@@ -20,8 +20,10 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 bnpy_root_path = os.path.abspath('../../')
 sys.path.append(bnpy_root_path)
-print '>>>'
+print '>>> sys.path[-1]'
 print sys.path[-1]
+print ">>> os.path.exists(os.path.join(sys.path[-1], 'bnpy'))"
+print os.path.exists(os.path.join(sys.path[-1], 'bnpy'))
 
 # -- General configuration ------------------------------------------------
 
