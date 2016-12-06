@@ -1,0 +1,20 @@
+young_turk,loyal_opposition,outcast,interstitial
+John_Bosco 1
+Gregory 1
+Basil 3
+Peter 2
+Bonaventure 2
+Berthold 2
+Mark 1
+Victor 4
+Ambrose 2
+Ramuald 4
+Louis 2
+Winfrid 1
+Amand 4
+Hugh 1
+Boniface 1
+Albert 1
+Elias 3
+Simplicius 3
+

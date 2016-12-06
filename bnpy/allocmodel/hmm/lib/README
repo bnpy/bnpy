@@ -1,0 +1,21 @@
+This module defines a C++ implementation of the forward backward algorithm.
+
+It must be compiled before it can be used. Otherwise, a slower python-based implementation will be used as a fallback.
+
+Dependencies
+--------
+* Eigen matrix library (eigen.tuxfamily.org), version 3+
+
+Compiliation Instructions
+--------
+Using GNU C++ compiler (aka g++) on UNIX machines:
+
+```
+>> export EIGENPATH=/path/to/eigen3/
+>> g++ FwdBwdRowMajor.cpp -o libfwdbwd.so --shared -fPIC -DNDEBUG -O3 -I$EIGENPATH 
+```
+
+Explanation of flags:
+* -O3 : level 3 optimizations make this code blazing fast
+* --shared -fPIC : direct compiler to build shared library, which is callable from Python
+* -I$EIGENPATH : set the include path of compiler so Eigen library can be found

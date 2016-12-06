@@ -1,0 +1,29 @@
+Tests of parallelization.
+
+* localstep-benchmark/
+  Latest benchmark that tests different parallelization schemes (IPC vs shared memory)
+  
+  Usage
+  -----
+  Examine speedup for an HDP topic model with 2 and 4 parallel workers.
+  $ cd localstep-benchmark/
+  $ python RunBenchmark.py --problemSpecModule ProblemSpec_HDPTopicModel --parallelModule LocalStepUtil_ParallelIPC --nWorkers 2,4
+  
+
+* kmeans/
+  Legacy code for some of the first experiments on shared-memory parallelization.
+  See https://bitbucket.org/michaelchughes/bnpy-dev/pull-request/31/
+
+* simple-task-benchmark/
+  Benchmark to understand how well different tasks (sleep, matrix multiply, etc.)
+  lend themselves to shared-memory parallelization.
+
+  Usage 
+  -----
+  python benchmark/RunBenchmark --task sleep --nWorkers 1,2,4 --methods all
+
+* topics/
+  Some unit-tests to verify correct parallelization of local step of topic models.
+
+* hmm/
+  Some unit-tests to verify correctness of paralellized local step for HMMs. 

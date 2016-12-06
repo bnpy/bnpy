@@ -1,0 +1,13 @@
+<nbsp;>
+<div id="sidebar-site-toc">
+<ul>
+	<li class="toctree-l1">
+	<a href="/" rel="nofollow" class="reference internal">
+    	Home
+    </a>
+	</li>
+{{ toctree(maxdepth=theme_globaltoc_depth|toint,
+		collapse=False,
+		includehidden=theme_globaltoc_includehidden|tobool) }}
+</ul>
+</div>

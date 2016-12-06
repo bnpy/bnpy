@@ -1,0 +1,7 @@
+Required modules developed by third-parties.
+All use permissive licenses, and we've done our best to comply with these licenses.
+
+* anchorwordtopics
+Recent work by Halpern, Mimno, et al. on using method-of-moments type estimators with "anchor words" for topic estimation.
+bnpy can use this method for initialization.
+

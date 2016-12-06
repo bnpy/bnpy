@@ -1,0 +1,16 @@
+<li class="dropdown globaltoc-container">
+  <a role="button"
+     id="allocDropdown"
+     data-toggle="dropdown"
+     data-target="#"
+     href="{{ pathto(master_doc) }}/allocmodel">
+     	Allocation Models<b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="allocDropdown">
+      {{ toctree(maxdepth=theme_globaltoc_depth|toint,
+                 collapse=False,
+                 includehidden=theme_globaltoc_includehidden|tobool) }}
+  </ul>
+</li>
