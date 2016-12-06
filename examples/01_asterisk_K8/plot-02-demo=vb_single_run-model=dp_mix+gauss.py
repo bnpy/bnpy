@@ -32,7 +32,6 @@ import os
 
 from matplotlib import pylab
 import seaborn as sns
-
 # sphinx_gallery_thumbnail_number = 3
 
 FIG_SIZE = (3, 3)
