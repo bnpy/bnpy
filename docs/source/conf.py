@@ -14,7 +14,6 @@
 
 import sys
 import os
-import bnpy
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -397,9 +396,9 @@ napoleon_use_rtype = False
 # -- Examples gallery settings -------------------------------------------
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : os.path.expandvars(bnpy.ROOT_PATH + '/examples/'),
+    'examples_dirs' : '../../examples/',
     # path where to save gallery generated examples
-    'gallery_dirs' : os.path.expandvars(bnpy.ROOT_PATH + '/docs/source/examples/'),
+    'gallery_dirs' : 'examples/',
     # path where module info goes
-    'mod_example_dir': os.path.expandvars(bnpy.ROOT_PATH + '/docs/source/api/'),
+    'mod_example_dir': 'api/',
     }

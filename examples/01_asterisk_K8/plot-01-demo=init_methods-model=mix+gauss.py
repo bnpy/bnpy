@@ -21,9 +21,10 @@ import os
 from matplotlib import pylab
 import seaborn as sns
 
+# sphinx_gallery_thumbnail_number = 2
+
 FIG_SIZE = (3, 3)
 SMALL_FIG_SIZE = (2, 2)
-sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
 # Read bnpy's built-in "AsteriskK8" dataset from file.
