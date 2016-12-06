@@ -1,19 +1,18 @@
 """
-========
-Gaussian Observation Model: From Scratch Initialization
-========
+========================================
+Initialization for Mixtures of Gaussians
+========================================
 
 How to initialize Gaussian observation models.
 
-We demonstrate various initialization procedures for
-Gaussian observation models (Gauss, DiagGauss, ZeroMeanGauss).
+We demonstrate a few possible initialization procedures for
+Gaussian observation models (which include Gauss, DiagGauss, ZeroMeanGauss).
 
-The initialization procedures are:
+Initialization depends on two key user-specified procedures:
 
-* randexamples
+1) Specifying hyperparameters for the conjugate prior
 
-* bregmankmeans
-
+2) Specifying how many clusters are created
 """
 import bnpy
 import numpy as np
@@ -25,7 +24,7 @@ import seaborn as sns
 FIG_SIZE = (2, 2)
 
 ###############################################################################
-# Read dataset from file.
+# Read bnpy's built-in "AsteriskK8" dataset from file.
 
 dataset_path = os.path.join(bnpy.DATASET_PATH, 'AsteriskK8')
 dataset = bnpy.data.XData.read_npz(
@@ -41,7 +40,8 @@ pylab.gca().set_ylim([-2, 2])
 
 
 ###############################################################################
-# Some other stuff
+#
+# Utility function for displaying many random initializations side by side.
 
 def show_many_random_initial_models(
         obsPriorArgsDict,

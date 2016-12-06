@@ -14,11 +14,12 @@
 
 import sys
 import os
+import bnpy
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.append(os.path.expandvars("$BNPYROOT"));
+sys.path.append(os.path.abspath('../../'))
 
 # -- General configuration ------------------------------------------------
 
@@ -231,8 +232,7 @@ html_use_smartypants = True
 #html_sidebars = {}
 html_sidebars = {'**': [
     'searchbox.html',
-    'localtoc.html', 
-    #'sidebar.html',
+    'localtoc.html',
     ]}
 
 
@@ -397,9 +397,9 @@ napoleon_use_rtype = False
 # -- Examples gallery settings -------------------------------------------
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : os.path.expandvars('$BNPYROOT/examples/'),
+    'examples_dirs' : os.path.expandvars(bnpy.ROOT_PATH + '/examples/'),
     # path where to save gallery generated examples
-    'gallery_dirs' : os.path.expandvars('$BNPYROOT/docs/source/examples/'),
+    'gallery_dirs' : os.path.expandvars(bnpy.ROOT_PATH + '/docs/source/examples/'),
     # path where module info goes
-    'mod_example_dir': os.path.expandvars('$BNPYROOT/docs/source/api/'),
+    'mod_example_dir': os.path.expandvars(bnpy.ROOT_PATH + '/docs/source/api/'),
     }
