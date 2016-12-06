@@ -21,7 +21,9 @@ import os
 from matplotlib import pylab
 import seaborn as sns
 
-FIG_SIZE = (2, 2)
+FIG_SIZE = (3, 3)
+SMALL_FIG_SIZE = (2, 2)
+sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
 # Read bnpy's built-in "AsteriskK8" dataset from file.
@@ -37,7 +39,7 @@ pylab.figure(figsize=FIG_SIZE)
 pylab.plot(dataset.X[:, 0], dataset.X[:, 1], 'k.')
 pylab.gca().set_xlim([-2, 2])
 pylab.gca().set_ylim([-2, 2])
-
+pylab.tight_layout()
 
 ###############################################################################
 #
@@ -50,7 +52,7 @@ def show_many_random_initial_models(
     ''' Create plot of many different random initializations
     '''
     fig_handle, ax_handle_list = pylab.subplots(
-        figsize=(FIG_SIZE[0] * ncols, FIG_SIZE[1] * nrows),
+        figsize=(SMALL_FIG_SIZE[0] * ncols, SMALL_FIG_SIZE[1] * nrows),
         nrows=nrows, ncols=ncols, sharex=True, sharey=True)
     for trial_id in range(nrows * ncols):
         cur_model = bnpy.make_initialized_model(
@@ -69,6 +71,7 @@ def show_many_random_initial_models(
             cur_model, Data=dataset, ax_handle=cur_ax_handle)
         cur_ax_handle.set_xticks([-2, -1, 0, 1, 2])
         cur_ax_handle.set_yticks([-2, -1, 0, 1, 2])
+    pylab.tight_layout()
 
 
 
