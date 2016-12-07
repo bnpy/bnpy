@@ -1,6 +1,6 @@
 """
 ====================================================
-HDP Topic Model with Multinomials: VB with proposals
+05: Training for HDP Topic Model with birth and merge proposals
 ====================================================
 
 
@@ -32,7 +32,7 @@ local_step_kwargs = dict(
     # Perform at most this many iterations at each document
     nCoordAscentItersLP=100,
     # Stop local iters early when max change in doc-topic counts < this thr
-    convThrLP=0.001,
+    convThrLP=0.01,
     restartLP=0,
     doMemoizeLocalParams=0,
     )
@@ -45,49 +45,14 @@ merge_kwargs = dict(
 
 birth_kwargs = dict(
     b_startLap=2,
-    b_stopLap=4,
+    b_stopLap=6,
     b_Kfresh=3, 
     b_nRefineSteps=5,
     )
 
-delete_kwargs = dict(
-    d_startLap=10,
-    d_nRefineSteps=5,
-    )
-
 ###############################################################################
 #
-# Run the VB+proposals algorithm
-# with BIRTHS, merges and re-shuffling.
-# 
-# Initialization: 3 topics, using randomlikewang
-trained_model, info_dict = bnpy.run(
-    dataset, 'HDPTopicModel', 'Mult', 'memoVB',
-    output_path='/tmp/bars_one_per_doc/trymoves-model=hdp+mult-K=3-moves=birth,merge,shuffle/',
-    nLap=20, convergeThr=0.001, nBatch=1,
-    K=3, initname='randomlikewang',
-    alpha=0.5, lam=0.1,
-    moves='birth,merge,shuffle',
-    **dict(merge_kwargs.items() +
-           local_step_kwargs.items() + 
-           birth_kwargs.items()))
-
-"""
-trained_model, info_dict = bnpy.run(
-    dataset, 'HDPTopicModel', 'Mult', 'memoVB',
-    output_path='/tmp/bars_one_per_doc/' + 
-        'trymoves-model=hdp+mult-K=3-moves=birth,delete,merge,shuffle/',
-    nLap=25, convergeThr=0.001, nBatch=1,
-    K=3, initname='randomlikewang',
-    alpha=0.5, lam=0.1,
-    moves='birth,delete,merge,shuffle',
-    **dict(merge_kwargs.items() + delete_kwargs.items() +
-           local_step_kwargs.items() + birth_kwargs.items()))
-
-"""
-###############################################################################
-#
-#
+# Setup: Helper function to plot bars at each stage of training
 
 def show_bars_over_time(
         task_output_path=None,
@@ -112,7 +77,22 @@ def show_bars_over_time(
     pylab.tight_layout()
 
 ###############################################################################
-#
-# Show the clusters over time
+# Training from K=3 with births
+# -----------------------------
+# 
+# Initialization: 3 topics, using random initial guess
+
+trained_model, info_dict = bnpy.run(
+    dataset, 'HDPTopicModel', 'Mult', 'memoVB',
+    output_path='/tmp/bars_one_per_doc/trymoves-model=hdp+mult-K=3-moves=birth,merge,shuffle/',
+    nLap=20, convergeThr=0.001, nBatch=1,
+    K=3, initname='randomlikewang',
+    alpha=0.5, lam=0.1,
+    moves='birth,merge,shuffle',
+    **dict(merge_kwargs.items() +
+           local_step_kwargs.items() + 
+           birth_kwargs.items()))
+
 show_bars_over_time(info_dict['task_output_path'])
 pylab.show()
+

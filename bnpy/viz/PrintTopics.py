@@ -168,17 +168,20 @@ def printTopWordsFromHModel(hmodel, vocabList, **kwargs):
     printTopWordsFromTopics(topics, vocabList, **kwargs)
 
 
-def printTopWordsFromWordCounts(WordCounts, vocabList, order=None, Ktop=10):
+def printTopWordsFromWordCounts(
+        WordCounts, vocabList, order=None,
+        prefix='topic', Ktop=10):
     K, W = WordCounts.shape
     if order is None:
         order = np.arange(K)
     N = np.sum(WordCounts, axis=1)
     for posID, k in enumerate(order):
-        print '----- topic %d. count %5d.' % (k, N[k])
+        print '----- %s %d. count %5d.' % (prefix, k, N[k])
 
         topIDs = np.argsort(-1 * WordCounts[k])
         for wID in topIDs[:Ktop]:
-            print '%3d %s' % (WordCounts[k, wID], vocabList[wID])
+            if WordCounts[k, wID] > 0:
+                print '%3d %s' % (WordCounts[k, wID], vocabList[wID])
 
 
 def printTopWordsFromTopics(topics, vocabList, ktarget=None, Ktop=10):
@@ -216,6 +219,8 @@ def plotCompsFromWordCounts(
         wordSizeLimit=10,
         Ktop=10, Kmax=32,
         H=2.2, W=1.5, figH=None, ncols=8,
+        ax_list=None,
+        fontsize=10,
         **kwargs):
     ''' Create subplots of top 10 words from each topic, from word count array.
 
@@ -244,22 +249,27 @@ def plotCompsFromWordCounts(
         compsToHighlight = np.asarray([compsToHighlight])
     nrows = int(np.ceil(Kplot / float(ncols)))
     # Create Figure
-    figH, ha = pylab.subplots(nrows=nrows, ncols=ncols,
-                              figsize=(ncols * W, nrows * H))
+    if ax_list is None:
+        fig_h, ax_list = pylab.subplots(
+            nrows=nrows, ncols=ncols,
+            figsize=(ncols * W, nrows * H))
+
     for plotID, compID in enumerate(compListToPlot):
-        ax = pylab.subplot(nrows, ncols, plotID + 1)
+        cur_ax_h = ax_list[plotID] #pylab.subplot(nrows, ncols, plotID + 1)
 
         topicMultilineStr = ''
         topIDs = np.argsort(-1 * WordCounts[compID])
         for wID in topIDs[:Ktop]:
-            wctStr = count2str(WordCounts[compID, wID])
-            topicMultilineStr += '%s %s\n' % (
-                wctStr, vocabList[wID][:wordSizeLimit])
-        pylab.text(0, 0, topicMultilineStr, fontsize=10, family=u'monospace')
-        pylab.xlim([0, 1]);
-        pylab.ylim([0, 1]);
-        pylab.xticks([])
-        pylab.yticks([])
+            if WordCounts[compID, wID] > 0:
+                wctStr = count2str(WordCounts[compID, wID])
+                topicMultilineStr += '%s %s\n' % (
+                    wctStr, vocabList[wID][:wordSizeLimit])
+        cur_ax_h.text(
+            0, 0, topicMultilineStr, fontsize=fontsize, family=u'monospace')
+        cur_ax_h.set_xlim([0, 1]);
+        cur_ax_h.set_ylim([0, 1]);
+        cur_ax_h.set_xticks([])
+        cur_ax_h.set_yticks([])
 
         # Draw colored border around highlighted topics
         if compID in compsToHighlight:
@@ -267,15 +277,13 @@ def plotCompsFromWordCounts(
             [i.set_linewidth(3) for i in ax.spines.itervalues()]
         if xlabels is not None:
             if len(xlabels) > 0:
-                pylab.xlabel(xlabels[plotID], fontsize=11)
+                cur_ax_h.set_xlabel(xlabels[plotID], fontsize=11)
     # Disable empty plots!
-    for kdel in xrange(plotID + 2, nrows * ncols + 1):
-        aH = pylab.subplot(nrows, ncols, kdel)
-        aH.axis('off')
+    #for kdel in xrange(plotID + 2, nrows * ncols + 1):
+    #    aH = pylab.subplot(nrows, ncols, kdel)
+    #    aH.axis('off')
     # Fix margins between subplots
-    pylab.subplots_adjust(wspace=0.04, hspace=0.18, left=0.01, right=0.99,
-                          top=0.99, bottom=0.1)
-    return figH
+    return figH, ax_list
 
 def count2str(val, width=4, minVal=0.01, **kwargs):
     ''' Pretty print large positive count values in confined 4 char format.

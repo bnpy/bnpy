@@ -40,13 +40,13 @@ def selectCompsForBirthAtCurrentBatch(
     BLogger.pprint('PLAN at ' + statusStr)
 
     if BArgs['Kmax'] - SS.K <= 0:
-        BLogger.pprint(
-            "Cannot plan any more births." + \
+        msg = "Cannot plan any more births." + \
             " Reached upper limit of %d existing comps (--Kmax)." % (
                 BArgs['Kmax'])
-            )
+        BLogger.pprint(msg)
         if 'b_targetUIDs' in MovePlans:
             del MovePlans['b_targetUIDs']
+        MovePlans['b_statusMsg'] = msg
         BLogger.pprint('')
         return MovePlans
 

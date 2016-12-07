@@ -1,9 +1,9 @@
 """
 =============================================
-Mixture of Multinomials: VB coordinate ascent
+01: Standard variational training for mixture model
 =============================================
 
-
+How to train a mixture of multinomials.
 """
 import bnpy
 import numpy as np
@@ -17,7 +17,7 @@ SMALL_FIG_SIZE = (1,1)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
 
 ###############################################################################
-# Read dataset from file.
+# Read toy "bars" dataset from file.
 
 dataset_path = os.path.join(bnpy.DATASET_PATH, 'bars_one_per_doc')
 dataset = bnpy.data.BagOfWordsData.read_npz(
@@ -29,6 +29,8 @@ dataset = bnpy.data.BagOfWordsData.read_npz(
 X_csr_DV = dataset.getSparseDocTypeCountMatrix()
 bnpy.viz.BarsViz.show_square_images(
     X_csr_DV[:10].toarray(), vmin=0, vmax=5)
+#pylab.colorbar()
+#pylab.clabel('word count')
 pylab.tight_layout()
 
 ###############################################################################
@@ -59,7 +61,7 @@ pylab.tight_layout()
 
 ###############################################################################
 #
-#
+# Setup: Useful function to display learned bar structure over time.
 
 def show_bars_over_time(
         task_output_path=None,

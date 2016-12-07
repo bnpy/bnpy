@@ -68,7 +68,7 @@ class DiagGaussObsModel(AbstractObsModel):
 
     def get_covar_mat_for_comp(self, k=None):
         if hasattr(self, 'EstParams'):
-            return self.EstParams.Sigma[k]
+            return np.diag(self.EstParams.sigma[k])
         elif k is None or k == 'prior':
             return self._E_CovMat()
         else:

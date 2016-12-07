@@ -1,9 +1,9 @@
 """
-===================================================
-Topic Model with Multinomials: VB coordinate ascent
-===================================================
+=========================================
+02: Training DP mixture model with birth and merge proposals
+=========================================
 
-
+How to train a DP mixture of multinomials.
 """
 import bnpy
 import numpy as np
@@ -13,7 +13,7 @@ from matplotlib import pylab
 import seaborn as sns
 
 FIG_SIZE = (3, 3)
-SMALL_FIG_SIZE = (1,1)
+SMALL_FIG_SIZE = (1.5, 1.5)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
 
 ###############################################################################
@@ -31,42 +31,10 @@ bnpy.viz.BarsViz.show_square_images(
     X_csr_DV[:10].toarray(), vmin=0, vmax=5)
 pylab.tight_layout()
 
-###############################################################################
-#
-# Let's do one single run of the VB algorithm.
-# 
-# Using 10 clusters and the 'randexamples' initializatio procedure.
-
-local_step_kwargs = dict(
-    # perform at most this many iterations at each document
-    nCoordAscentItersLP=100,
-    # stop local iters early when max change in doc-topic counts < this thr
-    convThrLP=0.001,
-    )
-trained_model, info_dict = bnpy.run(
-    dataset, 'FiniteTopicModel', 'Mult', 'VB',
-    output_path='/tmp/bars_one_per_doc/helloworld-K=10/',
-    nLap=500, convergeThr=0.01,
-    K=10, initname='randomlikewang',
-    alpha=0.5, lam=0.1,
-    **local_step_kwargs)
 
 ###############################################################################
 #
-# First, we can plot the loss function over time
-# We'll skip the first few iterations, since performance is quite bad.
-#
-
-pylab.figure(figsize=FIG_SIZE)
-pylab.plot(info_dict['lap_history'][1:], info_dict['loss_history'][1:], 'k.-')
-pylab.xlabel('num. laps')
-pylab.ylabel('loss')
-pylab.tight_layout()
-
-
-###############################################################################
-#
-#
+# Setup: Function to show bars from start to end of training run
 
 def show_bars_over_time(
         task_output_path=None,
@@ -85,13 +53,57 @@ def show_bars_over_time(
         cur_ax_list = ax_handles_RC[row_id].flatten().tolist()
         bnpy.viz.BarsViz.show_square_images(
             cur_topics_KV,
-            vmin=0.0, vmax=0.06,
+            vmin=0.0, vmax=0.1,
             ax_list=cur_ax_list)
         cur_ax_list[0].set_ylabel("lap: %d" % lap_val)
     pylab.tight_layout()
 
 ###############################################################################
-#
-# Show the clusters over time
-show_bars_over_time(info_dict['task_output_path'])
+# From K=2 initial clusters
+# -------------------------
+# 
+# Using random initialization
+
+initname = 'randomlikewang'
+K = 2
+
+K2_trained_model, K2_info_dict = bnpy.run(
+    dataset, 'DPMixtureModel', 'Mult', 'memoVB',
+    output_path='/tmp/bars_one_per_doc/trymoves-K=%d-initname=%s/' % (
+        K, initname),
+    nTask=1, nLap=50, convergeThr=0.0001, nBatch=1,
+    K=K, initname=initname,
+    gamma0=50.0, lam=0.1,
+    moves='birth,merge,shuffle,delete',
+    b_startLap=2,
+    m_startLap=5,
+    d_startLap=10)
+
+show_bars_over_time(K2_info_dict['task_output_path'])
+
+
+
+###############################################################################
+# K=10 initial clusters
+# ---------------------
+# 
+# Using random initialization
+
+initname = 'randomlikewang'
+K = 10
+
+K10_trained_model, K10_info_dict = bnpy.run(
+    dataset, 'DPMixtureModel', 'Mult', 'memoVB',
+    output_path='/tmp/bars_one_per_doc/trymoves-K=%d-initname=%s/' % (
+        K, initname),
+    nTask=1, nLap=50, convergeThr=0.0001, nBatch=1,
+    K=K, initname=initname,
+    gamma0=50.0, lam=0.1,
+    moves='birth,merge,shuffle,delete',
+    b_startLap=2,
+    m_startLap=5,
+    d_startLap=10)
+
+show_bars_over_time(K10_info_dict['task_output_path'])
+
 pylab.show()

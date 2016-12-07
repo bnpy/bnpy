@@ -71,6 +71,7 @@ class BagOfWordsData(DataObj):
         if vocab_size is not None:
             npz_dict['vocab_size'] = vocab_size
         # Magically initialize via call to __init__
+        npz_dict.update(kwargs)
         return cls(**npz_dict)
 
     @classmethod
@@ -795,7 +796,7 @@ class BagOfWordsData(DataObj):
             docMask = randstate.choice(
                 candidates, nSamples, replace=False, p=p)
         return self.make_subset(docMask=docMask,
-                                          doTrackFullSize=False)
+                                doTrackFullSize=False)
 
     def getRawDataAsSharedMemDict(self):
         ''' Create dict with copies of raw data as shared memory arrays

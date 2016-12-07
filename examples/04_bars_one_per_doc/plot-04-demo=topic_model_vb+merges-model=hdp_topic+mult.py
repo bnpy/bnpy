@@ -1,6 +1,6 @@
 """
 ====================================================
-HDP Topic Model with Multinomials: VB with proposals
+04: Training HDP Topic Model with merge proposals
 ====================================================
 
 
