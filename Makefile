@@ -4,6 +4,11 @@ EIGENOPTFLAGS=-O3 -ffast-math -DNDEBUG
 
 all: util_entropy libfwdbwd libsparsetopics libsparseresp libsparseManyDocs
 
+clean:
+	rm -rf dist/
+	rm -rf build/
+	rm -rf bnpy.egg-info/	
+
 # Rule: compile C extension via cython for fast calculation of entropy
 util_entropy:
 	cd bnpy/util/; \
