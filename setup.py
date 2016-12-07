@@ -140,7 +140,7 @@ class CustomizedBuildExt(build_ext):
 
 setup(
     name="bnpy",
-    version="0.7",
+    version="0.1",
     author="Michael C. Hughes",
     author_email="mike@michaelchughes.com",
     description=(
@@ -151,7 +151,7 @@ setup(
         "mixture model",
         "topic model",
         "hidden Markov model"],
-    url="TODO",
+    url="https://github.com/bnpy/bnpy",
     packages=['bnpy'],
     long_description=read_txt_file_as_string('README.md'),
     classifiers=[

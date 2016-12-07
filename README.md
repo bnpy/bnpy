@@ -1,7 +1,5 @@
 ## **bnpy** : Bayesian nonparametric machine learning for python.
 
-![bnpy-headline.png](https://bitbucket.org/repo/87qLXb/images/1585298866-bnpy-headline.png)
-
 * [About](#markdown-header-about)
 * [Demos](#markdown-header-demos)
 * [Quick Start](#markdown-header-quick-start)
@@ -57,43 +55,43 @@ This python module provides code for training popular clustering models on large
 
 These are all variants of *variational inference*, a family of optimization algorithms. We plan to eventually support sampling methods (Markov chain Monte Carlo) too.
 
-# Demos
+# Examples
 
-You can find many examples of **bnpy** in action in our curated set of  [IPython notebooks](http://nbviewer.ipython.org/urls/bitbucket.org/michaelchughes/bnpy-dev/raw/master/demos/DemoIndex.ipynb).
+You can find many examples of **bnpy** in action in our curated [Example Gallery](todo).
 
-These same demos are also directly available on our [wiki](http://bitbucket.org/michaelchughes/bnpy-dev/wiki/demos/DemoIndex.rst).
+These same demos are also directly available on our [github](https://github.com/bnpy/bnpy/tree/master/examples).
 
 # Quick Start
 
-You can use **bnpy** from the terminal, or from within Python. Both options require specifying a dataset, an allocation model, an observation model (likelihood), and an algorithm. Optional keyword arguments with reasonable defaults allow control of specific model hyperparameters, algorithm parameters, etc.
+You can use **bnpy** from a command line/terminal, or from within Python. Both options require specifying a dataset, an allocation model, an observation model (likelihood), and an algorithm. Optional keyword arguments with reasonable defaults allow control of specific model hyperparameters, algorithm parameters, etc.
 
-Below, we show how to call bnpy to train a 8 component Gaussian mixture model on the default AsteriskK8 toy dataset (shown below).
+Below, we show how to call bnpy to train a 8 component Gaussian mixture model on a default toy dataset (shown below).
 In both cases, log information is printed to stdout, and all learned model parameters are saved to disk.
 
 ## Calling from the terminal/command-line
 
 ```
-$ python -m bnpy.Run AsteriskK8 FiniteMixtureModel Gauss EM --K 8
+$ python -m bnpy.Run /path/to/dataset.csv FiniteMixtureModel Gauss EM --K 8
 ```
 
 ## Calling directly from Python
 
 ```
 import bnpy
-bnpy.run('AsteriskK8', 'FiniteMixtureModel', 'Gauss', 'EM', K=8)
+bnpy.run('/path/to/dataset.csv', 'FiniteMixtureModel', 'Gauss', 'EM', K=8)
 ```
 
 ## Other examples
 Train Dirichlet-process Gaussian mixture model (DP-GMM) via full-dataset variational algorithm (aka "VB" for variational Bayes).
 
 ```
-python -m bnpy.Run AsteriskK8 DPMixtureModel Gauss VB --K 8
+python -m bnpy.Run /path/to/dataset.csv DPMixtureModel Gauss VB --K 8
 ```
 
 Train DP-GMM via memoized variational, with birth and merge moves, with data divided into 10 batches.
 
 ```
-python -m bnpy.Run AsteriskK8 DPMixtureModel Gauss moVB --K 8 --nBatch 10 --moves birth,merge
+python -m bnpy.Run /path/to/dataset.csv DPMixtureModel Gauss memoVB --K 8 --nBatch 10 --moves birth,merge
 ```
 
 ## Quick help
@@ -102,24 +100,22 @@ python -m bnpy.Run AsteriskK8 DPMixtureModel Gauss moVB --K 8 --nBatch 10 --move
 python -m bnpy.Run --help 
 
 # print help message for specific keyword options for Gaussian mixture models
-python -m bnpy.Run AsteriskK8 FiniteMixtureModel Gauss EM --kwhelp
+python -m bnpy.Run /path/to/dataset.csv FiniteMixtureModel Gauss EM --kwhelp
 ```
 
-# Installation and Configuration
+# Installation
 
-To use **bnpy** for the first time, follow the [installation instructions](http://bitbucket.org/michaelchughes/bnpy-dev/wiki/Installation.md) on our project wiki.
-
-Once installed, please visit the [Configuration](http://bitbucket.org/michaelchughes/bnpy-dev/wiki/Configuration.md) wiki page to learn how to configure where data is saved and loaded from on disk.
-
-All documentation can be found on the  [project wiki](http://bitbucket.org/michaelchughes/bnpy-dev/wiki/Home.md).
+To use **bnpy** for the first time, follow the [installation instructions](TODO).
 
 # Team
 
 ### Primary contact
 Mike Hughes  
-PhD candidate  
-Brown University, Dept. of Computer Science  
 Website: [www.michaelchughes.com](http://www.michaelchughes.com)
+
+Post-doctoral researcher (Aug. 2016 - present)
+School of Engineering and Applied Sciences
+Harvard University
 
 ### Faculty adviser
 
@@ -178,11 +174,8 @@ Website: [http://cs.brown.edu/people/sudderth/](http://cs.brown.edu/people/sudde
 Michael C. Hughes and Erik B. Sudderth. Probabilistic Programming Workshop at NIPS 2014.
 [[paper]](http://michaelchughes.com/papers/HughesSudderth_NIPSProbabilisticProgrammingWorkshop_2014.pdf)
 
-## Background reading
-For background reading to understand the broader context of this field, see our [Resources wiki page](../wiki/Resources.md).
 
 # Target Audience
 
 Primarly, we intend **bnpy** to be a platform for researchers. 
-By gathering many learning algorithms and popular models in one convenient, modular repository, we hope to make it easier to compare and contrast approaches.
-We also how that the modular organization of **bnpy** enables researchers to try out new modeling ideas without reinventing the wheel.
+By gathering many learning algorithms and popular models in one convenient, modular repository, we hope to make it easier to compare and contrast approaches. We also hope that the modular organization of **bnpy** enables researchers to try out new modeling ideas without reinventing the wheel.

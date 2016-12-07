@@ -10,6 +10,7 @@ docs/source/examples/
 # These aren't of interest for tracking in a repository because
 #   (1) file sizes can be HUGE    
 #   (2) these files rarely mean anything to others except the person who ran the test
+dist/
 logs/
 local/
 results/
