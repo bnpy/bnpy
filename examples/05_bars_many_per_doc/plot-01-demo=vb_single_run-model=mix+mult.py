@@ -1,9 +1,9 @@
 """
-=========================================
-DP Mixture of Multinomials: VB with moves
-=========================================
+=============================================
+01: Standard variational training for mixture model
+=============================================
 
-
+How to train a mixture of multinomials.
 """
 import bnpy
 import numpy as np
@@ -13,11 +13,11 @@ from matplotlib import pylab
 import seaborn as sns
 
 FIG_SIZE = (3, 3)
-SMALL_FIG_SIZE = (1.5, 1.5)
+SMALL_FIG_SIZE = (1,1)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
 
 ###############################################################################
-# Read dataset from file.
+# Read toy "bars" dataset from file.
 
 dataset_path = os.path.join(bnpy.DATASET_PATH, 'bars_many_per_doc')
 dataset = bnpy.data.BagOfWordsData.read_npz(
@@ -29,6 +29,8 @@ dataset = bnpy.data.BagOfWordsData.read_npz(
 X_csr_DV = dataset.getSparseDocTypeCountMatrix()
 bnpy.viz.BarsViz.show_square_images(
     X_csr_DV[:10].toarray(), vmin=0, vmax=5)
+#pylab.colorbar()
+#pylab.clabel('word count')
 pylab.tight_layout()
 
 ###############################################################################
@@ -37,19 +39,12 @@ pylab.tight_layout()
 # 
 # Using 10 clusters and the 'randexamples' initializatio procedure.
 
-for K in [2]: # 32]:
-    for initname in ['randomlikewang']: #, 'randexamples']:
-        trained_model, info_dict = bnpy.run(
-            dataset, 'DPMixtureModel', 'Mult', 'memoVB',
-            output_path='/tmp/bars_many_per_doc/trymoves-K=%d-initname=%s/' % (
-                K, initname),
-            nTask=3, nLap=50, convergeThr=0.0001, nBatch=1,
-            K=K, initname=initname,
-            gamma0=50.0, lam=0.1,
-            moves='birth,merge,shuffle,delete',
-            b_startLap=2,
-            m_startLap=5,
-            d_startLap=10)
+trained_model, info_dict = bnpy.run(
+    dataset, 'FiniteMixtureModel', 'Mult', 'VB',
+    output_path='/tmp/bars_many_per_doc/helloworld-K=10/',
+    nLap=1000, convergeThr=0.0001,
+    K=10, initname='randomlikewang',
+    gamma0=50.0, lam=0.1)
 
 ###############################################################################
 #
@@ -57,20 +52,16 @@ for K in [2]: # 32]:
 # We'll skip the first few iterations, since performance is quite bad.
 #
 
-#pylab.figure(figsize=FIG_SIZE)
-#pylab.plot(info_dict['lap_history'][2:], info_dict['loss_history'][2:], 'k.-')
-#pylab.xlabel('num. laps')
-#pylab.ylabel('loss')
-#pylab.tight_layout()
-
-bnpy.viz.BarsViz.show_square_images(
-    trained_model.obsModel.getTopics(),
-    ncols=10, vmin=0, vmax=0.1)
+pylab.figure(figsize=FIG_SIZE)
+pylab.plot(info_dict['lap_history'][2:], info_dict['loss_history'][2:], 'k.-')
+pylab.xlabel('num. laps')
+pylab.ylabel('loss')
+pylab.tight_layout()
 
 
 ###############################################################################
 #
-#
+# Setup: Useful function to display learned bar structure over time.
 
 def show_bars_over_time(
         task_output_path=None,
@@ -89,7 +80,7 @@ def show_bars_over_time(
         cur_ax_list = ax_handles_RC[row_id].flatten().tolist()
         bnpy.viz.BarsViz.show_square_images(
             cur_topics_KV,
-            vmin=0.0, vmax=0.1,
+            vmin=0.0, vmax=0.06,
             ax_list=cur_ax_list)
         cur_ax_list[0].set_ylabel("lap: %d" % lap_val)
     pylab.tight_layout()
