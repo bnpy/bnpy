@@ -39,38 +39,31 @@ bnpy.viz.PrintTopics.plotCompsFromWordCounts(
 
 ###############################################################################
 #
-# Train with VB algorithm
-# -----------------------
+# Train with birth and merge proposals
+# ------------------------------------
 # 
 # Take the best of 1 initializations
+# 
+# Ideally, we'd run this longer, but this is convenient for rapid inspection.
 
 merge_kwargs = dict(
-    m_startLap=10,
+    m_startLap=5,
     m_pair_ranking_procedure='elbo',
     m_pair_ranking_direction='descending',
     m_pair_ranking_do_exclude_by_thr=1,
     m_pair_ranking_exclusion_thr=-0.0005,
     )
-'''
+
 trained_model, info_dict = bnpy.run(
     dataset, 'DPMixtureModel', 'Mult', 'memoVB',
     output_path='/tmp/we8there/helloworld-model=dp_mix+mult-K=30/',
-    nLap=1000, convergeThr=0.0001, nTask=1, nBatch=1,
+    nLap=15, convergeThr=0.0001, nTask=1, nBatch=1,
     K=30, initname='bregmankmeans+lam1+iter1',
     gamma0=50.0, lam=0.1,
     moves='birth,merge,shuffle',
     b_startLap=2, b_Kfresh=5, b_stopLap=10,
     **merge_kwargs)
-'''
-trained_model, info_dict = bnpy.run(
-    dataset, 'DPMixtureModel', 'Mult', 'memoVB',
-    output_path='/tmp/we8there/helloworld-model=dp_mix+mult-K=30/',
-    nLap=1000, convergeThr=0.0001, nTask=1, nBatch=1,
-    K=30, initname='bregmankmeans+lam1+iter1',
-    gamma0=50.0, lam=0.1,
-    moves='birth,merge,shuffle',
-    b_startLap=2, b_Kfresh=5, b_stopLap=10,
-    **merge_kwargs)
+
 bnpy.viz.PrintTopics.plotCompsFromHModel(
     trained_model,
     vocabList=dataset.vocabList,

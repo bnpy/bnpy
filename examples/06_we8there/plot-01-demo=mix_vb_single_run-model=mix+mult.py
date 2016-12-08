@@ -28,6 +28,7 @@ dataset = bnpy.data.BagOfWordsData.read_npz(
 doc_ids = np.flatnonzero(
     dataset.getDocTypeCountMatrix().sum(axis=1) >= 20)
 dataset = dataset.make_subset(docMask=doc_ids, doTrackFullSize=False)
+
 ###############################################################################
 #
 # Make a simple plot of the raw data

@@ -177,7 +177,7 @@ def make_list_of_datasets_specs():
 # Main function
 setup(
     name="bnpy",
-    version="0.1.4",
+    version="0.1.5",
     author="Michael C. Hughes",
     author_email="mike@michaelchughes.com",
     description=(

@@ -253,6 +253,11 @@ def plotCompsFromWordCounts(
         fig_h, ax_list = pylab.subplots(
             nrows=nrows, ncols=ncols,
             figsize=(ncols * W, nrows * H))
+    if isinstance(ax_list, np.ndarray):
+        ax_list = ax_list.flatten().tolist()
+    assert isinstance(ax_list, list)
+    n_images_viewable = len(ax_list)
+    n_images_to_plot = len(compListToPlot)
 
     for plotID, compID in enumerate(compListToPlot):
         cur_ax_h = ax_list[plotID] #pylab.subplot(nrows, ncols, plotID + 1)
@@ -278,11 +283,11 @@ def plotCompsFromWordCounts(
         if xlabels is not None:
             if len(xlabels) > 0:
                 cur_ax_h.set_xlabel(xlabels[plotID], fontsize=11)
-    # Disable empty plots!
-    #for kdel in xrange(plotID + 2, nrows * ncols + 1):
-    #    aH = pylab.subplot(nrows, ncols, kdel)
-    #    aH.axis('off')
-    # Fix margins between subplots
+
+    # Disable empty plots
+    for k, ax_h in enumerate(ax_list[n_images_to_plot:]):
+        ax_h.axis('off')
+
     return figH, ax_list
 
 def count2str(val, width=4, minVal=0.01, **kwargs):
