@@ -160,12 +160,15 @@ def make_list_of_datasets_specs():
     # Traverse root directory, and list directories as dirs and files as files
     for root, dirpath_list, fpath_list in os.walk('datasets/'):
         for fpath in fpath_list:
-            if fpath.endswith('.npz') or fpath.endswith('.csv'):
+            if (fpath.endswith('.npz')
+                    or fpath.endswith('.csv')
+                    or fpath.endswith('.txt')):
                 full_fpath = os.path.join(root, fpath)
                 full_dirpath = os.path.split(full_fpath)[0] + os.path.sep
                 data_spec = (
                     full_dirpath,
                     [full_fpath])
+                print data_spec
                 data_spec_list.append(data_spec)
     return data_spec_list
 
@@ -174,7 +177,7 @@ def make_list_of_datasets_specs():
 # Main function
 setup(
     name="bnpy",
-    version="0.1.3",
+    version="0.1.4",
     author="Michael C. Hughes",
     author_email="mike@michaelchughes.com",
     description=(
@@ -188,11 +191,10 @@ setup(
     url="https://github.com/bnpy/bnpy",
     packages=make_list_of_subpackages(),
     package_data = {
-        # If any package contains *.txt files, include them:
+        # If any subpackage contains these files, include them:
         '': ['*.conf', '*.txt', '*.md'],
         '': ['*.cpp', '*.c', '*.h', '*.pyx'],
     },
-    data_files=make_list_of_datasets_specs(),
     include_package_data=True,
     long_description='',
     classifiers=[
