@@ -402,7 +402,7 @@ def calcSparseLocalParams_SingleDoc(
     that can take numpy array objects.
 '''
 libpath = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
-libfilename = 'libsparseresp.so'
+libfilename = 'libsparsemix.so'
 libfilename2 = 'libsparsetopics.so'
 hasEigenLibReady = True
 

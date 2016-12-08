@@ -32,11 +32,11 @@ def make_extensions():
         ]
     if get_path_to_eigen():
         ext_list.append(make_cpp_extension_libfwdbwd())
-        ext_list.append(make_cpp_extension_libsparseresp())
+        ext_list.append(make_cpp_extension_libsparsemix())
     else:
         print "Warning: Environment variable EIGENPATH not found."
         print "Will not compile the following C++ extensions"
-        print " - libsparseresp (for L-sparse mixtures)"
+        print " - libsparsemix (for L-sparse mixtures)"
         print " - libfwdbwd (for fast local steps for HMMs)"
     if get_path_to_eigen() and get_path_to_boost():
         ext_list.append(make_cpp_extension_libsparsetopics())
@@ -49,15 +49,15 @@ def make_extensions():
 
 def make_cpp_extension_libfwdbwd():
     ext = Extension(
-        'bnpy.allocmodel.hmm.lib.libfwdbwd',
+        'bnpy.allocmodel.hmm.lib.libfwdbwdcpp',
         sources=['bnpy/allocmodel/hmm/lib/FwdBwdRowMajor.cpp'],
         include_dirs=[get_path_to_eigen()],
     )
     return ext
 
-def make_cpp_extension_libsparseresp():
+def make_cpp_extension_libsparsemix():
     ext = Extension(
-        'bnpy.util.lib.sparseResp.libsparseresp',
+        'bnpy.util.lib.sparseResp.libsparsemix',
         sources=['bnpy/util/lib/sparseResp/SparsifyRespCPPX.cpp'],
         include_dirs=[get_path_to_eigen()],
     )
@@ -135,9 +135,37 @@ class CustomizedBuildExt(build_ext):
             pass
         build_ext.build_extensions(self)
 
+def make_list_of_subpackages():
+    ''' Traverse subdirectories recursively and add to list
+    '''
+    package_list = []
+    # Traverse root directory, and list directories as dirs and files as files
+    for root, dirpath_list, fpath_list in os.walk('bnpy/'):
+        subpkg_path = root.strip(os.path.sep).replace(os.path.sep, '.')
+        for fpath in fpath_list:
+            if fpath == "__init__.py":
+                package_list.append(subpkg_path)
+    return package_list
+
+def make_list_of_datasets_specs():
+    ''' Traverse subdirectories recursively and add to list
+    '''
+    data_spec_list = []
+    # Traverse root directory, and list directories as dirs and files as files
+    for root, dirpath_list, fpath_list in os.walk('datasets/'):
+        for fpath in fpath_list:
+            if fpath.endswith('.npz') or fpath.endswith('.csv'):
+                full_fpath = os.path.join(root, fpath)
+                full_dirpath = os.path.split(full_fpath)[0] + os.path.sep
+                data_spec = (
+                    full_dirpath,
+                    [full_fpath])
+                data_spec_list.append(data_spec)
+    return data_spec_list
+
+
 ########################################################################
 # Main function
-
 setup(
     name="bnpy",
     version="0.1",
@@ -152,8 +180,14 @@ setup(
         "topic model",
         "hidden Markov model"],
     url="https://github.com/bnpy/bnpy",
-    packages=['bnpy'],
-    long_description=read_txt_file_as_string('README.md'),
+    packages=make_list_of_subpackages(),
+    package_data = {
+        # If any package contains *.txt files, include them:
+        '': ['*.conf', '*.npz', '*.txt', '*.csv', '*.mat', '*.md'],
+    },
+    data_files=make_list_of_datasets_specs(),
+    include_package_data=True,
+    long_description='', #read_txt_file_as_string('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: BSD License"],

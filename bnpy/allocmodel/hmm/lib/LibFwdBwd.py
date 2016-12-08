@@ -99,7 +99,7 @@ def SummaryAlg_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
     that can take numpy array objects.
 '''
 libpath = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
-libfilename = 'libfwdbwd.so'
+libfilename = 'libfwdbwdcpp.so'
 hasEigenLibReady = True
 
 try:

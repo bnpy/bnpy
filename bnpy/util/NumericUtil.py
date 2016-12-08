@@ -22,7 +22,7 @@ from EntropyUtil import calcRlogR, calcRlogRdotv
 def LoadConfig():
     global Config, cfgfilepath
     root = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2])
-    cfgfilepath = os.path.join(root, 'config', 'numeric.platform-config')
+    cfgfilepath = os.path.join(root, 'config', 'numeric.conf')
     Config = readConfigFileIntoDict(cfgfilepath, 'LibraryPrefs')
 
 

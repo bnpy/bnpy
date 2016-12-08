@@ -25,7 +25,9 @@ try:
         import calcMergeRlogRdotv_withSparseRespCSR_cpp as calcSparseMergeRlogRdotv
 except ImportError:
     hasCPPLib = False
-
+    # Sketchy avoid import errors
+    calcSparseMergeRlogR = None
+    calcSparseMergeRlogRdotv = None
 
 def calcSparseRlogR(spR=None, nnzPerRow=-1, **kwargs):
     ''' Compute assignment entropy of each state.
