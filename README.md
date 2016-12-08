@@ -1,12 +1,13 @@
 ## **bnpy** : Bayesian nonparametric machine learning for python.
 
-* [About](#markdown-header-about)
-* [Demos](#markdown-header-demos)
-* [Quick Start](#markdown-header-quick-start)
-* [Academic References](#markdown-header-academic-references)
-* * [NIPS 2015: HDP-HMM paper](#markdown-header-nips-2015-hdp-hmm-paper)
-* * [AISTATS 2015: HDP topic models](#markdown-header-aistats-2015-hdp-topic-model-paper)
-* * [NIPS 2013: DP mixture models](#markdown-header-nips-2013-dp-mixtures-paper)
+* [About](#about)
+* [Example Gallery](#examples)
+* [Quick Start](#quick-start)
+* [Team](#team)
+* [Academic References](#academic-references)
+* * [NIPS 2015: HDP-HMM paper](#nips-2015-hdp-hmm-paper)
+* * [AISTATS 2015: HDP topic models](#aistats-2015-hdp-topic-model-paper)
+* * [NIPS 2013: DP mixture models](#nips-2013-dp-mixtures-paper)
 
 # About
 This python module provides code for training popular clustering models on large datasets. We focus on Bayesian nonparametric models based on the Dirichlet process, but also provide parametric counterparts. 
@@ -55,7 +56,7 @@ This python module provides code for training popular clustering models on large
 
 These are all variants of *variational inference*, a family of optimization algorithms. We plan to eventually support sampling methods (Markov chain Monte Carlo) too.
 
-# Examples
+# Example Gallery
 
 You can find many examples of **bnpy** in action in our curated [Example Gallery](todo).
 
@@ -65,8 +66,7 @@ These same demos are also directly available on our [github](https://github.com/
 
 You can use **bnpy** from a command line/terminal, or from within Python. Both options require specifying a dataset, an allocation model, an observation model (likelihood), and an algorithm. Optional keyword arguments with reasonable defaults allow control of specific model hyperparameters, algorithm parameters, etc.
 
-Below, we show how to call bnpy to train a 8 component Gaussian mixture model on a default toy dataset (shown below).
-In both cases, log information is printed to stdout, and all learned model parameters are saved to disk.
+Below, we show how to call bnpy to train a 8 component Gaussian mixture model on a default toy dataset stored in a .csv file on disk. In both cases, log information is printed to stdout, and all learned model parameters are saved to disk.
 
 ## Calling from the terminal/command-line
 
