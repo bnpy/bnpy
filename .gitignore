@@ -12,7 +12,6 @@ docs/source/examples/
 #   (2) these files rarely mean anything to others except the person who ran the test
 dist/
 logs/
-local/
 results/
 profiler/
 reports/
@@ -21,11 +20,14 @@ api/
 bnpy.egg-info/
 .ipynb_checkpoints/
 .idea/
-*X.c
-*X.html
 
 # EXCLUDE FILE PATTERNS
 # ---------------------
+
+# Cython extensions
+EntropyUtilX.c
+SparseRespUtilX.c
+TextFileReaderX.c
 
 # Bash shell scripts
 *.sh
