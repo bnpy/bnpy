@@ -24,6 +24,10 @@ print '>>> sys.path[-1]'
 print sys.path[-1]
 print ">>> os.path.exists(os.path.join(sys.path[-1], 'bnpy'))"
 print os.path.exists(os.path.join(sys.path[-1], 'bnpy'))
+print ">>> os.path.exists(os.path.join(sys.path[-1], 'docs'))"
+print os.path.exists(os.path.join(sys.path[-1], 'docs'))
+print ">>> os.path.exists(os.path.join(sys.path[-1], 'docs/source/'))"
+print os.path.exists(os.path.join(sys.path[-1], 'docs/source/'))
 
 # -- General configuration ------------------------------------------------
 
@@ -401,7 +405,7 @@ napoleon_use_rtype = False
 # -- Examples gallery settings -------------------------------------------
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : '../../examples/',
+    'examples_dirs' : '../../examples/03_faithful/',
     # path where to save gallery generated examples
     'gallery_dirs' : 'examples/',
     # path where module info goes
