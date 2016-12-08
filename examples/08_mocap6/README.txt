@@ -1,7 +1,6 @@
-.. _examples_wiki_index:
+.. _examples_mocap6_index:
 
-Small wikipedia bag-of-words text dataset
-----------------------------------
+Small dataset of 6 motion-capture sequences
+-------------------------------------------
 
-Text from a few thousand wikipedia articles.
-Variational training of mixture models and topic models with Multinomial likelihoods.
+Variational training of mixture models and HMM models with various Gaussian observation models.

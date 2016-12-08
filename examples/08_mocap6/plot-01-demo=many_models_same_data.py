@@ -22,12 +22,13 @@ pylab.rcParams['figure.figsize'] = FIG_SIZE
 # Load dataset from file
 
 dataset_path = os.path.join(bnpy.DATASET_PATH, 'mocap6')
-print os.path.join(dataset_path, 'dataset.npz')
 dataset = bnpy.data.GroupXData.read_npz(
     os.path.join(dataset_path, 'dataset.npz'))
+
 ###############################################################################
 #
-# Make a simple plot of the raw data
+# Setup: Function to make a simple plot of the raw data
+# -----------------------------------------------------
 
 def show_single_sequence(seq_id):
     start = dataset.doc_range[seq_id]
@@ -38,6 +39,20 @@ def show_single_sequence(seq_id):
     pylab.xlabel('time')
     pylab.ylabel('angle')
     pylab.tight_layout()
+
+###############################################################################
+#
+# Visualization of the first sequence
+# -----------------------------------
+
+show_single_sequence(0)
+
+###############################################################################
+#
+# Visualization of the second sequence
+# ------------------------------------
+
+show_single_sequence(1)
 
 ###############################################################################
 #
@@ -66,7 +81,7 @@ mixdiag_trained_model, mixdiag_info_dict = bnpy.run(
 ###############################################################################
 #
 # HDP-HMM with *DiagGauss* observation model
-# --------------------------------------
+# -------------------------------------------
 #
 # Assume diagonal covariances.
 #
@@ -102,7 +117,7 @@ hmmfull_trained_model, hmmfull_info_dict = bnpy.run(
 ###############################################################################
 #
 # HDP-HMM with *AutoRegGauss* observation model
-# --------------------------------------
+# ----------------------------------------------
 #
 # Assume full covariances.
 #
@@ -148,5 +163,3 @@ pylab.xlim([4, 100]) # avoid early iterations
 pylab.ylim([2.4, 3.7]) # handpicked
 pylab.draw()
 pylab.tight_layout()
-
-pylab.show()
