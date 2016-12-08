@@ -1,0 +1,6 @@
+include README.md
+include LICENSE.txt
+include requirements.txt
+
+recursive-include datasets *.csv *.npz *.txt
+recursive-include bnpy *.c *.h *.pyx *.conf *.md *.txt

@@ -151,6 +151,12 @@ def make_list_of_datasets_specs():
     ''' Traverse subdirectories recursively and add to list
     '''
     data_spec_list = []
+    data_spec_list.append(
+        ('', ['requirements.txt']),
+        )
+    data_spec_list.append(
+        ('', ['LICENSE.txt']),
+        )
     # Traverse root directory, and list directories as dirs and files as files
     for root, dirpath_list, fpath_list in os.walk('datasets/'):
         for fpath in fpath_list:
@@ -168,7 +174,7 @@ def make_list_of_datasets_specs():
 # Main function
 setup(
     name="bnpy",
-    version="0.1",
+    version="0.1.3",
     author="Michael C. Hughes",
     author_email="mike@michaelchughes.com",
     description=(
@@ -183,15 +189,30 @@ setup(
     packages=make_list_of_subpackages(),
     package_data = {
         # If any package contains *.txt files, include them:
-        '': ['*.conf', '*.npz', '*.txt', '*.csv', '*.mat', '*.md'],
+        '': ['*.conf', '*.txt', '*.md'],
+        '': ['*.cpp', '*.c', '*.h', '*.pyx'],
     },
     data_files=make_list_of_datasets_specs(),
     include_package_data=True,
-    long_description='', #read_txt_file_as_string('README.md'),
+    long_description='',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: BSD License"],
-    install_requires=read_txt_file_as_string('requirements.txt').split(),
+    install_requires=[
+        "matplotlib>=1.5",
+        "numpy>=1.11",
+        "pandas>=0.18",
+        "scipy>=0.18",
+        "Cython>=0.25",
+        "ipython>=5.1",
+        "joblib>=0.10",
+        "memory_profiler>=0.41",
+        "munkres>=1.0",
+        "numexpr>=2.6",
+        "psutil>=5.0",
+        "scikit_learn>=0.18",
+        "sphinx_gallery>=0.1",
+        ],
     zip_safe=False,
     ext_modules=make_extensions(),
     cmdclass=dict(build_ext=CustomizedBuildExt),
