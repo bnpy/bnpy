@@ -192,7 +192,7 @@ setup(
     packages=make_list_of_subpackages(),
     package_data = {
         # If any subpackage contains these files, include them:
-        '': ['*.conf', '*.txt', '*.md'],
+        '': ['*.conf', '*.txt', '*.md', '*.npz', '*.csv'],
         '': ['*.cpp', '*.c', '*.h', '*.pyx'],
     },
     include_package_data=True,

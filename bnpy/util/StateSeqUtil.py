@@ -1,4 +1,5 @@
 import numpy as np
+import munkres
 
 from bnpy.util import as1D
 
@@ -100,11 +101,6 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
     AInfo : dict
         information about the alignment
     '''
-    try:
-        import munkres
-    except ImportError:
-        raise ImportError('Required third-party module munkres not found.\n' +
-                          'To fix, add $BNPYROOT/third-party/ to your path.')
     zHat = as1D(zHat)
     zTrue = as1D(zTrue)
     Kest = zHat.max() + 1
