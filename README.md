@@ -1,8 +1,9 @@
 ## **bnpy** : Bayesian nonparametric machine learning for python.
 
 * [About](#about)
-* [Example Gallery](#examples)
+* [Example Gallery](#example-gallery)
 * [Quick Start](#quick-start)
+* [Installation](#installation)
 * [Team](#team)
 * [Academic References](#academic-references)
 * * [NIPS 2015: HDP-HMM paper](#nips-2015-hdp-hmm-paper)
@@ -71,17 +72,21 @@ Below, we show how to call bnpy to train a 8 component Gaussian mixture model on
 ## Calling from the terminal/command-line
 
 ```
-$ python -m bnpy.Run /path/to/dataset.csv FiniteMixtureModel Gauss EM --K 8
+$ python -m bnpy.Run /path/to/my_dataset.csv FiniteMixtureModel Gauss EM --K 8 --output_path /tmp/my_dataset/results/
 ```
 
 ## Calling directly from Python
 
 ```
 import bnpy
-bnpy.run('/path/to/dataset.csv', 'FiniteMixtureModel', 'Gauss', 'EM', K=8)
+bnpy.run('/path/to/dataset.csv',
+         'FiniteMixtureModel', 'Gauss', 'EM',
+         K=8, output_path='/tmp/my_dataset/results/')
+
 ```
 
-## Other examples
+## Advanced examples
+
 Train Dirichlet-process Gaussian mixture model (DP-GMM) via full-dataset variational algorithm (aka "VB" for variational Bayes).
 
 ```
@@ -109,13 +114,14 @@ To use **bnpy** for the first time, follow the [installation instructions](TODO)
 
 # Team
 
-### Primary contact
+### Lead developer
+
 Mike Hughes  
 Website: [www.michaelchughes.com](http://www.michaelchughes.com)
 
-Post-doctoral researcher (Aug. 2016 - present)
-School of Engineering and Applied Sciences
-Harvard University
+Post-doctoral researcher (Aug. 2016 - present)  
+School of Engineering and Applied Sciences  
+Harvard University  
 
 ### Faculty adviser
 
@@ -131,6 +137,9 @@ Website: [http://cs.brown.edu/people/sudderth/](http://cs.brown.edu/people/sudde
 * Geng Ji
 * William Stephenson
 * Sonia Phene
+* Gabe Hope
+* Leah Weiner
+* Alexis Cook
 * Mert Terzihan
 * Mengrui Ni
 * Jincheng Li
