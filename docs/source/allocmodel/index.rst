@@ -5,24 +5,20 @@ Allocation Model Guide
 What is an allocation model?
 ----------------------------
 
-Within **bnpy**, every hierarchical model we support has two pieces: an allocation model and an observation model. We use the label "allocation model" to describe the substructure of a general hierarchical model that is concerned with two things: (1) the appearance probabilities of clusters, or (2) assigning clusters to data items. The illustration below highlights this substructure on several common models.
+Within **bnpy**, every hierarchical model we support has two pieces: an allocation model and an observation model.
+We use the label "allocation model" to describe the generative process that allocates cluster assignments to individual data points.
 
 TODO ILLUSTRATION
 
-In this document, we give a mathematical tour with examples of what defines an allocation model and how we do inference for allocation models. 
-We also describe what the API looks like for the abstract :class:`AllocModel` class, which is the template used for all concrete allocation models.
+In this document, we give a high-level overview of how we define an allocation model and how variational inference works. We also define the essential variational inference API functions that any concrete allocation model (an instance of the abstract :class:`AllocModel` class) should support.
 
 Quick Links
 -----------
 Here are some quick links to documentation for each of the possible allocation models supported by bnpy.
 
 * :doc:`Mixture models <mix/index>`
-* * :doc:`Finite Mixture Model <FiniteMixtureModel>`
-* * :doc:`DP Mixture Model <DPMixtureModel>`
 
 * :doc:`Topic models <topics/index>`
-* * :doc:`Finite Topic Model <FiniteTopicModel>`
-* * :doc:`HDP Topic Model <HDPTopicModel>`
 
 * :doc:`Hidden Markov models <hmm/index>`
 
@@ -80,9 +76,9 @@ The optimization objective is to make this approximate posterior as close to the
 Expanding the allocation model terms, we have
 
 .. math::
-	\Lalloc(r, theta) = \Lpz + \Lentropy
+	\Lalloc(r, theta) = \Lz + \Lentropy
 
-	\Lpz = \E_q[ \log p(z) + \frac{\log p(\pi)}{\log q(\pi)} ]
+	\Lz = \E_q[ \log p(z) + \frac{\log p(\pi)}{\log q(\pi)} ]
 
 	\Lentropy = - \E_q[ \log q(z) ]
 
@@ -162,3 +158,7 @@ During inference, we need to verify that each step is working as expected. Thus,
    :maxdepth: 3
    :hidden:
    :titlesonly:
+
+   mix/index
+   topics/index
+   hmm/index

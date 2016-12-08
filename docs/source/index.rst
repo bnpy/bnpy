@@ -74,7 +74,7 @@ Getting Help
     python -m bnpy.Run /path/to/dataset.csv FiniteMixtureModel Gauss EM --kwhelp
 
 
-Supported clustering models
+Supported allocation models
 ---------------------------
 
 The following are possible *allocation* models, which is **bnpy**-terminology for a generative model which assigns clusters to structured datasets.

@@ -240,7 +240,7 @@ html_use_smartypants = True
 #html_sidebars = {}
 html_sidebars = {'**': [
     'localtoc.html',
-    'searchbox.html',
+    'my_search_box.html',
     ]}
 
 
@@ -363,7 +363,7 @@ man_pages = [
 
 # Absolute path, using MathJax's CDN for fast loading
 # And special path to our custom local.js file
-mathjax_path = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML,https://cs.brown.edu/people/mhughes/bnpy/_static/MathJax/config/local/local.js"
+mathjax_path = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML,https://bnpy.readthedocs.io/en/latest/_static/MathJax/config/local/local.js"
 
 # -- Options for Texinfo output -------------------------------------------
 
