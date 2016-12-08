@@ -120,7 +120,7 @@ show_clusters_over_time(K8_info_dict['task_output_path'])
 
 ###############################################################################
 # Training from K=25 cluster
-# -------------------------
+# --------------------------
 # 
 # Now using 25 initial clusters
 

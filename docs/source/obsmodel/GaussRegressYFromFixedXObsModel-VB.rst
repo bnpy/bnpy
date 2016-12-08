@@ -286,7 +286,7 @@ The cumulant function of the Normal-Wishart produces a scalar output from 4 inpu
         - \frac{\nu}{2} \log \frac{\tau}{2}
         + \log \Gamma \left( \frac{\nu}{2} \right)
 
-where :math:`\Gamma(\cdot)` is the gamma function, and :math:` \log |P|` is the log determinant of the E x E matrix :math:`P`.
+where :math:`\Gamma(\cdot)` is the gamma function, and :math:`\log |P|` is the log determinant of the E x E matrix :math:`P`.
 
 Coordinate Ascent Updates
 =========================

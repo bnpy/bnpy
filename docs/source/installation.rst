@@ -2,60 +2,66 @@
 Installation
 ============
 
-Prerequisites
-=============
-**bnpy** depends on Python and the following (external) Python packages
+Requirements
+============
+**bnpy** requires Python 2.7+ and the following packages:
 
-* numpy, version > 1.8
-* scipy, version > 1.10
+* numpy >= 1.11
+* scipy >= 0.18
+* pandas >= 0.18
+* Cython >= 0.25
+* joblib >= 0.10
+* memory_profiler >= 0.41
+* munkres >= 1.0
+* numexpr >= 2.6
+* psutil >= 5.0
+* scikit_learn >= 0.18
 
-Optionally, we also require these packages for visualization:
+For interactivity and visualization, we also recommend:
 
-* matplotlib
+* ipython >= 5.1
+* matplotlib >= 1.5
 
 
-How to install prerequisites (recommended)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Easy installation of bnpy
+=========================
 
-We highly recommend the Enthought Python distribution. 
+First, make sure you have a working local install of the Anaconda python distribution, which makes managing common Python packages within userspace a breeze.
 
-It's one-click install comes with all the requirements for **bnpy** and avoids the hassle of individually installing each package.
+.. _anaconda: https://docs.continuum.io/anaconda/install
 
-Furthermore, the numerical subroutines for matrix operations that ship with the EPD are almost always better than what a novice user can build themselves from source or have installed from other routes. We've routinely observed speedups of 2-4x on basic operations like matrix multiplication.
-
-How to install prerequisites (advanced)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can either build numpy and scipy from source, or install via a package manager like "easy_install" or "pip". If you must go this route, we recommend using pip.  You can search the web for the latest and greatest instructions for installing these.
-
-Installing bnpy
-=================
-
-You can grab the latest stable version from our master git repository.  
-
-Execute the following command to have the project file structure cloned to your local disk, within a folder called "bnpy"
+Then, you can just clone the latest stable version of bnpy via:
 
 .. code-block:: bash
 
-	git clone https://michaelchughes@bitbucket.org/michaelchughes/bnpy-dev.git
+	git clone https://github.com/bnpy/bnpy.git
+
+And then install from the cloned source via:
+
+.. code-block:: bash
+
+	cd bnpy/
+	pip install -e .
+
+Verifying correct installation
+------------------------------
+
+Within a terminal, you can first verify basic installation with:
+
+.. code-block:: bash
+
+	python -m bnpy.Run --help
+
+You can further train a very simple model:
+
+.. code-block:: bash
+
+	python -m bnpy.Run \
+		DATASET_PATH/faithful/faithful.csv \
+		FiniteMixtureModel Gauss VB --nLap 1 --K 3
 
 
-Throughout all documentation, we'll call the directory where **bnpy** is installed `$BNPYROOT`.  Wherever you see this, substitute in the actual directory on your system.
-
-If you execute `ls $BNPYROOT`, you should see `bnpy/`, `demodata/`, and several other files and folders.  
-
-
-Verifying installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Open a terminal, and type `python` to drop into a python shell.  Then type:
-
-.. code-block:: python
-
-	import numpy
-	print numpy.__version__
-
-If this works OK, you've got numpy working. To further verify matplotlib installation, enter:
+To further verify matplotlib installation, enter:
 
 .. code-block:: python
 
@@ -63,15 +69,71 @@ If this works OK, you've got numpy working. To further verify matplotlib install
 	pylab.plot([1,2,3])
 	pylab.show()
 
-If that produces a figure with a simple line plot, you're good to go!
 
-.. code-block:: python
+Advanced Installation
+=====================
 
-	import bnpy
+Some of bnpy's advanced features require compiling custom C++ source code for fast algorithms. These aren't needed for basic usage, but do come in handy.
+
+Installing with Eigen C++ libraries
+-----------------------------------
+
+The Eigen C++ Matrix template library (>=3.0) is used for:
+
+* fast local step updates for hidden Markov models
+* fast local step updates for L-sparse mixtures
+
+If you want these features, go download and install Eigen_ from
+`http://www.eigen.tuxfamily.org 
+<http://www.eigen.tuxfamily.org>`_.	
+
+.. _eigen: http://eigen.tuxfamily.org/
+
+To install bnpy with Eigen support, you need to set the following environment variable:
+
+.. code-block:: bash
+
+	export EIGENPATH=/path/to/eigen/
+
+You can verify the right location by verifying the following directory exists:
+
+.. code-block:: bash
+
+	ls $EIGENPATH/Eigen/
+
+If the $EIGENPATH env variable is set when you perform **pip install**, the required C++ libraries should be built and useful automatically.
+
+
+Installing with Boost C++ math libraries
+----------------------------------------
+
+The Boost C++ math library (>= 1.52) is used for the following features:
+
+* fast local step updates for L-sparse topic models
+
+If you want these features, go download and install boost_ from
+`http://www.boost.org 
+<http://www.boost.org>`_.	
+
+.. _boost: http://www.boost.org/
+
+To install bnpy with Boost C++ support, you need to set the following environment variable:
+
+.. code-block:: bash
+
+	export BOOSTMATHPATH=/path/to/boost/include/
+
+You can verify the right location by verifying the following directory exists:
+
+.. code-block:: bash
+
+	ls $BOOSTMATHPATH/math/
+
+If the $BOOSTMATHPATH env variable is set when you perform **pip install**, the required C++ libraries should be built and useful automatically.
+
 
 Common errors with matplotlib
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+=============================
 
 If you try the above and get errors about not having "wx" or "wxpython" or "qt" installed, you need to configure your Matplotlib_backend_.
 
@@ -80,77 +142,3 @@ If you try the above and get errors about not having "wx" or "wxpython" or "qt" 
 
 I recommend setting your matplotlibrc file to have `backend: TkAgg` for Linux, and `backend: MacOSX` for Mac.
 
-
-
-Configuration
-==============
-
-After you have installed a copy of **bnpy** on your system, you need to adjust a few key settings to make sure that you are ready to use **bnpy**.  Here, we introduce the concept of *environment variables*, and discuss how **bnpy** uses them to accomplish three key tasks.
-
-* Tell Python where to find the "bnpy" module
-* Tell bnpy where to save results
-* (optional) Tell bnpy where to find your custom datasets.
-
-**What is an environment variable?** 
-In practice, environment variables allow you (the user) to define locations on your system (where to read data, where to save results, etc.), without these needing to be hard-coded into the **bnpy** module or passed as an argument everytime **bnpy** runs.
-
-**Simple Example:**  Open a terminal and try this. 
-
-.. code-block:: bash
-
-	$ MYVAR=42
-	$ echo $MYVAR
-	42
-
-You've just set an environment variable to 42 and then printed its value.
-
-In most UNIX systems, the keyword `export` makes a variable global, so that other processes (like python) can read that variable's value.
-
-.. code-block:: bash
-
-	export MYVAR=42
-
-Setting up bnpy environment variables.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Step 1:** Tell Python where to find the **bnpy** module
-
-Python always looks at the environment variable called PYTHONPATH to find custom-installed modules.
-
-.. code-block:: bash
-
-	export PYTHONPATH=/path/to/bnpy/
-
-
-**Step 2:** Tell **bnpy** where to save results
-
-**bnpy** looks at `BNPYOUTDIR` to define the complete path of the directory where results are saved.
-
-.. code-block:: bash
-
-	export BNPYOUTDIR=/path/to/my/results/
-
-Make sure this directory is readable and writeable by you.  Also make sure it has enough free disk space (a few GBs will do just fine) if you plan to do extensive experimentation.  
-
-**Step 3 (optional):** Tell **bnpy** where to load custom datasets from
-
-By default, **bnpy** will already know how to find the pre-installed toy and real datasets. However, to run **bnpy** on custom, user-defined data, you will need to specify a location. 
-
-**bnpy** can process any dataset defined in a dataset script. The location of these scripts are specified by the Unix environment variable *BNPYDATADIR*.
-
-.. code-block:: bash
-
-	export BNPYDATADIR=/path/to/my/custom/dataset/
-
-In general, you might change this location every time you work with a different custom dataset.
-
-
-**If you are using IDE:**  If you choose to develop and run your code in IDE, then the configurations need to be set somewhere else. Here we take PyCharm 3.4 on Mac OS X as an example. In the menu bar of PyCharm, select `Run -> Edit Configurations...`. Then in `Environment -> Environment Variables`, manually add the environment variables mentioned above as key value pairs (e.g. PYTHONPATH /path/to/bnpy/) and press OK. 
-
-A more general (but dangerous) way to do this is that you can edit the file `/etc/launchd.conf` in your machine to add these variables by writing down commands like
-
-.. code-block :: bash
-
-	setenv PYTHONPATH /path/to/bnpy
-
-into the file and restart your machine. In Pycharm, the second method could keep the autocompletion working when you deal with stuff in **bnpy** module.

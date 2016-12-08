@@ -162,6 +162,3 @@ During inference, we need to verify that each step is working as expected. Thus,
    :maxdepth: 3
    :hidden:
    :titlesonly:
-
-   mix/index
-   topics/index

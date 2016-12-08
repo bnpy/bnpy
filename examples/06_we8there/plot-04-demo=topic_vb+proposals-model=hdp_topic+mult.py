@@ -95,7 +95,6 @@ def show_top_words_over_time(
 ###############################################################################
 #
 # Show the topics over time
+
 show_top_words_over_time(
     info_dict['task_output_path'], vocabList=dataset.vocabList)
-
-pylab.show()

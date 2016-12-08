@@ -107,7 +107,7 @@ show_many_random_initial_models(
 
 ###############################################################################
 # initname: 'bregmankmeans'
-# ------------------------
+# -------------------------
 # This procedure selects K examples using a distance-biased procedure.
 # First, one example is chosen uniformly at random.
 # Next, each successive example is chosen with probability proportional to the 

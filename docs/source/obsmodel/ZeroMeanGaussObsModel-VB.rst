@@ -1,6 +1,6 @@
-============================================================================
-Zero-mean full-covariance Gaussian observation model: Variational Bayesian Methods
-============================================================================
+=========================================================================
+Zero-mean full-covariance Gaussian observation model: Variational Methods
+=========================================================================
 
 TODO update this page
 

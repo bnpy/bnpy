@@ -114,5 +114,3 @@ bnpy.viz.PrintTopics.plotCompsFromHModel(
     trained_model,
     vocabList=dataset.vocabList,
     Ktop=10)
-
-pylab.show()

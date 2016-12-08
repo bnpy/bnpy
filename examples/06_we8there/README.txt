@@ -1,4 +1,4 @@
-.. _examples_bars_one_per_doc_index:
+.. _examples_we8there_index:
 
 we8there bag-of-words text dataset
 ----------------------------------

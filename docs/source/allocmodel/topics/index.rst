@@ -16,7 +16,7 @@ Supported Learning Algorithms
 
 
 Possible Implementations
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 * FiniteTopicModel: 
   stuff here

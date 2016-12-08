@@ -86,7 +86,7 @@ def show_clusters_over_time(
 ###############################################################################
 #
 # *DiagGauss* observation model, without moves
-# --------------------------------------
+# --------------------------------------------
 #
 # Start with too many clusters (K=25)
 
