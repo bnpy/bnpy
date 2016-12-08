@@ -110,7 +110,7 @@ python -m bnpy.Run /path/to/dataset.csv FiniteMixtureModel Gauss EM --kwhelp
 
 # Installation
 
-To use **bnpy** for the first time, follow the [installation instructions](TODO).
+To use **bnpy** for the first time, follow the documentation's [Installation Instructions](https://bnpy.readthedocs.io/en/latest/installation.html).
 
 # Team
 
