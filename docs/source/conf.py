@@ -404,10 +404,15 @@ napoleon_use_rtype = False
 
 # -- Examples gallery settings -------------------------------------------
 sphinx_gallery_conf = {
-    # path to your examples scripts
-    'examples_dirs' : '../../examples/03_faithful/',
+    # path to examples scripts
+    'examples_dirs' : '../../examples/',
+
+    # path to examples scripts to go FAST!
+    #'examples_dirs' : '../../examples/03_faithful/',
+
     # path where to save gallery generated examples
     'gallery_dirs' : 'examples/',
+
     # path where module info goes
     'mod_example_dir': 'api/',
     }
