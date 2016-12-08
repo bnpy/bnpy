@@ -63,7 +63,7 @@ class GroupXData(XData):
         ''' Constructor for loading data from disk into XData instance
         '''
         if filepath.endswith('.mat'):
-            return cls.read_from_mat(filepath, nDocTotal=nDocTotal, **kwargs)
+            return cls.read_mat(filepath, nDocTotal=nDocTotal, **kwargs)
         raise NotImplemented('Only .mat file supported.')
 
     def save_to_mat(self, matfilepath):
@@ -78,7 +78,22 @@ class GroupXData(XData):
         scipy.io.savemat(matfilepath, SaveVars, oned_as='row')
 
     @classmethod
-    def read_from_mat(cls, matfilepath, nDocTotal=None, **kwargs):
+    def read_npz(cls, npzfilepath, nDocTotal=None, **kwargs):
+        ''' Constructor for building an instance of GroupXData from npz
+        '''
+        var_dict = dict(**np.load(npzfilepath))
+        if 'X' not in var_dict:
+            raise KeyError(
+                'Stored npz file needs to have data in field named X')
+        if 'doc_range' not in var_dict:
+            raise KeyError(
+                'Stored npz file needs to have field named doc_range')
+        if nDocTotal is not None:
+            var_dict['nDocTotal'] = nDocTotal
+        return cls(**var_dict)
+
+    @classmethod
+    def read_mat(cls, matfilepath, nDocTotal=None, **kwargs):
         ''' Constructor for building an instance of GroupXData from disk
         '''
         import scipy.io
@@ -213,10 +228,11 @@ class GroupXData(XData):
 
     # Create Subset
     #########################################################
-    def select_subset_by_mask(self, docMask=None,
-                              atomMask=None,
-                              doTrackTruth=False,
-                              doTrackFullSize=True):
+    def make_subset(self,
+            docMask=None,
+            atomMask=None,
+            doTrackTruth=False,
+            doTrackFullSize=True):
         """ Get subset of this dataset identified by provided unit IDs.
 
         Parameters
@@ -235,7 +251,6 @@ class GroupXData(XData):
         -------
         Dchunk : bnpy.data.GroupXData instance
         """
-
         if atomMask is not None:
             return self.toXData().select_subset_by_mask(atomMask)
 

@@ -131,8 +131,14 @@ def parseArgs(**kwargs):
     parser.add_argument('--taskids',
         type=str, default=None,
         help=taskidsHelpMsg)
+    parser.add_argument('--vocabfile',
+        type=str, default=None)
     args = parser.parse_args()
-    return vars(args)
+    arg_dict = vars(args)
+    if args.vocabfile is not None:
+        with open(args.vocabfile, 'r') as f:
+            arg_dict['vocabList'] = map(str.strip, f.readlines())
+    return arg_dict
 
 if __name__ == "__main__":
     arg_dict = parseArgs()
