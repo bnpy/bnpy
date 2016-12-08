@@ -59,9 +59,9 @@ These are all variants of *variational inference*, a family of optimization algo
 
 # Example Gallery
 
-You can find many examples of **bnpy** in action in our curated [Example Gallery](todo).
+You can find many examples of **bnpy** in action in our curated [Example Gallery](http://bnpy.readthedocs.io/en/latest/examples/).
 
-These same demos are also directly available on our [github](https://github.com/bnpy/bnpy/tree/master/examples).
+These same demos are also directly available as Python scrips inside the [examples/ folder of the project Github repository](https://github.com/bnpy/bnpy/tree/master/examples).
 
 # Quick Start
 
