@@ -174,6 +174,3 @@ pylab.legend(loc='upper right')
 pylab.xlabel('num. laps')
 pylab.ylabel('loss')
 pylab.tight_layout()
-
-
-pylab.show(block=True)

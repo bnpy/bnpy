@@ -96,4 +96,4 @@ def show_bars_over_time(
 #
 # Examine the bars over time
 show_bars_over_time(info_dict['task_output_path'])
-pylab.show()
+

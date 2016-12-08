@@ -106,4 +106,3 @@ K10_trained_model, K10_info_dict = bnpy.run(
 
 show_bars_over_time(K10_info_dict['task_output_path'])
 
-pylab.show()

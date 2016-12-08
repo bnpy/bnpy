@@ -89,4 +89,3 @@ def show_bars_over_time(
 #
 # Show the clusters over time
 show_bars_over_time(info_dict['task_output_path'])
-pylab.show()

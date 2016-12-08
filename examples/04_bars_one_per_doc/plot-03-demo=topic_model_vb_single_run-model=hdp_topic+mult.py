@@ -122,5 +122,3 @@ r_trained_model, r_info_dict = bnpy.run(
     **r_local_step_kwargs)
 
 show_bars_over_time(r_info_dict['task_output_path'])
-
-pylab.show()

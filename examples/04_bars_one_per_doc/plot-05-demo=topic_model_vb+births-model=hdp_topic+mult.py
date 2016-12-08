@@ -94,5 +94,4 @@ trained_model, info_dict = bnpy.run(
            birth_kwargs.items()))
 
 show_bars_over_time(info_dict['task_output_path'])
-pylab.show()
 
