@@ -2,8 +2,6 @@
 Observation Models
 ==================
 
-Within **bnpy**, . See TODO for details.
-
 All observation models define a *likelihood* for producing data :math:`x_n` from some cluster-specific density with parameter :math:`\phi_k`: 
 
 .. math ::
