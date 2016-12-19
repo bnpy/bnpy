@@ -1,5 +1,4 @@
 import ctypes
-import warnings
 from numpy.ctypeslib import ndpointer
 
 def LoadFuncFromCPPLib(libpath, srcpath, funcName):
@@ -37,7 +36,6 @@ def LoadFuncFromCPPLib(libpath, srcpath, funcName):
             setattr(getattr(lib, funcName), 'argtypes', argTypeList)
         return getattr(lib, funcName)
     except OSError as e:
-        warnings.warn(str(e))
         def errorFunc(*args, **kwargs):
             raise ImportError("Could not import C++ func: %s" % (funcName))
         return errorFunc

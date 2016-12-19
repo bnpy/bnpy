@@ -582,7 +582,6 @@ try:
          ndpointer(ctypes.c_int),
          ]
 except OSError as e:
-    print str(e)
     # No compiled C++ library exists
     hasEigenLibReady = False
 
