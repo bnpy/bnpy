@@ -404,6 +404,8 @@ napoleon_use_rtype = False
 
 # -- Examples gallery settings -------------------------------------------
 sphinx_gallery_conf = {
+    plot_gallery = True,
+    
     # path to examples scripts
     'examples_dirs' : '../../examples/',
 
