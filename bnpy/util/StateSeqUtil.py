@@ -1,5 +1,9 @@
 import numpy as np
-import munkres
+try:
+    import munkres
+    hasMunkres = True
+except ImportError as e:
+    hasMunkres = False
 
 from bnpy.util import as1D
 
@@ -107,6 +111,11 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
     Ktrue = zTrue.max() + 1
 
     if useInfo is None:
+        if not hasMunkres:
+            raise ImportError(
+                "alignEstimatedStateSeqToTruth requires the munkres package."
+                + " Please install via 'pip install munkres'")
+
         CostMatrix = buildCostMatrix(zHat, zTrue)
         MunkresAlg = munkres.Munkres()
         tmpAlignedRowColPairs = MunkresAlg.compute(CostMatrix)

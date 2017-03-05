@@ -15,6 +15,8 @@ import os
 import sys
 import scipy.io
 import ElapsedTimeLogger
+
+from sklearn.externals import joblib
 from bnpy.ioutil import ModelWriter
 from bnpy.util import isEvenlyDivisibleFloat
 
@@ -482,7 +484,6 @@ class LearnAlg(object):
         if self.outputParams['debugBatch'] == batchID:
             debugLap = self.outputParams['debugLap']
             debugLapBuffer = self.outputParams['debugLapBuffer']
-            import joblib
             if self.lapFrac < 1:
                 joblib.dump(dict(Dchunk=Dchunk),
                             os.path.join(self.task_output_path, 'Debug-Data.dump'))
