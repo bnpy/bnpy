@@ -557,7 +557,9 @@ def deleteAllFilesFromDir(savefolder, prefix=None):
 
 def configLoggingToConsoleAndFile(
         task_output_path,
-        taskid=0, doSaveToDisk=True, doWriteStdOut=True):
+        taskid=0,
+        doSaveToDisk=True, doWriteStdOut=True,
+        doHandleGrid=True):
     RootLog = logging.getLogger()
     RootLog.handlers = []
 
@@ -580,6 +582,8 @@ def configLoggingToConsoleAndFile(
     if not doSaveToDisk and not doWriteStdOut:
         Log.addHandler(logging.NullHandler())
 
+    if not doHandleGrid:
+        return None
     # Prepare special logs if we are running on the Brown CS grid
     try:
         jobID = int(os.getenv('JOB_ID'))
