@@ -6,6 +6,8 @@ from mix.DPMixtureRestrictedLocalStep import make_xPiVec_and_emptyPi
 
 from topics.FiniteTopicModel import FiniteTopicModel
 from topics.HDPTopicModel import HDPTopicModel
+from topics.SupervisedFiniteTopicModelWithPointEstimatedWeights import (
+    SupervisedFiniteTopicModelWithPointEstimatedWeights)
 
 from hmm.FiniteHMM import FiniteHMM
 from hmm.HDPHMM import HDPHMM
@@ -29,6 +31,8 @@ AllocModelConstructorsByName = {
     'FiniteAssortativeMMSB': FiniteAssortativeMMSB,
     'HDPMMSB': HDPMMSB,
     'HDPAssortativeMMSB': HDPAssortativeMMSB,
+    'SupervisedFiniteTopicModelWithPointEstimatedWeights': \
+        SupervisedFiniteTopicModelWithPointEstimatedWeights,
 }
 
 AllocModelNameSet = set(AllocModelConstructorsByName.keys())

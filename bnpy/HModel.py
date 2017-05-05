@@ -222,6 +222,10 @@ class HModel(object):
                 # Make sure K is exactly same for both alloc and obs models
                 # Needed because obsModel init can sometimes yield K < Kinput
                 initArgs['K'] = self.obsModel.K
+
+            ### ADDED FOR sLDA ###
+            if str(self.allocModel.__class__.__name__).count("Supervised"):
+                initArgs['eta'] = np.linspace(-1, 1, self.obsModel.K)
             self.allocModel.init_global_params(Data=Data, **initArgs)
 
     def getAllocModelName(self):

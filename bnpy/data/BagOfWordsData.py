@@ -49,6 +49,11 @@ class BagOfWordsData(DataObj):
         total size of the corpus
         will differ from nDoc when this dataset represents a
         small minibatch of some larger corpus.
+
+    Optional Attributes
+    -------------------
+    response : None [default], or 1D array of size nDoc
+        response[d] gives label for each document
     TrueParams : None [default], or dict of true parameters.
 
     """
@@ -262,10 +267,12 @@ class BagOfWordsData(DataObj):
                 matfilepath, vocabfile=vocabfile, **kwargs)
         return cls(vocabfile=vocabfile, **MatDict)
 
-    def __init__(self, word_id=None, word_count=None, doc_range=None,
-                 vocab_size=0, vocabList=None, vocabfile=None,
-                 summary=None,
-                 nDocTotal=None, TrueParams=None, **kwargs):
+    def __init__(self,
+            word_id=None, word_count=None, doc_range=None,
+            vocab_size=0, vocabList=None, vocabfile=None,
+            summary=None,
+            response=None,
+            nDocTotal=None, TrueParams=None, **kwargs):
         ''' Constructor for BagOfWordsData object.
 
         Represents bag-of-words dataset via several 1D vectors,
@@ -310,6 +317,9 @@ class BagOfWordsData(DataObj):
         if TrueParams is not None:
             self.TrueParams = TrueParams
 
+        if response is not None:
+            self.response = as1D(toCArray(response, dtype=np.float64))
+
         # Add dictionary of vocab words, if provided
         if vocabList is not None:
             self.vocabList = vocabList
@@ -352,6 +362,9 @@ class BagOfWordsData(DataObj):
         docEndBiggerThanStart = self.doc_range[1:] - self.doc_range[:-1]
         assert np.all(docEndBiggerThanStart)
 
+        if hasattr(self, 'response'):
+            assert self.response.ndim == 1
+            assert self.response.size == self.doc_range.size - 1
         if hasattr(self, 'vocabList') and self.vocabList is not None:
             if len(self.vocabList) != self.vocab_size:
                 self.vocabList = None
@@ -771,6 +784,12 @@ class BagOfWordsData(DataObj):
         self.nUniqueToken += WData.nUniqueToken
         self.nTotalToken += WData.nTotalToken
 
+        if hasattr(self,'response'):
+            if hasattr(WData, 'response'):
+                self.response = np.hstack([self.response, WData.response])
+            else:
+                print 'Warning: response response variables not added'
+
         self.clearCache()
         self._verify_attributes()
 
@@ -874,10 +893,17 @@ class BagOfWordsData(DataObj):
         else:
             newVocabList = None            
 
-        return BagOfWordsData(word_id, word_count, doc_range, self.vocab_size,
-                         nDocTotal=nDocTotal,
-                         TrueParams=newTrueParams,
-                         vocabList=newVocabList)
+        if hasattr(self, 'response'):
+            new_y = self.response[docMask].copy()
+        else:
+            new_y = None
+
+        return BagOfWordsData(
+            word_id, word_count, doc_range, self.vocab_size,
+            response=new_y,
+            nDocTotal=nDocTotal,
+            TrueParams=newTrueParams,
+            vocabList=newVocabList)
 
 
     def makeSubsetByThresholdingWeights(
