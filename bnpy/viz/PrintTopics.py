@@ -73,16 +73,18 @@ def showTopWordsForTask(taskpath, vocabfile, lap=None, doHTML=1,
             return printTopWordsFromHModel(hmodel, vocabList)
 
 
-def htmlTopWordsFromWordCounts(WordCounts, vocabList, order=None, Ktop=10,
-                               ncols=5, maxKToDisplay=50, countVec=None,
-                               activeCompIDs=None, **kwargs):
+def htmlTopWordsFromWordCounts(
+        WordCounts, vocabList, order=None, Ktop=10,
+        ncols=5, maxKToDisplay=50, countVec=None,
+        fmtstr='%8d',
+        activeCompIDs=None, **kwargs):
     K, W = WordCounts.shape
     if order is None:
         order = np.arange(K)
     if activeCompIDs is None:
         activeCompIDs = np.arange(K)
-    if countVec is None:
-        countVec = np.sum(WordCounts, axis=1)
+    #if countVec is None:
+    #    countVec = np.sum(WordCounts, axis=1)
 
     htmllines = list()
     htmllines.append(STYLE)
@@ -94,13 +96,18 @@ def htmlTopWordsFromWordCounts(WordCounts, vocabList, order=None, Ktop=10,
         k = np.flatnonzero(activeCompIDs == compID)
         if len(k) == 1:
             k = k[0]
-            titleline = '<h2>%4d/%d %10d</h2>' % (
-                k + 1, countVec.size, countVec[k])
+            if countVec is None:
+                titleline = '<h2>%4d/%d</h2>' % (
+                    k + 1, K)
+            else:
+                titleline = '<h2>%4d/%d %10d</h2>' % (
+                    k + 1, K, countVec[k])
             htmllines.append('    <td>' + titleline)
             htmllines.append('    ')
 
             htmlPattern = \
-                '<pre class="num">%8d </pre><pre class="word">%s </pre>'
+                '<pre class="num">' + fmtstr + ' ' + \
+                '</pre><pre class="word">%s </pre>'
             topIDs = np.argsort(-1 * WordCounts[k])[:Ktop]
             for topID in topIDs:
                 dataline = htmlPattern % (
@@ -184,7 +191,9 @@ def printTopWordsFromWordCounts(
                 print '%3d %s' % (WordCounts[k, wID], vocabList[wID])
 
 
-def printTopWordsFromTopics(topics, vocabList, ktarget=None, Ktop=10):
+def printTopWordsFromTopics(
+        topics, vocabList, order=None,
+        prefix='topic', ktarget=None, Ktop=10):
     K, W = topics.shape
     if ktarget is not None:
         topIDs = np.argsort(-1 * topics[ktarget])
@@ -193,6 +202,7 @@ def printTopWordsFromTopics(topics, vocabList, ktarget=None, Ktop=10):
         return
     # Base case: print all topics
     for k in xrange(K):
+        print '----- %s %d' % (prefix, k)
         topIDs = np.argsort(-1 * topics[k])
         for wID in topIDs[:Ktop]:
             print '%.3f %s' % (topics[k, wID], vocabList[wID])
@@ -212,13 +222,16 @@ def plotCompsFromHModel(hmodel, **kwargs):
 
 
 def plotCompsFromWordCounts(
-        WordCounts, vocabList=None,
+        WordCounts=None,
+        topics_KV=None,
+        vocabList=None,
         compListToPlot=None,
         compsToHighlight=None,
         xlabels=None,
         wordSizeLimit=10,
         Ktop=10, Kmax=32,
-        H=2.2, W=1.5, figH=None, ncols=8,
+        H=2.5, W=2.0,
+        figH=None, ncols=10,
         ax_list=None,
         fontsize=10,
         **kwargs):
@@ -230,11 +243,15 @@ def plotCompsFromWordCounts(
     '''
     if vocabList is None:
         raise ValueError('Missing vocabList. Cannot display topics.')
-    WordCounts = np.asarray(WordCounts, dtype=np.float64)
-    if WordCounts.ndim == 1:
-        WordCounts = WordCounts[np.newaxis,:]
-    K, vocab_size = WordCounts.shape
-    N = np.sum(WordCounts, axis=1)
+    if WordCounts is not None:
+        WordCounts = np.asarray(WordCounts, dtype=np.float64)
+        if WordCounts.ndim == 1:
+            WordCounts = WordCounts[np.newaxis,:]
+        K, vocab_size = WordCounts.shape
+        N = np.sum(WordCounts, axis=1)
+    else:
+        topics_KV = np.asarray(topics_KV, dtype=np.float64)
+        K, vocab_size = topics_KV.shape
 
     if compListToPlot is None:
         compListToPlot = np.arange(0, K)
@@ -263,12 +280,19 @@ def plotCompsFromWordCounts(
         cur_ax_h = ax_list[plotID] #pylab.subplot(nrows, ncols, plotID + 1)
 
         topicMultilineStr = ''
-        topIDs = np.argsort(-1 * WordCounts[compID])
+        if WordCounts is None:
+            topIDs = np.argsort(-1 * topics_KV[compID])
+        else:
+            topIDs = np.argsort(-1 * WordCounts[compID])
         for wID in topIDs[:Ktop]:
-            if WordCounts[compID, wID] > 0:
+            if WordCounts is not None and WordCounts[compID, wID] > 0:
                 wctStr = count2str(WordCounts[compID, wID])
                 topicMultilineStr += '%s %s\n' % (
                     wctStr, vocabList[wID][:wordSizeLimit])
+            else:
+                topicMultilineStr += "%.4f %s\n" % (
+                    topics_KV[compID, wID],
+                    vocabList[wID][:wordSizeLimit])
         cur_ax_h.text(
             0, 0, topicMultilineStr, fontsize=fontsize, family=u'monospace')
         cur_ax_h.set_xlim([0, 1]);
