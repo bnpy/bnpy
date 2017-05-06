@@ -17,6 +17,8 @@ from bnpy.util.lib.sparseResp.LibSparseResp \
 from bnpy.util.lib.sparseResp.LibLocalStepManyDocs \
     import sparseLocalStep_WordCountData
 
+from LocalStepSupervised import updateLPWithResp_Supervised
+
 def calcLocalParams(
         Data, LP,
         alphaEbeta=None,
@@ -52,6 +54,16 @@ def calcLocalParams(
         obsModelName = 'Gauss'
     # Unpack the problem size
     N, K = LP['E_log_soft_ev'].shape
+
+    #Supervised Modifications
+    nCoordAscentItersLP = kwargs['nCoordAscentItersLP'] if 'nCoordAscentItersLP' in kwargs else 1
+    SUPERVISED = 'supervised' in LP and LP['supervised']
+    sLik = None
+    if SUPERVISED:
+        #Make sure to only do 1 iteration of updating Theta before supervised step
+        kwargs['nCoordAscentItersLP'] = 1
+        sLik = LP['E_log_soft_ev'].copy()
+
     # Prepare the initial DocTopicCount matrix,
     # Useful for warm starts of the local step.
     initDocTopicCount = None
@@ -171,7 +183,16 @@ def calcLocalParams(
             LP, Data, Lik, DocTopicProb, sumRespTilde, cslice,
             nnzPerRowLP=nnzPerRowLP,
             doSparseOnlyAtFinalLP=doSparseOnlyAtFinalLP)
-    else:
+    if SUPERVISED:
+        LP['E_log_soft_ev'] = sLik
+        LP = updateLPWithResp_Supervised(
+            LP, Data, Lik, DocTopicProb, alphaEbeta, alphaEbetaRem, 
+            sumRespTilde, cslice,
+            nCoordAscentItersLP) #Check that the correct prior arg is passed
+        DocTopicCount = LP['DocTopicCount']
+        LP = updateLPGivenDocTopicCount(LP, DocTopicCount,
+                                    alphaEbeta, alphaEbetaRem)
+    if not DO_DENSE:
         indptr = np.arange(
             0, (N+1) * nnzPerRowLP, nnzPerRowLP, dtype=np.int32)
         LP['spR'] = scipy.sparse.csr_matrix(

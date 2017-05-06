@@ -271,7 +271,7 @@ class BagOfWordsData(DataObj):
             word_id=None, word_count=None, doc_range=None,
             vocab_size=0, vocabList=None, vocabfile=None,
             summary=None,
-            response=None,
+            response=None, Y=None,
             nDocTotal=None, TrueParams=None, **kwargs):
         ''' Constructor for BagOfWordsData object.
 
@@ -317,8 +317,11 @@ class BagOfWordsData(DataObj):
         if TrueParams is not None:
             self.TrueParams = TrueParams
 
+        #Support responses as either 'Y' or 'response' attribute (TODO: pick one)
+        response = Y if response is None and Y is not None else response 
         if response is not None:
             self.response = as1D(toCArray(response, dtype=np.float64))
+            self.Y = self.response
 
         # Add dictionary of vocab words, if provided
         if vocabList is not None:
@@ -1189,6 +1192,9 @@ class BagOfWordsData(DataObj):
             the_dict['TrueParams'] = self.TrueParams
         if hasattr(self, 'name'):
             the_dict['name'] = self.name
+        if hasattr(self, 'response'):
+            the_dict['response'] = self.response
+            the_dict['Y'] = self.Y
         return the_dict
 
     def WriteToFile_ldac(self, filepath,
