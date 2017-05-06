@@ -8,6 +8,7 @@ from GaussRegressYFromFixedXObsModel \
 	import GaussRegressYFromFixedXObsModel
 from GaussRegressYFromDiagGaussXObsModel \
 	import GaussRegressYFromDiagGaussXObsModel
+from SupervisedTopicMultObsModel import SupervisedTopicMultObsModel
 
 ObsModelConstructorsByName = {
     'DiagGauss': DiagGaussObsModel,
@@ -17,6 +18,7 @@ ObsModelConstructorsByName = {
     'GaussRegressYFromFixedX': GaussRegressYFromFixedXObsModel,
     'GaussRegressYFromDiagGaussX': GaussRegressYFromDiagGaussXObsModel,
     'Mult': MultObsModel,
+    'SupervisedMult': SupervisedTopicMultObsModel,
     'Bern': BernObsModel,
 }
 
