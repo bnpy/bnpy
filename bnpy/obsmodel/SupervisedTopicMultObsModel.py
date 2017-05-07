@@ -109,7 +109,7 @@ class SupervisedTopicMultObsModel(MultObsModel):
     def setPostFactors(self, w_m=None, **kwargs):
         ''' Set attribute Post to provided values.
         '''
-        super(SupervisedTopicMultObsModel, self).calcSummaryStats(**kwargs)
+        super(SupervisedTopicMultObsModel, self).setPostFactors(**kwargs)
         if w_m is not None:
             self.Post.setField('w_m', w_m, dims=('K'))
 
