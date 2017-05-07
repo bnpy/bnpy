@@ -214,6 +214,7 @@ def eta_update(m, S, X):
     m, S = np.asarray(m).reshape((-1,)), np.asarray(S).reshape((-1,))
     if m.shape[0] < X.shape[1]:
         m = np.ones(X.shape[1]) * m[0]
+    if S.shape[0] < X.shape[1]:
         S = np.ones(X.shape[1]) * S[0]
 
     eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
@@ -324,13 +325,10 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
     if SS is None:
         SS = SuffStatBag(K=K, D=Data.dim)
 
-    
-    if Post is None or not hasattr(Post, 'w_m'):
-        eta = eta_update(Prior.mu, Prior.sig, X)
-        eta_ss = calc_eta_ss(eta)
-    else:
-        eta = eta_update(Post.w_m, Post.S, X)
-        eta_ss = calc_eta_ss(eta)
+    w_m = Prior.mu if Post is None or not hasattr(Post, 'w_m') else Post.w_m
+    S = Prior.sig if Post is None or not hasattr(Post, 'S') else Post.S
+    eta = eta_update(w_m, S, X)
+    eta_ss = calc_eta_ss(eta)
 
     m_ss = calc_m_ss(X, Y)
     sinv_ss = calc_sinv_ss(eta, X)
