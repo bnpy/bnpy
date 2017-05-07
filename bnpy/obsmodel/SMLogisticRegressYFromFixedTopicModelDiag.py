@@ -276,11 +276,15 @@ def calcLocalParams(Dslice, Post=None,
 
     LP = dict()
     LP['supervised'] = True
+
     if Post is None or not hasattr(Post, 'w_m'):
-        LP['w_m'] = Prior.mu
-        LP['w_var'] = Prior.sig
+        LP['w_m'] = Prior.mu 
     else:
         LP['w_m'] = Post.w_m
+    
+    if Post is None or not hasattr(Post, 'S'):
+        LP['w_var'] = Prior.sig if Post is None or not hasattr(Post, 'w_m') else Prior.sig * np.ones(Post.w_m.shape)
+    else:
         LP['w_var'] = Post.S
     return LP
 

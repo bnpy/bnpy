@@ -14,11 +14,6 @@ try:
 except:
     pass
 
-try:
-    import tensorflow as tf
-except:
-    pass
-
 from scipy.optimize import fmin_l_bfgs_b
 
 def calcNumDocFromSlice(Data, cslice):
@@ -125,7 +120,10 @@ class RespOptimizerTheano:
         resp = resp / resp.sum(axis=1).reshape((-1,1))
         return resp
 
-Optimizer = RespOptimizerTheano()
+try:
+    Optimizer = RespOptimizerTheano()
+except:
+    pass
 
 def updateLPWithResp_Supervised(LP, Data, Lik, Prior, alphaEbeta, alphaEbetaRem, sumRespTilde, cslice=(0, None), nCoordAscentItersLP=1):
     ''' Compute assignment responsibilities given output of local step.
