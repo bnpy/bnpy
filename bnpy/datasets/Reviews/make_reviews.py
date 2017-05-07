@@ -41,7 +41,7 @@ def get_data_info():
     s = 'Binary movie review dataset.'
     return s
 
-def get_data_arrays(version=1, numvocab=4310, use_stop=False, **kwargs):
+def get_data_arrays(version=1, numvocab=4310, use_stop=False, min_thresh=0, max_thresh=0, **kwargs):
     tf = dict()
     allwords = []
     labels = []
@@ -65,7 +65,7 @@ def get_data_arrays(version=1, numvocab=4310, use_stop=False, **kwargs):
     allwords = [l[0] for l in lst]
     labels = [l[1] for l in lst]
 
-    vocabList, invvocab = createVocab(tf, len(labels), numvocab, use_stop)
+    vocabList, invvocab = createVocab(tf, len(labels), numvocab, use_stop, min_thresh, max_thresh)
     vocab_size = len(vocabList)
     word_id = []
     word_count = []
@@ -97,8 +97,8 @@ def get_data_from_arrays(word_id, word_count, doc_range, vocab_size, vocabList, 
     return Data
 
 
-def get_data(version=1, numvocab=4310, use_stop=False, **kwargs):
-    word_id, word_count, doc_range, vocab_size, vocabList, Y = get_data_arrays(version, numvocab, use_stop, **kwargs)
+def get_data(version=1, numvocab=4310, use_stop=False, min_thresh=0, max_thresh=0, **kwargs):
+    word_id, word_count, doc_range, vocab_size, vocabList, Y = get_data_arrays(version, numvocab, use_stop, min_thresh=min_thresh, max_thresh=max_thresh, **kwargs)
     Data = get_data_from_arrays(word_id, word_count, doc_range, vocab_size, vocabList, Y)
     return Data
 
@@ -116,8 +116,8 @@ def split_data_arrays(word_id, word_count, doc_range, vocab_size, vocabList, Y, 
     return (train_word_id, train_word_count, train_doc_range, vocab_size, vocabList, train_Y), \
         (test_word_id, test_word_count, test_doc_range, vocab_size, vocabList, test_Y)
 
-def get_train_test_data(version=1, numvocab=4310, split=0.7, use_stop=False, **kwargs):
-    word_id, word_count, doc_range, vocab_size, vocabList, Y = get_data_arrays(version, numvocab, use_stop=use_stop, **kwargs)
+def get_train_test_data(version=1, numvocab=4310, split=0.7, use_stop=False, min_thresh=0, max_thresh=0, **kwargs):
+    word_id, word_count, doc_range, vocab_size, vocabList, Y = get_data_arrays(version, numvocab, use_stop=use_stop, min_thresh=min_thresh, max_thresh=max_thresh, **kwargs)
     
     train, test = split_data_arrays(word_id, word_count, doc_range, vocab_size, vocabList, Y, split=split)
 
@@ -126,8 +126,8 @@ def get_train_test_data(version=1, numvocab=4310, split=0.7, use_stop=False, **k
 
     return train, test
 
-def get_split_data(version=1, numvocab=4310, split=[0.8, 0.1, 0.1], use_stop=False, **kwargs):
-    rem = get_data_arrays(version, numvocab, use_stop=use_stop, **kwargs)
+def get_split_data(version=1, numvocab=4310, split=[0.8, 0.1, 0.1], use_stop=False, min_thresh=0, max_thresh=0, **kwargs):
+    rem = get_data_arrays(version, numvocab, use_stop=use_stop, min_thresh=min_thresh, max_thresh=max_thresh, **kwargs)
     
     total = 1.0
     datasets = []
@@ -210,7 +210,13 @@ def processFile(file, label, tf, allwords, labels, byline=True):
                 else:
                     tf[word].append(count)
 
-def createVocab(tf, D, numvocab=4310, use_stop=False):
+def createVocab(tf, D, numvocab=4310, use_stop=False, min_thresh=0, max_thresh=0):
+    if min_thresh < 1.0 and min_thresh > 0.0:
+        min_thresh = int(D * min_thresh)
+    if max_thresh < 1.0 and max_thresh > 0.0:
+        max_thresh = int(D * max_thresh)
+    max_thresh = max_thresh if max_thresh >= 1 else 9999999999   
+
     stop = set()
     if use_stop:
         with open(stopfilepath) as f:
@@ -221,7 +227,7 @@ def createVocab(tf, D, numvocab=4310, use_stop=False):
     vocab = []
     for word, counts in tf.iteritems():
         tfidf = np.sum(np.array(counts)) * np.log(float(D) / len(counts))
-        if word not in stop:
+        if word not in stop and len(counts) >= min_thresh and len(counts) <= max_thresh:
             vocab.append((word, tfidf))
 
     vocab.sort(key=lambda v: -v[1])
@@ -235,10 +241,15 @@ def save_csr(filename,array):
     np.savez(filename, data=array.data ,indices=array.indices,
              indptr=array.indptr, shape=array.shape)
 
-def save_sscape_data(direc, names=['train', 'test', 'valid'], split=[0.8, 0.1, 0.1], version=1, numvocab=4310, use_stop=True):
-    datasets = get_split_data(version=version, split=split, numvocab=numvocab, use_stop=use_stop)
+def save_sscape_data(direc, names=['train', 'test', 'valid'], split=[0.8, 0.1, 0.1], version=1, numvocab=4310, use_stop=True, min_thresh=0, max_thresh=0):
+    try:
+        os.makedirs(direc)
+    except:
+        pass
+
+    datasets = get_split_data(version=version, split=split, numvocab=numvocab, use_stop=use_stop, min_thresh=min_thresh, max_thresh=max_thresh)
     with open(os.path.join(direc, 'X_colnames.txt'), 'w') as file:
-        file.writelines(datasets[0].vocabList)
+        file.write('\n'.join(datasets[0].vocabList) + '\n')
     with open(os.path.join(direc, 'Y_colnames.txt'), 'w') as file:
         file.write('bow_pang_verision_' + str(version))
 
@@ -264,7 +275,7 @@ if __name__ == '__main__':
     train_v2.to_npz('train_v2.npz')
     test_v2.to_npz('test_v2.npz')
 
-    train_regress, test_regress = get_train_test_data(version='regress', numvocab=4310, split=0.7, use_stop=True)
+    train_regress, test_regress = get_train_test_data(version='regress', numvocab=4310, split=0.7, use_stop=True, min_thresh=5, max_thresh=0.75)
     train_regress.to_npz('train_regress.npz')
     test_regress.to_npz('test_regress.npz')
 

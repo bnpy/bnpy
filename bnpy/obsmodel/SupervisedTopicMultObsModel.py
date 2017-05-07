@@ -106,6 +106,12 @@ class SupervisedTopicMultObsModel(MultObsModel):
             LP.update(RegressY.calcLocalParams(Data, Prior=self.Prior))
         return LP
 
+    def setPostFactors(self, w_m=None, **kwargs):
+        ''' Set attribute Post to provided values.
+        '''
+        super(SupervisedTopicMultObsModel, self).calcSummaryStats(**kwargs)
+        if w_m is not None:
+            self.Post.setField('w_m', w_m, dims=('K'))
 
     def updatePost(self, SS):
         ''' Update attribute Post for all comps given suff stats.

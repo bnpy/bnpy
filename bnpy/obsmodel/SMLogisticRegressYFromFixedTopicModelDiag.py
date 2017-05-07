@@ -338,6 +338,9 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
         eta = eta_update(m_post, 1.0 / Sinv_post, X)
         eta_ss = calc_eta_ss(eta)
 
+        if Data.nDoc != Data.nDocTotal:
+            break
+
         m_ss = calc_m_ss(X, Y)
         sinv_ss = calc_sinv_ss(eta, X)
         
