@@ -59,7 +59,7 @@ class RespOptimizerTheano:
         resp_outer = T.outer(sumN, sumN)
         resp_outer_adj = T.nlinalg.alloc_diag(sumN - T.sum(self.w_c * resp ** 2, axis=0))
         resp_outer = resp_outer + resp_outer_adj
-        term2 =  (lam / (self.Nd ** 2)) * T.sum(self.E_outer * resp_outer)
+        term2 =  -(lam / (self.Nd ** 2)) * T.sum(self.E_outer * resp_outer)
 
         #P(z|pi) term
         term3 = T.sum(self.Epi * sumN)
@@ -181,10 +181,11 @@ def updateLPWithResp_Supervised(LP, Data, Lik, Prior, alphaEbeta, alphaEbetaRem,
                 mean = np.ones(K) * mean.reshape((-1,))[0]
                 var = np.ones(K) * var.reshape((-1,))[0]
 
+            resp = LP['resp'][start:stop]
+            resp *= np.exp(((Yd - 0.5) / Nd) * mean.reshape((1, -1))) #Adjustment for labels in closed form update (TODO: check!)
+
             #Iterate between updating z and pi
             for i in xrange(nCoordAscentItersLP):
-                resp = LP['resp'][start:stop]
-                resp *= np.exp(((Yd - 0.5) / Nd) * mean.reshape((1, -1))) #Adjustment for labels in closed form update (TODO: check!)
                 resp = resp / np.sum(resp, axis=1).reshape((-1, 1))
 
                 Epi = LP['DocTopicCount'][d, :] + alphaEbeta   #This should be more correct, but leads to decreasing ELBO, so... idk wtf
@@ -193,10 +194,7 @@ def updateLPWithResp_Supervised(LP, Data, Lik, Prior, alphaEbeta, alphaEbetaRem,
                 #Run gradient descent for document
                 LP['resp'][start:stop] = Optimizer.optimize(resp, Nd, Epi, Yd, mean, var, w_c_loc, lLik)
                 LP['DocTopicCount'][d, :] = (LP['resp'][start:stop] * w_c_loc.reshape((-1, 1))).sum(axis=0)
-
-                DocTopicProb_d = LP['DocTopicCount'][d, :] + alphaEbeta
-                DocTopicProb_d = digamma(DocTopicProb_d)
-                Epi = np.exp(DocTopicProb_d)
+                resp = LP['resp'][start:stop]
 
     
     np.maximum(LP['resp'], 1e-300, out=LP['resp'])
