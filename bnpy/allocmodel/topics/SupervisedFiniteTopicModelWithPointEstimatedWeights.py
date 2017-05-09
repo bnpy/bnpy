@@ -66,9 +66,10 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
         '''
         return np.ones(self.K) / float(self.K)
 
-    def set_prior(self, alpha=1.0, delta=0.1, **kwargs):
+    def set_prior(self, alpha=1.0, delta=0.1,update_delta=0, **kwargs):
         self.alpha = float(alpha)
         self.delta = float(delta)
+	self.update_delta = int(update_delta)
 
     def to_dict(self):
         return dict(eta=self.eta)
@@ -87,8 +88,8 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
     def get_info_string(self):
         ''' Returns human-readable name of this object
         '''
-        return 'Supervised Finite LDA model with K=%d comps. alpha=%.2f, delta=%.2f' \
-            % (self.K, self.alpha, self.delta)
+        return 'Supervised Finite LDA model with K=%d comps. alpha=%.2f, delta=%.2f, update delta?=%d' \
+            % (self.K, self.alpha, self.delta, self.update_delta)
 
     def calc_local_params(self, Data, LP, **kwargs):
         ''' Compute local parameters for each data item.
@@ -113,7 +114,7 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
                 Defines approximate posterior on doc-topic weights.
                 q(\pi_d) = Dirichlet(theta[d,0], ... theta[d, K-1])
         '''
-        print self.eta
+	#print self.eta
         LP = calcLocalParams(
             Data, LP, eta=self.eta, alpha=self.alpha, delta=self.delta, **kwargs)
         assert 'resp' in LP
@@ -215,9 +216,13 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
     def update_global_params(self, SS, rho=None, **kwargs):
         ''' Update global parameters to optimize the ELBO objective.
         '''
-        self.eta = update_global_params(
+	if not self.update_delta:
+		self.eta = update_global_params(
             SS.resp, SS.response, SS.doc_range, SS.word_count)
-        self.K = SS.K
+	else:
+		self.eta, self.delta = update_global_params(
+			SS.resp, SS.response, SS.doc_range, SS.word_count)
+	self.K = SS.K
 
     def set_global_params(self, K=0, eta=None, **kwargs):
         """ Set global parameters to provided values.
@@ -541,6 +546,48 @@ def update_global_params(resp, response, doc_range, word_count):
     eta_update = np.dot(eta_update,response)
 
     return eta_update
+
+def update_global_params2(resp, response, doc_range, word_count):
+    _, K = resp.shape
+    if response is None:
+        return np.zeros(K)
+
+    nDoc = response.shape[0]
+
+    # Update eta (response weights per topic)
+    EX = np.zeros((nDoc,K)) # E[X], X[d] = \bar{Z}_d, D X K
+    EXTX = np.zeros((K,K)) #E[X^T X], KxK
+
+    for d in xrange(nDoc):
+        start = int(doc_range[d])
+        stop = int(doc_range[d+1] )
+        wc_d = word_count[start:stop]
+
+        N_d = int(sum(wc_d))
+
+        resp_d = resp[start:stop,:]
+        nTokens_d,_ = resp_d.shape
+
+        weighted_resp_d = wc_d[:,None] * resp_d
+        EX[d,:] = (1 / float(N_d)) * np.sum(weighted_resp_d,axis=0)
+
+
+        EXTX += calc_EZTZ_one_doc(wc_d,resp_d)
+
+
+    EXTXinv = inv(EXTX)
+
+    # Update eta
+    eta_update = np.dot(EXTXinv,EX.transpose())
+    eta_update = np.dot(eta_update,response)
+
+    # Update delta
+    yEX = np.dot(response,EX)
+    delta_update = np.dot(yEX,eta_update)
+    delta_update = np.inner(response,response) - delta_update
+    delta_update = delta_update / np.float(nDoc)
+
+    return eta_update, delta_update
 
 
 
