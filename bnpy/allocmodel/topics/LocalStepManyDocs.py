@@ -17,7 +17,7 @@ from bnpy.util.lib.sparseResp.LibSparseResp \
 from bnpy.util.lib.sparseResp.LibLocalStepManyDocs \
     import sparseLocalStep_WordCountData
 
-from LocalStepSupervised import updateLPWithResp_Supervised
+from LocalStepSupervised import calcLocalParamsSupervised_SingleDoc
 
 def calcLocalParams(
         Data, LP,
@@ -54,15 +54,6 @@ def calcLocalParams(
         obsModelName = 'Gauss'
     # Unpack the problem size
     N, K = LP['E_log_soft_ev'].shape
-
-    #Supervised Modifications
-    nCoordAscentItersLP = kwargs['nCoordAscentItersLP'] if 'nCoordAscentItersLP' in kwargs else 1
-    SUPERVISED = 'supervised' in LP and LP['supervised']
-    sLik = None
-    if SUPERVISED:
-        #Make sure to only do 1 iteration of updating Theta before supervised step
-        kwargs['nCoordAscentItersLP'] = 1
-        sLik = LP['E_log_soft_ev'].copy()
 
     # Prepare the initial DocTopicCount matrix,
     # Useful for warm starts of the local step.
@@ -113,6 +104,10 @@ def calcLocalParams(
         AggInfo['nRestartsAccepted'] = None
         AggInfo['nRestartsTried'] = None
 
+    SUPERVISED = 'supervised' in LP and LP['supervised']
+    if SUPERVISED:
+        LP['resp'] = np.zeros(Lik.shape)
+
     for d in xrange(nDoc):
         start = Data.doc_range[cslice[0] + d]
         stop = Data.doc_range[cslice[0] + d + 1]
@@ -140,7 +135,19 @@ def calcLocalParams(
                 #tstart = time.time()
                 DocTopicCount[d, :] = wc_d * init_spR[Data.word_id[start:stop]]
                 #telapsed += time.time() - tstart
-        if not DO_DENSE:
+    
+        if SUPERVISED:
+            Lik_d = Lik[lstart:lstop].copy()  # Local copy
+            (DocTopicCount[d], DocTopicProb[d], 
+                LP['resp'][lstart:lstop, :], Info_d) \
+                = calcLocalParamsSupervised_SingleDoc(
+                    wc_d, Lik_d, alphaEbeta, alphaEbetaRem,
+                    DocTopicCount_d=initDTC_d,
+                    initDocTopicCountLP=initDocTopicCountLP,
+                    w_m=LP['w_m'], w_var=LP['w_var'], y=Data.Y[d],
+                    **kwargs)
+            AggInfo = updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data)
+        elif not DO_DENSE:
             m_start = nnzPerRowLP * start
             m_stop = nnzPerRowLP * stop
             
@@ -170,28 +177,18 @@ def calcLocalParams(
                     initDocTopicCountLP=initDocTopicCountLP,
                     **kwargs)
             AggInfo = updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data)
-    #if initDocTopicCountLP.startswith('fast'):
-    #    AggInfo['time_extra'] = telapsed
+
     LP['DocTopicCount'] = DocTopicCount
     if hasattr(Data, 'word_count'):
         if cslice is None or (cslice[0] == 0 and cslice[1] is None):
             assert np.allclose(np.sum(DocTopicCount), np.sum(Data.word_count))
     LP = updateLPGivenDocTopicCount(LP, DocTopicCount,
                                     alphaEbeta, alphaEbetaRem)
-    if DO_DENSE:
+    if DO_DENSE and not SUPERVISED:
         LP = updateLPWithResp(
             LP, Data, Lik, DocTopicProb, sumRespTilde, cslice,
             nnzPerRowLP=nnzPerRowLP,
             doSparseOnlyAtFinalLP=doSparseOnlyAtFinalLP)
-    if SUPERVISED:
-        LP['E_log_soft_ev'] = sLik
-        LP = updateLPWithResp_Supervised(
-            LP, Data, Lik, DocTopicProb, alphaEbeta, alphaEbetaRem, 
-            sumRespTilde, cslice,
-            nCoordAscentItersLP) #Check that the correct prior arg is passed
-        DocTopicCount = LP['DocTopicCount']
-        LP = updateLPGivenDocTopicCount(LP, DocTopicCount,
-                                    alphaEbeta, alphaEbetaRem)
     if not DO_DENSE:
         indptr = np.arange(
             0, (N+1) * nnzPerRowLP, nnzPerRowLP, dtype=np.int32)

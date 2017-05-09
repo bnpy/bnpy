@@ -1,202 +1,163 @@
-import numpy as np
-import copy
-import time, sys, random
-
 from scipy.special import digamma, gammaln
-import scipy.sparse
+import numpy as np
+import warnings
 
-import LocalStepLogger
-from bnpy.util import NumericUtil
-
-try:
-    import theano.tensor as T
-    from theano import function
-except:
-    pass
-
-from scipy.optimize import fmin_l_bfgs_b
-
-def calcNumDocFromSlice(Data, cslice):
-    if cslice[1] is None:
-        nDoc = Data.nDoc
+def eta_update(m, S, X):
+    if m.size == S.size:
+        eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
     else:
-        nDoc = cslice[1] - cslice[0]
-    return int(nDoc)
+        eta2 = (X * np.dot(X, S)).sum(axis=1) + (np.dot(X, m) ** 2)
+    return np.sqrt(eta2)
+
+def lam(eta):
+    return np.tanh(eta / 2.0) / (4.0 * eta)
+
+def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
+    K = Lik_d.shape[1]
+    
+    #Ensure that the mean and cov are the right size
+    w_m, w_var = np.asarray(w_m), np.asarray(w_var)
+
+    w_m_t = np.zeros(K)
+    w_m_t[:w_m.size] = w_m.flatten()[:K]
+    w_m = w_m_t
+
+    if len(w_var.shape) <= 1:
+        w_var_t = np.ones(K)
+        w_var_t[:w_var.size] = w_var.flatten()[:K]
+        w_var = w_var_t
+    else:
+        w_var_t = np.eye(K)
+        w_var_t[:w_var.shape[0], :w_var.shape[1]] = w_var[:K, :K]
+        w_var = w_var_t
 
 
-class RespOptimizerTheano:
-    def __init__(self):
-        self.resp = T.dmatrix('resp')
-        self.Nd = T.dscalar('Nd')
-        self.Epi = T.dvector('Epi')
-        self.Yd = T.dscalar('Yd')
-        self.mean = T.dvector('mean')
-        self.var = T.dvector('var')
-        self.E_outer = T.dmatrix('E_outer')
-        self.w_c = T.dcol('w_c')
-        self.Lik = T.dmatrix('Lik')
+    nTok = wc_d.shape[0]
+    Nd = np.sum(wc_d)
+    Nd_2 = Nd ** 2
 
-        #Setup the "observation"
-        #resp = T.exp(self.resp)
-        #resp = self.resp ** 2
-        #resp = self.resp
-        #resp = T.log(T.exp(self.resp) + 1)
-        resp = T.sqrt(self.resp ** 2 + 1) - 1
+    #Term constant for each token
+    cTerm = E_pi * np.exp(((y - 0.5) / Nd) * w_m)
 
-        resp = resp / T.sum(resp, axis=1, keepdims=True) + 1e-300
-        sumN = T.sum(self.w_c * resp, axis=0)
-        X = sumN / self.Nd
+    #Responsibilities before iterative adjustments
+    resp = Lik_d * cTerm
+    resp = resp / np.sum(resp, axis=1)[:, np.newaxis]
 
-        #Compute the eta update and lambda from eta
-        eta2 = T.sum((X ** 2) * self.var) + T.sum(X * self.mean) ** 2
-        eta = T.sqrt(eta2)
-        lam = T.tanh(eta / 2.0) / (4.0 * eta)
+    #Initial covariates for regression
+    #(equivalent to docTopicCounts)
+    Zbar = np.dot(wc_d.reshape((1,-1)), resp) 
 
-        #Terms from the regression model
-        #term1 = (1.0 / (2 * self.Nd)) * T.sum(sumN * (self.Yd * self.mean))
-        term1 = ((self.Yd - 0.5) / self.Nd) * T.sum(sumN * self.mean)
-        
-        resp_outer = T.outer(sumN, sumN)
-        resp_outer_adj = T.nlinalg.alloc_diag(sumN - T.sum(self.w_c * resp ** 2, axis=0))
-        resp_outer = resp_outer + resp_outer_adj
-        term2 =  -(lam / (self.Nd ** 2)) * T.sum(self.E_outer * resp_outer)
+    #Expectation: E[ww^T]
+    E_outer = np.outer(w_m, w_m) + w_var
+    E_diag = np.diag(E_outer)
 
-        #P(z|pi) term
-        term3 = T.sum(self.Epi * sumN)
+    #Run coordinate ascent
+    for i in xrange(nTok):
+        #Update logistic approximation
+        l = lam(eta_update(w_m, w_var, Zbar))
 
-        #Entropy Term
-        term4 = -T.sum(resp * T.log(resp) * self.w_c)
+        #Subtract current token from Zbar
+        Zbar -= wc_d[i] * resp[i, :]
 
-        #Mixture likelihood term
-        term5 = T.sum((self.w_c * resp) * self.Lik)
+        #Compute the update to the resp for token i
+        update = 2 * np.dot(Zbar.reshape(1,-1), E_outer) + E_diag
+        resp[i, :] *= np.exp( -(l / Nd_2) * update.flatten() )
 
-        obj = -(1 * (term1 + term2) + term3 + term4 + term5)
-        grad = T.grad(obj, self.resp)
+        #Normalize
+        resp[i, :] = resp[i,:] / np.sum(resp[i,:])
 
-        self.obj_T = function([self.resp, self.Nd, self.Epi, self.Yd, self.mean, self.var, self.E_outer, self.w_c, self.Lik], obj, on_unused_input='ignore')
-        self.grad_T = function([self.resp, self.Nd, self.Epi, self.Yd, self.mean, self.var, self.E_outer, self.w_c, self.Lik], grad, on_unused_input='ignore')
-        
-    def obj(self, resp, Nd, Epi, Yd, mean, var, E_outer, w_c, Lik):
-        resp = resp.reshape((-1, mean.shape[0]))
-        val = self.obj_T(resp, Nd, Epi, Yd, mean, var, E_outer, w_c, Lik)
-        return val
+        #Update Zbar with the new resp
+        Zbar += wc_d[i] * resp[i, :]
 
-    def grad(self, resp, Nd, Epi, Yd, mean, var, E_outer, w_c, Lik):
-        resp = resp.reshape((-1, mean.shape[0]))
-        val = self.grad_T(resp, Nd, Epi, Yd, mean, var, E_outer, w_c, Lik)
-        return val.flatten()
+    return np.maximum(resp, 1e-300), Zbar
 
-    def optimize(self, resp, Nd, Epi, Yd, mean, var, w_c, Lik):
-        E_outer = np.outer(mean, mean)
-        np.fill_diagonal(E_outer, mean ** 2 + var)
 
-        rshape = resp.shape
-        resp = resp.flatten()
-
-        #resp = np.log(resp)
-        #resp = np.sqrt(resp)
-        #resp = np.log(np.exp(resp) - 0.99)
-        resp = np.sqrt((resp + 1) ** 2 - 1)
-
-        obj1 = self.obj(resp, Nd, Epi, Yd, mean, var, E_outer, w_c, Lik)
-        result = fmin_l_bfgs_b(self.obj, resp, fprime=self.grad, 
-                  args=(Nd, Epi, Yd, mean, var, E_outer, w_c, Lik))
-        resp = result[0].reshape(rshape)        
-        obj2 = self.obj(resp, Nd, Epi, Yd, mean, var, E_outer, w_c, Lik)
-
-        if obj2 > obj1:
-            print 'Objective decreased! Start:', obj1, 'end:', obj2
-
-        #print 'Optimization!', obj1, obj2
-        if not np.isfinite(obj2):
-            print resp 
-            raise
-
-        #resp = np.exp(resp)  
-        #resp = resp ** 2
-        #resp = np.log(np.exp(resp) + 1) 
-        resp = np.sqrt(resp ** 2 + 1) - 1 
-
-        resp = resp / resp.sum(axis=1).reshape((-1,1))
-        return resp
-
-try:
-    Optimizer = RespOptimizerTheano()
-except:
-    pass
-
-def updateLPWithResp_Supervised(LP, Data, Lik, Prior, alphaEbeta, alphaEbetaRem, sumRespTilde, cslice=(0, None), nCoordAscentItersLP=1):
-    ''' Compute assignment responsibilities given output of local step.
+def calcLocalParamsSupervised_SingleDoc(
+        wc_d, Lik_d, alphaEbeta, alphaEbetaRem=None,
+        DocTopicCount_d=None, sumResp_d=None,
+        nCoordAscentItersLP=10, convThrLP=0.001,
+        restartLP=0,
+        initDocTopicCountLP='setDocProbsToEGlobalProbs',
+        w_m=None, w_var=None, y=0.0,
+        **kwargs):
+    ''' Infer local parameters for a single document.
 
     Args
-    ----
-    LP : dict
-        Has other fields like 'E_log_soft_ev'
-    Data : DataObj 
-    Lik : 2D array, size N x K
-        Will be overwritten and turned into resp.
+    --------
+    wc_d : scalar or 1D array, size N
+        word counts for document d
+    Lik_d : 2D array, size N x K
+        Likelihood values for each token n and topic k.
+    alphaEbeta : 1D array, size K
+        Scalar prior parameter for each active topic, under the prior.
+    alphaEbetaRem : None or scalar
+        Scalar prior parameter for all inactive topics, aggregated.
+        Used only for ELBO calculation, not any update equations.
+
+    Kwargs
+    --------
+    nCoordAscentItersLP : int
+        Number of local step iterations to do for this document.
+    convThrLP : float
+        Threshold for convergence to halt iterations early.
+    restartLP : int
+        If 0, do not perform sparse restarts.
+        If 1, perform sparse restarts.
 
     Returns
-    -------
-    LP : dict
-        Add field 'resp' : N x K 2D array.
+    --------
+    DocTopicCount_d : 1D array, size K
+    DocTopicProb_d : 1D array, size K
+        Updated probability vector for active topics in this doc.
+        Known up to a multiplicative constant.
+    sumResp_d : 1D array, size N_d
+        sumResp_d[n] is normalization constant for token n.
+        That is, resp[n, :] / sumResp_d[n] will sum to one, when
+        resp[n,k] is computed from DocTopicCount_d and Lik_d.
+    Info : dict
+        Contains info about convergence, sparse restarts, etc.
     '''
 
-    LP['resp'] = Lik.copy()
-    w_c = np.ones(Lik.shape[0])
-    if hasattr(Data, 'word_count'):
-        w_c = Data.word_count
+    if sumResp_d is None:
+        sumResp_d = np.zeros(Lik_d.shape[0])
 
-    nDoc = calcNumDocFromSlice(Data, cslice)
-    slice_start = Data.doc_range[cslice[0]]
-    N = LP['resp'].shape[0]
-    K = LP['resp'].shape[1]
-    if N > Data.doc_range[-1]:
-        assert False
-    else:
-        for d in xrange(nDoc):
-            start = Data.doc_range[cslice[0] + d] - slice_start
-            stop = Data.doc_range[cslice[0] + d + 1] - slice_start
-            
-            #Initialize using update without regression
-            LP['resp'][start:stop] *= Prior[d]
-
-            #If we don't have labels, skip the optimization
-            if not hasattr(Data, 'Y') or Data.Y is None:
-                LP['resp'][start:stop] = LP['resp'][start:stop] / np.sum(LP['resp'][start:stop], axis=1).reshape((-1, 1))
-                continue
-            
-            #Setup optimization parameters
-            Yd = Data.Y[d]
-            Nd = np.sum(w_c[start:stop])
-
-            Epi = Prior[d]
-
-            lLik = LP['E_log_soft_ev'][start:stop]
-            mean = np.asarray(LP['w_m'])
-            var = np.asarray(LP['w_var'])
-            w_c_loc = w_c[start:stop].reshape((-1, 1))
-
-            if len(mean.shape) == 0 or mean.shape[0] < K:
-                mean = np.ones(K) * mean.reshape((-1,))[0]
-                var = np.ones(K) * var.reshape((-1,))[0]
-
-            resp = LP['resp'][start:stop]
-            resp *= np.exp(((Yd - 0.5) / Nd) * mean.reshape((1, -1))) #Adjustment for labels in closed form update (TODO: check!)
-
-            #Iterate between updating z and pi
-            for i in xrange(nCoordAscentItersLP):
-                resp = resp / np.sum(resp, axis=1).reshape((-1, 1))
-
-                Epi = LP['DocTopicCount'][d, :] + alphaEbeta   #This should be more correct, but leads to decreasing ELBO, so... idk wtf
-                Epi = digamma(Epi) - digamma(np.sum(Epi))
-
-                #Run gradient descent for document
-                LP['resp'][start:stop] = Optimizer.optimize(resp, Nd, Epi, Yd, mean, var, w_c_loc, lLik)
-                LP['DocTopicCount'][d, :] = (LP['resp'][start:stop] * w_c_loc.reshape((-1, 1))).sum(axis=0)
-                resp = LP['resp'][start:stop]
-
+    # Initialize prior from global topic probs
+    if DocTopicCount_d is None:
+        DocTopicCount_d = np.zeros_like(alphaEbeta)
     
-    np.maximum(LP['resp'], 1e-300, out=LP['resp'])
-    return LP
+    if initDocTopicCountLP.count('setDocProbsToEGlobalProbs'):
+        # Here, we initialize pi_d to alphaEbeta
+        DocTopicProb_d = alphaEbeta.copy()
+        # Update sumResp for all tokens in document
+        np.dot(Lik_d, DocTopicProb_d, out=sumResp_d)
+        # Update DocTopicCounts
+        np.dot(wc_d / sumResp_d, Lik_d, out=DocTopicCount_d)
+        DocTopicCount_d *= DocTopicProb_d
+    else:
+        # Set E[pi_d] to exp E log[ alphaEbeta ] 
+        DocTopicProb_d = np.zeros_like(alphaEbeta)
 
+    prevDocTopicCount_d = DocTopicCount_d.copy()
+    for iter in xrange(nCoordAscentItersLP):
+        # Update Prob of Active Topics
+        # First, in logspace, so Prob_d[k] = E[ log pi_dk ] + const
+        np.add(DocTopicCount_d, alphaEbeta, out=DocTopicProb_d)
+        digamma(DocTopicProb_d, out=DocTopicProb_d)
+        # TODO: subtract max for safe exp? doesnt seem necessary...
+
+        # Convert: Prob_d[k] = exp E[ log pi_dk ] / const
+        np.exp(DocTopicProb_d, out=DocTopicProb_d)
+
+        #Update the responsibilities and totals
+        Resp_d, DocTopicCount_d = calcResp(DocTopicProb_d, Lik_d, w_m, w_var, y, wc_d)
+
+        # Check for convergence
+        if iter % 5 == 0:
+            maxDiff = np.max(np.abs(DocTopicCount_d - prevDocTopicCount_d))
+            if maxDiff < convThrLP:
+                break
+        prevDocTopicCount_d[:] = DocTopicCount_d
+
+    Info = dict(maxDiff=maxDiff, iter=iter)
+
+    return DocTopicCount_d, DocTopicProb_d, Resp_d, Info
