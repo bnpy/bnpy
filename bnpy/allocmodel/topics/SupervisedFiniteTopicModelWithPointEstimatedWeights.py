@@ -67,24 +67,27 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
         return np.ones(self.K) / float(self.K)
 
     def set_prior(self, alpha=1.0, delta=0.1,update_delta=0, **kwargs):
-        self.alpha = float(alpha)
-        self.delta = float(delta)
+		self.alpha = float(alpha)
+		self.delta = float(delta)
 		self.update_delta = int(update_delta)
 
     def to_dict(self):
-        return dict(eta=self.eta,delta=self.delta)
+        return dict(eta=self.eta,delta=self.delta,update_delta=self.update_delta)
 
     def from_dict(self, Dict):
         self.inferType = Dict['inferType']
         self.K = Dict['K']
         self.eta = Dict['eta']
+        self.delta = Dict['delta']
+        self.update_delta = Dict['update_delta']
 
     def get_prior_dict(self):
         return dict(alpha=self.alpha,
                     K=self.K,
                     inferType=self.inferType,
                     eta=self.eta,
-                    delta=self.delta)
+                    delta=self.delta,
+                    update_delta=self.update_delta)
 
     def get_info_string(self):
         ''' Returns human-readable name of this object
@@ -217,13 +220,13 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
     def update_global_params(self, SS, rho=None, **kwargs):
         ''' Update global parameters to optimize the ELBO objective.
         '''
-	if not self.update_delta:
-		self.eta = update_global_params(
-            SS.resp, SS.response, SS.doc_range, SS.word_count)
-	else:
-		self.eta, self.delta = update_global_params(
-			SS.resp, SS.response, SS.doc_range, SS.word_count)
-	self.K = SS.K
+		if not self.update_delta:
+			self.eta = update_global_params(
+				SS.resp, SS.response, SS.doc_range, SS.word_count)
+		else:
+			self.eta, self.delta = update_global_params(
+				SS.resp, SS.response, SS.doc_range, SS.word_count)
+		self.K = SS.K
 
     def set_global_params(self, K=0, eta=None, **kwargs):
         """ Set global parameters to provided values.
