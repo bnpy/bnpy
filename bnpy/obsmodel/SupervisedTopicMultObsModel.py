@@ -84,8 +84,7 @@ class SupervisedTopicMultObsModel(MultObsModel):
     
         if hasattr(self.Post, 'w_m'):
             Ypred = predictYFromLP(Data, LP, self.Post)
-            Ypredb = predictYFromLP_Bound(Data, LP, self.Post)
-
+            
             print 'Checking accuracy:'
             print '\tCurrent acc:', np.sum((np.round(Ypred) == Data.Y).astype(float)) / Ypred.shape[0]
             print '\tCurrent mse:', np.sum((Ypred - Data.Y) ** 2) / Ypred.shape[0]
