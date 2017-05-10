@@ -210,16 +210,6 @@ def checkWPost(w_m, w_var, K):
 
     return w_m, w_var
 
-#def cdcomp(A):      
-#    return cho_factor(A, lower=False, check_finite=False)[0]   
-#
-#def csolve(A, b, A_dcomp=False):        
-#    if A_dcomp:     
-#        return cho_solve((A, False), b, check_finite=False)     
-#    return cho_solve(cho_factor(A, check_finite=False), b, check_finite=False)      
-#def cinv(A, A_dcomp=False):     
-#    return csolve(A, np.eye(A.shape[0]), A_dcomp)
-
 def lam(eta):
     return np.tanh(eta / 2.0) / (4.0 * eta)
 
@@ -243,16 +233,6 @@ def eta_update(m, S, X):
     else:
         eta2 = (X * np.dot(X, S)).sum(axis=1) + (np.dot(X, m) ** 2)
     return np.sqrt(eta2)
-
-#def eta_update(m, S, X):
-#    m, S = np.asarray(m).reshape((-1,)), np.asarray(S).reshape((-1,))
-#    if m.shape[0] < X.shape[1]:
-#        m = np.ones(X.shape[1]) * m[0]
-#    if S.shape[0] < X.shape[1]:
-#        S = np.ones(X.shape[1]) * S[0]
-#
-#    eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
-#    return np.sqrt(eta2)
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))

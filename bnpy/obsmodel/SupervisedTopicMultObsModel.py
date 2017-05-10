@@ -84,8 +84,11 @@ class SupervisedTopicMultObsModel(MultObsModel):
     
         if hasattr(self.Post, 'w_m'):
             Ypred = predictYFromLP(Data, LP, self.Post)
-            print 'Current acc:', np.sum((np.round(Ypred) == Data.Y).astype(float)) / Ypred.shape[0]
-            print 'Current mse:', np.sum((Ypred - Data.Y) ** 2) / Ypred.shape[0]
+            Ypredb = predictYFromLP_Bound(Data, LP, self.Post)
+
+            print 'Checking accuracy:'
+            print '\tCurrent acc:', np.sum((np.round(Ypred) == Data.Y).astype(float)) / Ypred.shape[0]
+            print '\tCurrent mse:', np.sum((Ypred - Data.Y) ** 2) / Ypred.shape[0]
         return SS
 
     def calc_local_params(self, Data, LP=None, **kwargs):
@@ -162,6 +165,7 @@ class SupervisedTopicMultObsModel(MultObsModel):
         '''
         assert False
 
+
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
@@ -169,9 +173,50 @@ def predictYFromLP(Data, LP, Post, **kwargs):
     nDoc = Data.nDoc
     Y = np.zeros(nDoc)
     for d in xrange(nDoc):
-    	x = LP['DocTopicCount'][d,:]
-    	x = x / np.sum(x)
-    	Y[d] = sigmoid(np.dot(x, Post.w_m))
+        x = LP['DocTopicCount'][d,:]
+        x = x / np.sum(x)
+        Y[d] = sigmoid(np.dot(x, Post.w_m))
+    return Y
+
+def lam(eta):
+    return np.tanh(eta / 2.0) / (4.0 * eta)
+
+def log_g(x):
+    return -np.log(1.0 + np.exp(-x))
+
+def predictYFromLP_Bound(Data, LP, Post, **kwargs):
+    nDoc = Data.nDoc
+    Y = np.zeros(nDoc)
+
+    Sinv, S, w_m = Post.Sinv, Post.S, Post.w_m
+    if Sinv.size == w_m.size:
+        Sinv = np.diag(Sinv.flatten())
+        S = np.diag(S.flatten())
+    
+    Sinv_mu = np.dot(Sinv, w_m)
+    mu_Sinv_mu = np.dot(Sinv_mu, w_m)
+    for d in xrange(nDoc):
+    	X = LP['DocTopicCount'][d,:]
+    	X = X / np.sum(X)
+
+        eta_t_2 = (X * np.dot(X, S)).sum() + (np.dot(X, w_m) ** 2)
+        eta_t = np.sqrt(eta_t_2)
+
+        Sinv_t = Sinv + 2 * lam(eta_t) * np.outer(X, X)
+        mu_t_0 = np.linalg.solve(Sinv_t, Sinv_mu - 0.5 * X)
+        mu_t_1 = np.linalg.solve(Sinv_t, Sinv_mu + 0.5 * X)
+
+        common = log_g(eta_t) - eta_t / 2.0 + lam(eta_t) * eta_t_2 - \
+            0.5 * mu_Sinv_mu - 0.5 * np.linalg.slogdet(S)[1] - 0.5 * np.linalg.slogdet(Sinv_t)[1]
+        y_adj_0 = 0.5 * np.dot(np.dot(Sinv_t, mu_t_0), mu_t_0)
+        y_adj_1 = 0.5 * np.dot(np.dot(Sinv_t, mu_t_1), mu_t_1)
+
+        p_y_0 = common + y_adj_0
+        p_y_1 = common + y_adj_1
+
+        #TODO: This is reveresed for some reason, check the math
+        Y[d] = p_y_0 / (p_y_0 + p_y_1)
+
     return Y
 
 

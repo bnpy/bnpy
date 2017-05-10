@@ -10,6 +10,7 @@ except:
     warnings.warn('Unable to import cython module for sLDA/sHDP model')
     USE_CYTHON = False
 
+#TODO: These functions appear in multiple places and should maybe be factored out
 def eta_update(m, S, X):
     if m.size == S.size:
         eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
@@ -81,7 +82,7 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
     E_outer = np.outer(w_m, w_m) + w_var
 
     #Update logistic approximation
-    #(Consider doing this inside the inner loop)
+    #(TODO: Consider doing this inside the inner loop)
     l = lam(eta_update(w_m, w_var, Zbar))
 
     #Run coordinate ascent loop
