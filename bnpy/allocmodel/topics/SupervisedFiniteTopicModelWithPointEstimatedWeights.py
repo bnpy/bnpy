@@ -69,10 +69,10 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
     def set_prior(self, alpha=1.0, delta=0.1,update_delta=0, **kwargs):
         self.alpha = float(alpha)
         self.delta = float(delta)
-	self.update_delta = int(update_delta)
+		self.update_delta = int(update_delta)
 
     def to_dict(self):
-        return dict(eta=self.eta)
+        return dict(eta=self.eta,delta=self.delta)
 
     def from_dict(self, Dict):
         self.inferType = Dict['inferType']
@@ -83,12 +83,13 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
         return dict(alpha=self.alpha,
                     K=self.K,
                     inferType=self.inferType,
-                    eta=self.eta)
+                    eta=self.eta,
+                    delta=self.delta)
 
     def get_info_string(self):
         ''' Returns human-readable name of this object
         '''
-        return 'Supervised Finite LDA model with K=%d comps. alpha=%.2f, delta=%.2f, update delta?=%d' \
+        return 'Supervised Finite LDA model with K=%d comps. alpha=%.2f, delta=%.3f, update delta?=%d' \
             % (self.K, self.alpha, self.delta, self.update_delta)
 
     def calc_local_params(self, Data, LP, **kwargs):
@@ -114,7 +115,7 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
                 Defines approximate posterior on doc-topic weights.
                 q(\pi_d) = Dirichlet(theta[d,0], ... theta[d, K-1])
         '''
-	#print self.eta
+		#print self.eta
         LP = calcLocalParams(
             Data, LP, eta=self.eta, alpha=self.alpha, delta=self.delta, **kwargs)
         assert 'resp' in LP
