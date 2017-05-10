@@ -192,7 +192,33 @@ class SMLogisticRegressYFromFixedTopicModelDiag(AbstractObsModel):
 ''' Functions for computing the updates and ELBO terms for the variational 
     logistic regression model.
 '''
+def checkWPost(w_m, w_var, K):
+    w_m, w_var = np.asarray(w_m), np.asarray(w_var)
 
+    w_m_t = np.zeros(K)
+    w_m_t[:w_m.size] = w_m.flatten()[:K]
+    w_m = w_m_t
+
+    if len(w_var.shape) <= 1:
+        w_var_t = np.ones(K)
+        w_var_t[:w_var.size] = w_var.flatten()[:K]
+        w_var = w_var_t
+    else:
+        w_var_t = np.eye(K)
+        w_var_t[:w_var.shape[0], :w_var.shape[1]] = w_var[:K, :K]
+        w_var = w_var_t
+
+    return w_m, w_var
+
+#def cdcomp(A):      
+#    return cho_factor(A, lower=False, check_finite=False)[0]   
+#
+#def csolve(A, b, A_dcomp=False):        
+#    if A_dcomp:     
+#        return cho_solve((A, False), b, check_finite=False)     
+#    return cho_solve(cho_factor(A, check_finite=False), b, check_finite=False)      
+#def cinv(A, A_dcomp=False):     
+#    return csolve(A, np.eye(A.shape[0]), A_dcomp)
 
 def lam(eta):
     return np.tanh(eta / 2.0) / (4.0 * eta)
@@ -200,25 +226,33 @@ def lam(eta):
 def calc_sinv_ss(eta, X):
     return np.dot((lam(eta)) * X.T, X)
 
-def sinv_update(siginv, sinv_ss):
-    return siginv + 2.0 * np.diag(sinv_ss)
+def sinv_update(siginv, sinv_ss, full=False):
+    ss_mat = sinv_ss if full else np.diag(sinv_ss)
+    return siginv + 2.0 * ss_mat
 
 def calc_m_ss(X, y):
     return np.dot(((y - 0.5)), X)
 
-def m_update(m_ss, sinv_ss, mu, siginv):
-    si = np.eye(m_ss.shape[0]) * siginv
-    return np.linalg.solve(si + 2 * sinv_ss, (siginv * mu) + m_ss)
+def m_update(m_ss, sinv, mu, siginv, full=False):
+    si = sinv if full else np.eye(m_ss.shape[0]) * siginv + 2 * sinv
+    return np.linalg.solve(si, (siginv * mu) + m_ss)
 
 def eta_update(m, S, X):
-    m, S = np.asarray(m).reshape((-1,)), np.asarray(S).reshape((-1,))
-    if m.shape[0] < X.shape[1]:
-        m = np.ones(X.shape[1]) * m[0]
-    if S.shape[0] < X.shape[1]:
-        S = np.ones(X.shape[1]) * S[0]
-
-    eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
+    if m.size == S.size:
+        eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
+    else:
+        eta2 = (X * np.dot(X, S)).sum(axis=1) + (np.dot(X, m) ** 2)
     return np.sqrt(eta2)
+
+#def eta_update(m, S, X):
+#    m, S = np.asarray(m).reshape((-1,)), np.asarray(S).reshape((-1,))
+#    if m.shape[0] < X.shape[1]:
+#        m = np.ones(X.shape[1]) * m[0]
+#    if S.shape[0] < X.shape[1]:
+#        S = np.ones(X.shape[1]) * S[0]
+#
+#    eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
+#    return np.sqrt(eta2)
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
@@ -233,19 +267,26 @@ def exp_log_lik_bound_vec(X, y, m, S, eta):
     Xm = np.dot(X, m)
     ellik = log_g(eta) -  0.5 * eta + lam(eta) * (eta ** 2)
     ellik = ellik + (y - 0.5) * Xm
-    ellik = ellik - lam(eta) * (Xm ** 2 + np.dot(X ** 2, S))
+    xSx = np.sum(np.dot(X, S) * X, axis=1) if m.size != S.size else np.dot(X ** 2, S)
+    ellik = ellik - lam(eta) * (Xm ** 2 + xSx)
     return ellik
 
 def exp_log_lik_bound(m_ss, sinv_ss, eta_ss, m, S):
     bound = eta_ss
-    bound = bound + np.dot(m_ss, m) 
-    bound = bound - np.sum(sinv_ss * np.outer(m, m)) - np.dot(np.diag(sinv_ss), S)
+    bound = bound + np.dot(m_ss, m)
+    if m.size != S.size:
+        bound = bound - np.sum(sinv_ss * (np.outer(m, m) + S))
+    else:
+        bound = bound - np.sum(sinv_ss * np.outer(m, m)) - np.dot(np.diag(sinv_ss), S)
     return bound
 
 def exp_log_prior(m, S, siginv, sig):
-    if not hasattr(sig, 'shape'):
+    if not hasattr(sig, 'shape') or sig.size == 1:
         siginv = np.ones(m.shape) * siginv
         sig = np.ones(m.shape) * sig
+
+    if m.size != S.size:
+        S = np.diag(S)
 
     elp = -0.5 * (np.sum(np.log(2 * np.pi * sig)))
     elp = elp - 0.5 * np.sum((m ** 2) * siginv)
@@ -254,7 +295,11 @@ def exp_log_prior(m, S, siginv, sig):
     return elp
 
 def exp_log_entropy(S):
-    return 0.5 * np.sum(np.log((2 * np.pi * np.e * S)))
+    if len(S.shape) == 1 or S.shape[0] != S.shape[1]:
+        return 0.5 * np.sum(np.log((2 * np.pi * np.e * S)))
+    else:
+        return 0.5 * np.linalg.slogdet(2 * np.pi * np.e * S)[1]
+    
     
 #TODO: thid is wrong for nonzero mean w pror
 def elbo(m_ss, sinv_ss, eta_ss, m, S, siginv, sig):
@@ -316,7 +361,7 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
     SS : SuffStatBag object, with K components.
     '''
     #Setup the data from the (normalized) observed token assignments
-    Ndoc = LP['DocTopicCount'].shape[0]
+    K = LP['DocTopicCount'].shape[1]
     X = LP['DocTopicCount']
     X = X / np.sum(X, axis=1).reshape((-1, 1))
 
@@ -327,24 +372,29 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
 
     w_m = Prior.mu if Post is None or not hasattr(Post, 'w_m') else Post.w_m
     S = Prior.sig if Post is None or not hasattr(Post, 'S') else Post.S
+
+    w_m, S = checkWPost(w_m, S, K)
+
     eta = eta_update(w_m, S, X)
     eta_ss = calc_eta_ss(eta)
 
     m_ss = calc_m_ss(X, Y)
     sinv_ss = calc_sinv_ss(eta, X)
 
-    for i in range(20):
-        Sinv_post = sinv_update(Prior.siginv, sinv_ss)
-        m_post = m_update(m_ss, sinv_ss, Prior.mu, Prior.siginv)
-        
-        eta = eta_update(m_post, 1.0 / Sinv_post, X)
-        eta_ss = calc_eta_ss(eta)
+    full = Prior.pfull if Prior is not None else False
 
-        if Data.nDoc != Data.nDocTotal:
-            break
+    if Data.nDoc == Data.nDocTotal:
+    #If not in the soVB/moVB case, run a few updates
+        for i in range(20):
+            Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
+            Sinv_for_m = Sinv_post if full else sinv_ss
+            m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
+            
+            eta = eta_update(m_post, 1.0 / Sinv_post, X)
+            eta_ss = calc_eta_ss(eta)
 
-        m_ss = calc_m_ss(X, Y)
-        sinv_ss = calc_sinv_ss(eta, X)
+            m_ss = calc_m_ss(X, Y)
+            sinv_ss = calc_sinv_ss(eta, X)
         
 
     SS.setField('m_ss', m_ss, dims=('K'))
@@ -379,9 +429,11 @@ def calcPostParamsFromSS(
     K = SS.K
     m_ss = SS.m_ss
     sinv_ss = SS.sinv_ss
+    full = Prior.pfull if Prior is not None else False
 
-    Sinv_post = sinv_update(Prior.siginv, sinv_ss)
-    m_post = m_update(m_ss, sinv_ss, Prior.mu, Prior.siginv)
+    Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
+    Sinv_for_m = Sinv_post if full else sinv_ss
+    m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
 
     if not returnParamBag:
         return m_post, Sinv_post
@@ -441,19 +493,23 @@ def packParamBagForPost(
     Post : ParamBag, with K clusters
     '''
     K = m.shape[0]
-    S = 1.0 / Sinv
+    full = Sinv.size != K 
 
-    m = as1D(m)
-    Sinv = as1D(Sinv)
-    S = as1D(S)
-    
     if Post is None:
         Post = ParamBag(K=K)
     assert Post.K == K
 
+    m = as1D(m)
     Post.setField('w_m', m, dims=('K',))
-    Post.setField('Sinv', Sinv, dims=('K',))
-    Post.setField('S', S, dims=('K',))
+
+    if full:
+        S = np.linalg.inv(Sinv)
+        Post.setField('Sinv', as2D(Sinv), dims=('K', 'K'))
+        Post.setField('S', as2D(S), dims=('K', 'K'))
+    else:
+        S = 1.0 / Sinv
+        Post.setField('Sinv', as1D(Sinv), dims=('K',))
+        Post.setField('S', as1D(S), dims=('K',))
     return Post
 
 def getStringSummaryOfPrior(Prior):
@@ -470,7 +526,7 @@ def createParamBagForPrior(
         Data=None, D=0,
         w_E=0,
         P_EE=None, P_diag_val=1.0,
-        Prior=None,
+        Prior=None, supervised_post_type='diag',
         **kwargs):
     ''' Initialize Prior ParamBag attribute.
 
@@ -495,6 +551,7 @@ def createParamBagForPrior(
     Prior.setField('mu', w_E, dims=None)
     Prior.setField('sig', P_EE, dims=None)
     Prior.setField('siginv', P_EE_inv, dims=None)
+    Prior.setField('pfull', 1 if supervised_post_type == 'full' else 0, dims=None)
 
     return Prior
 
@@ -519,9 +576,12 @@ def calcHardMergeGapForPair(
     sinv_ss = np.delete(SS.sinv_ss, kB)
     sinv_ss[kA] += SS.sinv_ss[kB]
 
-    Sinv_post = sinv_update(Prior.siginv, sinv_ss)
-    s_post = 1.0 / Sinv_post
-    m_post = m_update(Sinv_post, m_ss, Prior.mu, Prior.siginv)
+    full = Prior.pfull if Prior is not None else False
+
+    Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
+    s_post = np.linalg.inv(Sinv_post) if full else 1.0 / Sinv_post
+    Sinv_for_m = Sinv_post if full else sinv_ss
+    m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
 
     mEv = elbo(m_ss, sinv_ss, eta_ss, m_post, s_post, Prior.siginv, Prior.sig)
     Gap = mEv - Ev

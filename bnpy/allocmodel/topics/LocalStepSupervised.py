@@ -2,20 +2,25 @@ from scipy.special import digamma, gammaln
 import numpy as np
 import warnings
 
+USE_CYTHON = True
+try:
+    import pyximport; pyximport.install()
+    from SupervisedHelper import calcRespInner_cython
+except:
+    warnings.warn('Unable to import cython module for sLDA/sHDP model')
+    USE_CYTHON = False
+
 def eta_update(m, S, X):
     if m.size == S.size:
         eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
     else:
-        eta2 = (X * np.dot(X, S)).sum(axis=1) + (np.dot(X, m) ** 2)
+        eta2 = (X * np.dot(X.reshape((1, -1)), S)).sum() + (np.dot(X, m) ** 2)
     return np.sqrt(eta2)
 
 def lam(eta):
     return np.tanh(eta / 2.0) / (4.0 * eta)
 
-def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
-    K = Lik_d.shape[1]
-    
-    #Ensure that the mean and cov are the right size
+def checkWPost(w_m, w_var, K):
     w_m, w_var = np.asarray(w_m), np.asarray(w_var)
 
     w_m_t = np.zeros(K)
@@ -31,8 +36,33 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
         w_var_t[:w_var.shape[0], :w_var.shape[1]] = w_var[:K, :K]
         w_var = w_var_t
 
+    return w_m, w_var
 
-    nTok = wc_d.shape[0]
+def calcRespInner(resp, Zbar, wc_d, E_outer, l_div_Nd_2):
+    nTok = resp.shape[0]
+    E_diag = np.diag(E_outer)
+    for i in xrange(nTok):
+        #Subtract current token from Zbar
+        Zbar -= wc_d[i] * resp[i, :]
+
+        #Compute the update to the resp for token i
+        update = 2 * np.dot(Zbar.reshape(1,-1), E_outer) + E_diag
+        resp[i, :] *= np.exp( -l_div_Nd_2 * update.flatten() )
+
+        #Normalize
+        resp[i, :] = resp[i,:] / np.sum(resp[i,:])
+
+        #Update Zbar with the new resp
+        Zbar += wc_d[i] * resp[i, :]
+
+    return resp, Zbar
+
+def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
+    K = Lik_d.shape[1]
+    
+    #Ensure that the mean and cov are the right size
+    w_m, w_var = checkWPost(w_m, w_var, K)
+
     Nd = np.sum(wc_d)
     Nd_2 = Nd ** 2
 
@@ -45,29 +75,20 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
 
     #Initial covariates for regression
     #(equivalent to docTopicCounts)
-    Zbar = np.dot(wc_d.reshape((1,-1)), resp) 
+    Zbar = np.dot(wc_d.reshape((1,-1)), resp).flatten()
 
     #Expectation: E[ww^T]
     E_outer = np.outer(w_m, w_m) + w_var
-    E_diag = np.diag(E_outer)
 
-    #Run coordinate ascent
-    for i in xrange(nTok):
-        #Update logistic approximation
-        l = lam(eta_update(w_m, w_var, Zbar))
+    #Update logistic approximation
+    #(Consider doing this inside the inner loop)
+    l = lam(eta_update(w_m, w_var, Zbar))
 
-        #Subtract current token from Zbar
-        Zbar -= wc_d[i] * resp[i, :]
-
-        #Compute the update to the resp for token i
-        update = 2 * np.dot(Zbar.reshape(1,-1), E_outer) + E_diag
-        resp[i, :] *= np.exp( -(l / Nd_2) * update.flatten() )
-
-        #Normalize
-        resp[i, :] = resp[i,:] / np.sum(resp[i,:])
-
-        #Update Zbar with the new resp
-        Zbar += wc_d[i] * resp[i, :]
+    #Run coordinate ascent loop
+    if USE_CYTHON:
+        resp, Zbar = calcRespInner_cython(resp, Zbar, wc_d, E_outer, l / Nd_2)
+    else:
+        resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer, l / Nd_2)
 
     return np.maximum(resp, 1e-300), Zbar
 
