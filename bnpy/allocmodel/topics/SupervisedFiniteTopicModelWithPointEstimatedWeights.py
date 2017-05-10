@@ -218,8 +218,8 @@ class SupervisedFiniteTopicModelWithPointEstimatedWeights(AllocModel):
         return SS
 
     def update_global_params(self, SS, rho=None, **kwargs):
-        ''' Update global parameters to optimize the ELBO objective.
-        '''
+		''' Update global parameters to optimize the ELBO objective.
+		'''
 		if not self.update_delta:
 			self.eta = update_global_params(
 				SS.resp, SS.response, SS.doc_range, SS.word_count)
