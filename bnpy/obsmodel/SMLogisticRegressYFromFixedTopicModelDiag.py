@@ -301,7 +301,7 @@ def calcLocalParams(Dslice, Post=None,
         **kwargs):
 
     LP = dict()
-    LP['supervised'] = True
+    LP['supervised'] = hasattr(Dslice, 'Y') and Dslice.Y is not None
 
     if Post is None or not hasattr(Post, 'w_m'):
         LP['w_m'] = Prior.mu 

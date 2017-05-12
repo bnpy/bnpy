@@ -91,6 +91,7 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
     else:
         resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer, l / Nd_2)
 
+    resp, Zbar = np.asarray(resp), np.asarray(Zbar)
     return np.maximum(resp, 1e-300), Zbar
 
 

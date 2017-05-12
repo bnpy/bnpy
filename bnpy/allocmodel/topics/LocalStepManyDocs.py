@@ -139,7 +139,7 @@ def calcLocalParams(
         if SUPERVISED:
             Lik_d = Lik[lstart:lstop].copy()  # Local copy
             (DocTopicCount[d], DocTopicProb[d], 
-                LP['resp'][lstart:lstop, :], Info_d) \
+                LP['resp'][lstart:lstop, :],  Info_d) \
                 = calcLocalParamsSupervised_SingleDoc(
                     wc_d, Lik_d, alphaEbeta, alphaEbetaRem,
                     DocTopicCount_d=initDTC_d,

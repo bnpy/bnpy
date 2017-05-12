@@ -84,10 +84,7 @@ class SupervisedTopicMultObsModel(MultObsModel):
     
         if hasattr(self.Post, 'w_m'):
             Ypred = predictYFromLP(Data, LP, self.Post)
-            
-            print 'Checking accuracy:'
             print '\tCurrent acc:', np.sum((np.round(Ypred) == Data.Y).astype(float)) / Ypred.shape[0]
-            print '\tCurrent mse:', np.sum((Ypred - Data.Y) ** 2) / Ypred.shape[0]
         return SS
 
     def calc_local_params(self, Data, LP=None, **kwargs):
@@ -127,7 +124,7 @@ class SupervisedTopicMultObsModel(MultObsModel):
         super(SupervisedTopicMultObsModel, self).updatePost(SS)
         self.Post = RegressY.calcPostParamsFromSS(SS=SS, Prior=self.Prior, Post=self.Post)
 
-    def calcELBO_Memoized(self, SS, returnVec=0, afterMStep=False, **kwargs):
+    def calcELBO_Memoized(self, SS, returnVec=0, afterGlobalStep=False, **kwargs):
         """ Calculate obsModel's objective using suff stats SS and Post.
 
         Args
@@ -141,9 +138,9 @@ class SupervisedTopicMultObsModel(MultObsModel):
         elbo_K : scalar float
             Equal to E[ log p(x) + log p(phi) - log q(phi)]
         """
-        elbo = super(SupervisedTopicMultObsModel, self).calcELBO_Memoized(SS, returnVec, afterMStep, **kwargs)
-        elbo += RegressY.calcELBOFromSSAndPost(SS, Post=self.Post, Prior=self.Prior, returnVec=returnVec, afterMStep=afterMStep, **kwargs)
-        return elbo
+        elbox = super(SupervisedTopicMultObsModel, self).calcELBO_Memoized(SS, returnVec, afterGlobalStep, **kwargs)
+        elboy = RegressY.calcELBOFromSSAndPost(SS, Post=self.Post, Prior=self.Prior, returnVec=returnVec, afterMStep=afterGlobalStep, **kwargs)
+        return elbox + elboy
 
     def calcHardMergeGap(self, SS, kA, kB):
         ''' Calculate change in ELBO after a hard merge applied to this model
@@ -152,7 +149,9 @@ class SupervisedTopicMultObsModel(MultObsModel):
         ---------
         gap : scalar real, indicates change in ELBO after merge of kA, kB
         '''
-        assert False
+        gapx = super(SupervisedTopicMultObsModel, self).calcHardMergeGap(SS, kA, kB)
+        gapy = RegressY.calcHardMergeGapForPair(SS=SS, Prior=self.Prior, Post=self.Post, kA=kA, kB=kB)
+        return gapx + gapy
 
     def calcHardMergeGap_SpecificPairs(self, SS, PairList):
         ''' Calc change in ELBO for specific list of candidate hard merge pairs
@@ -162,7 +161,24 @@ class SupervisedTopicMultObsModel(MultObsModel):
         Gaps : 1D array, size L
               Gap[j] : scalar change in ELBO after merge of pair in PairList[j]
         '''
-        assert False
+        Gaps = np.zeros(len(PairList))
+        for ii, (kA, kB) in enumerate(PairList):
+            Gaps[ii] = self.calcHardMergeGap(SS, kA, kB)
+        return Gaps
+
+    def calcHardMergeGap_AllPairs(self, SS):
+        ''' Calculate change in ELBO for all candidate hard merge pairs
+
+        Returns
+        ---------
+        Gap : 2D array, size K x K, upper-triangular entries non-zero
+              Gap[j,k] : scalar change in ELBO after merge of k into j
+        '''
+        Gap = super(SupervisedTopicMultObsModel, self).calcHardMergeGap_AllPairs(SS)
+        for kA in xrange(SS.K):
+            for kB in xrange(kA + 1, SS.K):
+                Gap[j, k] += RegressY.calcHardMergeGapForPair(SS=SS, Prior=self.Prior, Post=self.Post, kA=kA, kB=kB)
+        return Gap
 
 
 def sigmoid(x):
