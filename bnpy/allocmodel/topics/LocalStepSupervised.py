@@ -67,6 +67,12 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
     Nd = np.sum(wc_d)
     Nd_2 = Nd ** 2
 
+    #Coarsening parameter
+    alpha = 100.0
+    zi = 1.0 / (1 + Nd / alpha)
+    #Lik_d = np.exp(zi * np.log(Lik_d))
+    #E_pi = np.exp(zi * np.log(E_pi))
+
     #Term constant for each token
     cTerm = E_pi * np.exp(((y - 0.5) / Nd) * w_m)
 
@@ -91,6 +97,10 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
     else:
         resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer, l / Nd_2)
 
+    resp, Zbar = np.asarray(resp), np.asarray(Zbar)
+    #if np.random.random() > 0.999:
+    #    print 'lstep:', zi, Zbar
+    #resp, Zbar = zi * resp, zi * Zbar #Coarsening
     return np.maximum(resp, 1e-300), Zbar
 
 
