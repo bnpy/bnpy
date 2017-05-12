@@ -181,7 +181,7 @@ def calcLocalParams(
     LP['DocTopicCount'] = DocTopicCount
     if hasattr(Data, 'word_count'):
         if cslice is None or (cslice[0] == 0 and cslice[1] is None):
-            pass #assert np.allclose(np.sum(DocTopicCount), np.sum(Data.word_count))
+            assert np.allclose(np.sum(DocTopicCount), np.sum(Data.word_count))
     LP = updateLPGivenDocTopicCount(LP, DocTopicCount,
                                     alphaEbeta, alphaEbetaRem)
     if DO_DENSE and not SUPERVISED:
