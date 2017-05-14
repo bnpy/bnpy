@@ -17,37 +17,19 @@ import SMLogisticRegressYFromFixedTopicModelDiag as RegressY
 
 class SupervisedTopicMultObsModel(MultObsModel):
 
-    ''' Model for producing 1D observations from modeled covariates
+    '''
+    KNOWN ISSUES (TODO):
+        - Updates and ELBO are (slightly) wrong! Both implicitly use the
+            expectation E[Z Z^T], but compute it at E[Z]E[Z]^T, which is
+            wrong, though the difference should be small
 
-    Attributes for DiagGauss Prior
-    ------------------------------
-    nu : scalar positive float
-        degrees of freedom for precision-matrix random variable L
-    B : 2D array, size D x D
-        determines mean of the precision-matrix random variable L
-    m : 1D array, size D
-        mean of the location parameter mu
-    kappa : scalar positive float
-        additional precision for location parameter mu
+        - Predictions are also (slighty) wrong! Currently defaults to
+            making predictions by using E[w] and the standard sigmoid,
+            when it should (probably) use the posterior predictive (bound)
+            p(y | x, D)
 
-    Attributes for Regression Prior
-    -------------------------------
-    w_E : 1D array, size E
-        mean of the regression weights
-    P_EE : 2D array, size E x E
-        precision matrix for regression weights
-    nu : positive float
-        effective sample size of prior on regression precision
-    tau : positive float
-        effective scale parameter of prior on regression precision
-
-    Attributes for Point Estimation
-    -------------------------------
-    TODO
-
-    Attributes for Approximate Posterior
-    ------------------------------------
-    Same names as for the Prior
+        - Posterior predictive is wrong! (See the first bullet), also there
+            is some weirdness in the code that should be checked out
     '''
 
 
