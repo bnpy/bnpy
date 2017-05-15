@@ -2,6 +2,8 @@ from scipy.special import digamma, gammaln
 import numpy as np
 import warnings
 
+from bnpy.util import checkWPost, eta_update, calc_Zbar_ZZT, lam
+
 USE_CYTHON = True
 try:
     import pyximport; pyximport.install()
@@ -10,34 +12,6 @@ except:
     warnings.warn('Unable to import cython module for sLDA/sHDP model')
     USE_CYTHON = False
 
-#TODO: These functions appear in multiple places and should maybe be factored out
-def eta_update(m, S, X):
-    if m.size == S.size:
-        eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
-    else:
-        eta2 = (X * np.dot(X.reshape((1, -1)), S)).sum() + (np.dot(X, m) ** 2)
-    return np.sqrt(eta2)
-
-def lam(eta):
-    return np.tanh(eta / 2.0) / (4.0 * eta)
-
-def checkWPost(w_m, w_var, K):
-    w_m, w_var = np.asarray(w_m), np.asarray(w_var)
-
-    w_m_t = np.zeros(K)
-    w_m_t[:w_m.size] = w_m.flatten()[:K]
-    w_m = w_m_t
-
-    if len(w_var.shape) <= 1:
-        w_var_t = np.ones(K)
-        w_var_t[:w_var.size] = w_var.flatten()[:K]
-        w_var = w_var_t
-    else:
-        w_var_t = np.eye(K)
-        w_var_t[:w_var.shape[0], :w_var.shape[1]] = w_var[:K, :K]
-        w_var = w_var_t
-
-    return w_m, w_var
 
 def calcRespInner(resp, Zbar, wc_d, E_outer, l_div_Nd_2):
     nTok = resp.shape[0]
@@ -58,7 +32,7 @@ def calcRespInner(resp, Zbar, wc_d, E_outer, l_div_Nd_2):
 
     return resp, Zbar
 
-def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
+def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d, lik_weight=1):
     K = Lik_d.shape[1]
     
     #Ensure that the mean and cov are the right size
@@ -68,7 +42,7 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
     Nd_2 = Nd ** 2
 
     #Term constant for each token
-    cTerm = E_pi * np.exp(((y - 0.5) / Nd) * w_m)
+    cTerm = E_pi * np.exp(lik_weight * ((y - 0.5) / Nd) * w_m)
 
     #Responsibilities before iterative adjustments
     resp = Lik_d * cTerm
@@ -76,14 +50,17 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d):
 
     #Initial covariates for regression
     #(equivalent to docTopicCounts)
-    Zbar = np.dot(wc_d.reshape((1,-1)), resp).flatten()
+    Zbar, ZZT = calc_Zbar_ZZT(resp, wc_d)
+
+    #Update logistic approximation (and weight by lik_weight)
+    #(TODO: Consider doing this inside the inner loop)
+    l = lam(eta_update(w_m, w_var, Zbar, ZZT)) * lik_weight
+
+    #Make Zbar unnormalized for updates
+    Zbar *= Nd 
 
     #Expectation: E[ww^T]
     E_outer = np.outer(w_m, w_m) + w_var
-
-    #Update logistic approximation
-    #(TODO: Consider doing this inside the inner loop)
-    l = lam(eta_update(w_m, w_var, Zbar))
 
     #Run coordinate ascent loop
     if USE_CYTHON:
@@ -101,7 +78,7 @@ def calcLocalParamsSupervised_SingleDoc(
         nCoordAscentItersLP=10, convThrLP=0.001,
         restartLP=0,
         initDocTopicCountLP='setDocProbsToEGlobalProbs',
-        w_m=None, w_var=None, y=0.0,
+        w_m=None, w_var=None, y=0.0, lik_weight=1.0,
         **kwargs):
     ''' Infer local parameters for a single document.
 
@@ -172,7 +149,7 @@ def calcLocalParamsSupervised_SingleDoc(
         np.exp(DocTopicProb_d, out=DocTopicProb_d)
 
         #Update the responsibilities and totals
-        Resp_d, DocTopicCount_d = calcResp(DocTopicProb_d, Lik_d, w_m, w_var, y, wc_d)
+        Resp_d, DocTopicCount_d = calcResp(DocTopicProb_d, Lik_d, w_m, w_var, y, wc_d, lik_weight)
 
         # Check for convergence
         if iter % 5 == 0:

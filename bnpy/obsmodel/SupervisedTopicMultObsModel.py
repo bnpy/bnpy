@@ -8,6 +8,7 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D, toCArray
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcSpRXXT
+from bnpy.util import lam, eta_update, calc_Zbar_ZZT_manyDocs
 from AbstractObsModel import AbstractObsModel
 import copy
 
@@ -175,8 +176,6 @@ def predictYFromLP(Data, LP, Post, **kwargs):
         Y[d] = sigmoid(np.dot(x, Post.w_m))
     return Y
 
-def lam(eta):
-    return np.tanh(eta / 2.0) / (4.0 * eta)
 
 def log_g(x):
     return -np.log(1.0 + np.exp(-x))
@@ -192,14 +191,16 @@ def predictYFromLP_Bound(Data, LP, Post, **kwargs):
     
     Sinv_mu = np.dot(Sinv, w_m)
     mu_Sinv_mu = np.dot(Sinv_mu, w_m)
+
+    X_all, XXT_all = calc_Zbar_ZZT_manyDocs(LP['resp'], Data.word_count, Data.doc_range)
     for d in xrange(nDoc):
-    	X = LP['DocTopicCount'][d,:]
-    	X = X / np.sum(X)
+    	X = X_all[d, :]
+        XXT = XXT_all[d, :, :]
 
-        eta_t_2 = (X * np.dot(X, S)).sum() + (np.dot(X, w_m) ** 2)
-        eta_t = np.sqrt(eta_t_2)
+        eta_t = eta_update(w_m, S, X, XXT)
+        eta_t_2 = eta_t ** 2
 
-        Sinv_t = Sinv + 2 * lam(eta_t) * np.outer(X, X)
+        Sinv_t = Sinv + 2 * lam(eta_t) * XXT
         mu_t_0 = np.linalg.solve(Sinv_t, Sinv_mu - 0.5 * X)
         mu_t_1 = np.linalg.solve(Sinv_t, Sinv_mu + 0.5 * X)
 

@@ -10,8 +10,8 @@ from bnpy.util import as1D, as2D, as3D, toCArray, np2flatstr
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcSpRXXT
 from AbstractObsModel import AbstractObsModel
+from bnpy.util import checkWPost, eta_update, calc_Zbar_ZZT_manyDocs, lam
 
-import matplotlib.pyplot as plt
 
 class SMLogisticRegressYFromFixedTopicModelDiag(AbstractObsModel):
 
@@ -192,29 +192,12 @@ class SMLogisticRegressYFromFixedTopicModelDiag(AbstractObsModel):
 ''' Functions for computing the updates and ELBO terms for the variational 
     logistic regression model.
 '''
-def checkWPost(w_m, w_var, K):
-    w_m, w_var = np.asarray(w_m), np.asarray(w_var)
 
-    w_m_t = np.zeros(K)
-    w_m_t[:w_m.size] = w_m.flatten()[:K]
-    w_m = w_m_t
-
-    if len(w_var.shape) <= 1:
-        w_var_t = np.ones(K)
-        w_var_t[:w_var.size] = w_var.flatten()[:K]
-        w_var = w_var_t
+def calc_sinv_ss(eta, X, XXT=None):
+    if XXT is None:
+        return np.dot((lam(eta)) * X.T, X)
     else:
-        w_var_t = np.eye(K)
-        w_var_t[:w_var.shape[0], :w_var.shape[1]] = w_var[:K, :K]
-        w_var = w_var_t
-
-    return w_m, w_var
-
-def lam(eta):
-    return np.tanh(eta / 2.0) / (4.0 * eta)
-
-def calc_sinv_ss(eta, X):
-    return np.dot((lam(eta)) * X.T, X)
+        return (XXT * lam(eta).reshape(-1, 1, 1)).sum(axis=0)
 
 def sinv_update(siginv, sinv_ss, full=False):
     ss_mat = sinv_ss if full else np.diag(sinv_ss)
@@ -227,29 +210,11 @@ def m_update(m_ss, sinv, mu, siginv, full=False):
     si = sinv if full else np.eye(m_ss.shape[0]) * siginv + 2 * sinv
     return np.linalg.solve(si, (siginv * mu) + m_ss)
 
-def eta_update(m, S, X):
-    if m.size == S.size:
-        eta2 = np.dot(X ** 2, S) + (np.dot(X, m) ** 2)
-    else:
-        eta2 = (X * np.dot(X, S)).sum(axis=1) + (np.dot(X, m) ** 2)
-    return np.sqrt(eta2)
-
-def sigmoid(x):
-    return 1.0 / (1.0 + np.exp(-x))
-
 def log_g(x):
     return -np.log(1.0 + np.exp(-x))
 
 def calc_eta_ss(eta):
     return np.sum(log_g(eta) -  0.5 * eta + lam(eta) * (eta ** 2))
-
-def exp_log_lik_bound_vec(X, y, m, S, eta):
-    Xm = np.dot(X, m)
-    ellik = log_g(eta) -  0.5 * eta + lam(eta) * (eta ** 2)
-    ellik = ellik + (y - 0.5) * Xm
-    xSx = np.sum(np.dot(X, S) * X, axis=1) if m.size != S.size else np.dot(X ** 2, S)
-    ellik = ellik - lam(eta) * (Xm ** 2 + xSx)
-    return ellik
 
 def exp_log_lik_bound(m_ss, sinv_ss, eta_ss, m, S):
     bound = eta_ss
@@ -312,6 +277,8 @@ def calcLocalParams(Dslice, Post=None,
         LP['w_var'] = Prior.sig if Post is None or not hasattr(Post, 'w_m') else Prior.sig * np.ones(Post.w_m.shape)
     else:
         LP['w_var'] = Post.S
+
+    LP['lik_weight'] = Prior.lik_weight
     return LP
 
 
@@ -342,24 +309,25 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
     '''
     #Setup the data from the (normalized) observed token assignments
     K = LP['DocTopicCount'].shape[1]
-    X = LP['DocTopicCount']
-    X = X / np.sum(X, axis=1).reshape((-1, 1))
+    X, XXT = calc_Zbar_ZZT_manyDocs(LP['resp'], Data.word_count, Data.doc_range)
 
     Y = Data.Y
 
     if SS is None:
         SS = SuffStatBag(K=K, D=Data.dim)
 
+    lw = Prior.lik_weight #Likelihood weighting
+
     w_m = Prior.mu if Post is None or not hasattr(Post, 'w_m') else Post.w_m
     S = Prior.sig if Post is None or not hasattr(Post, 'S') else Post.S
 
     w_m, S = checkWPost(w_m, S, K)
 
-    eta = eta_update(w_m, S, X)
-    eta_ss = calc_eta_ss(eta)
+    eta = eta_update(w_m, S, X, XXT)
+    eta_ss = lw * calc_eta_ss(eta)
 
-    m_ss = calc_m_ss(X, Y)
-    sinv_ss = calc_sinv_ss(eta, X)
+    m_ss = lw * calc_m_ss(X, Y)
+    sinv_ss = lw * calc_sinv_ss(eta, X, XXT)
 
     full = Prior.pfull if Prior is not None else False
 
@@ -370,11 +338,11 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
             Sinv_for_m = Sinv_post if full else sinv_ss
             m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
             
-            eta = eta_update(m_post, 1.0 / Sinv_post, X)
-            eta_ss = calc_eta_ss(eta)
+            eta = eta_update(m_post, 1.0 / Sinv_post, X, XXT)
+            eta_ss = lw * calc_eta_ss(eta)
 
-            m_ss = calc_m_ss(X, Y)
-            sinv_ss = calc_sinv_ss(eta, X)
+            m_ss = lw * calc_m_ss(X, Y)
+            sinv_ss = lw * calc_sinv_ss(eta, X, XXT)
         
 
     SS.setField('m_ss', m_ss, dims=('K'))
@@ -505,8 +473,8 @@ def getStringSummaryOfPrior(Prior):
 def createParamBagForPrior(
         Data=None, D=0,
         w_E=0,
-        P_EE=None, P_diag_val=1.0,
-        Prior=None, supervised_post_type='diag',
+        P_EE=None, P_diag_val=1.0, lik_weight=1.0,
+        Prior=None, supervised_post_type='full',
         **kwargs):
     ''' Initialize Prior ParamBag attribute.
 
@@ -532,6 +500,7 @@ def createParamBagForPrior(
     Prior.setField('sig', P_EE, dims=None)
     Prior.setField('siginv', P_EE_inv, dims=None)
     Prior.setField('pfull', 1 if supervised_post_type == 'full' else 0, dims=None)
+    Prior.setField('lik_weight', lik_weight, dims=None)
 
     return Prior
 

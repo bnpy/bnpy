@@ -144,7 +144,7 @@ def calcLocalParams(
                     wc_d, Lik_d, alphaEbeta, alphaEbetaRem,
                     DocTopicCount_d=initDTC_d,
                     initDocTopicCountLP=initDocTopicCountLP,
-                    w_m=LP['w_m'], w_var=LP['w_var'], y=Data.Y[d],
+                    w_m=LP['w_m'], w_var=LP['w_var'], y=Data.Y[d], lik_weight=LP['lik_weight'],
                     **kwargs)
             AggInfo = updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data)
         elif not DO_DENSE:

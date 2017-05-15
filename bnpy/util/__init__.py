@@ -19,6 +19,7 @@ from .ShapeUtil import argsort_bigtosmall_stable, is_sorted_bigtosmall
 from .ShapeUtil import argsortBigToSmallByTiers
 from .ParallelUtil import numpyToSharedMemArray, sharedMemToNumpyArray
 from .ParallelUtil import sharedMemDictToNumpy, fillSharedMemArray
+from .SupervisedUtil import calc_Zbar_ZZT_manyDocs, calc_Zbar_ZZT, eta_update, checkWPost, lam
 
 __all__ = ['RandUtil', 'OptimizerForPi',
            'split_str_into_fixed_width_lines',
@@ -34,4 +35,6 @@ __all__ = ['RandUtil', 'OptimizerForPi',
            'numpyToSharedMemArray', 'sharedMemToNumpyArray',
            'sharedMemDictToNumpy', 'fillSharedMemArray',
            'getMemUsageOfCurProcess', 'calcObjSize_MiB',
+           'calc_Zbar_ZZT_manyDocs', 'calc_Zbar_ZZT', 'eta_update', 'lam',
+           'checkWPost'
            ]
