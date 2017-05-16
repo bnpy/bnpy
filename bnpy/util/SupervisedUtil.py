@@ -1,6 +1,6 @@
 import numpy as np
 
-def checkWPost(w_m, w_var, K):
+def checkWPost(w_m, w_var, K, force2D=False):
     w_m, w_var = np.asarray(w_m), np.asarray(w_var)
 
     w_m_t = np.zeros(K)
@@ -10,7 +10,7 @@ def checkWPost(w_m, w_var, K):
     if len(w_var.shape) <= 1:
         w_var_t = np.ones(K)
         w_var_t[:w_var.size] = w_var.flatten()[:K]
-        w_var = w_var_t
+        w_var = w_var_t if not force2D else np.diag(w_var_t)
     else:
         w_var_t = np.eye(K)
         w_var_t[:w_var.shape[0], :w_var.shape[1]] = w_var[:K, :K]
@@ -40,12 +40,12 @@ def calc_Zbar_ZZT_unnorm(resp, w_c):
     w_c = w_c.flatten()
     Zbar = np.dot(w_c, resp).flatten()
     ZZT = np.outer(Zbar, Zbar)
-    ZZT_adj = (Zbar - np.sum(w_c.reshape((-1, 1)) * (resp ** 2), axis=0))
+    ZZT_adj = Zbar - np.dot(w_c, resp ** 2)
     ZZT.flat[::(ZZT_adj.size+1)] += ZZT_adj
     return Zbar, ZZT
 
-def calc_Zbar_ZZT(resp, w_c):
-    Nd = np.sum(w_c)
+def calc_Zbar_ZZT(resp, w_c, Nd=None):
+    Nd = np.sum(w_c) if Nd is None else Nd
     Zbar, ZZT = calc_Zbar_ZZT_unnorm(resp, w_c)
     return Zbar / Nd, ZZT / (Nd ** 2)
 

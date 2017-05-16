@@ -1,13 +1,13 @@
 from scipy.special import digamma, gammaln
 import numpy as np
-import warnings
+import warnings, os
 
 from bnpy.util import checkWPost, eta_update, calc_Zbar_ZZT, lam
 
 USE_CYTHON = True
 try:
     import pyximport; pyximport.install()
-    from SupervisedHelper import calcRespInner_cython
+    from SupervisedHelper import calcRespInner_cython, normalizeRows_cython
 except:
     warnings.warn('Unable to import cython module for sLDA/sHDP model')
     USE_CYTHON = False
@@ -32,13 +32,7 @@ def calcRespInner(resp, Zbar, wc_d, E_outer, l_div_Nd_2):
 
     return resp, Zbar
 
-def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d, lik_weight=1):
-    K = Lik_d.shape[1]
-    
-    #Ensure that the mean and cov are the right size
-    w_m, w_var = checkWPost(w_m, w_var, K)
-
-    Nd = np.sum(wc_d)
+def calcResp(E_pi, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight=1):
     Nd_2 = Nd ** 2
 
     #Term constant for each token
@@ -46,11 +40,15 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d, lik_weight=1):
 
     #Responsibilities before iterative adjustments
     resp = Lik_d * cTerm
-    resp = resp / np.sum(resp, axis=1)[:, np.newaxis]
+
+    if USE_CYTHON:
+        normalizeRows_cython(resp)
+    else:
+        resp = resp / np.sum(resp, axis=1)[:, np.newaxis]
 
     #Initial covariates for regression
     #(equivalent to docTopicCounts)
-    Zbar, ZZT = calc_Zbar_ZZT(resp, wc_d)
+    Zbar, ZZT = calc_Zbar_ZZT(resp, wc_d, Nd)
 
     #Update logistic approximation (and weight by lik_weight)
     #(TODO: Consider doing this inside the inner loop)
@@ -59,16 +57,12 @@ def calcResp(E_pi, Lik_d, w_m, w_var, y, wc_d, lik_weight=1):
     #Make Zbar unnormalized for updates
     Zbar *= Nd 
 
-    #Expectation: E[ww^T]
-    E_outer = np.outer(w_m, w_m) + w_var
-
     #Run coordinate ascent loop
     if USE_CYTHON:
-        resp, Zbar = calcRespInner_cython(resp, Zbar, wc_d, E_outer, l / Nd_2)
+        calcRespInner_cython(resp, Zbar, wc_d, E_outer, l / Nd_2)
     else:
         resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer, l / Nd_2)
 
-    resp, Zbar = np.asarray(resp), np.asarray(Zbar)
     return np.maximum(resp, 1e-300), Zbar
 
 
@@ -137,6 +131,16 @@ def calcLocalParamsSupervised_SingleDoc(
         # Set E[pi_d] to exp E log[ alphaEbeta ] 
         DocTopicProb_d = np.zeros_like(alphaEbeta)
 
+    #Setup the regression parameters (Outside the inner loop)
+    K = Lik_d.shape[1]
+    Nd = np.sum(wc_d)
+
+    #Ensure that the mean and cov are the right size
+    w_m, w_var = checkWPost(w_m, w_var, K, force2D=True)
+    
+    #Expectation: E[ww^T]
+    E_outer = np.outer(w_m, w_m) + w_var
+
     prevDocTopicCount_d = DocTopicCount_d.copy()
     for iter in xrange(nCoordAscentItersLP):
         # Update Prob of Active Topics
@@ -149,7 +153,7 @@ def calcLocalParamsSupervised_SingleDoc(
         np.exp(DocTopicProb_d, out=DocTopicProb_d)
 
         #Update the responsibilities and totals
-        Resp_d, DocTopicCount_d = calcResp(DocTopicProb_d, Lik_d, w_m, w_var, y, wc_d, lik_weight)
+        Resp_d, DocTopicCount_d = calcResp(DocTopicProb_d, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight)
 
         # Check for convergence
         if iter % 5 == 0:

@@ -1,4 +1,5 @@
-import numpy as np
+#cython: boundscheck=False, wraparound=False, nonecheck=False
+
 from libc.math cimport exp
 
 def calcRespInner_cython(double[:, :] resp, double[:] Zbar, double[:] wc_d, double[:, :] E_outer, double l_div_Nd_2):
@@ -29,6 +30,17 @@ def calcRespInner_cython(double[:, :] resp, double[:] Zbar, double[:] wc_d, doub
         for k in range(K):
             resp[i, k] /= respsum
             Zbar[k] += wc_d[i] * resp[i, k]
-            
-    return resp, Zbar
+   
 
+def normalizeRows_cython(double[:, :] resp):
+    cdef int N = resp.shape[0]
+    cdef int K = resp.shape[1]
+    cdef double respsum = 0.0
+
+    for i in range(N):
+        respsum = 0.0
+        for k in range(K):
+            respsum += resp[i, k]
+
+        for k in range(K):
+            resp[i, k] /= respsum
