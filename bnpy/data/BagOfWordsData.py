@@ -366,8 +366,8 @@ class BagOfWordsData(DataObj):
         assert np.all(docEndBiggerThanStart)
 
         if hasattr(self, 'response'):
-            assert self.response.ndim == 1
-            assert self.response.size == self.doc_range.size - 1
+            assert self.response.ndim == 2
+            assert self.response.shape[0] == self.doc_range.size - 1
         if hasattr(self, 'vocabList') and self.vocabList is not None:
             if len(self.vocabList) != self.vocab_size:
                 self.vocabList = None
