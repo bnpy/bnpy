@@ -13,7 +13,7 @@ import os
 from collections import namedtuple
 
 from bnpy.data.DataObj import DataObj
-from bnpy.util import as1D, toCArray
+from bnpy.util import as1D, as2D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
 class BagOfWordsData(DataObj):
