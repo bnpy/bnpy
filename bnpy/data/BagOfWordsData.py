@@ -320,7 +320,7 @@ class BagOfWordsData(DataObj):
         #Support responses as either 'Y' or 'response' attribute (TODO: pick one)
         response = Y if response is None and Y is not None else response 
         if response is not None:
-            self.response = as1D(toCArray(response, dtype=np.float64))
+            self.response = as2D(toCArray(response, dtype=np.float64))
             self.Y = self.response
 
         # Add dictionary of vocab words, if provided

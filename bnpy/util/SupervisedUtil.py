@@ -3,7 +3,7 @@ import numpy as np
 def checkWPost(w_m, w_var, K, force2D=False):
     w_m, w_var = np.asarray(w_m), np.asarray(w_var)
 
-    w_m_t = np.zeros(K)
+    w_m_t = np.random.randn(K)
     w_m_t[:w_m.size] = w_m.flatten()[:K]
     w_m = w_m_t
 

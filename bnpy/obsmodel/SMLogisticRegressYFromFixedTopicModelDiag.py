@@ -308,10 +308,10 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
     SS : SuffStatBag object, with K components.
     '''
     #Setup the data from the (normalized) observed token assignments
-    K = LP['DocTopicCount'].shape[1]
+    K = LP['resp'].shape[1]
     X, XXT = calc_Zbar_ZZT_manyDocs(LP['resp'], Data.word_count, Data.doc_range)
 
-    Y = Data.Y
+    Y = Data.Y.flatten()
 
     if SS is None:
         SS = SuffStatBag(K=K, D=Data.dim)
