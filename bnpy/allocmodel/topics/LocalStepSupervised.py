@@ -8,6 +8,7 @@ USE_CYTHON = True
 try:
     import pyximport; pyximport.install()
     from SupervisedHelper import calcRespInner_cython, normalizeRows_cython
+    print 'BNPY is using cython in like a boss!'
 except:
     warnings.warn('Unable to import cython module for sLDA/sHDP model')
     USE_CYTHON = False
