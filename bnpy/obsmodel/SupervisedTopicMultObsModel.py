@@ -93,7 +93,8 @@ class SupervisedTopicMultObsModel(MultObsModel):
         '''
         super(SupervisedTopicMultObsModel, self).setPostFactors(**kwargs)
         if w_m is not None:
-            self.Post.setField('w_m', w_m, dims=('K'))
+            self.Post.setField('L', w_m.shape[0], dims=None)
+            self.Post.setField('w_m', w_m, dims=('L', 'K'))
 
     def updatePost(self, SS):
         ''' Update attribute Post for all comps given suff stats.
