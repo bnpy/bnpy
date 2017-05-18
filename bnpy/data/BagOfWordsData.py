@@ -789,7 +789,7 @@ class BagOfWordsData(DataObj):
 
         if hasattr(self,'response'):
             if hasattr(WData, 'response'):
-                self.response = np.hstack([self.response, WData.response])
+                self.response = np.vstack([self.response, WData.response])
             else:
                 print 'Warning: response response variables not added'
 
