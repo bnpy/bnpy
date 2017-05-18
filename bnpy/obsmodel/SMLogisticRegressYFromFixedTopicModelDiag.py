@@ -307,47 +307,58 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
     --------
     SS : SuffStatBag object, with K components.
     '''
-    #Setup the data from the (normalized) observed token assignments
-    K = LP['resp'].shape[1]
-    X, XXT = calc_Zbar_ZZT_manyDocs(LP['resp'], Data.word_count, Data.doc_range)
-
-    Y = Data.Y.flatten()
 
     if SS is None:
         SS = SuffStatBag(K=K, D=Data.dim)
 
-    lw = Prior.lik_weight #Likelihood weighting
+    #Setup the data from the (normalized) observed token assignments
+    K = LP['resp'].shape[1]
+    X, XXT = calc_Zbar_ZZT_manyDocs(LP['resp'], Data.word_count, Data.doc_range)
 
-    w_m = Prior.mu if Post is None or not hasattr(Post, 'w_m') else Post.w_m
-    S = Prior.sig if Post is None or not hasattr(Post, 'S') else Post.S
+    #Setup the number of labels
+    nlabels = Data.Y.shape[1]
+    SS.setField('L', nlabels, dims=None)
 
-    w_m, S = checkWPost(w_m, S, K)
+    all_m_ss, all_sinv_ss, all_eta_ss = [], [], []
 
-    eta = eta_update(w_m, S, X, XXT)
-    eta_ss = lw * calc_eta_ss(eta)
+    for i in range(nlabels):
+        Y = Data.Y[:, i]
 
-    m_ss = lw * calc_m_ss(X, Y)
-    sinv_ss = lw * calc_sinv_ss(eta, X, XXT)
+        lw = Prior.lik_weight #Likelihood weighting
 
-    full = Prior.pfull if Prior is not None else False
+        w_m = Prior.mu if Post is None or not hasattr(Post, 'w_m') else Post.w_m[i]
+        S = Prior.sig if Post is None or not hasattr(Post, 'S') else Post.S[i]
 
-    if Data.nDoc == Data.nDocTotal:
-    #If not in the soVB/moVB case, run a few updates
-        for i in range(20):
-            Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
-            Sinv_for_m = Sinv_post if full else sinv_ss
-            m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
-            
-            eta = eta_update(m_post, 1.0 / Sinv_post, X, XXT)
-            eta_ss = lw * calc_eta_ss(eta)
+        w_m, S = checkWPost(w_m, S, K)
 
-            m_ss = lw * calc_m_ss(X, Y)
-            sinv_ss = lw * calc_sinv_ss(eta, X, XXT)
+        eta = eta_update(w_m, S, X, XXT)
+        eta_ss = lw * calc_eta_ss(eta)
+
+        m_ss = lw * calc_m_ss(X, Y)
+        sinv_ss = lw * calc_sinv_ss(eta, X, XXT)
+
+        full = Prior.pfull if Prior is not None else False
+
+        #If not in the soVB/moVB case, run a few updates
+        if Data.nDoc == Data.nDocTotal:
+            for i in range(20):
+                Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
+                Sinv_for_m = Sinv_post if full else sinv_ss
+                m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
+                
+                eta = eta_update(m_post, 1.0 / Sinv_post, X, XXT)
+                eta_ss = lw * calc_eta_ss(eta)
+
+                m_ss = lw * calc_m_ss(X, Y)
+                sinv_ss = lw * calc_sinv_ss(eta, X, XXT)
+
+        all_m_ss.append(m_ss)
+        all_sinv_ss.append(sinv_ss)
+        all_eta_ss.append(eta_ss)
         
-
-    SS.setField('m_ss', m_ss, dims=('K'))
-    SS.setField('sinv_ss', sinv_ss, dims=('K', 'K'))
-    SS.setField('eta_ss', eta_ss, dims=None)
+    SS.setField('m_ss', np.stack(all_m_ss), dims=('L', 'K'))
+    SS.setField('sinv_ss', np.stack(all_sinv_ss), dims=('L', 'K', 'K'))
+    SS.setField('eta_ss', np.stack(all_eta_ss), dims=('L',))
     # Expected count for each k
     # Usually computed by allocmodel. But just in case...
     if not hasattr(SS, 'N'):
@@ -379,9 +390,17 @@ def calcPostParamsFromSS(
     sinv_ss = SS.sinv_ss
     full = Prior.pfull if Prior is not None else False
 
-    Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
-    Sinv_for_m = Sinv_post if full else sinv_ss
-    m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
+    all_m_post, all_Sinv_post = [], []
+    for i in range(m_ss.shape[0]):
+        Sinv_post = sinv_update(Prior.siginv, sinv_ss[i], full=full)
+        Sinv_for_m = Sinv_post if full else sinv_ss[i]
+        m_post = m_update(m_ss[i], Sinv_for_m, Prior.mu, Prior.siginv, full=full)
+
+        all_m_post.append(m_post)
+        all_Sinv_post.append(Sinv_post)
+
+    m_post = np.stack(all_m_post)
+    Sinv_post = np.stack(all_Sinv_post)
 
     if not returnParamBag:
         return m_post, Sinv_post
@@ -422,11 +441,13 @@ def calcELBOFromSSAndPost(
     elbo_K : scalar float
         Equal to E[ log p(x) + log p(phi) - log q(phi)]
     """
-    elbo_K = 1 * elbo(SS.m_ss, SS.sinv_ss, SS.eta_ss, Post.w_m, Post.S, Prior.siginv, Prior.sig)
+    elbo_K = 0
+    for i in range(int(Post.L)):
+        elbo_K += elbo(SS.m_ss[i], SS.sinv_ss[i], SS.eta_ss[i], Post.w_m[i], Post.S[i], Prior.siginv, Prior.sig)
 
     if returnVec:
         return elbo_K * np.ones((SS.K,)) / SS.K
-    return elbo_K.sum()
+    return np.sum(elbo_K)
 
 
 def packParamBagForPost(
@@ -440,24 +461,29 @@ def packParamBagForPost(
     -------
     Post : ParamBag, with K clusters
     '''
-    K = m.shape[0]
-    full = Sinv.size != K 
+    L = m.shape[0]
+    K = m.shape[1]
+    full = Sinv.size != m.size
+
+    if full:
+        S = np.stack([np.linalg.inv(Sinv[i]) for i in range(L)])
+    else:
+        S = 1.0 / Sinv
 
     if Post is None:
         Post = ParamBag(K=K)
     assert Post.K == K
+    Post.setField('L', L, dims=None)
 
-    m = as1D(m)
-    Post.setField('w_m', m, dims=('K',))
+    m = as2D(m)
+    Post.setField('w_m', m, dims=('L', 'K'))
 
     if full:
-        S = np.linalg.inv(Sinv)
-        Post.setField('Sinv', as2D(Sinv), dims=('K', 'K'))
-        Post.setField('S', as2D(S), dims=('K', 'K'))
+        Post.setField('Sinv', as3D(Sinv), dims=('L', 'K', 'K'))
+        Post.setField('S', as3D(S), dims=('L', 'K', 'K'))
     else:
-        S = 1.0 / Sinv
-        Post.setField('Sinv', as1D(Sinv), dims=('K',))
-        Post.setField('S', as1D(S), dims=('K',))
+        Post.setField('Sinv', as2D(Sinv), dims=('L', 'K',))
+        Post.setField('S', as2D(S), dims=('L', 'K',))
     return Post
 
 def getStringSummaryOfPrior(Prior):
@@ -518,22 +544,29 @@ def calcHardMergeGapForPair(
     Ldiff : scalar
         difference in ELBO from merging cluster indices kA and kB
     '''
-    Ev = elbo(SS.m_ss, SS.sinv_ss, SS.eta_ss, Post.w_m, Post.S, Prior.siginv, Prior.sig)
+    Ev = calcELBOFromSSAndPost(SS, Post, Prior)
 
-    m_ss = np.delete(SS.m_ss, kB)
-    m_ss[kA] += SS.m_SS[kB]
-    sinv_ss = np.delete(SS.sinv_ss, kB)
-    sinv_ss[kA] += SS.sinv_ss[kB]
+    mEv = 0
+    for i in range(int(Post.L)):
+        m_ss = SS.m_ss[i]
+        sinv_ss = SS.sinv_ss[i]
 
-    full = Prior.pfull if Prior is not None else False
+        m_ss[kA] += m_SS[kB]
+        m_ss = np.delete(m_ss, kB)
+        
+        #TODO: This seems wrong
+        sinv_ss[kA] += SS.sinv_ss[kB]
+        sinv_ss = np.delete(SS.sinv_ss, kB)
+        
+        full = Prior.pfull if Prior is not None else False
 
-    Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
-    s_post = np.linalg.inv(Sinv_post) if full else 1.0 / Sinv_post
-    Sinv_for_m = Sinv_post if full else sinv_ss
-    m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
+        Sinv_post = sinv_update(Prior.siginv, sinv_ss, full=full)
+        s_post = np.linalg.inv(Sinv_post) if full else 1.0 / Sinv_post
+        Sinv_for_m = Sinv_post if full else sinv_ss
+        m_post = m_update(m_ss, Sinv_for_m, Prior.mu, Prior.siginv, full=full)
 
-    mEv = elbo(m_ss, sinv_ss, eta_ss, m_post, s_post, Prior.siginv, Prior.sig)
+        mEv += elbo(m_ss, sinv_ss, eta_ss, m_post, s_post, Prior.siginv, Prior.sig)
+    
     Gap = mEv - Ev
-
     return Gap, None, None
 

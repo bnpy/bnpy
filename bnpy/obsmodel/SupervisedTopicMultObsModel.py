@@ -67,7 +67,7 @@ class SupervisedTopicMultObsModel(MultObsModel):
     
         if hasattr(self.Post, 'w_m'):
             Ypred = predictYFromLP(Data, LP, self.Post)
-            print '\tCurrent acc:', np.sum((np.round(Ypred) == Data.Y).astype(float)) / Ypred.shape[0]
+            print '\tCurrent acc:', np.sum((np.round(Ypred) == Data.Y).astype(float), axis=0) / Ypred.shape[0]
         return SS
 
     def calc_local_params(self, Data, LP=None, **kwargs):
@@ -169,11 +169,15 @@ def sigmoid(x):
 
 def predictYFromLP(Data, LP, Post, **kwargs):
     nDoc = Data.nDoc
-    Y = np.zeros(nDoc)
+    L = Post.w_m.shape[0]
+    Y = np.zeros((nDoc, L))
     for d in xrange(nDoc):
         x = LP['DocTopicCount'][d,:]
         x = x / np.sum(x)
-        Y[d] = sigmoid(np.dot(x, Post.w_m))
+
+        for i in xrange(L):
+            Y[d, i] = sigmoid(np.dot(x, Post.w_m[i]))
+
     return Y
 
 
@@ -182,38 +186,42 @@ def log_g(x):
 
 def predictYFromLP_Bound(Data, LP, Post, **kwargs):
     nDoc = Data.nDoc
-    Y = np.zeros(nDoc)
-
-    Sinv, S, w_m = Post.Sinv, Post.S, Post.w_m
-    if Sinv.size == w_m.size:
-        Sinv = np.diag(Sinv.flatten())
-        S = np.diag(S.flatten())
-    
-    Sinv_mu = np.dot(Sinv, w_m)
-    mu_Sinv_mu = np.dot(Sinv_mu, w_m)
+    L = Post.w_m.shape[0]
+    Y = np.zeros((nDoc, L))
 
     X_all, XXT_all = calc_Zbar_ZZT_manyDocs(LP['resp'], Data.word_count, Data.doc_range)
-    for d in xrange(nDoc):
-    	X = X_all[d, :]
-        XXT = XXT_all[d, :, :]
 
-        eta_t = eta_update(w_m, S, X, XXT)
-        eta_t_2 = eta_t ** 2
+    for i in xrange(L):
+        Sinv, S, w_m = Post.Sinv[i], Post.S[i], Post.w_m[i]
+        if Sinv.size == w_m.size:
+            Sinv = np.diag(Sinv.flatten())
+            S = np.diag(S.flatten())
+        
+        Sinv_mu = np.dot(Sinv, w_m)
+        mu_Sinv_mu = np.dot(Sinv_mu, w_m)
 
-        Sinv_t = Sinv + 2 * lam(eta_t) * XXT
-        mu_t_0 = np.linalg.solve(Sinv_t, Sinv_mu - 0.5 * X)
-        mu_t_1 = np.linalg.solve(Sinv_t, Sinv_mu + 0.5 * X)
+        
+        for d in xrange(nDoc):
+        	X = X_all[d, :]
+            XXT = XXT_all[d, :, :]
 
-        common = log_g(eta_t) - eta_t / 2.0 + lam(eta_t) * eta_t_2 - \
-            0.5 * mu_Sinv_mu - 0.5 * np.linalg.slogdet(S)[1] - 0.5 * np.linalg.slogdet(Sinv_t)[1]
-        y_adj_0 = 0.5 * np.dot(np.dot(Sinv_t, mu_t_0), mu_t_0)
-        y_adj_1 = 0.5 * np.dot(np.dot(Sinv_t, mu_t_1), mu_t_1)
+            eta_t = eta_update(w_m, S, X, XXT)
+            eta_t_2 = eta_t ** 2
 
-        p_y_0 = common + y_adj_0
-        p_y_1 = common + y_adj_1
+            Sinv_t = Sinv + 2 * lam(eta_t) * XXT
+            mu_t_0 = np.linalg.solve(Sinv_t, Sinv_mu - 0.5 * X)
+            mu_t_1 = np.linalg.solve(Sinv_t, Sinv_mu + 0.5 * X)
 
-        #TODO: This is reveresed for some reason, check the math
-        Y[d] = p_y_0 / (p_y_0 + p_y_1)
+            common = log_g(eta_t) - eta_t / 2.0 + lam(eta_t) * eta_t_2 - \
+                0.5 * mu_Sinv_mu - 0.5 * np.linalg.slogdet(S)[1] - 0.5 * np.linalg.slogdet(Sinv_t)[1]
+            y_adj_0 = 0.5 * np.dot(np.dot(Sinv_t, mu_t_0), mu_t_0)
+            y_adj_1 = 0.5 * np.dot(np.dot(Sinv_t, mu_t_1), mu_t_1)
+
+            p_y_0 = common + y_adj_0
+            p_y_1 = common + y_adj_1
+
+            #TODO: This is reveresed for some reason, check the math
+            Y[d, i] = p_y_0 / (p_y_0 + p_y_1)
 
     return Y
 

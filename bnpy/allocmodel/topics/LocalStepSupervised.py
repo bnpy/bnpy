@@ -36,7 +36,7 @@ def calcResp(E_pi, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight=1):
     Nd_2 = Nd ** 2
 
     #Term constant for each token
-    cTerm = E_pi * np.exp(lik_weight * ((y - 0.5) / Nd) * w_m)
+    cTerm = E_pi * np.exp(lik_weight * np.dot(y - 0.5, w_m) / Nd)
 
     #Responsibilities before iterative adjustments
     resp = Lik_d * cTerm
@@ -50,18 +50,22 @@ def calcResp(E_pi, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight=1):
     #(equivalent to docTopicCounts)
     Zbar, ZZT = calc_Zbar_ZZT(resp, wc_d, Nd)
 
-    #Update logistic approximation (and weight by lik_weight)
-    #(TODO: Consider doing this inside the inner loop)
-    l = lam(eta_update(w_m, w_var, Zbar, ZZT)) * lik_weight
+    #Sum the expected outer products for each label
+    E_outer_sum = np.zeros_like(E_outer[0])
+    for i in xrange(w_m.shape[0]):
+        #Update logistic approximation (and weight by lik_weight)
+        #(TODO: Consider doing this inside the inner loop)
+        l = lam(eta_update(w_m[i], w_var[i], Zbar, ZZT)) * lik_weight
+        E_outer_sum += l * E_outer[i]
 
     #Make Zbar unnormalized for updates
     Zbar *= Nd 
 
     #Run coordinate ascent loop
     if USE_CYTHON:
-        calcRespInner_cython(resp, Zbar, wc_d, E_outer, l / Nd_2)
+        calcRespInner_cython(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
     else:
-        resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer, l / Nd_2)
+        resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
 
     return np.maximum(resp, 1e-300), Zbar
 
@@ -135,11 +139,27 @@ def calcLocalParamsSupervised_SingleDoc(
     K = Lik_d.shape[1]
     Nd = np.sum(wc_d)
 
-    #Ensure that the mean and cov are the right size
-    w_m, w_var = checkWPost(w_m, w_var, K, force2D=True)
-    
-    #Expectation: E[ww^T]
-    E_outer = np.outer(w_m, w_m) + w_var
+    #Get the posterior parameters for each regression model
+    all_w_m, all_w_var, all_E_outer = [], [], []
+    for i in xrange(y.size):
+        if w_m.ndim < 2:
+            w_m_i, w_var_i = w_m, w_var
+        else:
+            w_m_i, w_var_i = w_m[i], w_var[i]
+
+        #Ensure that the mean and cov are the right size
+        w_m_i, w_var_i = checkWPost(w_m_i, w_var_i, K, force2D=True)
+        
+        #Expectation: E[ww^T]
+        E_outer_i = np.outer(w_m_i, w_m_i) + w_var_i
+
+        all_w_m.append(w_m_i)
+        all_w_var.append(w_var_i)
+        all_E_outer.append(E_outer_i)
+
+    w_m = np.stack(all_w_m)
+    w_var = np.stack(all_w_var)
+    E_outer = np.stack(all_E_outer)
 
     prevDocTopicCount_d = DocTopicCount_d.copy()
     for iter in xrange(nCoordAscentItersLP):
