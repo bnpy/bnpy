@@ -7,8 +7,7 @@ from bnpy.util import checkWPost, eta_update, calc_Zbar_ZZT, lam
 USE_CYTHON = True
 try:
     import pyximport; pyximport.install()
-    from SupervisedHelper import calcRespInner_cython, normalizeRows_cython
-    print 'BNPY is using cython in like a boss!'
+    from SupervisedHelper import calcRespInner_cython, calcRespInner_cython_blas, normalizeRows_cython
 except:
     warnings.warn('Unable to import cython module for sLDA/sHDP model')
     USE_CYTHON = False
@@ -64,7 +63,7 @@ def calcResp(E_pi, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight=1):
 
     #Run coordinate ascent loop
     if USE_CYTHON:
-        calcRespInner_cython(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
+        calcRespInner_cython_blas(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
     else:
         resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
 
