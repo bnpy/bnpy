@@ -202,7 +202,7 @@ def predictYFromLP_Bound(Data, LP, Post, **kwargs):
 
         
         for d in xrange(nDoc):
-        	X = X_all[d, :]
+            X = X_all[d, :]
             XXT = XXT_all[d, :, :]
 
             eta_t = eta_update(w_m, S, X, XXT)
