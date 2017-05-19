@@ -306,7 +306,7 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
     Returns
     --------
     SS : SuffStatBag object, with K components.
-    '''
+    ''' 
 
     if SS is None:
         SS = SuffStatBag(K=K, D=Data.dim)
@@ -317,7 +317,8 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
 
     #Setup the number of labels
     nlabels = Data.Y.shape[1]
-    SS.setField('L', nlabels, dims=None)
+    #SS.setField('Q', nlabels, dims=None)
+    setattr(SS._Fields, 'Q', nlabels)
 
     all_m_ss, all_sinv_ss, all_eta_ss = [], [], []
 
@@ -355,10 +356,10 @@ def calcSummaryStats(Data, SS, LP, Prior=None, Post=None, **kwargs):
         all_m_ss.append(m_ss)
         all_sinv_ss.append(sinv_ss)
         all_eta_ss.append(eta_ss)
-        
-    SS.setField('m_ss', np.stack(all_m_ss), dims=('L', 'K'))
-    SS.setField('sinv_ss', np.stack(all_sinv_ss), dims=('L', 'K', 'K'))
-    SS.setField('eta_ss', np.stack(all_eta_ss), dims=('L',))
+     
+    SS.setField('m_ss', np.stack(all_m_ss), dims=('Q', 'K'))
+    SS.setField('sinv_ss', np.stack(all_sinv_ss), dims=('Q', 'K', 'K'))
+    SS.setField('eta_ss', np.stack(all_eta_ss), dims=('Q',))
     # Expected count for each k
     # Usually computed by allocmodel. But just in case...
     if not hasattr(SS, 'N'):
@@ -442,7 +443,7 @@ def calcELBOFromSSAndPost(
         Equal to E[ log p(x) + log p(phi) - log q(phi)]
     """
     elbo_K = 0
-    for i in range(int(Post.L)):
+    for i in range(int(Post.Q)):
         elbo_K += elbo(SS.m_ss[i], SS.sinv_ss[i], SS.eta_ss[i], Post.w_m[i], Post.S[i], Prior.siginv, Prior.sig)
 
     if returnVec:
@@ -461,29 +462,29 @@ def packParamBagForPost(
     -------
     Post : ParamBag, with K clusters
     '''
-    L = m.shape[0]
+    Q = m.shape[0]
     K = m.shape[1]
     full = Sinv.size != m.size
 
     if full:
-        S = np.stack([np.linalg.inv(Sinv[i]) for i in range(L)])
+        S = np.stack([np.linalg.inv(Sinv[i]) for i in range(Q)])
     else:
         S = 1.0 / Sinv
 
     if Post is None:
         Post = ParamBag(K=K)
     assert Post.K == K
-    Post.setField('L', L, dims=None)
+    Post.setField('Q', Q, dims=None)
 
     m = as2D(m)
-    Post.setField('w_m', m, dims=('L', 'K'))
+    Post.setField('w_m', m, dims=('Q', 'K'))
 
     if full:
-        Post.setField('Sinv', as3D(Sinv), dims=('L', 'K', 'K'))
-        Post.setField('S', as3D(S), dims=('L', 'K', 'K'))
+        Post.setField('Sinv', as3D(Sinv), dims=('Q', 'K', 'K'))
+        Post.setField('S', as3D(S), dims=('Q', 'K', 'K'))
     else:
-        Post.setField('Sinv', as2D(Sinv), dims=('L', 'K',))
-        Post.setField('S', as2D(S), dims=('L', 'K',))
+        Post.setField('Sinv', as2D(Sinv), dims=('Q', 'K',))
+        Post.setField('S', as2D(S), dims=('Q', 'K',))
     return Post
 
 def getStringSummaryOfPrior(Prior):
@@ -547,7 +548,7 @@ def calcHardMergeGapForPair(
     Ev = calcELBOFromSSAndPost(SS, Post, Prior)
 
     mEv = 0
-    for i in range(int(Post.L)):
+    for i in range(int(Post.Q)):
         m_ss = SS.m_ss[i]
         sinv_ss = SS.sinv_ss[i]
 

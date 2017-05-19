@@ -321,7 +321,7 @@ class BagOfWordsData(DataObj):
         response = Y if response is None and Y is not None else response 
         if response is not None:
             response = toCArray(response, dtype=np.float64)
-            self.response = as2D(response if len(response.shape) == 2 else response.reshape((-1, 1)))
+            self.response = as2D(response if response.ndim == 2 else response.reshape((-1, 1)))
             self.Y = self.response
 
         # Add dictionary of vocab words, if provided
@@ -898,7 +898,7 @@ class BagOfWordsData(DataObj):
             newVocabList = None            
 
         if hasattr(self, 'response'):
-            new_y = self.response[docMask].copy()
+            new_y = self.Y[docMask, :].copy()
         else:
             new_y = None
 
