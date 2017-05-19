@@ -36,7 +36,8 @@ def calcResp(E_pi, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight=1):
     Nd_2 = Nd ** 2
 
     #Term constant for each token
-    cTerm = E_pi * np.exp(lik_weight * np.dot(y - 0.5, w_m) / Nd)
+    cTerm = lik_weight * np.dot(y - 0.5, w_m) / Nd
+    cTerm = E_pi * np.exp(cTerm - np.max(cTerm))
 
     #Responsibilities before iterative adjustments
     resp = Lik_d * cTerm

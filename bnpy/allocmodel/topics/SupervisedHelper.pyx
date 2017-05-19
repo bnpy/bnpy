@@ -3,7 +3,7 @@
 from scipy.linalg.cython_blas cimport dgemv, dsymv
 import numpy as np
 
-from libc.math cimport exp
+from libc.math cimport exp, fmax
 
 def calcRespInner_cython(double[:, :] resp, double[:] Zbar, double[:] wc_d, double[:, :] E_outer, double l_div_Nd_2):
     cdef int N = resp.shape[0]
@@ -35,7 +35,7 @@ def calcRespInner_cython(double[:, :] resp, double[:] Zbar, double[:] wc_d, doub
             Zbar[k] += wc_d[i] * resp[i, k]
 
 
-def calcRespInner_cython_blas(double[:, :] resp, double[:] Zbar, double[:] wc_d, double[:, :] E_outer, double l_div_Nd_2):
+def calcRespInner_cython_blas_sym(double[:, :] resp, double[:] Zbar, double[:] wc_d, double[:, :] E_outer, double l_div_Nd_2):
     cdef int N = resp.shape[0]
     cdef int K = resp.shape[1]
 
@@ -76,7 +76,7 @@ def calcRespInner_cython_blas(double[:, :] resp, double[:] Zbar, double[:] wc_d,
             resp[i, k] /= respsum
             Zbar[k] += wc_d[i] * resp[i, k]
 
-def calcRespInner_cython_blas_old(double[:, :] resp, double[:] Zbar, double[:] wc_d, double[:, :] E_outer, double l_div_Nd_2):
+def calcRespInner_cython_blas(double[:, :] resp, double[:] Zbar, double[:] wc_d, double[:, :] E_outer, double l_div_Nd_2):
     cdef int N = resp.shape[0]
     cdef int K = resp.shape[1]
 
@@ -87,6 +87,8 @@ def calcRespInner_cython_blas_old(double[:, :] resp, double[:] Zbar, double[:] w
 
     cdef double[:] update = np.zeros(K)
     cdef double respsum = 0.0
+
+    cdef double rmax = 0.0
 
     cdef int one = 1
     cdef int two = 2
@@ -108,8 +110,12 @@ def calcRespInner_cython_blas_old(double[:, :] resp, double[:] Zbar, double[:] w
 
         dgemv(&n, &K, &K, &dtwo, &E_outer[0,0], &K, &Zbar[0], &one, &done, &update[0], &one)
 
+        rmax = -1e50
         for k in range(K):
-            resp[i, k] *= exp(update[k])
+            rmax = fmax(rmax, update[k])
+
+        for k in range(K):
+            resp[i, k] *= exp(update[k] - rmax)
             respsum += resp[i, k]
 
         #Normalize & update Zbar with the new resp
