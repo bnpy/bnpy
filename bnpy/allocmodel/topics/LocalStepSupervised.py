@@ -64,7 +64,7 @@ def calcResp(E_pi, Lik_d, w_m, w_var, E_outer, y, wc_d, Nd, lik_weight=1):
 
     #Run coordinate ascent loop
     if USE_CYTHON:
-        calcRespInner_cython_blas(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
+        calcRespInner_cython(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
     else:
         resp, Zbar = calcRespInner(resp, Zbar, wc_d, E_outer_sum, 1.0 / Nd_2)
 
