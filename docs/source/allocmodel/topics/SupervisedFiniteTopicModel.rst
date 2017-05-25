@@ -81,7 +81,7 @@ Variational optimization will find the approximate posterior parameters that max
 where
 
 .. math::
-\mathbb{E}[\eta^T \bar{z_d}^T \bar{z_d}\eta]_d = 
+    \mathbb{E}[\eta^T \bar{z_d}^T \bar{z_d}\eta]_d = ...
 
 This objective function 
 
@@ -89,3 +89,49 @@ This objective function
     \mathcal{L}^{unsupervised} + \mathcal{L}^{{supervised}}
 
 is computed by calling the Python function ``calc_evidence``.
+
+
+Update equations
+----------------
+
+.. math::
+    r_{dn} \propto \exp\{\mathbb{E}[log \beta_kv] + \Psi(\theta_{d}) - \Psi(\sum_{j=1}^K \theta_{dj}} - \frac{y_d}{\delta N_d}\eta - \frac{1}{\delta N_d^2}(2\eta^T r_{-j} \eta + \eta \circ \eta))\}
+
+where :math:`k` is the cluster assignment of :math:`r_{dn}` and :math:`v` is the vocab index for word :math:`n` in document :math:`d` and :math:`r_{-j} = \sum_{n \neq j} w_n r_{dn}`. :math:`w_n` is the weight (number of occurances of token :math:`n`) in doc d
+
+
+.. math::
+    \theta_d \propto \alpha + \sum_{n=1}^{N_d} w_n r_{dn}
+
+
+
+.. math::
+    \eta \propto \mathbb{E}[Z^T Z]^{-1} \mathbb{E}[Z]^T y 
+
+
+General
+-------
+https://arxiv.org/pdf/1003.0783.pdf
+Supervised lda with response y drawn from a Normal distribution
+
+Parameters:
+
+delta: float 0.1 (default)
+variance of response (:math:`y \sim N(\bar{z} \eta, \delta)`)
+
+update_delta: boolean 
+
+0 (default) to fix delta to fixed value
+1 to update variance with MAP estimate
+
+Example code:
+
+.. math::
+    \texttt{import bnpy} \newline
+     \texttt{import grid3x3\_nD400\_nW100} \newline
+     \texttt{Data = grid3x3\_nD400\_nW100.get\_data()} \newline
+     \texttt{Data.name = 'grid3x3\_nD400\_nW100'} \newline
+     \texttt{h, r = 
+ bnpy.run(TrainData,'SupervisedFiniteTopicModel2','Mult','VB',K=9,nLap=50,jobname='test',delta=0.01,update_delta=1)}
+
+
