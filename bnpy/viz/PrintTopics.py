@@ -72,6 +72,57 @@ def showTopWordsForTask(taskpath, vocabfile, lap=None, doHTML=1,
         else:
             return printTopWordsFromHModel(hmodel, vocabList)
 
+def htmlTopWordsFromTopics(
+        topics_KV, vocabList, order=None, uids_K=None, Ktop=10,
+        ncols=5, maxKToDisplay=100,
+        fmtstr='%.4f',
+        wordSizeLimit=30,
+        label_per_topic=None,
+        **kwargs):
+    K, W = topics_KV.shape
+    if order is None:
+        order = np.arange(K)
+
+    htmllines = list()
+    htmllines.append(STYLE)
+    htmllines.append('<table>')
+    for posID, k in enumerate(order[:maxKToDisplay]):
+        if posID % ncols == 0:
+            htmllines.append('  <tr>')
+        if True:
+            if uids_K is None:
+                uid = k + 1
+            else:
+                uid = uids_K[k]
+            #k = k[0]
+            if label_per_topic is None:
+                titleline = '<h2>%4d/%d</h2>' % (
+                    uid, K)
+            else:
+                titleline = '<h2>%4d/%d %10s</h2>' % (
+                    uid, K, label_per_topic[k])
+            htmllines.append('    <td>' + titleline)
+            htmllines.append('    ')
+
+            htmlPattern = \
+                '<pre class="num">' + fmtstr + ' ' + \
+                '</pre><pre class="word">%s </pre>'
+            topIDs = np.argsort(-1 * topics_KV[k])[:Ktop]
+            for topID in topIDs:
+                dataline = htmlPattern % (
+                    topics_KV[k, topID],
+                    vocabList[topID][:wordSizeLimit])
+                htmllines.append(dataline + "<br />")
+            htmllines.append('    </td>')
+        else:
+            htmllines.append('    <td></td>')
+
+        if posID % ncols == ncols - 1:
+            htmllines.append(' </tr>')
+    htmllines.append('</table>')
+    htmlstr = '\n'.join(htmllines)
+    return htmlstr
+
 
 def htmlTopWordsFromWordCounts(
         WordCounts, vocabList, order=None, Ktop=10,
@@ -293,8 +344,11 @@ def plotCompsFromWordCounts(
                 topicMultilineStr += "%.4f %s\n" % (
                     topics_KV[compID, wID],
                     vocabList[wID][:wordSizeLimit])
-        cur_ax_h.text(
-            0, 0, topicMultilineStr, fontsize=fontsize, family=u'monospace')
+        try:
+            cur_ax_h.text(
+                0, 0, topicMultilineStr, fontsize=fontsize, family=u'monospace')
+        except Exception as e:
+            print topicMultilineStr
         cur_ax_h.set_xlim([0, 1]);
         cur_ax_h.set_ylim([0, 1]);
         cur_ax_h.set_xticks([])
