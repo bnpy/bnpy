@@ -68,7 +68,7 @@ class SharedMemWorker(multiprocessing.Process):
     def printMsg(self, msg):
         if self.verbose:
             for line in msg.split("\n"):
-                print "#%d: %s" % (self.uid, line)
+                print("#%d: %s" % (self.uid, line))
 
     def run(self):
         self.printMsg("process SetUp! pid=%d" % (os.getpid()))

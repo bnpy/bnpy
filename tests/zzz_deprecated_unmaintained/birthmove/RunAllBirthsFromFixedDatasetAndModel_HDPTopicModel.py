@@ -43,7 +43,7 @@ def main(**kwargs):
     DefaultKwargs.update(kwargs)
 
     parser = argparse.ArgumentParser()
-    for key, val in DefaultKwargs.items():
+    for key, val in list(DefaultKwargs.items()):
         try:
             assert np.allclose(int(val), float(val))
             _type = int
@@ -84,12 +84,12 @@ def main(**kwargs):
         vocabList = Data.vocabList
         nDoc = np.minimum(args.nDocTotal, Data.nDoc)
         if nDoc < Data.nDoc:
-            Data = Data.select_subset_by_mask(range(nDoc))
+            Data = Data.select_subset_by_mask(list(range(nDoc)))
         Data.name = dataName
         Data.vocabList = vocabList
 
     nDocInit = np.minimum(Data.nDoc, args.nDocInit)
-    InitData = Data.select_subset_by_mask(range(nDocInit))
+    InitData = Data.select_subset_by_mask(list(range(nDocInit)))
 
     # Create and initialize model
     hmodel = bnpy.HModel.CreateEntireModel(
@@ -121,9 +121,9 @@ def runBirthForEveryCompInModel(
         outputdir,
         '%s_nDoc=%d_K=%d' % (
             args.dataName, nDocTotal, args.Kinit)) 
-    print ''
-    print '=============='
-    print "OUTPUT: ", outputdir
+    print('')
+    print('==============')
+    print("OUTPUT: ", outputdir)
 
     for i in range(nInitSteps):    
         LP = hmodel.calc_local_params(Data, **LPkwargs)
@@ -158,8 +158,8 @@ def runBirthForEveryCompInModel(
         startuid = 1000 + 100 * targetUID + 1
         newUIDs=np.arange(startuid, startuid+args.Kfresh)
 
-        print jobdir
-        print 'newUIDs: ', newUIDs
+        print(jobdir)
+        print('newUIDs: ', newUIDs)
         try:
             xSS, Info = createSplitStats(
                 Data, hmodel, LP, curSSwhole=SS,
@@ -171,7 +171,7 @@ def runBirthForEveryCompInModel(
                 b_debugOutputDir=b_debugOutputDir,
                 **bkwargs)
         except BirthProposalError as e:
-            print '  SKIPPED!', str(e)
+            print('  SKIPPED!', str(e))
             continue
 
         # Construct proposed stats
@@ -195,11 +195,11 @@ def runBirthForEveryCompInModel(
 
         # Decision time: accept or reject
         if propLscore > curLscore:
-            print '  ACCEPT!'
+            print('  ACCEPT!')
         else:
-            print '  REJECT!'
-        print '     curLscore %.5f' % (curLscore)
-        print '    propLscore %.5f' % (propLscore)
+            print('  REJECT!')
+        print('     curLscore %.5f' % (curLscore))
+        print('    propLscore %.5f' % (propLscore))
 
 
 if __name__ == '__main__':

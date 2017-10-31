@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 
-import BLogger
+from . import BLogger
 from bnpy.viz.PrintTopics import vec2str
 from bnpy.util import argsort_bigtosmall_stable, argsortBigToSmallByTiers
 

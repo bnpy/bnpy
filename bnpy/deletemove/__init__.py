@@ -1,4 +1,4 @@
 ''' deletemove module
 '''
 
-from DPlanner import selectCandidateDeleteComps
+from .DPlanner import selectCandidateDeleteComps

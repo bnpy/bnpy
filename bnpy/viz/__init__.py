@@ -2,23 +2,23 @@
 The :mod:`viz` module provides visualization capability
 """
 
-import BarsViz
-import BernViz
-import GaussViz
-import SequenceViz
-import ProposalViz
+from . import BarsViz
+from . import BernViz
+from . import GaussViz
+from . import SequenceViz
+from . import ProposalViz
 
-import PlotTrace
-import PlotELBO
-import PlotK
-import PlotHeldoutLik
+from . import PlotTrace
+from . import PlotELBO
+from . import PlotK
+from . import PlotHeldoutLik
 
-import PlotParamComparison
-import PlotComps
+from . import PlotParamComparison
+from . import PlotComps
 
-import JobFilter
-import TaskRanker
-import BestJobSearcher
+from . import JobFilter
+from . import TaskRanker
+from . import BestJobSearcher
 
 __all__ = ['GaussViz', 'BernViz', 'BarsViz', 'SequenceViz',
            'PlotTrace', 'PlotELBO', 'PlotK', 'ProposalViz',

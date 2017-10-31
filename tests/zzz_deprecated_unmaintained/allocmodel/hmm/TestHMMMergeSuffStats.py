@@ -93,66 +93,66 @@ class TestHMMMergeSuffStats(unittest.TestCase):
         assert np.allclose(sum, sum3412)
 
     def test_K2__merge_equals_expected(self):
-        print ''
+        print('')
         propSS = self.origSS_K2.copy()
         propSS.mergeComps(0, 1)
 
-        print propSS.M
-        print mM_K2
+        print(propSS.M)
+        print(mM_K2)
         assert np.allclose(propSS.M, mM_K2)
 
     def test_K4_12__merge_equals_expected(self):
-        print ''
+        print('')
         propSS = self.origSS_K4.copy()
         propSS.mergeComps(0, 1)
 
-        print propSS.M
-        print mM_K4_12
+        print(propSS.M)
+        print(mM_K4_12)
         assert np.allclose(propSS.M, mM_K4_12)
 
-        print propSS.N
-        print propSS.N.shape
+        print(propSS.N)
+        print(propSS.N.shape)
 
         assert propSS.N.shape[0] == 3
         assert np.allclose(propSS.N, mN_K4_12)
 
     def test_K4_13__merge_equals_expected(self):
-        print ''
+        print('')
         propSS = self.origSS_K4.copy()
         propSS.mergeComps(0, 2)
 
-        print propSS.M
-        print mM_K4_13
+        print(propSS.M)
+        print(mM_K4_13)
         assert np.allclose(propSS.M, mM_K4_13)
 
     def test_K4_24__merge_equals_expected(self):
-        print ''
+        print('')
         propSS = self.origSS_K4.copy()
         propSS.mergeComps(1, 3)
 
-        print propSS.M
-        print mM_K4_24
+        print(propSS.M)
+        print(mM_K4_24)
         assert np.allclose(propSS.M, mM_K4_24)
         assert propSS.N.shape[0] == 3
         assert np.allclose(propSS.N, mN_K4_24)
 
     def test_K4_34__merge_equals_expected(self):
-        print ''
+        print('')
         propSS = self.origSS_K4.copy()
         propSS.mergeComps(2, 3)
 
-        print propSS.M
-        print mM_K4_34
+        print(propSS.M)
+        print(mM_K4_34)
         assert np.allclose(propSS.M, mM_K4_34)
 
     def test_K4_34then12__merge_equals_expected(self):
         ''' Verify merge followed by another merge works as expected
         '''
-        print ''
+        print('')
         propSS = self.origSS_K4.copy()
         propSS.mergeComps(2, 3)
         propSS.mergeComps(0, 1)
 
-        print propSS.M
-        print mM_K4_3412
+        print(propSS.M)
+        print(mM_K4_3412)
         assert np.allclose(propSS.M, mM_K4_3412)

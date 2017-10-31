@@ -88,15 +88,15 @@ def runBenchmarkAcrossProblemSizes(TestClass):
 
     kwargs = dict(**args.__dict__)
 
-    print "Speed Test."
-    print "    OMP_NUM_THREADS=%s" % (os.environ['OMP_NUM_THREADS'])
-    print "    vocab_size=%d" % (args.vocab_size)
-    print "    nCoordAscentItersLP=%d" % (args.nCoordAscentItersLP)
-    print "    convThrLP=%.2e" % (args.convThrLP)
+    print("Speed Test.")
+    print("    OMP_NUM_THREADS=%s" % (os.environ['OMP_NUM_THREADS']))
+    print("    vocab_size=%d" % (args.vocab_size))
+    print("    nCoordAscentItersLP=%d" % (args.nCoordAscentItersLP))
+    print("    convThrLP=%.2e" % (args.convThrLP))
 
     for (N, K, nDoc, nWorkers) in NKDiterator:
-        print '========================= nDoc %d  N %d  K=%d | nWorkers %d' \
-            % (nDoc, N, K, nWorkers)
+        print('========================= nDoc %d  N %d  K=%d | nWorkers %d' \
+            % (nDoc, N, K, nWorkers))
         kwargs['N'] = N
         kwargs['K'] = K
         kwargs['nDoc'] = nDoc
@@ -192,7 +192,7 @@ class Worker(multiprocessing.Process):
     def printMsg(self, msg):
         if self.verbose:
             for line in msg.split("\n"):
-                print "#%d: %s" % (self.uid, line)
+                print("#%d: %s" % (self.uid, line))
 
     def run(self):
         self.printMsg("process SetUp! pid=%d" % (os.getpid()))
@@ -379,7 +379,7 @@ class Test(unittest.TestCase):
         Just verifying that we can split computation up into >1 slice,
         add up results from all slices and still get the same answer.
         '''
-        print ''
+        print('')
         SSbase = self.run_baseline()
         SSserial = self.run_serial()
         allcloseSS(SSbase, SSserial)
@@ -392,7 +392,7 @@ class Test(unittest.TestCase):
         * performs computations on this chunk
         * load the resulting suff statistics object into resultsQueue
         """
-        print ''
+        print('')
         SSparallel = self.run_parallel()
         SSbase = self.run_baseline()
         allcloseSS(SSparallel, SSbase)
@@ -400,7 +400,7 @@ class Test(unittest.TestCase):
     def test_speed(self, nRepeat=5):
         """ Compare speed of different algorithms.
         """
-        print ''
+        print('')
         Results = self.run_all_with_timer(nRepeat=nRepeat)
         assert True
 
@@ -426,18 +426,18 @@ class Test(unittest.TestCase):
                     speedupmsg = "| %8.3f speedup" % (speedupval)
                 except KeyError:
                     speedupmsg = ""
-                print "%18s | %8.3f sec %s" % (
+                print("%18s | %8.3f sec %s" % (
                     key,
                     Results[key],
                     speedupmsg
-                )
+                ))
         return Results
 
     def run_with_timer(self, funcToCall, nRepeat=3):
         """ Timing experiment specified by funcToCall.
         """
         starttime = time.time()
-        for r in xrange(nRepeat):
+        for r in range(nRepeat):
             getattr(self, funcToCall)()
         return (time.time() - starttime) / nRepeat
 
@@ -483,28 +483,28 @@ def rangeFromHyphen(hyphenString):
     myList : list of integers
     """
     x = [int(x) for x in hyphenString.split('-')]
-    return range(x[0], x[-1] + 1)
+    return list(range(x[0], x[-1] + 1))
 
 
 def allcloseSS(SS1, SS2):
     """ Verify that two suff stat bags have indistinguishable data.
     """
     # Both A and B better give the same answer
-    for key in SS1._FieldDims.keys():
+    for key in list(SS1._FieldDims.keys()):
         arr1 = getattr(SS1, key)
         arr2 = getattr(SS2, key)
-        print key
+        print(key)
         if isinstance(arr1, float):
-            print arr1
-            print arr1
+            print(arr1)
+            print(arr1)
         elif arr1.ndim == 1:
-            print arr1[:3]
-            print arr2[:3]
-            print arr1.sum()
-            print arr2.sum()
+            print(arr1[:3])
+            print(arr2[:3])
+            print(arr1.sum())
+            print(arr2.sum())
         else:
-            print arr1[:2, :3]
-            print arr2[:2, :3]
+            print(arr1[:2, :3])
+            print(arr2[:2, :3])
         assert np.allclose(arr1, arr2)
 
 

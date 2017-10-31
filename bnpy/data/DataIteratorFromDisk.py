@@ -437,11 +437,11 @@ if __name__ == '__main__':
         DI = DataIteratorFromDisk(path, aModelType=args.aModelType,
                                   oModelType=args.oModelType,
                                   nLap=args.nLap, nBatch=args.nBatch)
-        print DI.get_stats_summary()
+        print(DI.get_stats_summary())
 
         while DI.has_next_batch():
             Dchunk = DI.get_next_batch()
             try:
-                print DI.batchID, Dchunk.nDoc, Dchunk.X[0].shape
+                print(DI.batchID, Dchunk.nDoc, Dchunk.X[0].shape)
             except:
-                print DI.batchID, Dchunk.nObs, Dchunk.X[0].shape
+                print(DI.batchID, Dchunk.nObs, Dchunk.X[0].shape)

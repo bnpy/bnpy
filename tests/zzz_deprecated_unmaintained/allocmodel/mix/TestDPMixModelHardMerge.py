@@ -27,15 +27,15 @@ class TestDPHardMerge(unittest.TestCase):
         self.beforeK = K
 
     def test_calcHardMergeGap(self):
-        print ''
+        print('')
         beforeELBO = self.beforeModel.calc_evidence(None, self.beforeSS, None)
 
         afterModel = copy.deepcopy(self.beforeModel)
         GapMat = self.beforeModel.calcHardMergeGap_AllPairs(self.beforeSS)
 
-        for kA in xrange(self.beforeK):
-            for kB in xrange(kA + 1, self.beforeK):
-                print '%d, %d' % (kA, kB)
+        for kA in range(self.beforeK):
+            for kB in range(kA + 1, self.beforeK):
+                print('%d, %d' % (kA, kB))
                 afterSS = self.beforeSS.copy()
                 afterSS.mergeComps(kA, kB)
                 afterModel.update_global_params(afterSS)

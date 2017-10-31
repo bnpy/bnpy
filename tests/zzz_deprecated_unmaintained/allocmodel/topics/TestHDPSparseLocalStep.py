@@ -55,13 +55,13 @@ if __name__ == '__main__':
 			yesaLP['DocTopicCount'], noaLP['DocTopicCount'],
 			rtol=0, atol=0.05)
 	except AssertionError:
-		print "BADNESS! learned DocTopicCount not allclose."
+		print("BADNESS! learned DocTopicCount not allclose.")
 	try:
 		assert np.allclose(yesaLP['spR'].toarray(), noaLP['spR'].toarray(),
 			rtol=0, atol=0.05)
 		#assert np.allclose(yesaLP['spR'].data, noaLP['spR'].data)
 	except AssertionError:
-		print "BADNESS! learned resp not allclose."
+		print("BADNESS! learned resp not allclose.")
 
 	tstart = time.time()
 	denseLP = hmodel.calc_local_params(Data, 
@@ -75,11 +75,11 @@ if __name__ == '__main__':
 		initDocTopicCountLP='setDocProbsToEGlobalProbs')
 	dense_elapsed = time.time() - tstart
 
-	print "Without restarts. MAX_ITER: %d. convThr %.5f " % (
-		args.nCoordAscentItersLP, args.convThrLP)
-	print "DENSE O(K)        : ", dense_elapsed
-	print "SPARSE O(K)       : ", b_elapsed
-	print "SPARSE O(Kactive) : ", a_elapsed
+	print("Without restarts. MAX_ITER: %d. convThr %.5f " % (
+		args.nCoordAscentItersLP, args.convThrLP))
+	print("DENSE O(K)        : ", dense_elapsed)
+	print("SPARSE O(K)       : ", b_elapsed)
+	print("SPARSE O(Kactive) : ", a_elapsed)
 
 	tstart = time.time()
 	denserestartLP = hmodel.calc_local_params(Data, 
@@ -104,15 +104,15 @@ if __name__ == '__main__':
 		nCoordAscentItersLP=args.nCoordAscentItersLP,
 		initDocTopicCountLP='setDocProbsToEGlobalProbs')
 	r_elapsed = time.time() - tstart
-	print ''
-	print "WITH RESTARTS. MAX_ITER: %d. convThr %.5f " % (
-		args.nCoordAscentItersLP, args.convThrLP)
-	print "DENSE O(K)        : ", dense_elapsed
-	print "SPARSE O(Kactive) : ", r_elapsed
+	print('')
+	print("WITH RESTARTS. MAX_ITER: %d. convThr %.5f " % (
+		args.nCoordAscentItersLP, args.convThrLP))
+	print("DENSE O(K)        : ", dense_elapsed)
+	print("SPARSE O(Kactive) : ", r_elapsed)
 
-	print 'dense'
+	print('dense')
 	for key in ['nRestartsAccepted', 'nRestartsTried']:
-		print key, denserestartLP['Info'][key]
-	print 'sparse'
+		print(key, denserestartLP['Info'][key])
+	print('sparse')
 	for key in ['nRestartsAccepted', 'nRestartsTried']:
-		print key, sprestartLP['Info'][key]
+		print(key, sprestartLP['Info'][key])

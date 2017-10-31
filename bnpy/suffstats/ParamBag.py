@@ -52,7 +52,7 @@ class ParamBag(object):
         '''
         self.K = K
         self.D = 0
-        for key, val in kwargs.iteritems():
+        for key, val in kwargs.items():
             setattr(self, key, val)
         self._FieldDims = dict()
         self.doCollapseK1 = doCollapseK1
@@ -82,7 +82,7 @@ class ParamBag(object):
     def setAllFieldsToZero(self):
         ''' Update every field to be an array of all zeros.
         '''
-        for key, dims in self._FieldDims.items():
+        for key, dims in list(self._FieldDims.items()):
             curShape = getattr(self, key).shape
             self.setField(key, np.zeros(curShape), dims=dims)
 
@@ -192,7 +192,7 @@ class ParamBag(object):
             raise IndexError(emsg)
         if compPB.K != 1:
             raise ValueError('Expected compPB to have K=1')
-        for key, dims in self._FieldDims.items():
+        for key, dims in list(self._FieldDims.items()):
             if dims is None:
                 self.setField(key, getattr(compPB, key), dims=None)
             elif self.K == 1:
@@ -245,7 +245,7 @@ class ParamBag(object):
         '''
         if self.K != PB.K or self.D != PB.D:
             raise ValueError('Dimension mismatch')
-        if len(self._FieldDims.keys()) < len(PB._FieldDims.keys()):
+        if len(list(self._FieldDims.keys())) < len(list(PB._FieldDims.keys())):
             for key in PB._FieldDims:
                 arrB = getattr(PB, key)
                 try:

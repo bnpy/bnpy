@@ -2,8 +2,8 @@
 The :mod:`util` module gathers utility functions
 """
 
-import RandUtil
-import OptimizerForPi
+from . import RandUtil
+from . import OptimizerForPi
 
 from .PrettyPrintUtil import np2flatstr, flatstr2np
 from .PrettyPrintUtil import split_str_into_fixed_width_lines

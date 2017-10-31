@@ -2,22 +2,22 @@ import numpy as np
 import os
 import sys
 import bnpy.init.FromTruth
-import BLogger
+from . import BLogger
 
 from scipy.special import digamma, gammaln
 
 from bnpy.allocmodel.topics.HDPTopicRestrictedLocalStep \
     import summarizeRestrictedLocalStep_HDPTopicModel
 
-from BCleanup import cleanupMergeClusters, cleanupDeleteSmallClusters
-from BirthProposalError import BirthProposalError
+from .BCleanup import cleanupMergeClusters, cleanupDeleteSmallClusters
+from .BirthProposalError import BirthProposalError
 from bnpy.viz.PlotComps import plotCompsFromSS
 from bnpy.viz.ProposalViz import plotELBOtermsForProposal
 from bnpy.viz.ProposalViz import plotDocUsageForProposal
 from bnpy.viz.ProposalViz import makeSingleProposalHTMLStr
 from bnpy.viz.PrintTopics import vec2str
 
-from BRestrictedLocalStep import \
+from .BRestrictedLocalStep import \
     summarizeRestrictedLocalStep, \
     makeExpansionSSFromZ
 
@@ -226,7 +226,7 @@ def makeSummaryForBirthProposal(
                         initDocUsage_uid = np.sum(Info['targetZ'] == k)
                     else:
                         initDocUsage_uid = 0.0
-                        for d in xrange(Dslice.nDoc):
+                        for d in range(Dslice.nDoc):
                             start = Dslice.doc_range[d]
                             stop = Dslice.doc_range[d+1]
                             initDocUsage_uid += np.any(
@@ -369,7 +369,7 @@ def makeSummaryForBirthProposal(
             Info['mergestep'] = rstep + 1
             xSSslice, xInitLPslice = cleanupMergeClusters(
                 xSSslice, curModel,
-                obsSSkeys=xInitSStarget._Fields._FieldDims.keys(),
+                obsSSkeys=list(xInitSStarget._Fields._FieldDims.keys()),
                 vocabList=vocabList,
                 pprintCountVec=pprintCountVec,
                 xInitLPslice=xInitLPslice,

@@ -27,7 +27,7 @@ def get_data(seed=123456, nDocTotal=32, T=1000, **kwargs):
 
     nUsedStates = len(np.unique(Z))
     if nUsedStates < K:
-        print 'WARNING: NOT ALL TRUE STATES USED IN GENERATED DATA'
+        print('WARNING: NOT ALL TRUE STATES USED IN GENERATED DATA')
 
     Data = GroupXData(X=X, doc_range=doc_range, TrueZ=Z)
     Data.name = get_short_name()
@@ -88,7 +88,7 @@ def get_X(seed, nDocTotal=None, T=None):
 
     # Each iteration generates one time-series/sequence
     # with starting state deterministically rotating among all states
-    for i in xrange(nDocTotal):
+    for i in range(nDocTotal):
         Z = list()
         X = list()
         initState = i % K
@@ -96,8 +96,8 @@ def get_X(seed, nDocTotal=None, T=None):
                                          sigmas[initState, :, :])
         Z.append(initState)
         X.append(initX)
-        for j in xrange(T - 1):
-            nextState = prng.choice(xrange(K), p=transPi[Z[j]])
+        for j in range(T - 1):
+            nextState = prng.choice(range(K), p=transPi[Z[j]])
 
             nextX = prng.multivariate_normal(mus[nextState, :],
                                              sigmas[nextState, :, :])

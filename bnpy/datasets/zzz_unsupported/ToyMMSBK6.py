@@ -44,9 +44,9 @@ def get_data(
     # Generate community assignments, s, r, and pack into TrueZ
     s = np.zeros((nNodes, nNodes), dtype=int)
     r = np.zeros((nNodes, nNodes), dtype=int)
-    for i in xrange(nNodes):
-        s[i, :] = prng.choice(xrange(K), p=pi[i, :], size=nNodes)
-        r[:, i] = prng.choice(xrange(K), p=pi[i, :], size=nNodes)
+    for i in range(nNodes):
+        s[i, :] = prng.choice(range(K), p=pi[i, :], size=nNodes)
+        r[:, i] = prng.choice(range(K), p=pi[i, :], size=nNodes)
     TrueZ = np.zeros((nNodes, nNodes, 2), dtype=int)
     TrueZ[:, :, 0] = s
     TrueZ[:, :, 1] = r
@@ -55,8 +55,8 @@ def get_data(
 
     # Generate adjacency matrix
     AdjMat = np.zeros((nNodes, nNodes))
-    for i in xrange(nNodes):
-        for j in xrange(nNodes):
+    for i in range(nNodes):
+        for j in range(nNodes):
             if i == j:
                 continue
             AdjMat[i,j] = prng.binomial(n=1, p=w[s[i, j], r[i, j]])

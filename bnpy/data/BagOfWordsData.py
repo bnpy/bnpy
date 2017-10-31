@@ -91,7 +91,7 @@ class BagOfWordsData(DataObj):
         if key not in Vars:
             key = 'test'
         nDoc = Vars[key].shape[1]
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             tokens_d = np.squeeze(Vars[key][0, d])
             word_id_d = np.unique(tokens_d)
             word_ct_d = np.zeros_like(word_id_d, dtype=np.float64)
@@ -516,7 +516,7 @@ class BagOfWordsData(DataObj):
         Removes all attributes matching "__[A-Za-z]Mat",
         such as "__DocTypeCountMat"
         '''
-        for key in self.__dict__.keys():
+        for key in list(self.__dict__.keys()):
             if key.startswith("__") and key.endswith("Mat"):
                 delattr(self, key)
 
@@ -718,7 +718,7 @@ class BagOfWordsData(DataObj):
         sameWordVec = np.zeros(self.vocab_size)
         data = np.zeros(self.word_count.shape, dtype=dtype)
 
-        for docID in xrange(self.nDoc):
+        for docID in range(self.nDoc):
             start = self.doc_range[docID]
             stop = self.doc_range[docID + 1]
             N = self.word_count[start:stop].sum()
@@ -837,11 +837,11 @@ class BagOfWordsData(DataObj):
         # Fill in new word_id, word_count, and doc_range
         startLoc = 0
         newMask = list()
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             start = self.doc_range[docMask[d]]
             stop = self.doc_range[docMask[d] + 1]
             endLoc = startLoc + (stop - start)
-            newMask.extend(range(start, stop))
+            newMask.extend(list(range(start, stop)))
             word_count[startLoc:endLoc] = self.word_count[start:stop]
             word_id[startLoc:endLoc] = self.word_id[start:stop]
             doc_range[d] = startLoc
@@ -858,7 +858,7 @@ class BagOfWordsData(DataObj):
             ('Z' in self.TrueParams or 'resp' in self.TrueParams)
         if doTrackTruth and hasTrueZ:
             newTrueParams = dict()
-            for key, arr in self.TrueParams.items():
+            for key, arr in list(self.TrueParams.items()):
                 if key == 'Z' or key == 'resp':
                     newMask = np.asarray(newMask, dtype=np.int32)
                     newTrueParams[key] = arr[newMask]
@@ -926,7 +926,7 @@ class BagOfWordsData(DataObj):
         docIDs = list()
         atomIDs = list()
         doc_range = [0]
-        for d in xrange(self.nDoc):
+        for d in range(self.nDoc):
             start = self.doc_range[d]
             stop = self.doc_range[d+1]
             atomIDs_d = np.flatnonzero(atomWeightVec[start:stop] >= thr)
@@ -1012,12 +1012,12 @@ class BagOfWordsData(DataObj):
         wordCountsPerDoc = list()
 
         resp = np.zeros((nDocTotal, K))
-        Ks = range(K)
+        Ks = list(range(K))
 
         # startPos : tracks start index for current doc within corpus-wide
         # lists
         startPos = 0
-        for d in xrange(nDocTotal):
+        for d in range(nDocTotal):
             # Draw single topic assignment for this doc
             k = RandUtil.choice(Ks, beta, PRNG)
             resp[d, k] = 1
@@ -1083,7 +1083,7 @@ class BagOfWordsData(DataObj):
         # startPos : tracks start index for current doc within corpus-wide
         # lists
         startPos = 0
-        for d in xrange(nDocTotal):
+        for d in range(nDocTotal):
             # Need docseed to be type int, have non-zero value for all d
             docseed = (seed * d + seed) % (100000000)
             PRNG = np.random.RandomState(docseed)
@@ -1101,7 +1101,7 @@ class BagOfWordsData(DataObj):
             # Draw the observed words for this doc
             # wordCountBins: V x 1 vector, entry v counts appearance of word v
             wordCountBins = np.zeros(V)
-            for k in xrange(K):
+            for k in range(K):
                 wordCountBins += RandUtil.multinomial(Npercomp[k],
                                                       topics[k, :], PRNG)
 
@@ -1184,12 +1184,12 @@ class BagOfWordsData(DataObj):
         if min_word_index > 0:
             word_id = word_id + min_word_index
         with open(filepath, 'w') as f:
-            for d in xrange(self.nDoc):
+            for d in range(self.nDoc):
                 dstart = self.doc_range[d]
                 dstop = self.doc_range[d + 1]
                 nUniqueInDoc = dstop - dstart
                 idct_list = ["%d:%d" % (word_id[n], self.word_count[n])
-                             for n in xrange(dstart, dstop)]
+                             for n in range(dstart, dstop)]
                 if hasattr(self, 'Yr'):
                     docstr = "%d %.4f %s" % (
                         nUniqueInDoc, self.Yr[d], ' '.join(idct_list))
@@ -1214,14 +1214,14 @@ class BagOfWordsData(DataObj):
 
         MatVars = dict()
         MatVars['tokensByDoc'] = np.empty((1, self.nDoc), dtype=object)
-        for d in xrange(self.nDoc):
+        for d in range(self.nDoc):
             start = self.doc_range[d]
             stop = self.doc_range[d + 1]
             nTokens = np.sum(self.word_count[start:stop])
             tokenvec = np.zeros(nTokens, dtype=word_id.dtype)
 
             a = 0
-            for n in xrange(start, stop):
+            for n in range(start, stop):
                 tokenvec[a:a + self.word_count[n]] = word_id[n]
                 a += self.word_count[n]
 
@@ -1368,8 +1368,8 @@ def processLine_ldac__splitandzip(line):
     """
     Fields = line.strip().split(' ')
     nUnique = int(Fields[0])
-    doc_word_id, doc_word_ct = zip(
-        *[x.split(':') for x in Fields[1:]])
+    doc_word_id, doc_word_ct = list(zip(
+        *[x.split(':') for x in Fields[1:]]))
     return nUnique, doc_word_id, doc_word_ct
 
 

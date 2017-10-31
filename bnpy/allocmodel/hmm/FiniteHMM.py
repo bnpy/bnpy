@@ -1,6 +1,6 @@
 import numpy as np
 
-import HMMUtil
+from . import HMMUtil
 from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
 from bnpy.util import digamma, gammaln, as2D
@@ -151,7 +151,7 @@ class FiniteHMM(AllocModel):
         logMargPr = np.empty(Data.nDoc)
         resp = np.empty((Data.nObs, K))
         respPair = np.zeros((Data.nObs, K, K))
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             logSoftEv_n = logSoftEv[start:stop]
@@ -189,7 +189,7 @@ class FiniteHMM(AllocModel):
 
         # Loop over each sequence,
         # and define pair-wise responsibilities via an outer-product
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             R = resp[start:stop]

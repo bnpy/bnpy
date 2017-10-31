@@ -19,7 +19,7 @@ def main(nBatch=100, nSetupLaps=1, targetUID=0, **kwargs):
     SS = None
     SSmemory = dict()
     for lap in range(nSetupLaps):
-        for batchID in xrange(nBatch):
+        for batchID in range(nBatch):
             Dbatch = DataIterator.getBatch(batchID)
 
             LPbatch = hmodel.calc_local_params(Dbatch)
@@ -34,8 +34,8 @@ def main(nBatch=100, nSetupLaps=1, targetUID=0, **kwargs):
             else:
                 SS += SSbatch
 
-    for batchID in xrange(nBatch):
-        print 'batch %d/%d' % (batchID+1, nBatch)
+    for batchID in range(nBatch):
+        print('batch %d/%d' % (batchID+1, nBatch))
         Dbatch = DataIterator.getBatch(batchID)
 
         LPbatch = hmodel.calc_local_params(Dbatch)
@@ -75,14 +75,14 @@ def main(nBatch=100, nSetupLaps=1, targetUID=0, **kwargs):
             propModel.update_global_params(propSS)
             propLscore = propModel.calc_evidence(SS=propSS)
     
-            print propSS.N
-            print ' cursize %.1f   propsize %.1f' % (SS.N.sum(), propSS.N.sum())
-            print ' curLscore %.3f' % (curLscore)
-            print 'propLscore %.3f' % (propLscore)
+            print(propSS.N)
+            print(' cursize %.1f   propsize %.1f' % (SS.N.sum(), propSS.N.sum()))
+            print(' curLscore %.3f' % (curLscore))
+            print('propLscore %.3f' % (propLscore))
             if propLscore > curLscore:
-                print 'ACCEPTED!'
+                print('ACCEPTED!')
             else:
-                print 'REJECTED <<<<<<<<<< :('
+                print('REJECTED <<<<<<<<<< :(')
 
 if __name__ == '__main__':
     main()

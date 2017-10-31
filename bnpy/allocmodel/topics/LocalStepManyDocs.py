@@ -5,10 +5,10 @@ import time
 from scipy.special import digamma, gammaln
 import scipy.sparse
 
-import LocalStepLogger
+from . import LocalStepLogger
 from bnpy.util import NumericUtil
-from LocalStepSingleDoc import calcLocalParams_SingleDoc
-from LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
+from .LocalStepSingleDoc import calcLocalParams_SingleDoc
+from .LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
 
 from bnpy.util.SparseRespUtil \
     import fillInDocTopicCountFromSparseResp, sparsifyResp, sparsifyLogResp
@@ -101,7 +101,7 @@ def calcLocalParams(
         AggInfo['nRestartsAccepted'] = None
         AggInfo['nRestartsTried'] = None
 
-    for d in xrange(nDoc):
+    for d in range(nDoc):
         start = Data.doc_range[cslice[0] + d]
         stop = Data.doc_range[cslice[0] + d + 1]
         if hasattr(Data, 'word_count') and obsModelName.count('Bern'):
@@ -255,13 +255,13 @@ def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde,
     if N > Data.doc_range[-1]:
         assert N == nDoc * Data.vocab_size
         # Bernoulli naive case. Quite slow!
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             rstart = d * Data.vocab_size
             rstop = (d+1) * Data.vocab_size
             LP['resp'][rstart:rstop] *= Prior[d]
     else:
         # Usual case. Quite fast!
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             start = Data.doc_range[cslice[0] + d] - slice_start
             stop = Data.doc_range[cslice[0] + d + 1] - slice_start
             LP['resp'][start:stop] *= Prior[d]
@@ -357,7 +357,7 @@ def updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data):
         * maxDiff : 1D array, nDoc
         * iter : 1D array, nDoc
     """
-    if len(AggInfo.keys()) == 0:
+    if len(list(AggInfo.keys())) == 0:
         AggInfo['maxDiff'] = np.zeros(Data.nDoc)
         AggInfo['iter'] = np.zeros(Data.nDoc, dtype=np.int32)
 

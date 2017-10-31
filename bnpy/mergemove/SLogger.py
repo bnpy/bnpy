@@ -28,7 +28,7 @@ def pprint(msg, level=None, prefix='', linewidth=80):
         return
 
     if level == 'print':
-        print msg
+        print(msg)
     if Log is None:
         return
     if level is None:

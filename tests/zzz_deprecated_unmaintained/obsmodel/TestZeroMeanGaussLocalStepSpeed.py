@@ -14,16 +14,16 @@ def measureTime(f, nTrial=3):
             end = time.time()
             times.append(end-start)
             if rep == 0:
-                print "trial  %2d/%2d: %.3f sec %s" % (
-                    rep+1, nTrial, times[-1], f.__name__)
+                print("trial  %2d/%2d: %.3f sec %s" % (
+                    rep+1, nTrial, times[-1], f.__name__))
             else:
-                print "trial  %2d/%2d: %.3f sec" % (
-                    rep+1, nTrial, times[-1])
-        print "mean   of %2d: %.3f sec" % (
-            nTrial, np.mean(times))
-        print "median of %2d: %.3f sec" % (
-            nTrial, np.median(times))
-        print ''
+                print("trial  %2d/%2d: %.3f sec" % (
+                    rep+1, nTrial, times[-1]))
+        print("mean   of %2d: %.3f sec" % (
+            nTrial, np.mean(times)))
+        print("median of %2d: %.3f sec" % (
+            nTrial, np.median(times)))
+        print('')
         return result
     return f_timer
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     N = args.N
     D = args.D
 
-    print "TIMING TEST: N=%d D=%d" % (N, D)
+    print("TIMING TEST: N=%d D=%d" % (N, D))
     X = np.random.randn(N, D)
     R = np.random.randn(D, D)
     B = np.dot(R.T, R) + np.eye(D, D)

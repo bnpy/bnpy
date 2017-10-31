@@ -65,7 +65,7 @@ def genToyData(seed=1234, nPerState=20):
 
     X = np.zeros((K * nPerState, D))
     Z = np.zeros(K * nPerState)
-    for k in xrange(K):
+    for k in range(K):
         start = k * nPerState
         stop = (k + 1) * nPerState
 

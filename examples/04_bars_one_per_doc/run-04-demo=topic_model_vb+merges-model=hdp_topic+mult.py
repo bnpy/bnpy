@@ -60,7 +60,7 @@ trained_model, info_dict = bnpy.run(
     K=10, initname='randomlikewang',
     alpha=0.5, lam=0.1,
     moves='merge,shuffle',
-    **dict(merge_kwargs.items() + local_step_kwargs.items()))
+    **dict(list(merge_kwargs.items()) + list(local_step_kwargs.items())))
 
 ###############################################################################
 #

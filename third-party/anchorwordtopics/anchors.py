@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 import numpy as np
 import sys
@@ -12,7 +12,7 @@ def findAnchors(Q, K, params, candidates):
 
     # row normalize Q
     row_sums = Q.sum(axis=1)
-    for i in xrange(len(Q[:, 0])):
+    for i in range(len(Q[:, 0])):
         Q[i, :] = Q[i, :]/float(row_sums[i] + 1e-100)    
 
     # Reduced dimension random projection method for recovering anchor words
@@ -26,7 +26,7 @@ def findAnchors(Q, K, params, candidates):
     (anchors, anchor_indices) = gs.Projection_Find(Q_red, K, candidates)
 
     # restore the original Q
-    for i in xrange(len(Q[:, 0])):
+    for i in range(len(Q[:, 0])):
         Q[i, :] = Q[i, :]*float(row_sums[i])
 
     return anchor_indices

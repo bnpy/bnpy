@@ -28,7 +28,7 @@ def get_data(seed=123, nDocTotal=32, T=1000,
 
     nUsedStates = len(np.unique(Z))
     if nUsedStates < K:
-        print 'WARNING: NOT ALL TRUE STATES USED IN GENERATED DATA'
+        print('WARNING: NOT ALL TRUE STATES USED IN GENERATED DATA')
 
     Data = GroupXData(X=X, doc_range=doc_range, TrueZ=Z)
     Data.name = get_short_name()
@@ -87,7 +87,7 @@ def get_X(seed, T, nDocTotal):
     doc_range = np.zeros(nDocTotal + 1, dtype=np.int32)
     # Each iteration generates one time-series/sequence
     # with starting state deterministically rotating among all states
-    for i in xrange(nDocTotal):
+    for i in range(nDocTotal):
         Z = list()
         X = list()
         initState = i % K
@@ -95,8 +95,8 @@ def get_X(seed, T, nDocTotal):
                                          sigmas[initState, :, :])
         Z.append(initState)
         X.append(initX)
-        for j in xrange(T - 1):
-            nextState = prng.choice(xrange(K), p=transPi[Z[j]])
+        for j in range(T - 1):
+            nextState = prng.choice(range(K), p=transPi[Z[j]])
 
             nextX = prng.multivariate_normal(mus[nextState, :],
                                              sigmas[nextState, :, :])
@@ -132,7 +132,7 @@ def illustrate(Colors=Colors):
     import bnpy
 
     Data = get_data(T=1000, nDocTotal=8)
-    for k in xrange(K):
+    for k in range(K):
         zmask = Data.TrueParams['Z'] == k
         pylab.plot(Data.X[zmask, 0], Data.X[zmask, 1], '.', color=Colors[k],
                    markeredgecolor=Colors[k],
@@ -154,7 +154,7 @@ def illustrate(Colors=Colors):
             ty = 0 - mus[k, 1]
             xy = (mus[k, 0] - 0.2 * tx, mus[k, 1] - 0.2 * ty)
             '''
-            pylab.annotate( u'\u27F2',
+            pylab.annotate( u'\\u27F2',
                       xy=(mus[k,0], mus[k,1]),
                      color=Colors[k],
                      fontsize=35,

@@ -89,9 +89,9 @@ trained_model, info_dict = bnpy.run(
     K=3, initname='randomlikewang',
     alpha=0.5, lam=0.1,
     moves='birth,merge,shuffle',
-    **dict(merge_kwargs.items() +
-           local_step_kwargs.items() + 
-           birth_kwargs.items()))
+    **dict(list(merge_kwargs.items()) +
+           list(local_step_kwargs.items()) + 
+           list(birth_kwargs.items())))
 
 show_bars_over_time(info_dict['task_output_path'])
 

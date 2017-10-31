@@ -1,5 +1,5 @@
 import numpy as np
-import HMMUtil
+from . import HMMUtil
 from bnpy.util import digamma, gammaln
 from bnpy.util.StickBreakUtil import rho2beta
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir

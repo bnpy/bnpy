@@ -334,7 +334,7 @@ def find_optimum(
         approx_grad=approx_grad,
         disp=None,
         )
-    fminPossibleKwargs = set(scipy.optimize.fmin_l_bfgs_b.func_code.co_varnames)
+    fminPossibleKwargs = set(scipy.optimize.fmin_l_bfgs_b.__code__.co_varnames)
     for key in kwargs:
         if key in fminPossibleKwargs:
             fminKwargs[key] = kwargs[key]
@@ -608,7 +608,7 @@ def calc_fgrid(o_grid=None, o_pos=None,
         assert o_pos >= 0 and o_pos < K
         f_grid = np.zeros_like(o_grid)
         omega_n = omega.copy()
-        for n in xrange(o_grid.size):
+        for n in range(o_grid.size):
             omega_n[o_pos] = o_grid[n]
             f_grid[n] = negL_omega(rho=rho, omega=omega_n,
                 approx_grad=1, **kwargs)
@@ -616,7 +616,7 @@ def calc_fgrid(o_grid=None, o_pos=None,
         assert r_pos >= 0 and r_pos < K
         f_grid = np.zeros_like(r_grid)
         rho_n = rho.copy()
-        for n in xrange(r_grid.size):
+        for n in range(r_grid.size):
             rho_n[o_pos] = r_grid[n]
             f_grid[n] = negL_rho(rho=rho_n, omega=omega,
                 approx_grad=1, **kwargs)
@@ -645,11 +645,11 @@ def negL_rhoomega_viaHDPTopicUtil(
     '''
     K = rho.size
 
-    from HDPTopicUtil import L_alloc
+    from .HDPTopicUtil import L_alloc
     Ldict = L_alloc(todict=1, 
         rho=rho, omega=omega, nDoc=nDoc, alpha=alpha, gamma=gamma)
 
-    from HDPTopicUtil import calcELBO_NonlinearTerms
+    from .HDPTopicUtil import calcELBO_NonlinearTerms
     Ldict2 = calcELBO_NonlinearTerms(todict=1, 
         rho=rho,
         alpha=alpha,

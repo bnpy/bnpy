@@ -9,7 +9,7 @@ import numpy as np
 from bnpy.data import XData
 from bnpy.suffstats import SuffStatBag
 from scipy.cluster.vq import kmeans2
-from FromTruth import convertLPFromHardToSoft
+from .FromTruth import convertLPFromHardToSoft
 
 def init_global_params(obsModel, Data, K=0, seed=0,
                        initname='randexamples',
@@ -43,7 +43,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         #    then component params by M-step given those single items
         resp = np.zeros((Data.nObs, K))
         permIDs = PRNG.permutation(Data.nObs).tolist()
-        for k in xrange(K):
+        for k in range(K):
             resp[permIDs[k], k] = 1.0
 
     elif initname == 'randexamplesbydist':
@@ -60,7 +60,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
             objID = PRNG.choice(Data.nObs, p=minDistVec / minDistVec.sum())
             chosenObjIDs.append(objID)
         resp = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             resp[chosenObjIDs[k], k] = 1.0
 
     elif initname == 'randcontigblocks':
@@ -74,7 +74,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         docIDs = np.arange(nDoc)
         PRNG.shuffle(docIDs)
         resp = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             n = docIDs[k % nDoc]
             start = doc_range[n]
             stop = doc_range[n + 1]
@@ -107,7 +107,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         np.random.seed(seed)
         centroids, labels = kmeans2(data=Data.X, k=K, minit='points')
         resp = np.zeros((Data.nObs, K))
-        for t in xrange(Data.nObs):
+        for t in range(Data.nObs):
             resp[t, labels[t]] = 1
 
     else:
@@ -247,7 +247,7 @@ def calcBregDiv_ZeroMeanGauss(X, Mu):
     K = Mu.shape[0]
     Div = np.zeros((N, K))
     logdetX = np.log(np.square(X) + 1e-100).sum(axis=1)
-    for k in xrange(K):
+    for k in range(K):
         # cholMu_k is a lower-triangular matrix
         cholMu_k = np.linalg.cholesky(Mu[k])
         logdetMu_k = 2 * np.sum(np.log(np.diag(cholMu_k)))

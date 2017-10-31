@@ -14,7 +14,7 @@ import logging
 import os
 import sys
 import scipy.io
-import ElapsedTimeLogger
+from . import ElapsedTimeLogger
 
 from sklearn.externals import joblib
 from bnpy.ioutil import ModelWriter
@@ -66,7 +66,7 @@ class LearnAlg(object):
         self.status = 'active. not converged.'
 
         self.algParamsLP = dict()
-        for k, v in algParams.items():
+        for k, v in list(algParams.items()):
             if k.count('LP') > 0:
                 self.algParamsLP[k] = v
 
@@ -515,7 +515,7 @@ def makeDictOfAllWorkspaceVars(**kwargs):
         kwargs['learnAlg'] = kwargs.pop('self')
     if 'lap' in kwargs:
         kwargs['lapFrac'] = kwargs['lap']
-    for key in kwargs.keys():
+    for key in list(kwargs.keys()):
         if key.startswith('_'):
             kwargs.pop(key)
     return kwargs

@@ -13,7 +13,7 @@ def getCurMemCost_MiB():
 def pprintCurMemCost(label=''):
     # return the memory usage in MB
     mem_MiB = getCurMemCost
-    print "%.3f MiB | %s" % (mem_MiB, label)
+    print("%.3f MiB | %s" % (mem_MiB, label))
 
 # Configure PYTHONPATH before importing any bnpy modules
 ROOT_PATH = os.path.sep.join(
@@ -24,24 +24,24 @@ ROOT_PATH = os.path.sep.join(
 
 DATASET_PATH = os.path.join(ROOT_PATH, 'bnpy/datasets/')
 
-import data
-import suffstats
-import util
+from . import data
+from . import suffstats
+from . import util
 
-import allocmodel
-import obsmodel
-from HModel import HModel
+from . import allocmodel
+from . import obsmodel
+from .HModel import HModel
 
-import ioutil
-import init
-import learnalg
-import birthmove
-import mergemove
-import deletemove
+from . import ioutil
+from . import init
+from . import learnalg
+from . import birthmove
+from . import mergemove
+from . import deletemove
 
-import callbacks
+from . import callbacks
 
-import Run
+from . import Run
 
 # Convenient aliases to existing functions
 run = Run.run
@@ -56,9 +56,9 @@ __all__ = ['run', 'Run', 'learnalg', 'allocmodel', 'obsmodel', 'suffstats',
 # Optional viz package for plotting
 try:
     from matplotlib import pylab
-    import viz
+    from . import viz
     __all__.append('viz')
 except ImportError:
-    print "Error importing matplotlib. Plotting disabled."
-    print "Fix by making sure this produces a figure window on your system"
-    print " >>> from matplotlib import pylab; pylab.figure(); pylab.show();"
+    print("Error importing matplotlib. Plotting disabled.")
+    print("Fix by making sure this produces a figure window on your system")
+    print(" >>> from matplotlib import pylab; pylab.figure(); pylab.show();")

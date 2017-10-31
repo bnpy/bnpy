@@ -8,10 +8,10 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D, toCArray
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcSpRXXT
-from AbstractObsModel import AbstractObsModel
+from .AbstractObsModel import AbstractObsModel
 
-import GaussRegressYFromFixedXObsModel as RegressY
-import DiagGaussObsModel as DiagGaussX
+from . import GaussRegressYFromFixedXObsModel as RegressY
+from . import DiagGaussObsModel as DiagGaussX
 
 class GaussRegressYFromDiagGaussXObsModel(AbstractObsModel):
 

@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from ParamBag import ParamBag
+from .ParamBag import ParamBag
 
 
 class SuffStatBag(object):
@@ -428,7 +428,7 @@ class SuffStatBag(object):
 
             # Remove any other pairs related to kA, kB
             if self.hasMergeTerms():
-                for key, dims in self._MergeTerms._FieldDims.items():
+                for key, dims in list(self._MergeTerms._FieldDims.items()):
                     mArr = getattr(self._MergeTerms, key)
                     if dims[0] == 'M':
                         mArr = mArr[keepRowIDs]
@@ -442,7 +442,7 @@ class SuffStatBag(object):
         Every key, arr pair in _Fields will have size K, as before.
         The array will have entries related to component kA overwritten.
         '''
-        for key, dims in self._Fields._FieldDims.items():
+        for key, dims in list(self._Fields._FieldDims.items()):
             if key in fieldsToIgnore:
                 continue
             if dims is not None and dims != ():
@@ -478,7 +478,7 @@ class SuffStatBag(object):
         The array will have entries related to component kA overwritten.
         '''
         if self.hasELBOTerms():
-            for key, dims in self._ELBOTerms._FieldDims.items():
+            for key, dims in list(self._ELBOTerms._FieldDims.items()):
                 if not self.hasMergeTerm(key):
                     continue
 
@@ -508,7 +508,7 @@ class SuffStatBag(object):
         ''' Make terms tracked for kA incompatible for future merges.
         '''
         if self.hasMergeTerms():
-            for key, dims in self._MergeTerms._FieldDims.items():
+            for key, dims in list(self._MergeTerms._FieldDims.items()):
                 mArr = getattr(self._MergeTerms, key)
                 if dims == ('K', 'K'):
                     mArr[kA, kA + 1:] = np.nan
@@ -525,7 +525,7 @@ class SuffStatBag(object):
         ''' Update terms at index kA.
         '''
         if self.hasSelectionTerms():
-            for key, dims in self._SelectTerms._FieldDims.items():
+            for key, dims in list(self._SelectTerms._FieldDims.items()):
                 mArr = getattr(self._SelectTerms, key)
                 if dims == ('K', 'K'):
                     ab = mArr[kB, kB] + 2 * mArr[kA, kB] + mArr[kA, kA]
@@ -586,7 +586,7 @@ class SuffStatBag(object):
         for uid in replaceUIDs:
             replace_ids.append(self.uid2k(uid))
 
-        for key, dims in self._Fields._FieldDims.items():
+        for key, dims in list(self._Fields._FieldDims.items()):
             if dims is None:
                 continue
             assert dims[0] == 'K' and 'K' not in dims[1:]
@@ -594,7 +594,7 @@ class SuffStatBag(object):
             arr[replace_ids] = getattr(replaceSS._Fields, key)
 
         if self.hasELBOTerms():
-            for key, dims in self._ELBOTerms._FieldDims.items():
+            for key, dims in list(self._ELBOTerms._FieldDims.items()):
                 if dims is None:
                     continue
                 assert dims[0] == 'K' and 'K' not in dims[1:]
@@ -640,7 +640,7 @@ class SuffStatBag(object):
         k = self.uid2k(uid)
 
         # Decrement Fields terms
-        for key, dims in self._Fields._FieldDims.items():
+        for key, dims in list(self._Fields._FieldDims.items()):
             arr = getattr(self._Fields, key)
             if dims is None:
                 pass
@@ -654,7 +654,7 @@ class SuffStatBag(object):
                 else:
                     arr[k] -= getattr(xSS, key).sum(axis=0)
         # Decrement ELBO terms
-        for key, dims in self._ELBOTerms._FieldDims.items():
+        for key, dims in list(self._ELBOTerms._FieldDims.items()):
             arr = getattr(self._ELBOTerms, key)
             if dims is None:
                 pass

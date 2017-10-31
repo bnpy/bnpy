@@ -124,7 +124,7 @@ class DataIterator(object):
         shuffleIDs = PRNG.permutation(nUnit).tolist()
         self.DataPerBatch = list()
         self.IDsPerBatch = list()
-        for b in xrange(nBatch):
+        for b in range(nBatch):
             curBatchMask = shuffleIDs[:nUnitPerBatch[b]]
             Dchunk = Data.make_subset(
                 curBatchMask, doTrackTruth=alwaysTrackTruth)
@@ -236,7 +236,7 @@ class DataIterator(object):
         ''' Create dict with copies of raw data as shared memory arrays
         '''
         dataShMemDict = dict()
-        for batchID in xrange(self.nBatch):
+        for batchID in range(self.nBatch):
             BatchData = self.DataPerBatch[batchID]
             ShMem = self.DataPerBatch[batchID].getRawDataAsSharedMemDict()
             dataShMemDict[batchID] = ShMem

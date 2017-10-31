@@ -241,7 +241,7 @@ class HDPSB(AllocModel):
     resp = LP['resp']
     K = resp.shape[1]
     DocTopicCount = np.zeros( (Data.nDoc, K))
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
       start = Data.doc_range[d]
       stop = Data.doc_range[d+1]
       if hasattr(Data, 'word_count'):

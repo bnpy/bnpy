@@ -242,7 +242,7 @@ class HDPDir(AllocModel):
     resp = LP['resp']
     K = resp.shape[1]
     DocTopicCount = np.zeros( (Data.nDoc, K))
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
       start = Data.doc_range[d]
       stop = Data.doc_range[d+1]
       if hasattr(Data, 'word_count'):
@@ -312,7 +312,7 @@ class HDPDir(AllocModel):
     for docID in docIDs:
       start = Data.doc_range[docID]
       stop  = Data.doc_range[docID+1]
-      subsetTokenIDs.extend(range(start,stop))
+      subsetTokenIDs.extend(list(range(start,stop)))
     subsetLP['resp'] = LP['resp'][subsetTokenIDs].copy()
     return subsetLP
 
@@ -845,7 +845,7 @@ def c_Dir__big(AMat, arem):
 
 def c_Dir__slow(AMat, arem):
   c = 0
-  for d in xrange(AMat.shape[0]):
+  for d in range(AMat.shape[0]):
     avec = np.hstack([AMat[d], arem])
     c += gammaln(np.sum(avec)) - np.sum(gammaln(avec))
   return c

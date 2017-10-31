@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 
 def Projection_Find(M_orig, r, candidates):

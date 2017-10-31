@@ -1,5 +1,5 @@
 import numpy as np
-import BLogger
+from . import BLogger
 
 from bnpy.allocmodel.mix.DPMixtureRestrictedLocalStep import \
     summarizeRestrictedLocalStep_DPMixtureModel, \

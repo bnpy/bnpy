@@ -372,19 +372,19 @@ if __name__ == '__main__':
             trueN_d = np.dot(cts_d, Data.TrueParams['resp'][start_d:stop_d])
             truePi_d = (trueN_d + alpha)
             truePi_d /= truePi_d.sum()
-            print ''
-            print "     True Pi[%d]:\n %s" % (d, pi2str(truePi_d))
+            print('')
+            print("     True Pi[%d]:\n %s" % (d, pi2str(truePi_d)))
 
         numPi_d, numf, numInfo = estimatePi2(ids_d, cts_d, topics, alpha,
             scale=1.0, #/np.sum(cts_d),
             approx_grad=True)
-        print "Numerical Pi[%d]:\n %s" % (d, pi2str(numPi_d))
+        print("Numerical Pi[%d]:\n %s" % (d, pi2str(numPi_d)))
 
         estPi_d, f, Info = estimatePi2(ids_d, cts_d, topics, alpha,
             scale=1.0, #/np.sum(cts_d))
             approx_grad=False,
             )
-        print "Estimated Pi[%d]:\n %s" % (d, pi2str(estPi_d))
+        print("Estimated Pi[%d]:\n %s" % (d, pi2str(estPi_d)))
 
         
         PRNG = np.random.RandomState(d)
@@ -399,9 +399,9 @@ if __name__ == '__main__':
             if np.allclose(estPi_d, estPiFromRand, rtol=0, atol=atol):
                 nMatch += 1
             else:
-                print "initrandom Pi[%d]:\n %s" % (
-                    d, pi2str(estPiFromRand))
-                print f
-                print f2
-        print "%d/%d random inits within %s" % (nMatch, nRep, atol)
+                print("initrandom Pi[%d]:\n %s" % (
+                    d, pi2str(estPiFromRand)))
+                print(f)
+                print(f2)
+        print("%d/%d random inits within %s" % (nMatch, nRep, atol))
         

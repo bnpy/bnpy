@@ -98,7 +98,7 @@ def loadFromPlainTextFiles(dpath):
     Xprev = np.vstack(allXprevList)
     Z = np.hstack(keepZList)
 
-    for seqID in xrange(doc_range.size - 1):
+    for seqID in range(doc_range.size - 1):
         start = doc_range[seqID]
         stop = doc_range[seqID + 1]
         assert np.allclose(X[start:stop - 1], Xprev[start + 1:stop])

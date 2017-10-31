@@ -35,7 +35,7 @@ class GSAlg(LearnAlg):
         SS = hmodel.get_global_suff_stats(Data, LP)
 
         self.set_start_time_now()
-        for iterid in xrange(self.algParams['nLap'] + 1):
+        for iterid in range(self.algParams['nLap'] + 1):
             lap = self.algParams['startLap'] + iterid
             self.set_random_seed_at_lap(lap)
 

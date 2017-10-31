@@ -7,7 +7,7 @@ import numpy as np
 import sys
 import os
 import itertools
-import MLogger
+from . import MLogger
 from collections import defaultdict
 from bnpy.viz.PrintTopics import vec2str, count2str
 
@@ -41,7 +41,7 @@ def selectCandidateMergePairs(hmodel, SS,
     if 'b_shortlistUIDs' in MovePlans:
         for uid in MovePlans['b_shortlistUIDs']:
             uidUsageCount[uid] = 10 * m_maxNumPairsContainingComp
-    nDisqualified = len(uidUsageCount.keys())
+    nDisqualified = len(list(uidUsageCount.keys()))
     MLogger.pprint(
         "   %d/%d UIDs ineligible because on shortlist for births. " % (
             nDisqualified, SS.K),
@@ -49,7 +49,7 @@ def selectCandidateMergePairs(hmodel, SS,
     if nDisqualified > 0:
         MLogger.pprint(
             "   Ineligible UIDs:" + \
-                vec2str(uidUsageCount.keys()),
+                vec2str(list(uidUsageCount.keys())),
             'debug')
 
     uid2k = dict()

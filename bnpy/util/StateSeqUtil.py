@@ -50,7 +50,7 @@ def calcHammingDistance(zTrue, zHat, excludeNegLabels=1, verbose=0,
         good_tstep_mask = zTrue >= 0
         nGood = np.sum(good_tstep_mask)
         if verbose and np.sum(good_tstep_mask) < zTrue.size:
-            print 'EXCLUDED %d/%d timesteps' % (np.sum(zTrue < 0), zTrue.size)
+            print('EXCLUDED %d/%d timesteps' % (np.sum(zTrue < 0), zTrue.size))
         dist = np.sum(zTrue[good_tstep_mask] != zHat[good_tstep_mask])
         dist = dist/float(nGood)
     else:
@@ -81,8 +81,8 @@ def buildCostMatrix(zHat, zTrue):
     Kest = int(np.max(zHat)) + 1
     K = np.maximum(Ktrue, Kest)
     CostMatrix = np.zeros((K, K))
-    for ktrue in xrange(K):
-        for kest in xrange(K):
+    for ktrue in range(K):
+        for kest in range(K):
             CostMatrix[ktrue, kest] = np.sum(np.logical_and(zTrue == ktrue,
                                                             zHat != kest))
     return CostMatrix
@@ -175,7 +175,7 @@ def convertStateSeq_flat2list(zFlat, Data):
     ''' Convert flat, 1D array representation of multiple sequences to list
     '''
     zListBySeq = list()
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
         zListBySeq.append(zFlat[start:stop])
@@ -186,7 +186,7 @@ def convertStateSeq_list2flat(zListBySeq, Data):
     ''' Convert nested list representation of multiple sequences to 1D array
     '''
     zFlat = np.zeros(Data.doc_range[-1])
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
         zFlat[start:stop] = zListBySeq[n]
@@ -198,7 +198,7 @@ def convertStateSeq_list2MAT(zListBySeq):
     '''
     N = len(zListBySeq)
     zObjArr = np.zeros((N, 1), dtype=object)
-    for n in xrange(N):
+    for n in range(N):
         zObjArr[n, 0] = np.asarray(
             zListBySeq[n][:, np.newaxis], dtype=np.int32)
     return zObjArr
@@ -207,7 +207,7 @@ def convertStateSeq_list2MAT(zListBySeq):
 def convertStateSeq_MAT2list(zObjArr):
     N = zObjArr.shape[0]
     zListBySeq = list()
-    for n in xrange(N):
+    for n in range(N):
         zListBySeq.append(np.squeeze(zObjArr[n, 0]))
     return zListBySeq
 
@@ -280,12 +280,12 @@ def makeStateColorMap(nTrue=1, nExtra=0, nHighlight=0):
             C.shape[0]))
     C = C[:nTrue] / 255.0
     shadeVals = np.linspace(0.2, 0.95, nExtra)
-    for shadeID in xrange(nExtra):
+    for shadeID in range(nExtra):
         shadeOfRed = np.asarray([shadeVals[shadeID], 0, 0])
         C = np.vstack([C, shadeOfRed[np.newaxis, :]])
 
     highVals = np.linspace(0.3, 1.0, nHighlight)
-    for highID in xrange(nHighlight):
+    for highID in range(nHighlight):
         yellowColor = np.asarray([highVals[highID], highVals[highID], 0])
         C = np.vstack([C, yellowColor[np.newaxis, :]])
 

@@ -24,7 +24,7 @@ def evaluateReconfigWordMoveCandidate_LP(
         doPrecompEntropy=1)
     curModel.update_global_params(curSS)
     curELBO = curModel.calc_evidence(SS=curSS)
-    print ' current ELBO: %.5f' % (curELBO)
+    print(' current ELBO: %.5f' % (curELBO))
 
     # Visualize proposed expansion
     propSS = curModel.get_global_suff_stats(Data, propLP, doPrecompEntropy=1)
@@ -35,8 +35,8 @@ def evaluateReconfigWordMoveCandidate_LP(
         destCompIDs = np.insert(destCompIDs, 0, targetCompID)
     for ctr, kk in enumerate(destCompIDs[1:]):
         mPairIDs.append((kk, Korig+ctr+1))
-    print 'Candidate merge pairs: '
-    print mPairIDs
+    print('Candidate merge pairs: ')
+    print(mPairIDs)
     
     # Create full expansion (including merge terms)
     propSS = propModel.get_global_suff_stats(
@@ -44,18 +44,18 @@ def evaluateReconfigWordMoveCandidate_LP(
         doPrecompEntropy=1, doPrecompMergeEntropy=1, mPairIDs=mPairIDs)
     propModel.update_global_params(propSS)
     propELBO = propModel.calc_evidence(SS=propSS)
-    print 'expanded ELBO: %.5f' % (propELBO)
+    print('expanded ELBO: %.5f' % (propELBO))
     
     # Create final refined model after merging
     finalModel, finalSS, finalELBO, Info = \
         bnpy.mergemove.MergeMove.run_many_merge_moves(
             propModel, propSS, propELBO, mPairIDs)
 
-    print 'Accepted merge pairs: '
-    print Info['AcceptedPairOrigIDs']
+    print('Accepted merge pairs: ')
+    print(Info['AcceptedPairOrigIDs'])
 
     finalELBO = finalModel.calc_evidence(SS=finalSS)
-    print '   final ELBO: %.5f' % (finalELBO)
+    print('   final ELBO: %.5f' % (finalELBO))
     
     return finalModel, dict(
         SS=finalSS,
@@ -202,14 +202,14 @@ def makeReconfigWordPlan(Data, curSS, **kwargs):
     '''
     QMat = Data.getWordTypeCooccurMatrix()
     usedWordsByTopic = [None for k in range(curSS.K)]
-    for k in xrange(curSS.K):
+    for k in range(curSS.K):
         usedWordsByTopic[k] = np.flatnonzero(curSS.WordCounts[k, :] > 10)
 
     bestScore = 0
     targetWordIDs = None
     destCompIDs = None
-    for k in xrange(curSS.K):
-        for kdest in xrange(curSS.K):
+    for k in range(curSS.K):
+        for kdest in range(curSS.K):
             if k == kdest:
                 continue
             in_k_not_kdest = np.setdiff1d(usedWordsByTopic[k],
@@ -276,25 +276,25 @@ if __name__ == '__main__':
             targetCompID=destCompIDs[0],
             )            
 
-    print 'Model is STUCK!'
-    print 'Ideal knowledge of missing words:', args.initDropWordIDs
-    print 'Planned target words: ', Plan['targetWordIDs']
+    print('Model is STUCK!')
+    print('Ideal knowledge of missing words:', args.initDropWordIDs)
+    print('Planned target words: ', Plan['targetWordIDs'])
 
-    print 'curSS counts of target words by topic'
+    print('curSS counts of target words by topic')
     for k in Plan['destCompIDs']:
-        print 'topic %d: %s' % (
-            k, str(curSS.WordCounts[k, Plan['targetWordIDs']]))
+        print('topic %d: %s' % (
+            k, str(curSS.WordCounts[k, Plan['targetWordIDs']])))
 
-    print ''
-    print 'Proposing a candidate set of local parameters...'
+    print('')
+    print('Proposing a candidate set of local parameters...')
     propLP_true = makeReconfigWordMoveCandidate_LP(
         Data, curLP, curModel, 
         proposalName='truelabels', **Plan)
     propModel_true, Result = evaluateReconfigWordMoveCandidate_LP(
         Data, curModel, curLP=curLP, propLP=propLP_true,
         proposalName='truelabels', **Plan)
-    print ''
-    print 'Proposing a candidate set of local parameters...'
+    print('')
+    print('Proposing a candidate set of local parameters...')
     propLP_scratch = makeReconfigWordMoveCandidate_LP(
         Data, curLP, curModel, 
         proposalName='fromscratch', **Plan)
@@ -304,6 +304,6 @@ if __name__ == '__main__':
 
     propSS = Result['SS']
     for k in Plan['destCompIDs']:
-        print 'Topic %d: counts of target words' % (k)
-        print propSS.WordCounts[k, Plan['targetWordIDs']]
+        print('Topic %d: counts of target words' % (k))
+        print(propSS.WordCounts[k, Plan['targetWordIDs']])
 

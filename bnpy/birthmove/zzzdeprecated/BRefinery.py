@@ -64,7 +64,7 @@ def refineCandidateViaLocalGlobalStepsAndDeletes(
     assert propSS.K == propK
 
     # Refine via repeated local/global steps
-    for riter in xrange(bRefineIters):
+    for riter in range(bRefineIters):
         # Increment to full size, and verify
         propSS += propSS_t
         wholeSize = propSS.getCountVec().sum()

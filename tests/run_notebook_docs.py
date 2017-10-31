@@ -9,7 +9,7 @@ from nbconvert.preprocessors.execute import CellExecutionError
 
 def verify_notebook_output(root_path):
     for notebook in glob.glob(os.path.join(root_path, "*.ipynb")):
-        print notebook
+        print(notebook)
         nb, errors = execute_notebook(notebook)
         assert errors == []
 
@@ -39,7 +39,7 @@ def execute_notebook(
             ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
         except CellExecutionError as e:
             if "SKIP" in e.traceback:
-                print(str(e.traceback).split("\n")[-2])
+                print((str(e.traceback).split("\n")[-2]))
             else:
                 raise e
     return nb, errors

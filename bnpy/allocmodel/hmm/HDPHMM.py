@@ -2,9 +2,9 @@ import copy
 import numpy as np
 import logging
 
-import HMMUtil
-from HDPHMMUtil import ELBOTermDimMap, calcELBO
-from HDPHMMUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
+from . import HMMUtil
+from .HDPHMMUtil import ELBOTermDimMap, calcELBO
+from .HDPHMMUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
 
 from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
@@ -127,11 +127,11 @@ class HDPHMM(AllocModel):
             LP['TransCount'] = np.zeros((Data.nDoc, K, K))
         else:
             LP['respPair'] = np.zeros((Data.doc_range[-1], K, K))
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             if limitMemoryLP:
-                for t in xrange(start + 1, stop):
+                for t in range(start + 1, stop):
                     respPair_t = np.outer(
                         LP['resp'][
                             t - 1,
@@ -344,7 +344,7 @@ class HDPHMM(AllocModel):
         # Update theta with recently updated info from suff stats
         self.transTheta, self.startTheta = self._calcTheta(SS)
 
-        for giter in xrange(nGlobalIters):
+        for giter in range(nGlobalIters):
             # Update rho, omega through numerical optimization
             self.rho, self.omega = self.find_optimum_rhoOmega(**kwargs)
             # Update theta again to reflect the new rho, omega
@@ -577,8 +577,8 @@ class HDPHMM(AllocModel):
         ''' Calc matrix of improvement in ELBO for all possible pairs of comps
         '''
         Gap = np.zeros((SS.K, SS.K))
-        for kB in xrange(1, SS.K):
-            for kA in xrange(0, kB):
+        for kB in range(1, SS.K):
+            for kA in range(0, kB):
                 Gap[kA, kB] = self.calcHardMergeGap(SS, kA, kB)
         return Gap
 
@@ -710,7 +710,7 @@ def calcSummaryStats(Data, LP,
     if trackDocUsage:
         # Track how often topic appears in a seq. with mass > thresh.
         DocUsage = np.zeros(K)
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             DocUsage += np.sum(LP['resp'][start:stop], axis=0) > 0.01

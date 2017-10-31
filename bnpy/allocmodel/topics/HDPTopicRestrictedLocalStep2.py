@@ -234,7 +234,7 @@ def restrictedLocalStep_HDPTopicModel(
         assert 'obsModelName' in xLPslice
 
         # Fill in these fields, one doc at a time
-        for d in xrange(Dslice.nDoc):
+        for d in range(Dslice.nDoc):
             xLPslice = restrictedLocalStepForSingleDoc_HDPTopicModel(
                 d=d,
                 Dslice=Dslice,

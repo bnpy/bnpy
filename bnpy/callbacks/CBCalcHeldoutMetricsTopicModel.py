@@ -24,14 +24,14 @@ This interface means that the functions onAlgorithmComplete and onBatchComplete
 defined here will be called at appropriate time in *every* learning algorithm.
 See LearnAlg.py's eval_custom_function for details.
 '''
-from __future__ import print_function
+
 
 import os
 import numpy as np
 import scipy.io
 
-import InferHeldoutTopics
-import HeldoutMetricsLogger
+from . import InferHeldoutTopics
+from . import HeldoutMetricsLogger
 SavedLapSet = set()
 
 def onAlgorithmComplete(**kwargs):

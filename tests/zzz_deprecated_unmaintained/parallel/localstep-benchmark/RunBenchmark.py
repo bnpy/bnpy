@@ -78,7 +78,7 @@ def runBenchmark():
 
     # Evaluate the baseline method (single-thread)
     tstart = time.time()
-    for rep in xrange(kwargs['nRepsForMinDuration']):
+    for rep in range(kwargs['nRepsForMinDuration']):
         SS_baseline = LocalStepUtil_Baseline.calcLocalParamsAndSummarize(
             Data=Data, hmodel=hmodel, 
             **kwargs)
@@ -123,17 +123,17 @@ def printTaskResult(ttotal,
         twork=0, nWorker=0, name='baseline',
         SS=None, showCountVec=0, **kwargs):
     if nWorker == 0:
-        print '%s | %.2f sec total' % (
-            name, ttotal)
+        print('%s | %.2f sec total' % (
+            name, ttotal))
     else:
         msg = '%s: %d workers | %.2f sec total'
         msg += ' | %.2f sec max single worker no overhead'
         msg = msg % (
             name.replace('LocalStepUtil_', ''), nWorker, ttotal, twork)
-        print msg
+        print(msg)
     if SS is not None and showCountVec:
         countVecStr = ' '.join(['%.1f' % (Nk) for Nk in SS.getCountVec()[:10]])
-        print "  countvec ", countVecStr
+        print("  countvec ", countVecStr)
 
 
 def printProblemSpec(
@@ -141,14 +141,14 @@ def printProblemSpec(
         minDurationPerWorker_sec=0, nRepsForMinDuration=0, **kwargs):
     ''' Print out info about how we scale computation to reach min duration.
     '''
-    print 'Task Specification'
-    print '------------------'
-    print 'OMP_NUM_THREADS=%s' % (os.environ['OMP_NUM_THREADS'])
-    print ProblemSpec.pprintProblemSpecStr(**kwargs)
-    print 'Minimum duration per worker: %.1f sec' % (minDurationPerWorker_sec)
-    print 'To achieve min duration, we will repeat each task %d times' % (
-        nRepsForMinDuration)
-    print ''
+    print('Task Specification')
+    print('------------------')
+    print('OMP_NUM_THREADS=%s' % (os.environ['OMP_NUM_THREADS']))
+    print(ProblemSpec.pprintProblemSpecStr(**kwargs))
+    print('Minimum duration per worker: %.1f sec' % (minDurationPerWorker_sec))
+    print('To achieve min duration, we will repeat each task %d times' % (
+        nRepsForMinDuration))
+    print('')
 
 def calcNumRepsForMinDuration(Data=None, hmodel=None, **kwargs):
     ''' Compute number of times to repeat local step to reach minimum duration.
@@ -221,7 +221,7 @@ def rangeFromHyphen(hyphenString):
     myList : list of integers
     '''
     x = [int(x) for x in hyphenString.split('-')]
-    return range(x[0], x[-1] + 1)
+    return list(range(x[0], x[-1] + 1))
 
 if __name__ == '__main__':
     runBenchmark()

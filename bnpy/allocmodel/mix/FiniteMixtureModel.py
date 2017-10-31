@@ -9,7 +9,7 @@ from bnpy.util import NumericUtil
 from bnpy.util import logsumexp
 from bnpy.util import gammaln, digamma
 from bnpy.util.SparseRespUtil import sparsifyLogResp
-from DPMixtureModel import calcSummaryStats, calcHrespFromLP
+from .DPMixtureModel import calcSummaryStats, calcHrespFromLP
 
 class FiniteMixtureModel(AllocModel):
 
@@ -420,7 +420,7 @@ class FiniteMixtureModel(AllocModel):
         '''
         Z = LP['Z']
         # Iteratively sample data allocations
-        for dataindex in xrange(Data.nObs):
+        for dataindex in range(Data.nObs):
             x = Data.X[dataindex]
 
             # de-update current assignment and suff stats

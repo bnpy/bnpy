@@ -91,7 +91,7 @@ def proposeNewResp_bisectExistingBlocks(Z_n, propResp,
             PastAttemptLog['nTryByStateUID'] = dict()
 
         minTry = np.inf
-        for badState, nTry in PastAttemptLog['nTryByStateUID'].items():
+        for badState, nTry in list(PastAttemptLog['nTryByStateUID'].items()):
             if badState in candidateStateUIDs:
                 if nTry < minTry:
                     minTry = nTry
@@ -102,7 +102,7 @@ def proposeNewResp_bisectExistingBlocks(Z_n, propResp,
             candidateStateUIDs = untriedList
         else:
             # Keep only candidates that have been tried the least
-            for badState, nTry in PastAttemptLog['nTryByStateUID'].items():
+            for badState, nTry in list(PastAttemptLog['nTryByStateUID'].items()):
                 # Remove bad State from candidateStateUIDs
                 if badState in candidateStateUIDs:
                     if nTry > minTry:
@@ -157,7 +157,7 @@ def proposeNewResp_bisectExistingBlocks(Z_n, propResp,
 
         # Avoid overlapping with previous attempts that failed
         maxOverlapWithPreviousFailure = 0.0
-        for (preva, prevb), prevm in PastAttemptLog['blocks'].items():
+        for (preva, prevb), prevm in list(PastAttemptLog['blocks'].items()):
             # skip previous attempts that succeed
             if prevm > preva:
                 continue
@@ -188,9 +188,9 @@ def proposeNewResp_bisectExistingBlocks(Z_n, propResp,
 
         PastAttemptLog['blocks'][(a, b)] = bestm
 
-        print 'TARGETING UID: ', PastAttemptLog['uIDs'][blockStates[blockID]]
-        print 'BEST BISECTION CUT: [%4d, %4d, %4d] w/ stride %d' % (
-            a, bestm, b, stride)
+        print('TARGETING UID: ', PastAttemptLog['uIDs'][blockStates[blockID]])
+        print('BEST BISECTION CUT: [%4d, %4d, %4d] w/ stride %d' % (
+            a, bestm, b, stride))
 
         curUID = PastAttemptLog['uIDs'][blockStates[blockID]]
         if bestm == a:
@@ -274,7 +274,7 @@ def proposeNewResp_bisectGrownBlocks(Z_n, propResp,
             PastAttemptLog['nTryByStateUID'] = dict()
 
         minTry = np.inf
-        for badState, nTry in PastAttemptLog['nTryByStateUID'].items():
+        for badState, nTry in list(PastAttemptLog['nTryByStateUID'].items()):
             if badState in candidateStateUIDs:
                 if nTry < minTry:
                     minTry = nTry
@@ -285,7 +285,7 @@ def proposeNewResp_bisectGrownBlocks(Z_n, propResp,
             candidateStateUIDs = untriedList
         else:
             # Keep only candidates that have been tried the least
-            for badState, nTry in PastAttemptLog['nTryByStateUID'].items():
+            for badState, nTry in list(PastAttemptLog['nTryByStateUID'].items()):
                 # Remove bad State from candidateStateUIDs
                 if badState in candidateStateUIDs:
                     if nTry > minTry:
@@ -340,7 +340,7 @@ def proposeNewResp_bisectGrownBlocks(Z_n, propResp,
 
         # Avoid overlapping with previous attempts that failed
         maxOverlapWithPreviousFailure = 0.0
-        for (preva, prevb), prevm in PastAttemptLog['blocks'].items():
+        for (preva, prevb), prevm in list(PastAttemptLog['blocks'].items()):
             # skip previous attempts that succeed
             if prevm > preva:
                 continue
@@ -386,9 +386,9 @@ def proposeNewResp_bisectGrownBlocks(Z_n, propResp,
 
         PastAttemptLog['blocks'][(a, b)] = bestm
 
-        print 'TARGETING UID: ', PastAttemptLog['uIDs'][blockStates[blockID]]
-        print 'BEST BISECTION CUT: [%4d, %4d, %4d] w/ stride %d' % (
-            a, bestm, b, stride)
+        print('TARGETING UID: ', PastAttemptLog['uIDs'][blockStates[blockID]])
+        print('BEST BISECTION CUT: [%4d, %4d, %4d] w/ stride %d' % (
+            a, bestm, b, stride))
 
         if bestm == a:
             if curUID in PastAttemptLog['nTryByStateUID']:
@@ -453,7 +453,7 @@ def proposeNewResp_subdivideExistingBlocks(Z_n, propResp,
 
     candidateStateIDs = list()
     candidateBlockIDsByState = dict()
-    for blockID in xrange(nBlocks):
+    for blockID in range(nBlocks):
         stateID = Z_n[blockStarts[blockID]]
         if blockSizes[blockID] >= minBlockSize:
             candidateStateIDs.append(stateID)
@@ -545,14 +545,14 @@ def proposeNewResp_uniquifyExistingBlocks(Z_n, propResp,
     nBlocks = len(blockSizes)
 
     candidateBlockIDsByState = dict()
-    for blockID in xrange(nBlocks):
+    for blockID in range(nBlocks):
         stateID = Z_n[blockStarts[blockID]]
         if stateID not in candidateBlockIDsByState:
             candidateBlockIDsByState[stateID] = list()
         candidateBlockIDsByState[stateID].append(blockID)
 
     candidateStateIDs = list()
-    for stateID in candidateBlockIDsByState.keys():
+    for stateID in list(candidateBlockIDsByState.keys()):
         hasJustOneBlock = len(candidateBlockIDsByState[stateID]) < 2
         if tempSS is None:
             appearsOnlyInThisSeq = True
@@ -634,7 +634,7 @@ def proposeNewResp_dpmixture(Z_n, propResp,
             PastAttemptLog['nTryByStateUID'] = dict()
 
         minTry = np.inf
-        for badState, nTry in PastAttemptLog['nTryByStateUID'].items():
+        for badState, nTry in list(PastAttemptLog['nTryByStateUID'].items()):
             if badState in candidateStateUIDs:
                 if nTry < minTry:
                     minTry = nTry
@@ -645,7 +645,7 @@ def proposeNewResp_dpmixture(Z_n, propResp,
             candidateStateUIDs = untriedList
         else:
             # Keep only candidates that have been tried the least
-            for badState, nTry in PastAttemptLog['nTryByStateUID'].items():
+            for badState, nTry in list(PastAttemptLog['nTryByStateUID'].items()):
                 # Remove bad State from candidateStateUIDs
                 if badState in candidateStateUIDs:
                     if nTry > minTry:
@@ -697,7 +697,7 @@ def proposeNewResp_dpmixture(Z_n, propResp,
     Kfresh = myHModel.obsModel.K
     mergeIsPromising = True
     while Kfresh > 1 and mergeIsPromising:
-        for vbiter in xrange(nVBIters):
+        for vbiter in range(nVBIters):
             targetLP = myHModel.calc_local_params(targetData)
             targetSS = myHModel.get_global_suff_stats(targetData, targetLP)
             # Delete unnecessarily small comps
@@ -739,11 +739,11 @@ def proposeNewResp_dpmixture(Z_n, propResp,
 
     # Test if we added at least 2 states with mass > 1
     didAddNonEmptyNewStates = np.sum(targetSS.N > 1.0) >= 2
-    print 'dpmixture proposal: targetUID %d didAddNonEmptyNewStates %d' % (
-        chosenStateUID, didAddNonEmptyNewStates)
+    print('dpmixture proposal: targetUID %d didAddNonEmptyNewStates %d' % (
+        chosenStateUID, didAddNonEmptyNewStates))
     if didAddNonEmptyNewStates:
-        print 'NEW STATE MASSES:',
-        print ' '.join(['%5.1f' % (x) for x in targetSS.N])
+        print('NEW STATE MASSES:', end=' ')
+        print(' '.join(['%5.1f' % (x) for x in targetSS.N]))
         PastAttemptLog['nTryByStateUID'][chosenStateUID] = 0  # success!
     else:
         if chosenStateUID in PastAttemptLog['nTryByStateUID']:

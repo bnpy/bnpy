@@ -22,9 +22,9 @@ import numpy as np
 import os
 import copy
 
-import init
-from allocmodel import AllocModelConstructorsByName
-from obsmodel import ObsModelConstructorsByName
+from . import init
+from .allocmodel import AllocModelConstructorsByName
+from .obsmodel import ObsModelConstructorsByName
 from bnpy.learnalg import ElapsedTimeLogger
 
 class HModel(object):
@@ -162,7 +162,7 @@ class HModel(object):
             # Identify unique keys, ignoring subdivided terms
             # eg Lalloc_top_term1 and Lalloc_top_term2 are not counted,
             # since we expect they are already aggregated in term Lalloc
-            ukeys = list(set([key.split('_')[0] for key in evA.keys()]))
+            ukeys = list(set([key.split('_')[0] for key in list(evA.keys())]))
             evA['Ltotal'] = sum([evA[key] for key in ukeys])
             return evA
         else:

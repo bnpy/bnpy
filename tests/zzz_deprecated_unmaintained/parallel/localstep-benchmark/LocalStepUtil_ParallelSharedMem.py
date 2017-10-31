@@ -141,7 +141,7 @@ class Worker_SHMData_SHMModel(multiprocessing.Process):
                 sharedMemDictToNumpy(self.ShMem['oSharedMem']))
 
             tstart = time.time()
-            for rep in xrange(self.nReps):
+            for rep in range(self.nReps):
                 # Do local step
                 LP = self.funcH['o_calcLocalParams'](Dslice, **LPkwargs)
                 LP = self.funcH['a_calcLocalParams'](Dslice, LP, **LPkwargs)

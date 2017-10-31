@@ -80,7 +80,7 @@ def summarizeRestrictedLocalStep_HDPTopicModel(
             LPb=xLPslice, SSb=xSSslice, 
             mUIDPairs=mUIDPairs)
         xSSslice.setMergeUIDPairs(mUIDPairs)
-        for key, arr in Mdict.items():
+        for key, arr in list(Mdict.items()):
             xSSslice.setMergeTerm(key, arr, dims='M')
     # Prepare dict of info for debugging/inspection
     Info = dict()
@@ -139,12 +139,12 @@ def restrictedLocalStep_HDPTopicModel(
         restrictedLocalStepForSingleDoc_Func = \
             restrictedLocalStepForSingleDoc_HDPTopicModel
     else:
-        print 'SLOW<<<!!'
+        print('SLOW<<<!!')
         restrictedLocalStepForSingleDoc_Func = \
             restrictedLocalStepForSingleDoc_HDPTopicModel_SlowerButStable
 
     # Fill in these fields, one doc at a time
-    for d in xrange(Dslice.nDoc):
+    for d in range(Dslice.nDoc):
         xLPslice = restrictedLocalStepForSingleDoc_Func(
             d=d,
             Dslice=Dslice,
@@ -300,7 +300,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
         xLPslice['_maxDiff'][d] = maxDiff_d
         # Make proposal resp for relevant atoms in current doc d
         if np.any(np.isnan(xDocTopicCount_d)):
-            print 'WHOA! NaN ALERT'
+            print('WHOA! NaN ALERT')
             # Edge case! Common only when deleting... 
             # Recover from numerical issues in coord ascent
             # by falling back to likelihood only to make resp
@@ -441,7 +441,7 @@ def makeExpansionLPFromZ_HDPTopicModel(
 
     # Create xDocTopicCount
     xDocTopicCount = np.zeros((Dslice.nDoc, Kfresh))
-    for d in xrange(Dslice.nDoc):
+    for d in range(Dslice.nDoc):
         start = Dslice.doc_range[d]
         stop = Dslice.doc_range[d+1]
         if hasattr(Dslice, 'word_id') and \

@@ -50,5 +50,5 @@ def get_test_data(**kwargs):
    
 if __name__ == '__main__':
     Data = get_data()
-    print Data.get_text_summary()
-    print Data.get_stats_summary()
+    print(Data.get_text_summary())
+    print(Data.get_stats_summary())

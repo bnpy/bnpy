@@ -48,7 +48,7 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
             Method 1: directly from local parameters, no precomputed ELBO terms
             Method 2: use precomputed tables in SuffStatsBag
         '''
-        print ''
+        print('')
         ELBOfromSS = self.hmodel.calc_evidence(SS=self.origSS)
         plainSS = self.hmodel.get_global_suff_stats(self.Data, self.origLP)
         ELBOfromLP = self.hmodel.calc_evidence(self.Data, plainSS, self.origLP)
@@ -60,7 +60,7 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         ''' Loop over all tracked merge pairs, and verify ELBO is same
             regardless of which method is used
         '''
-        for mID in xrange(len(self.mPairIDs)):
+        for mID in range(len(self.mPairIDs)):
             self.verify__mergeELBOfromSS_equals_mergeELBOfromLP(mID)
 
     def verify__mergeELBOfromSS_equals_mergeELBOfromLP(self, mID=0):
@@ -69,11 +69,11 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         Method 1: Using tables in suff stats
         Method 2: Using direct construction of the local parameters
         '''
-        print ''
+        print('')
 
         kA = self.mPairIDs[mID][0]
         kB = self.mPairIDs[mID][1]
-        print '@@@ kA=%d kB=%d' % (kA, kB)
+        print('@@@ kA=%d kB=%d' % (kA, kB))
 
         # Method 1: using suff stats tables
         #
@@ -83,8 +83,8 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         propM.update_global_params(propSS)
         propELBO_fromSS = propM.calc_evidence(SS=propSS)
         assert np.isfinite(propELBO_fromSS)
-        print 'propELBO via manipulation of tables stored in SS'
-        print propELBO_fromSS
+        print('propELBO via manipulation of tables stored in SS')
+        print(propELBO_fromSS)
 
         # Method 2 : direct construction of resp, respPair for candidate
         #
@@ -99,8 +99,8 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         newM.update_global_params(newSS)
         propELBO_fromLP = newM.calc_evidence(self.Data, newSS, newLP)
         assert np.isfinite(propELBO_fromLP)
-        print 'propELBO via direct construction of LP'
-        print propELBO_fromLP
+        print('propELBO via direct construction of LP')
+        print(propELBO_fromLP)
 
         assert np.allclose(propELBO_fromLP, propELBO_fromSS)
         assert np.allclose(newSS.N, propSS.N)
@@ -113,8 +113,8 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         '''
         M = len(self.mPairIDs)
         # Try all possible tuples of merge pairs
-        for mID in xrange(M):
-            for mID2 in xrange(M):
+        for mID in range(M):
+            for mID2 in range(M):
                 if mID == mID2:
                     continue
                 if self.mPairIDs[mID][0] in self.mPairIDs[mID2]:
@@ -134,7 +134,7 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         Method 1: Using tables in suff stats
         Method 2: Using direct construction of the local parameters
         '''
-        print ''
+        print('')
 
         kA = self.mPairIDs[mID][0]
         kB = self.mPairIDs[mID][1]
@@ -142,7 +142,7 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         kB2 = self.mPairIDs[mID2][1]
 
         assert len(np.unique([kA, kB, kA2, kB2])) == 4
-        print '@@@ kA=%d kB=%d kA2=%d kB2=%d' % (kA, kB, kA2, kB2)
+        print('@@@ kA=%d kB=%d kA2=%d kB2=%d' % (kA, kB, kA2, kB2))
 
         if kB < kA2:
             kA2 -= 1
@@ -159,8 +159,8 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         propM.update_global_params(propSS)
         propELBO_fromSS = propM.calc_evidence(SS=propSS)
         assert np.isfinite(propELBO_fromSS)
-        print 'propELBO via manipulation of tables stored in SS'
-        print propELBO_fromSS
+        print('propELBO via manipulation of tables stored in SS')
+        print(propELBO_fromSS)
 
         # Method 2 : direct construction of resp, respPair for candidate
         #
@@ -176,21 +176,21 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         newM.update_global_params(newSS)
         propELBO_fromLP = newM.calc_evidence(self.Data, newSS, newLP)
         assert np.isfinite(propELBO_fromLP)
-        print 'propELBO via direct construction of LP'
-        print propELBO_fromLP
+        print('propELBO via direct construction of LP')
+        print(propELBO_fromLP)
 
         assert propELBO_fromLP >= propELBO_fromSS
         assert np.allclose(newSS.N, propSS.N)
         assert np.allclose(newSS.TransStateCount, propSS.TransStateCount)
 
-        print 'Htable from suff stats... should have some zero entries'
-        print propSS.getELBOTerm('Htable')
+        print('Htable from suff stats... should have some zero entries')
+        print(propSS.getELBOTerm('Htable'))
 
     def test__merge_yields_valid_suff_stats_object(self):
         ''' Loop over each possible merge pair that we've tracked,
             and verify that we can merge successfully with that pair
         '''
-        for mID in xrange(len(self.mPairIDs)):
+        for mID in range(len(self.mPairIDs)):
             self.verify__merge_yields_valid_suff_stats_object(mID)
 
     def verify__merge_yields_valid_suff_stats_object(self, mID=0):
@@ -200,7 +200,7 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
             * expected K
             * expected shapes of various fields
         '''
-        print ''
+        print('')
 
         kA = self.mPairIDs[mID][0]
         kB = self.mPairIDs[mID][1]
@@ -211,8 +211,8 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         Knew = Korig - 1
         assert propSS.K == Knew
 
-        print self.origSS.getELBOTerm('Hstart')
-        print propSS.getELBOTerm('Hstart')
+        print(self.origSS.getELBOTerm('Hstart'))
+        print(propSS.getELBOTerm('Hstart'))
 
         assert propSS.getELBOTerm('Hstart').ndim == 1
         assert propSS.getELBOTerm('Hstart').size == Knew
@@ -227,11 +227,11 @@ class TestMergeEntropyCalc_EndToEnd(unittest.TestCase):
         newHtable = HMMUtil.calc_Htable_forMergePair_fromTables(origHtable,
                                                                 Mtable, kA, kB)
 
-        print 'newHTable calculated by SuffStatBag.mergeComps'
-        print propHtable
+        print('newHTable calculated by SuffStatBag.mergeComps')
+        print(propHtable)
 
-        print 'newHtable from HMMUtil'
-        print newHtable
+        print('newHtable from HMMUtil')
+        print(newHtable)
         assert np.allclose(propHtable,
                            newHtable
                            )
@@ -265,10 +265,10 @@ class TestMergeEntropyCalc_SingleTimeSlice(unittest.TestCase):
     def test_Lentropy__directMethod_equals_tableMethod(self):
         ''' Test for all pairs (kA, kB) whether L_entropy is same from two methods
         '''
-        print ''
+        print('')
         K = self.respPair.shape[1]
-        for kA in xrange(K):
-            for kB in xrange(kA + 1, K):
+        for kA in range(K):
+            for kB in range(kA + 1, K):
                 self.verify_Lentropy__directMethod_equals_tableMethod(kA, kB)
 
     def verify_Lentropy__directMethod_equals_tableMethod(self, kA, kB):
@@ -292,7 +292,7 @@ class TestMergeEntropyCalc_SingleTimeSlice(unittest.TestCase):
         L_table = HMMUtil.calc_sumHtable_forMergePair__fromTables(
             Htable_orig, Mtable, kA, kB)
         assert np.allclose(L_table, L_direct)
-        print kA, kB, L_table, L_direct
+        print(kA, kB, L_table, L_direct)
 
 
 class TestMergeEntropyCalc_FullSequence(TestMergeEntropyCalc_SingleTimeSlice):
@@ -339,8 +339,8 @@ class TestIsNotTheSame(unittest.TestCase):
         self.resp[3] = np.sum(self.s[2, :, :], axis=1)
 
     def test__respPair_sums_to_one(self):
-        print ''
-        print self.s[0]
+        print('')
+        print(self.s[0])
         assert np.allclose(1.0, self.s.sum(axis=2).sum(axis=1))
 
     def test_Htrad_equals_Hhmm(self):
@@ -348,8 +348,8 @@ class TestIsNotTheSame(unittest.TestCase):
         Hhmm = bnpy.allocmodel.hmm.HMMUtil.calcEntropyFromResp(
             self.resp,
             self.s)
-        print Htrad
-        print Hhmm
+        print(Htrad)
+        print(Hhmm)
         assert not np.allclose(Htrad, Hhmm)
 
 
@@ -396,25 +396,25 @@ class TestSimpleFacts(unittest.TestCase):
             self.BrespPair.sum(axis=1)[:, np.newaxis]
 
     def test_print_A(self):
-        print ''
-        print '     BEFORE merge of states 1&2'
-        print self.respPair
-        print ''
-        print '     AFTER  merge of states 1&2'
-        print self.ArespPair
+        print('')
+        print('     BEFORE merge of states 1&2')
+        print(self.respPair)
+        print('')
+        print('     AFTER  merge of states 1&2')
+        print(self.ArespPair)
 
     def test_print_B(self):
-        print ''
-        print '     BEFORE merge of states 3&4'
-        print self.respPair
-        print ''
-        print '     AFTER  merge of states 3&4'
-        print self.BrespPair
+        print('')
+        print('     BEFORE merge of states 3&4')
+        print(self.respPair)
+        print('')
+        print('     AFTER  merge of states 3&4')
+        print(self.BrespPair)
 
     def test_sums_to_one(self):
-        print ''
-        print self.respPair
-        print self.respPair.sum()
+        print('')
+        print(self.respPair)
+        print(self.respPair.sum())
         assert np.allclose(1.0, np.sum(self.respPair))
         assert np.allclose(1.0, np.sum(self.sigma, axis=1))
 
@@ -422,7 +422,7 @@ class TestSimpleFacts(unittest.TestCase):
         assert np.allclose(1.0, np.sum(self.Asigma, axis=1))
 
     def test_entropy_decreases_after_merge(self):
-        print ''
+        print('')
         H_orig = -1 * np.sum(self.respPair * np.log(self.sigma))
         H_A = -1 * np.sum(self.ArespPair * np.log(self.Asigma))
         H_B = -1 * np.sum(self.BrespPair * np.log(self.Bsigma))
@@ -432,7 +432,7 @@ class TestSimpleFacts(unittest.TestCase):
     def test_entropy_bounded_by_slogs(self):
         ''' Verify that -1 * s log s >= -1 * s log (sigma)
         '''
-        print ''
+        print('')
         H_orig = -1 * np.sum(self.respPair * np.log(self.sigma))
         H_A = -1 * np.sum(self.ArespPair * np.log(self.Asigma))
         H_B = -1 * np.sum(self.BrespPair * np.log(self.Bsigma))

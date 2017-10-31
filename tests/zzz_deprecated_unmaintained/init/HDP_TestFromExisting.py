@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import numpy as np
 import itertools
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     Zlist = list()
     doc_range = [0]
     PRNG = np.random.RandomState(0)
-    for d in xrange(Ndoc):
+    for d in range(Ndoc):
         N_doc = 0
         for k, patch_name in enumerate(
                 ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']):

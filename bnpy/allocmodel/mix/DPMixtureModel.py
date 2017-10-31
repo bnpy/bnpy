@@ -644,7 +644,7 @@ class DPMixtureModel(AllocModel):
 
         # Add terms for each index kA+1, kA+2, ... kB-1
         # where only \gamma_0 has changed
-        for k in xrange(kA + 1, kB):
+        for k in range(kA + 1, kB):
             a1 = self.eta1[k]
             a0old = self.eta0[k]
             a0new = self.eta0[k] - SS.N[kB]
@@ -697,8 +697,8 @@ class DPMixtureModel(AllocModel):
         ''' Calc matrix of improvement in ELBO for all possible pairs of comps
         '''
         Gap = np.zeros((SS.K, SS.K))
-        for kB in xrange(1, SS.K):
-            for kA in xrange(0, kB):
+        for kB in range(1, SS.K):
+            for kA in range(0, kB):
                 Gap[kA, kB] = self.calcHardMergeGapFast(SS, kA, kB)
         if hasattr(self, 'cBetaNewB'):
             del self.cBetaNewB
@@ -782,7 +782,7 @@ class DPMixtureModel(AllocModel):
         LP['Z'] = np.argmax(LP['resp'], axis=1)
         K = LP['resp'].shape[1]
         LP['resp'].fill(0)
-        for k in xrange(K):
+        for k in range(K):
             LP['resp'][LP['Z'] == k, k] = 1
         return LP
 
@@ -820,7 +820,7 @@ class DPMixtureModel(AllocModel):
         '''
         Z = LP['Z']
         # Iteratively sample data allocations
-        for dataindex in xrange(Data.nObs):
+        for dataindex in range(Data.nObs):
             x = Data.X[dataindex]
 
             # de-update current assignment and suff stats
@@ -842,8 +842,8 @@ class DPMixtureModel(AllocModel):
             psum = np.sum(pvec)
 
             if np.isnan(psum) or psum <= 0:
-                print pvec
-                print psum
+                print(pvec)
+                print(psum)
                 raise ValueError('BAD VALUES FOR PROBS!')
 
             pvec /= psum
@@ -856,7 +856,7 @@ class DPMixtureModel(AllocModel):
             Z[dataindex] = knew
 
         LP['Z'] = Z
-        print ' '.join(['%.1f' % (x) for x in SS.N])
+        print(' '.join(['%.1f' % (x) for x in SS.N]))
         return LP, SS
 
     def getConditionalProbVec_Unnorm(self, SS, doKeepFinalCompEmpty):

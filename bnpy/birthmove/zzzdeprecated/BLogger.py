@@ -60,7 +60,7 @@ def pprint1Darr(
             return prettystr, maxStrLen
         return prettystr
 
-    print prettystr    
+    print(prettystr)    
 
 def printDataSummary(
         Data_t, curSS_t, curSS_nott, relevantCompIDs, Plan, **kwargs):
@@ -108,7 +108,7 @@ def printDataSummary(
 
     msg += "REST size of relevant comps: \n%s" % (sizestr_nott)
 
-    print msg
+    print(msg)
 
 
 def printRefineStatus(
@@ -126,12 +126,12 @@ def printRefineStatus(
     if riter == 0:
         headerfmt = "%3s | %" + str(len(newNstr)-1) + "s | %s" 
         header = headerfmt % ('iter', 'new comps', 'rel comps')
-        print header
-    print iterstr + " | " + newNstr.rstrip() + " | " + targetNstr.rstrip()
+        print(header)
+    print(iterstr + " | " + newNstr.rstrip() + " | " + targetNstr.rstrip())
 
 def printEarlyExitMsg(msg, e, **kwargs):
-    print msg
-    print str(e)
+    print(msg)
+    print(str(e))
 
 def log(msg, level='debug'):
     if Log is None:

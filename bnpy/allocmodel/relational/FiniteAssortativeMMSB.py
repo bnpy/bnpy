@@ -10,7 +10,7 @@ from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
 from bnpy.util import gammaln, digamma, EPS
 from bnpy.util.NumericUtil import calcRlogR
-from FiniteMMSB import FiniteMMSB
+from .FiniteMMSB import FiniteMMSB
 
 
 class FiniteAssortativeMMSB(FiniteMMSB):
@@ -192,7 +192,7 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         else:
             # Full K x K block relations
             resp = np.zeros((Data.nEdges, K))
-            for k in xrange(K):
+            for k in range(K):
                 resp[:,k] = LP['resp'][:, k, k]
             srcresp_bg = LP['resp'].sum(axis=2) - resp
             rcvresp_bg = LP['resp'].sum(axis=1) - resp
@@ -311,14 +311,14 @@ class FiniteAssortativeMMSB(FiniteMMSB):
             raise NotImplementedError("TODO")
 
         logSoftEv = LP['E_log_soft_ev']  # E x K x K
-        for k in xrange(K):
+        for k in range(K):
             resp[:, k, k] += logSoftEv[:, k]
 
         logepsEvVec = np.sum(
             np.log(self.epsilon) * Data.X + \
             np.log(1-self.epsilon) * (1-Data.X),
             axis=1)
-        for j, k in itertools.product(xrange(K), xrange(K)):
+        for j, k in itertools.product(range(K), range(K)):
             if j == k:
                 continue
             resp[:, j, k] += logepsEvVec
@@ -329,7 +329,7 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         respNormConst = resp.sum(axis=(1,2))[:, np.newaxis, np.newaxis]
 
         respNormConst_fg = np.zeros(Data.nEdges)
-        for k in xrange(K):
+        for k in range(K):
             respNormConst_fg += resp[:, k, k]
 
 
@@ -339,14 +339,14 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         LP['respNormConst_fg'] = respNormConst_fg
 
         NodeStateCount_fg = np.zeros((Data.nNodes, K))
-        for k in xrange(K):
+        for k in range(K):
             NodeStateCount_fg[:,k] += \
                 Data.getSparseSrcNodeMat() * resp[:, k, k]
             NodeStateCount_fg[:,k] += \
                 Data.getSparseRcvNodeMat() * resp[:, k, k]
 
         NodeStateCount_bg = np.zeros((Data.nNodes, K))
-        for k in xrange(K):
+        for k in range(K):
             srcResp =  resp[:, k, :k].sum(axis=1) + \
                 resp[:, k, k+1:].sum(axis=1)
             rcvResp =  resp[:, :k, k].sum(axis=1) + \

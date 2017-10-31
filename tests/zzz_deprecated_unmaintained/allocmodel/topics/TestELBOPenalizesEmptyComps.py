@@ -31,7 +31,7 @@ class TesELBOPenalizesEmptyComps(unittest.TestCase):
         '''
         assert np.allclose(1.0, np.sum(self.trueResp, axis=1))
 
-        for kempty in xrange(0, 4):
+        for kempty in range(0, 4):
             resp = makeNewRespWithEmptyStates(self.trueResp, kempty)
             assert np.allclose(1.0, np.sum(resp, axis=1))
             assert resp.shape[0] == self.trueResp.shape[0]
@@ -46,11 +46,11 @@ class TesELBOPenalizesEmptyComps(unittest.TestCase):
         assert np.all(np.diff(ELBOVals) < 0)
 
     def test_ELBO_penalizes_empty__range_of_hypers(self):
-        print ''
-        print '%5s %5s' % ('alpha', 'gamma')
+        print('')
+        print('%5s %5s' % ('alpha', 'gamma'))
         for alpha in [0.1, 0.5, 0.9, 1.5]:
             for gamma in [1.0, 3.0, 10.0]:
-                print '%5.2f %5.2f' % (alpha, gamma)
+                print('%5.2f %5.2f' % (alpha, gamma))
 
                 self.test_ELBO_penalizes_empty_comps(alpha=alpha, gamma=gamma)
 
@@ -59,7 +59,7 @@ def printProbVector(xvec, fmt='%.4f'):
     xvec = np.asarray(xvec)
     if xvec.ndim == 0:
         xvec = np.asarray([xvec])
-    print ' '.join([fmt % (x) for x in xvec])
+    print(' '.join([fmt % (x) for x in xvec]))
 
 
 def resp2ELBO_HDPTopicModel(Data, resp,
@@ -85,10 +85,10 @@ def resp2ELBO_HDPTopicModel(Data, resp,
     amodel.set_global_params(K=K, beta=init_probs, Data=Data)
     estBeta = amodel.get_active_comp_probs()
 
-    print 'doPointEstimate ', doPointEstimate
-    print 'first 3 active: ', estBeta[:3]
-    print 'last  3 active: ', estBeta[Ktrue - 2:Ktrue]
-    print '          junk: ', estBeta[Ktrue:]
+    print('doPointEstimate ', doPointEstimate)
+    print('first 3 active: ', estBeta[:3])
+    print('last  3 active: ', estBeta[Ktrue - 2:Ktrue])
+    print('          junk: ', estBeta[Ktrue:])
     # Create a local params dict and suff stats
     # These will remain fixed, used to update amodle
     LP = dict(resp=resp)
@@ -119,7 +119,7 @@ def resp2ELBO_HDPTopicModel(Data, resp,
         amodel.update_global_params(SS)
         ELBO = amodel.calc_evidence(Data, SS, LP) / scaleF
 
-    print amodel.gamma, amodel.alpha, initprobs, Data.nDoc
+    print(amodel.gamma, amodel.alpha, initprobs, Data.nDoc)
     return ELBO
 
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     makeFigure(**args.__dict__)
 
     pylab.show(block=False)
-    keypress = raw_input('Press y to save, any other key to close >>')
+    keypress = input('Press y to save, any other key to close >>')
     if keypress.count('y'):
         pylab.savefig(
             'changeInELBOVsNumEmpty.eps',

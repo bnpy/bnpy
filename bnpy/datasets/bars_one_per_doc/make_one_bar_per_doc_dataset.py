@@ -30,7 +30,7 @@ def make_bars_topics(V, K, fracMassOnTopic=0.95, PRNG=np.random):
     topics = np.zeros((K, V))
     # Make horizontal bars
     for k in range(K / 2):
-        wordIDs = range(B * k, B * (k + 1))
+        wordIDs = list(range(B * k, B * (k + 1)))
         topics[k, wordIDs] = 1.0
 
     # Make vertical bars
@@ -38,7 +38,7 @@ def make_bars_topics(V, K, fracMassOnTopic=0.95, PRNG=np.random):
         wordIDs = list()
         for b in range(sqrtV):
             start = b * sqrtV + k * BarWidth
-            wordIDs.extend(range(start, start + BarWidth))
+            wordIDs.extend(list(range(start, start + BarWidth)))
         topics[K / 2 + k, wordIDs] = 1.0
 
     # Add smoothing mass to all entries in "topics"
@@ -51,7 +51,7 @@ def make_bars_topics(V, K, fracMassOnTopic=0.95, PRNG=np.random):
     topics += (2 * smoothMass) * PRNG.rand(K, V)
 
     # Ensure each row of topics is a probability vector
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] /= np.sum(topics[k, :])
 
     assert np.sum(topics[0, :B]) > fracMassOnTopic - 0.05
@@ -74,8 +74,8 @@ if __name__ == '__main__':
 
     dataset = bnpy.data.BagOfWordsData.CreateToyDataFromMixModel(**Defaults)
     dataset.to_npz('dataset.npz')
-    print "Created dataset:"
-    print dataset.get_stats_summary()
+    print("Created dataset:")
+    print(dataset.get_stats_summary())
 
-    print "Counts of each true topic:"
-    print dataset.TrueParams['resp'].sum(axis=0)
+    print("Counts of each true topic:")
+    print(dataset.TrueParams['resp'].sum(axis=0))

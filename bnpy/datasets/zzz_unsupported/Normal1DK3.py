@@ -46,7 +46,7 @@ def generate_data(seed, nObsTotal):
     N = nObsTotal / K
     Xlist = list()
     Zlist = list()
-    for k in xrange(K):
+    for k in range(K):
         if k == K - 1:
             N = nObsTotal - (K - 1) * N
         X = mu[k] + PRNG.randn(N, 1)

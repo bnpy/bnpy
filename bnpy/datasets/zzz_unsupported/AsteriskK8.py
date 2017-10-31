@@ -65,12 +65,12 @@ SigmaBase = np.asarray([[V, 0], [0, V / 100.0]])
 
 # Create several Sigmas by rotating this basic covariance matrix
 Sigma = np.zeros((K, D, D))
-for k in xrange(K):
+for k in range(K):
     Sigma[k] = rotateCovMat(SigmaBase, k * np.pi / 4.0)
 
 # Precompute cholesky decompositions
 cholSigma = np.zeros(Sigma.shape)
-for k in xrange(K):
+for k in range(K):
     cholSigma[k] = scipy.linalg.cholesky(Sigma[k])
 
 

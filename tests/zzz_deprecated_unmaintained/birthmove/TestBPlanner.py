@@ -63,7 +63,7 @@ def test_BPlanner_makePlanAtBatch_someDisqualifiedForPrevFailures(K=10):
 
 
 def test_BPlanner_makePlanAtBatch_someDQForPrevFailuresWithOtherBatches(K=20):
-	print ''
+	print('')
 	SS = SuffStatBag(K=K)
 	SS.setField('N',  np.arange(K), dims='K')
 	SSbatch = SS.copy()
@@ -79,14 +79,14 @@ def test_BPlanner_makePlanAtBatch_someDQForPrevFailuresWithOtherBatches(K=20):
 		MoveRecordsByUID[uid]['b_nFail'] = 1
 		MoveRecordsByUID[uid]['b_nFailRecent'] = 1
 		MoveRecordsByUID[uid]['b_batchIDsWhoseProposalFailed'] = set([0])
-		print 'PREV FAIL AT THIS BATCH: uid ', uid
+		print('PREV FAIL AT THIS BATCH: uid ', uid)
 	for uid in otherfailUIDs:
 		if uid in dqUIDs:
 			continue
 		MoveRecordsByUID[uid]['b_nFail'] = 1
 		MoveRecordsByUID[uid]['b_nFailRecent'] = 1
 		MoveRecordsByUID[uid]['b_batchIDsWhoseProposalFailed'] = set([1])
-		print 'PREV FAIL AT ANOTHER BATCH: uid ', uid
+		print('PREV FAIL AT ANOTHER BATCH: uid ', uid)
 
 	for b_minNumAtomsForTargetComp in [2, 5, 10, K]:
 		BArgs['b_minNumAtomsForTargetComp'] = b_minNumAtomsForTargetComp

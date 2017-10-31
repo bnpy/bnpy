@@ -16,10 +16,10 @@ import glob
 import os
 import scipy.io
 
-from PlotUtil import pylab
+from .PlotUtil import pylab
 from bnpy.ioutil import BNPYArgParser
 from bnpy.ioutil.CountReader import loadKeffForTask
-from JobFilter import filterJobs
+from .JobFilter import filterJobs
 
 taskidsHelpMsg = "ids of trials/runs to plot from given job." + \
                  " Example: '4' or '1,2,3' or '2-6'."
@@ -66,7 +66,7 @@ def plotJobs(jpaths, legNames, styles=None, density=2,
 
     nLeg = len(legNames)
 
-    for lineID in xrange(nLines):
+    for lineID in range(nLines):
         if styles is None:
             curStyle = dict(colorID=lineID)
         else:
@@ -232,10 +232,10 @@ def plot_all_tasks_for_job(jobpath, label, taskids=None,
             diff = xs[1:] - xs[:-1]
             goodIDs = np.flatnonzero(diff >= 0)
             if len(goodIDs) < xs.size - 1:
-                print 'WARNING: looks like multiple runs writing to this file!'
-                print jobpath
-                print 'Task: ', taskid
-                print len(goodIDs), xs.size - 1
+                print('WARNING: looks like multiple runs writing to this file!')
+                print(jobpath)
+                print('Task: ', taskid)
+                print(len(goodIDs), xs.size - 1)
                 xs = np.hstack([xs[goodIDs], xs[-1]])
                 ys = np.hstack([ys[goodIDs], ys[-1]])
 
@@ -346,7 +346,7 @@ def parse_args(xvar='laps', yvar='evidence'):
     parser.add_argument('jpath', type=str, default='demo*')
 
     parser.add_argument('--xvar', type=str, default=xvar,
-                        choices=LabelMap.keys(),
+                        choices=list(LabelMap.keys()),
                         help="name of x axis variable to plot.")
 
     parser.add_argument('--yvar', type=str, default=yvar,

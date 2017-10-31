@@ -95,7 +95,7 @@ def save_alloc_prior(amodel, fpath):
     """
     outpath = os.path.join(fpath, 'AllocPrior.mat')
     adict = amodel.get_prior_dict()
-    if len(adict.keys()) == 0:
+    if len(list(adict.keys())) == 0:
         return None
     scipy.io.savemat(outpath, adict, oned_as='row')
 
@@ -124,7 +124,7 @@ def save_obs_prior(obsModel, fpath):
     """
     outpath = os.path.join(fpath, 'ObsPrior.mat')
     adict = obsModel.get_prior_dict()
-    if len(adict.keys()) == 0:
+    if len(list(adict.keys())) == 0:
         return None
     scipy.io.savemat(outpath, adict, oned_as='row')
 

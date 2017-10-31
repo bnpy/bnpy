@@ -42,7 +42,7 @@ Sigma[1] = np.diag([s2, s1])
 Sigma[2] = np.diag([s2, s1])
 Sigma[3] = np.diag([s2, s1])
 cholSigma = np.zeros_like(Sigma)
-for k in xrange(K):
+for k in range(K):
     cholSigma[k] = scipy.linalg.cholesky(Sigma[k])
 
 
@@ -89,7 +89,7 @@ def genToyData(seed=0, T=6000):
     # Pre-generate the noise that will be added at each step
     PRNG = np.random.RandomState(seed)
     Noise = np.zeros((K, T + 1, D))
-    for k in xrange(K):
+    for k in range(K):
         PRNG = np.random.RandomState(seed + k)
         Noise[k, :, :] = np.dot(cholSigma[k].T, PRNG.randn(D, T + 1)).T
 
@@ -101,7 +101,7 @@ def genToyData(seed=0, T=6000):
     X[0] = 0
 
     stateSpace = np.arange(K)
-    for t in xrange(1, T + 1):
+    for t in range(1, T + 1):
         Z[t] = PRNG.choice(stateSpace, p=transPi[Z[t - 1]])
         X[t] = np.dot(A[Z[t]], X[t - 1]) + Noise[Z[t], t]
 

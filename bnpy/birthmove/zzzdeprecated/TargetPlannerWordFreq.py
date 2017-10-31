@@ -19,7 +19,7 @@ def MakePlans(Data, model, LP, Q=None, **kwargs):
                      aspect=Data.vocab_size / newTopics.shape[0],
                      interpolation='nearest')
     Plans = list()
-    for kk in xrange(newTopics.shape[0]):
+    for kk in range(newTopics.shape[0]):
         Plan = dict(ktarget=None, Data=None, targetWordIDs=None,
                     targetWordFreq=newTopics[kk])
 
@@ -65,7 +65,7 @@ def makeCandidateTopics(Data, Q, model, LP, **kwargs):
 def getTopicWordFreqFromModel(model):
     K = model.obsModel.K
     topics = np.zeros((K, model.obsModel.comp[0].D))
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] = model.obsModel.comp[k].lamvec
         topics[k, :] = topics[k, :] / topics[k, :].sum()
     return topics

@@ -66,9 +66,9 @@ def main():
     for key in ['Lslack', 'Lalloc', 'LcDtheta', 'Lentropy', 'Ldata', 'Ltotal']:
         if key.count('_') > 1:
             continue
-        print key
-        print '   cur %.5f' % (curLdict[key])
-        print '  prop %.5f' % (propLdict[key])
+        print(key)
+        print('   cur %.5f' % (curLdict[key]))
+        print('  prop %.5f' % (propLdict[key]))
 
 if __name__ == '__main__':
     main()

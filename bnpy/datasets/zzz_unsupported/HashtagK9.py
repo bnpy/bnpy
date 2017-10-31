@@ -5,7 +5,7 @@ Simple toy dataset of 9 Gaussian components with diagonal covariance structure.
 
 Generated data form a "hashtag"-like shapes when plotted in 2D.
 '''
-from __future__ import division
+
 import scipy.linalg
 import numpy as np
 from bnpy.data import XData

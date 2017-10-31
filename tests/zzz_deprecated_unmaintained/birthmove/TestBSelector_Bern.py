@@ -17,7 +17,7 @@ def makeDataset(K=5, Nk=100, Nvec=None, **kwargs):
     Z = [None for k in range(K)]
     X = [None for k in range(K)]
     D = 25
-    for k in xrange(K):
+    for k in range(K):
         PRNG = np.random.RandomState(k)
         thr = PRNG.rand()
         mu_k = 0.05 * np.ones(D)

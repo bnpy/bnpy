@@ -27,7 +27,7 @@ def pprint(msg, level=None, prefix='', linewidth=80):
             pprint(prefixes[ii] + msgs[ii], level=level)
         return
     if DEFAULTLEVEL == 'print':
-        print msg
+        print(msg)
     if Log is None:
         return
     if level is None:

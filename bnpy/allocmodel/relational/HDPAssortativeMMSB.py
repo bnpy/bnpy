@@ -14,9 +14,9 @@ from bnpy.util import StickBreakUtil
 from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir, L_top
 
-from FiniteAssortativeMMSB import FiniteAssortativeMMSB
-from HDPMMSB import updateRhoOmega, updateThetaAndThetaRem, _beta2rhoomega
-from HDPMMSB import initRhoOmegaFromScratch, initThetaFromScratch
+from .FiniteAssortativeMMSB import FiniteAssortativeMMSB
+from .HDPMMSB import updateRhoOmega, updateThetaAndThetaRem, _beta2rhoomega
+from .HDPMMSB import initRhoOmegaFromScratch, initThetaFromScratch
 
 class HDPAssortativeMMSB(FiniteAssortativeMMSB):
 
@@ -94,7 +94,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
         self.theta, self.thetaRem = updateThetaAndThetaRem(
             SS, rho=self.rho, alpha=self.alpha, gamma=self.gamma)
         # Now, alternatively update rho and theta...
-        for giter in xrange(nGlobalIters):
+        for giter in range(nGlobalIters):
             self.rho, self.omega = updateRhoOmega(
                 theta=self.theta, thetaRem=self.thetaRem,
                 initrho=self.rho, omega=self.omega, 

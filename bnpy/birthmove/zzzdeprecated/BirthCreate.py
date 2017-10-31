@@ -66,7 +66,7 @@ def create_model_with_new_comps(bigModel, bigSS, freshData, Q=None,
         if hasattr(freshSS, 'WordCounts'):
             topics = freshSS.WordCounts
             priorvec = freshModel.obsModel.obsPrior.lamvec
-            for k in xrange(freshSS.K):
+            for k in range(freshSS.K):
                 topics[k, :] = freshModel.obsModel.comp[k].lamvec - priorvec
             freshSS.setField('WordCounts', topics, dims=('K', 'D'))
         return freshModel, freshSS, Info
@@ -76,7 +76,7 @@ def create_model_with_new_comps(bigModel, bigSS, freshData, Q=None,
         Info['freshModelInit'] = freshModel.copy()
 
     # Complete several iterations to improve this fresh proposal
-    for step in xrange(kwargs['creationNumIters']):
+    for step in range(kwargs['creationNumIters']):
         freshLP = freshModel.calc_local_params(freshData, **fastParams)
         freshSS = freshModel.get_global_suff_stats(freshData, freshLP)
         freshModel.update_global_params(freshSS)
@@ -200,7 +200,7 @@ def create_new_model_expandedspectral(freshModel, Q, freshData, bigModel,
                                       **kwargs):
     K = bigModel.obsModel.K
     topics = np.zeros((K, Q.shape[1]))
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] = bigModel.obsModel.comp[k].lamvec
         topics[k, :] = topics[k, :] / topics[k, :].sum()
 
@@ -218,7 +218,7 @@ def create_new_model_spectralOnTarget(freshModel, freshData, bigModel,
                                       **kwargs):
     K = bigModel.obsModel.K
     topics = np.zeros((K, freshData.vocab_size))
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] = bigModel.obsModel.comp[k].lamvec
         topics[k, :] = topics[k, :] / topics[k, :].sum()
 

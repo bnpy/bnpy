@@ -172,10 +172,10 @@ def makePPListMapFromJPattern(jpathPattern=None,
         jpathList = glob.glob(jpathPattern)
 
     if verbose:
-        print 'Looking for jobs with pattern:'
-        print jpathPattern
-        print '%d candidates found' % (len(jpathList))
-        print '    (before filtering by keywords)'
+        print('Looking for jobs with pattern:')
+        print(jpathPattern)
+        print('%d candidates found' % (len(jpathList)))
+        print('    (before filtering by keywords)')
 
     if len(jpathList) == 0:
         raise ValueError('No matching jobs found.')
@@ -184,7 +184,7 @@ def makePPListMapFromJPattern(jpathPattern=None,
     for jID, jpath in enumerate(jpathList):
         jdict = jpath2jdict(jpath)
         if jID > 0:
-            if len(jdict.keys()) != len(PPDict.keys()):
+            if len(list(jdict.keys())) != len(list(PPDict.keys())):
                 raise ValueError('Inconsistent key lists!')
             for key in jdict:
                 if key not in PPDict:
@@ -221,18 +221,18 @@ def filterJobs(jpathPattern,
     jpathList = glob.glob(jpathPattern)
 
     if verbose:
-        print 'Looking for jobs with pattern:'
-        print jpathPattern
-        print '%d candidates found' % (len(jpathList))
-        print '    (before filtering by keywords)'
+        print('Looking for jobs with pattern:')
+        print(jpathPattern)
+        print('%d candidates found' % (len(jpathList)))
+        print('    (before filtering by keywords)')
 
     if len(jpathList) == 0:
         raise ValueError('No matching jobs found.')
 
     if verbose:
-        print '\nRequirements:'
+        print('\nRequirements:')
         for key in reqKwArgs:
-            print '%s = %s' % (key, reqKwArgs[key])
+            print('%s = %s' % (key, reqKwArgs[key]))
 
     keepListP = list()  # list of paths to keep
     keepListD = list()  # list of dicts to keep (one for each path)
@@ -261,15 +261,15 @@ def filterJobs(jpathPattern,
                                  (reqkey, reqKwArgs[reqkey]))
 
     if verbose:
-        print '\nCandidates matching requirements'
+        print('\nCandidates matching requirements')
         for p in keepListP:
-            print p.split(os.path.sep)[-1]
+            print(p.split(os.path.sep)[-1])
 
     # Figure out intelligent labels for the final jobs
     K = len(keepListD)
     varKeys = set()
-    for kA in xrange(K):
-        for kB in xrange(kA + 1, K):
+    for kA in range(K):
+        for kB in range(kA + 1, K):
             varKeys.update(findKeysWithDiffVals(keepListD[kA], keepListD[kB]))
     varKeys = [x for x in varKeys]
 
@@ -289,9 +289,9 @@ def filterJobs(jpathPattern,
             RangeMap[key].sort()
 
     if len(varKeys) > 1:
-        print 'ERROR! Need to constrain more variables'
+        print('ERROR! Need to constrain more variables')
         for key in RangeMap:
-            print key, RangeMap[key]
+            print(key, RangeMap[key])
         raise ValueError('ERROR! Need to constrain more variables')
 
     elif len(varKeys) == 1:
@@ -312,9 +312,9 @@ def filterJobs(jpathPattern,
         legNames = [None]
 
     if verbose:
-        print '\nLegend entries for selected jobs (auto-selected)'
+        print('\nLegend entries for selected jobs (auto-selected)')
         for name in legNames:
-            print name
+            print(name)
 
     return keepListFinal, legNames
 

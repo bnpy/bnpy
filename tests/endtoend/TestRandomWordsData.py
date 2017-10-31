@@ -15,11 +15,11 @@ class TestEndToEnd(AbstractEndToEndTest):
         rng = np.random.RandomState(0)
         vocab_size = 25
         nDoc = 10
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             NU_d = rng.choice(vocab_size)
             NU_d = np.maximum(1, NU_d)
             word_id_d = rng.choice(vocab_size, size=NU_d, replace=False)
-            word_ct_d = rng.choice(range(1, 10), size=NU_d, replace=True)
+            word_ct_d = rng.choice(list(range(1, 10)), size=NU_d, replace=True)
             if d == 0:
                 word_id = word_id_d
                 word_ct = word_ct_d

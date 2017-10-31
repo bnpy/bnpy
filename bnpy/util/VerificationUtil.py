@@ -47,5 +47,5 @@ def assert_allclose(a, b, atol=1e-8, rtol=0):
         msg = np2flatstr(a)
         msg += "\n"
         msg += np2flatstr(b)
-        print msg
+        print(msg)
     assert isOK

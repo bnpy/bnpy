@@ -39,16 +39,16 @@ def run_doctest_for_py_file(python_file_path):
     If any tests fail, error info printed to stdout.
     Otherwise, nothing else will be printed. No news is good news.
     '''
-    print python_file_path
+    print(python_file_path)
     root_path, filename = os.path.split(python_file_path)
     with cd(root_path):
         CMD = "python -m doctest %s" % (filename)
-        print CMD
+        print(CMD)
         proc = subprocess.Popen(
                 CMD.split(),
                 shell=False)
         proc.wait()
-        print ""
+        print("")
 
 class cd:
     """ Context manager for changing the current working directory

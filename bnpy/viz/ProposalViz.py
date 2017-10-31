@@ -4,7 +4,7 @@ import sys
 import glob
 
 from bnpy.birthmove import BLogger
-from PlotUtil import pylab
+from .PlotUtil import pylab
 
 CELL_WIDTH = 200
 SQIMG_WIDTH = 200

@@ -106,7 +106,7 @@ def createBetterBNPYDatasetFromMATFiles():
             '$BNPYDATADIR/rawData/speakerDiarizationData'), file)
         SavedVars = scipy.io.loadmat(matfilepath)
         outmatpath = matfilepath.replace(suffix, '')
-        print file.replace(suffix, '')
+        print(file.replace(suffix, ''))
         SavedVars['TrueZ'] = \
             relabelStateSeqWithNegativeIDsForNonspeakerIntervals(
             SavedVars['TrueZ'])
@@ -134,16 +134,16 @@ def relabelStateSeqWithNegativeIDsForNonspeakerIntervals(Z):
         size = np.sum(Z == uID)
         frac = size / float(Z.size)
         aggFrac += frac
-        print 'state %3d: %5d tsteps (%.3f, %.3f)' % (
-            rankID, size, frac, aggFrac)
+        print('state %3d: %5d tsteps (%.3f, %.3f)' % (
+            rankID, size, frac, aggFrac))
     Znew[Z == 0] = -1
     Znew[Z == 10] = -2
     for uID in [-1, -2]:
         size = np.sum(Znew == uID)
         frac = size / float(Z.size)
         aggFrac += frac
-        print 'state %3d: %5d tsteps (%.3f, %.3f)' % (
-            uID, size, frac, aggFrac)
+        print('state %3d: %5d tsteps (%.3f, %.3f)' % (
+            uID, size, frac, aggFrac))
     assert np.allclose(1.0, aggFrac)
     return Znew
 
@@ -244,12 +244,12 @@ def plotBlackWhiteStateSeqForMeeting(meetingNum=1, badUIDs=[-1, -2],
         Zim[1 + rankID, Z == uID] = 1
         size = sizes[sortIDs[rankID]]
         frac = size / float(Z.size)
-        print 'state %3d: %5d tsteps (%.3f)' % (rankID + 1, size, frac)
+        print('state %3d: %5d tsteps (%.3f)' % (rankID + 1, size, frac))
 
     for uID in badUIDs:
         size = np.sum(Z == uID)
         frac = size / float(Z.size)
-        print 'state %3d: %5d tsteps (%.3f)' % (uID, size, frac)
+        print('state %3d: %5d tsteps (%.3f)' % (uID, size, frac))
 
     pylab.imshow(1 - Zim,
                  interpolation='nearest',

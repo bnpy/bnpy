@@ -1,4 +1,4 @@
-from PlotTrace import plotJobsThatMatchKeywords, plotJobs, parse_args
+from .PlotTrace import plotJobsThatMatchKeywords, plotJobs, parse_args
 
 plotJobsThatMatch = plotJobsThatMatchKeywords
 

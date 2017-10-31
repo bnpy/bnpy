@@ -4,7 +4,7 @@ Implementation of parallel memoized variational algorithm for bnpy models.
 import numpy as np
 import multiprocessing
 import os
-import ElapsedTimeLogger 
+from . import ElapsedTimeLogger 
 import scipy.sparse
 
 from collections import defaultdict
@@ -22,8 +22,8 @@ from bnpy.mergemove import selectCandidateMergePairs
 from bnpy.deletemove import DLogger, selectCandidateDeleteComps
 from bnpy.util import argsort_bigtosmall_stable
 from bnpy.util.SparseRespUtil import sparsifyResp
-from LearnAlg import makeDictOfAllWorkspaceVars
-from LearnAlg import LearnAlg
+from .LearnAlg import makeDictOfAllWorkspaceVars
+from .LearnAlg import LearnAlg
 from bnpy.viz.PrintTopics import count2str
 
 # If abs val of two ELBOs differs by less than this small constant
@@ -447,11 +447,11 @@ class MemoVBMovesAlg(LearnAlg):
             Fields to save determined by the memoLPkeys attribute of this alg.
         '''
         batchLP = dict(**batchLP) # make a copy
-        allkeys = batchLP.keys()
+        allkeys = list(batchLP.keys())
         for key in allkeys:
             if key not in self.memoLPkeys:
                 del batchLP[key]
-        if len(batchLP.keys()) > 0:
+        if len(list(batchLP.keys())) > 0:
             if self.algParams['doMemoizeLocalParams'] == 1:
                 self.LPmemory[batchID] = batchLP
             elif self.algParams['doMemoizeLocalParams'] == 2:
@@ -1441,7 +1441,7 @@ class MemoVBMovesAlg(LearnAlg):
                 lapFrac, nAccept, nTrial, Ndiff)
             DLogger.pprint(msg, 'info')
         # Discard plans, because they have come to fruition.
-        for key in MovePlans.keys():
+        for key in list(MovePlans.keys()):
             if key.startswith('d_'):
                 del MovePlans[key]
         ElapsedTimeLogger.stopEvent('delete', 'eval')
@@ -1602,7 +1602,7 @@ class MemoVBMovesAlg(LearnAlg):
         if evBound is None:
             evBound = hmodel.calc_evidence(SS=SS)
 
-        for batchID in range(len(self.SSmemory.keys())):
+        for batchID in range(len(list(self.SSmemory.keys()))):
             SSchunk = self.loadBatchAndFastForward(
                 batchID, lapFrac=lapFrac, MoveLog=MoveLog, doCopy=1)
             if batchID == 0:
@@ -1612,8 +1612,8 @@ class MemoVBMovesAlg(LearnAlg):
         evCheck = hmodel.calc_evidence(SS=SS2)
 
         if self.algParams['debug'].count('quiet') == 0:
-            print '% 14.8f evBound from agg SS' % (evBound)
-            print '% 14.8f evBound from sum over SSmemory' % (evCheck)
+            print('% 14.8f evBound from agg SS' % (evBound))
+            print('% 14.8f evBound from sum over SSmemory' % (evCheck))
         if self.algParams['debug'].count('interactive'):
             isCorrect = np.allclose(SS.getCountVec(), SS2.getCountVec()) \
                 and np.allclose(evBound, evCheck)

@@ -105,9 +105,9 @@ class Test(unittest.TestCase):
         self.beforeELBOalloc = calcAllocELBO(Data, resp)
         self.afterELBOalloc = calcAllocELBO(Data, respNew)
         self.respNew = respNew
-        print ''
-        print 'K=%d  D=%d  N=%d  %s' % (K, D, N, self.obsModelName)
-        print '----------------- setup complete.'
+        print('')
+        print('K=%d  D=%d  N=%d  %s' % (K, D, N, self.obsModelName))
+        print('----------------- setup complete.')
 
     def test_suff_stats_represent_same_whole_dataset(self):
         assert np.allclose(self.beforeSS.N.sum(),
@@ -118,8 +118,8 @@ class Test(unittest.TestCase):
     def test_ELBO_gap(self):
         beforeELBO = self.beforeModel.calcELBO_Memoized(self.beforeSS)
         afterELBO = self.afterModel.calcELBO_Memoized(self.afterSS)
-        print "beforeELBO   % 9.6f" % (beforeELBO)
-        print " afterELB0   % 9.6f" % (afterELBO)
+        print("beforeELBO   % 9.6f" % (beforeELBO))
+        print(" afterELB0   % 9.6f" % (afterELBO))
         assert afterELBO >= beforeELBO
 
         after2ELBO = self.after2Model.calcELBO_Memoized(self.after2SS)

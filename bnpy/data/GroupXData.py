@@ -9,7 +9,7 @@ GroupXData
 import numpy as np
 from collections import namedtuple
 
-from XData import XData
+from .XData import XData
 from bnpy.util import as1D, as2D, as3D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -135,7 +135,7 @@ class GroupXData(XData):
         # Add optional true parameters / true hard labels
         if TrueParams is not None:
             self.TrueParams = dict()
-            for key, arr in TrueParams.items():
+            for key, arr in list(TrueParams.items()):
                 self.TrueParams[key] = toCArray(arr)
 
         if TrueZ is not None:
@@ -261,7 +261,7 @@ class GroupXData(XData):
         newXPrevList = list()
         newDocRange = np.zeros(len(docMask) + 1)
         newPos = 1
-        for d in xrange(len(docMask)):
+        for d in range(len(docMask)):
             start = self.doc_range[docMask[d]]
             stop = self.doc_range[docMask[d] + 1]
             newXList.append(self.X[start:stop])
@@ -285,7 +285,7 @@ class GroupXData(XData):
         if doTrackTruth and hasTrueZ:
             TrueZ = self.TrueParams['Z']
             newTrueZList = list()
-            for d in xrange(len(docMask)):
+            for d in range(len(docMask)):
                 start = self.doc_range[docMask[d]]
                 stop = self.doc_range[docMask[d] + 1]
                 newTrueZList.append(TrueZ[start:stop])

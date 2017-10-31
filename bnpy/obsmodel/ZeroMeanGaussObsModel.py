@@ -8,8 +8,8 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D, toCArray
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcSpRXXT
-from AbstractObsModel import AbstractObsModel
-from GaussObsModel import createECovMatFromUserInput
+from .AbstractObsModel import AbstractObsModel
+from .GaussObsModel import createECovMatFromUserInput
 
 
 class ZeroMeanGaussObsModel(AbstractObsModel):
@@ -172,7 +172,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
 
         nu = self.Prior.nu + N
         B = np.zeros((K, D, D))
-        for k in xrange(K):
+        for k in range(K):
             B[k] = (nu[k] - D - 1) * EstParams.Sigma[k]
         self.Post = ParamBag(K=K, D=D)
         self.Post.setField('nu', nu, dims=('K'))
@@ -226,7 +226,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         '''
         K = self.EstParams.K
         L = np.empty((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             L[:, k] = - 0.5 * self.D * LOGTWOPI \
                 - 0.5 * self._logdetSigma(k)  \
                 - 0.5 * self._mahalDist_EstParam(Data.X, k)
@@ -284,7 +284,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
 
         minCovMat = self.min_covar * np.eye(SS.D)
         covMat = np.tile(minCovMat, (SS.K, 1, 1))
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             covMat[k] += SS.xxT[k] / SS.N[k]
         self.EstParams.setField('Sigma', covMat, dims=('K', 'D', 'D'))
         self.K = SS.K
@@ -304,7 +304,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         Prior = self.Prior
         nu = Prior.nu + SS.N
         B = np.empty((SS.K, SS.D, SS.D))
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             B[k] = Prior.B + SS.xxT[k]
 
         Sigma = MAPEstParams_inplace(nu, B)
@@ -330,7 +330,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
 
         Post.setField('nu', Prior.nu + SS.N, dims=('K'))
         B = np.empty((SS.K, SS.D, SS.D))
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             B[k] = Prior.B + SS.xxT[k]
         Post.setField('B', B, dims=('K', 'D', 'D'))
         self.K = SS.K
@@ -408,7 +408,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         '''
         K = self.Post.K
         L = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             L[:, k] = - 0.5 * self.D * LOGTWOPI \
                 + 0.5 * self.GetCached('E_logdetL', k)  \
                 - 0.5 * self._mahalDist_Post(Data.X, k)
@@ -445,7 +445,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         elbo = np.zeros(SS.K)
         Post = self.Post
         Prior = self.Prior
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             elbo[k] = c_Diff(Prior.nu,
                              self.GetCached('logdetB'), self.D,
                              Post.nu[k],
@@ -502,12 +502,12 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         cPrior = c_Func(Prior.nu, self.GetCached('logdetB'), self.D)
 
         c = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             c[k] = c_Func(Post.nu[k], self.GetCached('logdetB', k), self.D)
 
         Gap = np.zeros((SS.K, SS.K))
-        for j in xrange(SS.K):
-            for k in xrange(j + 1, SS.K):
+        for j in range(SS.K):
+            for k in range(j + 1, SS.K):
                 nu, B = self.calcPostParamsForComp(SS, j, k)
                 cjk = c_Func(nu, B)
                 Gap[j, k] = c[j] + c[k] - cPrior - cjk
@@ -557,7 +557,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
     def calcMargLik_CFuncForLoop(self, SS):
         Prior = self.Prior
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             nu, B = self.calcPostParamsForComp(SS, k)
             logp[k] = c_Diff(Prior.nu, Prior.B, self.D,
                              nu, B)
@@ -580,7 +580,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         pSS.xxT += np.outer(x, x)[np.newaxis, :, :]
         pnu, pB, pm, pkappa = self.calcPostParams(pSS)
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             logp[k] = c_Diff(nu[k], B[k], self.D,
                              pnu[k], pB[k])
         return np.exp(logp - np.max(logp))
@@ -589,7 +589,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         nu, B = self.calcPostParams(SS)
         logp = np.zeros(SS.K)
         p = logp  # Rename so its not confusing what we're returning
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             cholB_k = scipy.linalg.cholesky(B[k], lower=1)
             logdetB_k = 2 * np.sum(np.log(np.diag(cholB_k)))
             mVec = np.linalg.solve(cholB_k, x)
@@ -623,7 +623,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
     def _cholB(self, k=None):
         if k == 'all':
             retArr = np.zeros((self.K, self.D, self.D))
-            for kk in xrange(self.K):
+            for kk in range(self.K):
                 retArr[kk] = self.GetCached('cholB', kk)
             return retArr
         elif k is None:
@@ -641,7 +641,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         if k == 'all':
             dvec = dvec[:, np.newaxis]
             retVec = self.D * LOGTWO * np.ones(self.K)
-            for kk in xrange(self.K):
+            for kk in range(self.K):
                 retVec[kk] -= self.GetCached('logdetB', kk)
             nuT = self.Post.nu[np.newaxis, :]
             retVec += np.sum(digamma(0.5 * (nuT + 1 - dvec)), axis=0)
@@ -745,7 +745,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
             smoothMu = self.Prior.B
             smoothNu = 1 + self.Prior.nu - self.D - 1
         Div = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             chol_Mu_k = np.linalg.cholesky(Mu[k])
             logdet_Mu_k = 2.0 * np.sum(np.log(np.diag(chol_Mu_k)))
             xxTInvMu_k = scipy.linalg.solve_triangular(
@@ -852,7 +852,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         Div = np.zeros(K)
         s, logdet = np.linalg.slogdet(priorMu)
         logdet_prior = s * logdet
-        for k in xrange(K):
+        for k in range(K):
             chol_Mu_k = np.linalg.cholesky(Mu[k])
             logdet_Mu_k = 2.0 * np.sum(np.log(np.diag(chol_Mu_k)))
             tr_PriorInvMu_k = np.trace(np.linalg.solve(Mu[k], priorMu))
@@ -914,7 +914,7 @@ def MAPEstParams_inplace(nu, B):
     '''
     D = B.shape[-1]
     Sigma = B
-    for k in xrange(B.shape[0]):
+    for k in range(B.shape[0]):
         Sigma[k] /= (nu[k] + D + 1)
     return Sigma
 
@@ -973,14 +973,14 @@ def calcSummaryStats(Data, SS, LP, **kwargs):
         sqrtResp_k = np.sqrt(resp[:, 0])
         sqrtRX_k = sqrtResp_k[:, np.newaxis] * Data.X
         S_xxT[0] = dotATA(sqrtRX_k)
-        for k in xrange(1, K):
+        for k in range(1, K):
             np.sqrt(resp[:, k], out=sqrtResp_k)
             np.multiply(sqrtResp_k[:, np.newaxis], Data.X, out=sqrtRX_k)
             S_xxT[k] = dotATA(sqrtRX_k)
 
         sqrtResp = np.sqrt(resp)
         xxT = np.zeros((K, D, D))
-        for k in xrange(K):
+        for k in range(K):
             xxT[k] = dotATA(sqrtResp[:, k][:, np.newaxis] * Data.X)
         assert np.allclose(xxT, S_xxT)
     else:
@@ -1018,7 +1018,7 @@ def calcLogSoftEvMatrix_FromPost(Dslice, **kwargs):
     '''
     K = kwargs['K']
     L = np.zeros((Dslice.nObs, K))
-    for k in xrange(K):
+    for k in range(K):
         L[:, k] = - 0.5 * Dslice.dim * LOGTWOPI \
             + 0.5 * kwargs['E_logdetL'][k]  \
             - 0.5 * _mahalDist_Post(Dslice.X, k, **kwargs)

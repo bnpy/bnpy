@@ -12,7 +12,7 @@ import scipy.io
 import os
 import glob
 
-from ModelWriter import makePrefixForLap
+from .ModelWriter import makePrefixForLap
 from bnpy.allocmodel import AllocModelConstructorsByName
 from bnpy.obsmodel import ObsModelConstructorsByName
 from bnpy.util import toCArray, as1D, as2D
@@ -85,7 +85,7 @@ def load_model_at_prefix(matfilepath, prefix='Best', lap=None):
         allocModel = load_alloc_model(matfilepath, prefix)
         model = HModel(allocModel, obsModel)
     except IOError as e:
-        print str(e)
+        print(str(e))
         '''
         if prefix == 'Best':
             matList = glob.glob(os.path.join(matfilepath, '*TopicModel.mat'))
@@ -205,7 +205,7 @@ def loadDictFromMatfile(matfilepath):
     array([1, 2, 3])
     '''
     Dtmp = scipy.io.loadmat(matfilepath)
-    D = dict([x for x in Dtmp.items() if not x[0].startswith('__')])
+    D = dict([x for x in list(Dtmp.items()) if not x[0].startswith('__')])
     for key in D:
         if not isinstance(D[key], np.ndarray):
             continue

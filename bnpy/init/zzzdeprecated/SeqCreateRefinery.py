@@ -48,7 +48,7 @@ def refineProposedRespViaLocalGlobalStepsAndDeletes(
     tempModel.update_global_params(tempSS)
 
     # Refine via repeated local/global steps
-    for step in xrange(nRefineIters):
+    for step in range(nRefineIters):
         propLP_n = tempModel.calc_local_params(Data_n)
         tempSS -= propSS_n
         propSS_n = tempModel.get_global_suff_stats(Data_n, propLP_n)
@@ -109,7 +109,7 @@ def deleteEmptyCompsAndKeepConsistentWithWholeDataset(
     extraIDs_remaining = np.arange(origK, tempSS.K).tolist()
     nEmpty = np.sum(tempSS.N[origK:] <= 1)
     if verbose:
-        print extraIDs_remaining, '<< original extra ids'
+        print(extraIDs_remaining, '<< original extra ids')
     while nEmpty > 0 and tempSS.K > 1:
         # Loop thru each remaining extra comp created for current seq. n
         # Remove any such comps that are too small.
@@ -117,7 +117,7 @@ def deleteEmptyCompsAndKeepConsistentWithWholeDataset(
         for kLoc, kk in enumerate(reversed(np.arange(origK, tempSS.K))):
             if tempSS.N[kk] <= 1 and tempSS.K > 1:
                 if verbose:
-                    print 'removing extra comp %d' % (kk)
+                    print('removing extra comp %d' % (kk))
                 tempSS.removeComp(kk)
                 propSS_n.removeComp(kk)
                 extraIDs_remaining.pop(L - kLoc - 1)
@@ -137,7 +137,7 @@ def deleteEmptyCompsAndKeepConsistentWithWholeDataset(
     tempModel.update_global_params(tempSS)
 
     if verbose:
-        print extraIDs_remaining, '<< remaining extra ids AFTER'
+        print(extraIDs_remaining, '<< remaining extra ids AFTER')
 
     # Store the original ids of remaining extra comps
     # which are useful for visualizing how this refinement

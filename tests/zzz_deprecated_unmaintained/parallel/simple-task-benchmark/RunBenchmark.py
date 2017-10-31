@@ -131,16 +131,16 @@ def getScaleFactorForTask(X, maxWorker=1, **kwargs):
     sliceSize = np.floor(N / maxWorker)
     Xslice = X[:sliceSize]
     kwargs['scaleFactor'] = 1
-    print 'FINDING PROBLEM SCALE.'
-    print '  Max possible workers %d\n Min duration of slice: %.2f' \
-        % (maxWorker, minSliceDuration)
+    print('FINDING PROBLEM SCALE.')
+    print('  Max possible workers %d\n Min duration of slice: %.2f' \
+        % (maxWorker, minSliceDuration))
 
     t = workOnSlice(Xslice, None, None, **kwargs)
 
     while t < minSliceDuration:
         kwargs['scaleFactor'] *= 2
         t = workOnSlice(Xslice, None, None, **kwargs)
-    print 'SCALE: ', kwargs['scaleFactor'], 'telapsed=%.3f' % (t)
+    print('SCALE: ', kwargs['scaleFactor'], 'telapsed=%.3f' % (t))
     return kwargs['scaleFactor']
 
 
@@ -158,7 +158,7 @@ def updateBenchmarkInfo(AllInfo, CurInfo, nRepeat, **kwargs):
     """
     for method in CurInfo:
         tvec = np.asarray([
-            CurInfo[method][r]['telapsed'] for r in xrange(nRepeat)])
+            CurInfo[method][r]['telapsed'] for r in range(nRepeat)])
         key = 't_' + method
         loc = np.flatnonzero(AllInfo['nWorker'] == kwargs['nWorker'])
         AllInfo[key][loc] = np.median(tvec)
@@ -196,24 +196,24 @@ def workOnSlice(X, start, stop,
         duration = minSliceDuration * (maxWorker / float(nWorker))
         time.sleep(duration)
     elif task == 'sumforloop':
-        for rep in xrange(nReps):
+        for rep in range(nReps):
             s = 0
-            for n in xrange(stop - start):
+            for n in range(stop - start):
                 s = 2 * n
     elif task == 'Xcolsumforloop':
-        for rep in xrange(nReps):
+        for rep in range(nReps):
             s = 0.0
-            for n in xrange(stop - start):
+            for n in range(stop - start):
                 s += Xslice[n, 0]
     elif task == 'Xcolsumvector':
-        for rep in xrange(nReps):
+        for rep in range(nReps):
             s = Xslice[:, 0].sum()
 
     elif task == 'Xelementwiseproduct':
-        for rep in xrange(nReps):
+        for rep in range(nReps):
             S = Xslice * Xslice
     elif task == 'Xmatrixproduct':
-        for rep in xrange(nReps):
+        for rep in range(nReps):
             S = np.dot(Xslice.T, Xslice)
     else:
         raise NotImplementedError("Unrecognized task: %s" % (task))
@@ -252,11 +252,11 @@ def runAllBenchmarks(X, JobQ, ResultQ,
                      nRepeat=1, methods='all', **kwargs):
     methodNames = getMethodNames(methods=methods)
 
-    print '======================= ', makeTitle(**kwargs)
-    print '%16s %15s %15s %15s %10s' % (
-        ' ',  'slice size', 'slice time', 'wallclock time', 'speedup')
+    print('======================= ', makeTitle(**kwargs))
+    print('%16s %15s %15s %15s %10s' % (
+        ' ',  'slice size', 'slice time', 'wallclock time', 'speedup'))
     Tinfo = defaultdict(dict)
-    for rep in xrange(nRepeat):
+    for rep in range(nRepeat):
         for method in methodNames:
             tstart = time.time()
             ts = runBenchmark(X, JobQ, ResultQ, method=method, **kwargs)
@@ -269,9 +269,9 @@ def runAllBenchmarks(X, JobQ, ResultQ,
     # PRINT RESULTS
     if 'monolithic' in Tinfo:
         telasped_monolithic = np.median([Tinfo['monolithic'][r]['telapsed']
-                                         for r in xrange(nRepeat)])
+                                         for r in range(nRepeat)])
 
-    for rep in xrange(nRepeat):
+    for rep in range(nRepeat):
         for method in methodNames:
             start, stop = [x for x in sliceGenerator(**kwargs)][0]
             msg = "%16s" % (method)
@@ -285,14 +285,14 @@ def runAllBenchmarks(X, JobQ, ResultQ,
             msg += " %11.3f sec" % (telapsed)
             if 'monolithic' in Tinfo:
                 msg += " %11.2f" % (telasped_monolithic / telapsed)
-            print msg
+            print(msg)
 
     # PLOT RESULTS
     pylab.figure(1)
     pylab.hold('on')
     for method in methodNames:
         xs = kwargs['nWorker'] * np.ones(nRepeat)
-        ys = [Tinfo[method][r]['telapsed'] for r in xrange(nRepeat)]
+        ys = [Tinfo[method][r]['telapsed'] for r in range(nRepeat)]
         if kwargs['nWorker'] == 1:
             label = method
         else:
@@ -334,14 +334,14 @@ def launchWorkers(X, nWorker=1, **kwargs):
     JobQ = manager.Queue()
     ResultQ = manager.Queue()
 
-    for wID in xrange(nWorker):
+    for wID in range(nWorker):
         worker = SharedMemWorker(wID, JobQ, ResultQ, X)
         worker.start()
     return JobQ, ResultQ
 
 
 def closeWorkers(JobQ, nWorker=1, **kwargs):
-    for wID in xrange(nWorker):
+    for wID in range(nWorker):
         JobQ.put(None)  # this is shutdown signal
 
 
@@ -398,7 +398,7 @@ def rangeFromHyphen(hyphenString):
     myList : list of integers
     """
     x = [int(x) for x in hyphenString.split('-')]
-    return range(x[0], x[-1] + 1)
+    return list(range(x[0], x[-1] + 1))
 
 
 def sliceGenerator(N=0, nWorker=0, nTaskPerWorker=1, **kwargs):

@@ -82,11 +82,11 @@ Mu[:, 1] = np.sin(ts)
 V = 1.0 / 16.0
 SigmaBase = np.asarray([[V, 0], [0, V / 100.0]])
 Sigma = np.zeros((K, D, D))
-for k in xrange(K):
+for k in range(K):
     Sigma[k] = rotateCovMat(SigmaBase, k * np.pi / 4.0)
 # Precompute cholesky decompositions
 cholSigma = np.zeros(Sigma.shape)
-for k in xrange(K):
+for k in range(K):
     cholSigma[k] = scipy.linalg.cholesky(Sigma[k])
 
 
@@ -97,7 +97,7 @@ def MakeGroupData(seed, nDoc, nObsPerDoc):
     Pi = PRNG.dirichlet(gamma * np.ones(K), size=nDoc)
     XList = list()
     ZList = list()
-    for d in xrange(nDoc):
+    for d in range(nDoc):
         Npercomp = PRNG.multinomial(nObsPerDoc, Pi[d])
         for k in range(K):
             if Npercomp[k] < 1:

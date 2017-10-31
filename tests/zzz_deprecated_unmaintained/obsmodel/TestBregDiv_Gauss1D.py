@@ -32,7 +32,7 @@ def makePlot(muVals=[(0.01,0), (0.1,0), (1,0), (10,0)], doCorrection=1):
     pylab.plot(xgrid, np.zeros_like(xgrid), ':', alpha=0.2)
     for mu1, mu2 in muVals:
         ygrid = calcBregDiv_Gauss1D(xgrid, mu1, mu2, doCorrection=doCorrection)
-        print ygrid.min()
+        print(ygrid.min())
         pylab.plot(xgrid, ygrid, label='mu1=% 6.2f mu2=% 6.2f' % (mu1, mu2))
     pylab.legend(loc='lower right')
     pylab.xlim([xgrid.min(), xgrid.max()])

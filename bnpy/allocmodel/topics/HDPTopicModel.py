@@ -1,14 +1,14 @@
 import numpy as np
 import logging
 
-import LocalStepManyDocs
-import OptimizerRhoOmegaBetter
+from . import LocalStepManyDocs
+from . import OptimizerRhoOmegaBetter
 
-from HDPTopicUtil import calcELBO
-from HDPTopicUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
-from HDPTopicUtil import calcHrespForMergePairs, calcHrespForSpecificMergePairs
-from HDPTopicUtil import calcMergeTermsFromSeparateLP
-from HDPTopicUtil import L_alloc
+from .HDPTopicUtil import calcELBO
+from .HDPTopicUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
+from .HDPTopicUtil import calcHrespForMergePairs, calcHrespForSpecificMergePairs
+from .HDPTopicUtil import calcMergeTermsFromSeparateLP
+from .HDPTopicUtil import L_alloc
 
 from bnpy.allocmodel.AllocModel import AllocModel
 from bnpy.allocmodel.mix.DPMixtureModel import convertToN0
@@ -272,7 +272,7 @@ class HDPTopicModel(AllocModel):
         N = resp.shape[0]
         K = resp.shape[1]
         DocTopicCount = np.zeros((Data.nDoc, K))
-        for d in xrange(Data.nDoc):
+        for d in range(Data.nDoc):
             start = Data.doc_range[d]
             stop = Data.doc_range[d + 1]
             if hasattr(Data, 'word_count'):
@@ -365,7 +365,7 @@ class HDPTopicModel(AllocModel):
         for docID in docIDs:
             start = Data.doc_range[docID]
             stop = Data.doc_range[docID + 1]
-            subsetTokenIDs.extend(range(start, stop))
+            subsetTokenIDs.extend(list(range(start, stop)))
         subsetLP['resp'] = LP['resp'][subsetTokenIDs].copy()
         return subsetLP
 

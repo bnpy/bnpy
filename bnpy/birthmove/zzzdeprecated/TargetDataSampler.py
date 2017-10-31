@@ -113,7 +113,7 @@ def _sample_target_XData(Data, model, LP, **kwargs):
         if size == Data.get_size():
             TargetData = Data
         else:
-            targetIDs = range(Data.get_size())
+            targetIDs = list(range(Data.get_size()))
             randstate.shuffle(targetIDs)
             TargetData = Data.select_subset_by_mask(targetIDs[:size],
                                                     doTrackFullSize=False)
@@ -220,7 +220,7 @@ def makeHeldoutData(targetData, **kwargs):
     nDoc = targetData.nDoc
     nHoldout = nDoc / 5
     holdIDs = kwargs['randstate'].choice(nDoc, nHoldout, replace=False)
-    trainIDs = [x for x in xrange(nDoc) if x not in holdIDs]
+    trainIDs = [x for x in range(nDoc) if x not in holdIDs]
     holdData = targetData.select_subset_by_mask(docMask=holdIDs,
                                                 doTrackFullSize=False)
     targetData = targetData.select_subset_by_mask(docMask=trainIDs,

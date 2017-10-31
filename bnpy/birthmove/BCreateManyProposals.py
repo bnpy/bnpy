@@ -1,9 +1,9 @@
 import numpy as np
 import os
 
-import BLogger
+from . import BLogger
 from collections import defaultdict
-from BCreateOneProposal import makeSummaryForBirthProposal_HTMLWrapper
+from .BCreateOneProposal import makeSummaryForBirthProposal_HTMLWrapper
 
 def makeSummariesForManyBirthProposals(
         Dslice=None,

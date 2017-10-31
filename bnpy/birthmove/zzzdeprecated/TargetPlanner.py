@@ -112,7 +112,7 @@ def makePlansToTargetWordFreq(model=None, LP=None, Data=None, Q=None,
                               **kwargs):
     K = model.obsModel.K
     topics = np.zeros((K, Q.shape[1]))
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] = model.obsModel.comp[k].lamvec
         topics[k, :] = topics[k, :] / topics[k, :].sum()
     Q = Q / Q.sum(axis=1)[:, np.newaxis]
@@ -180,14 +180,14 @@ def select_target_words_MultipleSets(model=None,
         onTopicWords = goodWords[np.argsort(-1 * score)[:targetNumWords]]
         if hasattr(Data, 'vocab_dict'):
             Vocab = [str(x[0][0]) for x in Data.vocab_dict]
-            print 'Anchor Doc %d' % (a)
-            print ' '.join([Vocab[goodWords[w]] for w in np.argsort(
-                -1 * uErrBiggest[a])[:20]])
-            print 'Anchor Doc %d' % (b)
-            print ' '.join([Vocab[goodWords[w]] for w in np.argsort(
-                -1 * uErrBiggest[b])[:20]])
-            print 'BOTH'
-            print ' '.join([Vocab[w] for w in onTopicWords])
+            print('Anchor Doc %d' % (a))
+            print(' '.join([Vocab[goodWords[w]] for w in np.argsort(
+                -1 * uErrBiggest[a])[:20]]))
+            print('Anchor Doc %d' % (b))
+            print(' '.join([Vocab[goodWords[w]] for w in np.argsort(
+                -1 * uErrBiggest[b])[:20]]))
+            print('BOTH')
+            print(' '.join([Vocab[w] for w in onTopicWords]))
         Plans.append(dict(targetWordIDs=onTopicWords, ktarget=None, Data=None))
     return Plans
 
@@ -330,8 +330,8 @@ def select_target_words(model=None,
 
     if hasattr(Data, 'vocab_dict'):
         Vocab = [str(x[0][0]) for x in Data.vocab_dict]
-        print 'TARGETED WORDS'
-        print ' '.join([Vocab[w] for w in words])
+        print('TARGETED WORDS')
+        print(' '.join([Vocab[w] for w in words]))
 
     if return_ps:
         return words, pWords
@@ -342,7 +342,7 @@ def calc_word_scores_for_anchor(model, Q, Data, **kwargs):
     goodWords = get_good_words(Data)
     K = model.obsModel.K
     topics = np.zeros((K, Q.shape[1]))
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] = model.obsModel.comp[k].lamvec
         topics[k, :] = topics[k, :] / topics[k, :].sum()
     # Normalization happens internally in this function
@@ -353,7 +353,7 @@ def calc_word_scores_for_anchor(model, Q, Data, **kwargs):
     chosenWord = goodWords[choice]
     if hasattr(Data, 'vocab_dict'):
         Vocab = [str(x[0][0]) for x in Data.vocab_dict]
-        print 'CHOSEN ANCHOR WORD: %s' % (Vocab[chosenWord])
+        print('CHOSEN ANCHOR WORD: %s' % (Vocab[chosenWord]))
     score = np.zeros(Data.vocab_size)
     score[goodWords] = Q[chosenWord, goodWords]
 
@@ -488,14 +488,14 @@ def calc_word_scores_for_closest_pair_of_underpredicted_docs(
     score /= score.sum()
     if hasattr(Data, 'vocab_dict'):
         Vocab = [str(x[0][0]) for x in Data.vocab_dict]
-        print 'Anchor Doc 1'
-        print ' '.join([Vocab[goodWords[w]] for w in np.argsort(
-            -1 * uErrBiggest[i])[:20]])
-        print 'Anchor Doc 2'
-        print ' '.join([Vocab[goodWords[w]] for w in np.argsort(
-            -1 * uErrBiggest[j])[:20]])
-        print 'BOTH'
-        print ' '.join([Vocab[w] for w in np.argsort(-1 * score)[:20]])
+        print('Anchor Doc 1')
+        print(' '.join([Vocab[goodWords[w]] for w in np.argsort(
+            -1 * uErrBiggest[i])[:20]]))
+        print('Anchor Doc 2')
+        print(' '.join([Vocab[goodWords[w]] for w in np.argsort(
+            -1 * uErrBiggest[j])[:20]]))
+        print('BOTH')
+        print(' '.join([Vocab[w] for w in np.argsort(-1 * score)[:20]]))
     return score
 
 
@@ -511,7 +511,7 @@ def calc_underprediction_scores_per_word(model, Data, LP=None, **kwargs):
     DocWordMat = Data.to_sparse_docword_matrix().toarray()
     score = np.zeros(Data.vocab_size)
     # TODO: only consider words with many docs overall
-    for vID in xrange(Data.vocab_size):
+    for vID in range(Data.vocab_size):
         countPerDoc = DocWordMat[:, vID]
         typicalWordCount = np.median(countPerDoc[countPerDoc > 0])
         candidateDocs = np.flatnonzero(countPerDoc > typicalWordCount)
@@ -557,7 +557,7 @@ def sample_related_words_by_score(Data, pscore, nWords=3, anchor=None,
                                        p=relWordProbs)
             curWords.append(int(newWord))
             if doVerbose:
-                print curWords
+                print(curWords)
         if len(curWords) == nWords:
             return curWords
     return anchors

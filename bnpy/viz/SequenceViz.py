@@ -183,7 +183,7 @@ def plotSingleJob(dataset, jobname, taskids='1', lap='final',
 
         # Find maximum number of states we need to display
         nSeq = len(zHatBySeq)
-        Kmax = np.max([zHatBySeq[i].max() for i in xrange(nSeq)])
+        Kmax = np.max([zHatBySeq[i].max() for i in range(nSeq)])
         hasGroundTruth = False
 
         vmin = 0
@@ -195,8 +195,8 @@ def plotSingleJob(dataset, jobname, taskids='1', lap='final',
             Kignore = np.sum(uLabels < 0)
             if Kignore > 0:
                 for k in range(1, Kignore + 1):
-                    print 'ignoring state %d  Ttrue = %d' % (
-                        -k, np.sum(Data.TrueParams['Z'] == -k))
+                    print('ignoring state %d  Ttrue = %d' % (
+                        -k, np.sum(Data.TrueParams['Z'] == -k)))
 
             if colorManyToOne:
                 # For each state in zHat, find best true sequence

@@ -8,7 +8,7 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
-from AbstractObsModel import AbstractObsModel
+from .AbstractObsModel import AbstractObsModel
 
 nx = np.newaxis
 
@@ -431,7 +431,7 @@ class BernObsModel(AbstractObsModel):
             # Typical case: K x D
             assert Post._FieldDims['lam1'] == ('K', 'D')
             L_perComp = np.zeros(SS.K)
-            for k in xrange(SS.K):
+            for k in range(SS.K):
                 L_perComp[k] = c_Diff(Prior.lam1, Prior.lam0,
                                       Post.lam1[k], Post.lam0[k])
                 if not afterMStep:
@@ -508,12 +508,12 @@ class BernObsModel(AbstractObsModel):
 
         Post = self.Post
         c = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             c[k] = c_Func(Post.lam1[k], Post.lam0[k])
 
         Gap = np.zeros((SS.K, SS.K))
-        for j in xrange(SS.K):
-            for k in xrange(j + 1, SS.K):
+        for j in range(SS.K):
+            for k in range(j + 1, SS.K):
                 cjk = c_Func(*self.calcPostParamsForComp(SS, j, k))
                 Gap[j, k] = c[j] + c[k] - cPrior - cjk
         return Gap
@@ -587,7 +587,7 @@ class BernObsModel(AbstractObsModel):
     def calcMargLik_CFuncForLoop(self, SS):
         Prior = self.Prior
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             lam1, lam0 = self.calcPostParamsForComp(SS, k)
             logp[k] = c_Diff(Prior.lam1, Prior.lam0,
                              lam1, lam0)
@@ -787,7 +787,7 @@ class BernObsModel(AbstractObsModel):
 
         # Compute Div array up to a per-row additive constant indep. of k
         Div = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             Div[:,k] = -1 * np.sum(MuX * np.log(Mu[k]), axis=1) + \
                 -1 * np.sum((1-MuX) * np.log(1-Mu[k]), axis=1)
 
@@ -869,7 +869,7 @@ class BernObsModel(AbstractObsModel):
         priorN = (1-smoothFrac) * (self.Prior.lam1 + self.Prior.lam0)
 
         Div = np.zeros((K, self.D))
-        for k in xrange(K):
+        for k in range(K):
             Div[k, :] = priorMu * np.log(priorMu / Mu[k]) + \
                 (1-priorMu) * np.log((1-priorMu)/(1-Mu[k]))
         return np.dot(Div, priorN)
@@ -952,7 +952,7 @@ def calcLogSoftEvMatrix_FromPost(Data,
             C += C_1mX
         else:
             C = np.tile(Elog1mphiT, (Data.nDoc, 1))
-            for d in xrange(Data.nDoc):
+            for d in range(Data.nDoc):
                 start_d = Data.vocab_size * d
                 words_d = Data.word_id[
                     Data.doc_range[d]:Data.doc_range[d+1]]
@@ -1007,7 +1007,7 @@ def calcSummaryStats(Dslice, SS, LP, DataAtomType='doc', **kwargs):
     else:
         CountON = np.zeros((SS.K, Dslice.vocab_size))
         CountOFF = np.zeros((SS.K, Dslice.vocab_size))
-        for d in xrange(Dslice.nDoc):
+        for d in range(Dslice.nDoc):
             words_d = Dslice.word_id[
                 Dslice.doc_range[d]:Dslice.doc_range[d+1]]
             rstart_d = d * Dslice.vocab_size

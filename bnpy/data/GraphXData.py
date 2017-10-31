@@ -12,7 +12,7 @@ import scipy.io
 from scipy.sparse import csc_matrix
 
 from bnpy.util import as1D, as2D, as3D, toCArray
-from XData import XData
+from .XData import XData
 
 class GraphXData(XData):
 
@@ -340,8 +340,8 @@ def makeEdgesForDenseGraphWithNNodes(N):
         contains all non-self-loop edges
     '''
     edges = list()
-    for s in xrange(N):
-        for t in xrange(N):
+    for s in range(N):
+        for t in range(N):
             if s == t:
                 continue 
             edges.append((s,t))

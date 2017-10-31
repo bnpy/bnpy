@@ -102,7 +102,7 @@ def summarizeRestrictedLocalStep_DPMixtureModel(
             LPb=xLPslice, SSb=xSSslice, 
             mUIDPairs=mUIDPairs)
         xSSslice.setMergeUIDPairs(mUIDPairs)
-        for key, arr in Mdict.items():
+        for key, arr in list(Mdict.items()):
             xSSslice.setMergeTerm(key, arr, dims='M')
     # Prepare dict of info for debugging/inspection
     Info = dict()

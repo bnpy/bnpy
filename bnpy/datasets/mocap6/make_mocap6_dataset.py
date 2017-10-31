@@ -9,7 +9,7 @@ X_list = list()
 X_prev_list = list()
 T_list = list()
 Z_list = list()
-for doc in xrange(6):
+for doc in range(6):
     doc_X = np.asarray(Q[doc]['X'][0], dtype=np.float64).copy()
     doc_Xprev = np.asarray(Q[doc]['Xprev'][0], dtype=np.float64).copy()
     doc_Z = np.squeeze(

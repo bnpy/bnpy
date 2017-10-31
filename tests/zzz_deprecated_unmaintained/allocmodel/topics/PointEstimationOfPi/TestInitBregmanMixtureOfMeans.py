@@ -25,7 +25,7 @@ def initMu_BregmanMixture(Data, K, obsModel, seed=0,
         smoothFrac=1.0)
     Pi = np.ones((X.shape[0], K))
     scoreVsK = list()
-    for k in xrange(1, K):
+    for k in range(1, K):
         sum_minDiv = np.sum(minDiv)        
         scoreVsK.append(sum_minDiv)
         if sum_minDiv == 0.0:
@@ -33,7 +33,7 @@ def initMu_BregmanMixture(Data, K, obsModel, seed=0,
             # Some rows of X may be exact copies, 
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
-            for emptyk in reversed(range(k, K)):
+            for emptyk in reversed(list(range(k, K))):
                 # Remove remaining entries in the Mu list,
                 # so its total size is now k, not K
                 Mu.pop(emptyk)
@@ -53,7 +53,7 @@ def initMu_BregmanMixture(Data, K, obsModel, seed=0,
 
     scoreVsK.append(np.sum(minDiv))
     #assert np.all(np.diff(scoreVsK) >= -1e-6)
-    print scoreVsK
+    print(scoreVsK)
     return chosenZ, Mu, minDiv, np.sum(DivDataVec), scoreVsK
 
 
@@ -96,7 +96,7 @@ def estimatePiAndDiv_ManyDocs(Data, Mu, Pi, k, alpha=0.0,
                 piInit=None)
                 #piInit=piInit)
         if d == 0:
-            print pi2str(Pi[d,:k])
+            print(pi2str(Pi[d,:k]))
     minDiv -= np.dot(np.log(np.dot(Pi[:, :k], topics)), obsModel.Prior.lam)
     if DivDataVec is not None:
         minDiv += DivDataVec
@@ -125,9 +125,9 @@ if __name__ == '__main__':
         chosenZ, Mu, minDiv, sumDataTerm, scoreVsK = initMu_BregmanMixture(
             Data, K, obsModel, seed=trial)
         score = np.sum(minDiv)
-        print "init %d/%d : sum(minDiv) %8.2f" % (trial, nTrial, np.sum(minDiv))
+        print("init %d/%d : sum(minDiv) %8.2f" % (trial, nTrial, np.sum(minDiv)))
         if score < bestScore:
             bestScore = score
             bestMu = Mu
-            print "*** New best"
+            print("*** New best")
     from IPython import embed; embed()

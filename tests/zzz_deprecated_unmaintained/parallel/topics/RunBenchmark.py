@@ -92,7 +92,7 @@ def main():
             time.sleep(.1)
 
             CurInfo = defaultdict(dict)
-            for rep in xrange(kwargs['nRepeat']):
+            for rep in range(kwargs['nRepeat']):
                 for method in getMethodNames(**kwargs):
                     tstart = time.time()
                     telapsed_slices = runBenchmark(
@@ -103,7 +103,7 @@ def main():
                     CurInfo[method][rep]['telapsed_wall'] = telapsed_wall
                     CurInfo[method][rep]['telapsed_slices'] = telapsed_slices
 
-                    print '%s %.2f ' % (method, telapsed_wall)
+                    print('%s %.2f ' % (method, telapsed_wall))
 
             AllInfo = updateBenchmarkInfo(AllInfo, CurInfo, **kwargs)
             printResultsTable(CurInfo, **kwargs)
@@ -146,7 +146,7 @@ def workOnSlice(ShMem,
         duration = minSliceDuration * (maxWorker / float(nWorker))
         time.sleep(duration)
     elif task == 'localstep':
-        for rep in xrange(nReps):
+        for rep in range(nReps):
             # Do local step
             LP = fH['o_calcLocalParams'](Dslice, **kwargs)
             LP = fH['a_calcLocalParams'](Dslice, LP, **kwargs)
@@ -194,14 +194,14 @@ def launchWorkers(ShMem, fH, nWorker=1, **kwargs):
     JobQ = manager.Queue()
     ResultQ = manager.Queue()
 
-    for wID in xrange(nWorker):
+    for wID in range(nWorker):
         worker = SharedMemWorker(wID, JobQ, ResultQ, ShMem, fH, **kwargs)
         worker.start()
     return JobQ, ResultQ
 
 
 def closeWorkers(JobQ, nWorker=1, **kwargs):
-    for wID in xrange(nWorker):
+    for wID in range(nWorker):
         JobQ.put(None)  # this is shutdown signal
 
 
@@ -234,17 +234,17 @@ def getMethodNames(methods='all', **kwargs):
 
 def printResultsTable(Tinfo, nRepeat=1, methods='', **kwargs):
 
-    print '======================= ', makeTitle(**kwargs)
-    print '%16s %15s %15s %15s %10s' % (
-        ' ', 'slice size', 'slice time', 'wallclock time', 'speedup')
+    print('======================= ', makeTitle(**kwargs))
+    print('%16s %15s %15s %15s %10s' % (
+        ' ', 'slice size', 'slice time', 'wallclock time', 'speedup'))
 
     nDocTotal = kwargs['nDocTotal']
     # PRINT RESULTS
     if 'monolithic' in Tinfo:
         telasped_monolithic = np.median(
-            [Tinfo['monolithic'][r]['telapsed_wall'] for r in xrange(nRepeat)])
+            [Tinfo['monolithic'][r]['telapsed_wall'] for r in range(nRepeat)])
 
-    for rep in xrange(nRepeat):
+    for rep in range(nRepeat):
         for method in getMethodNames(methods):
             start, stop = [x for x in sliceGenerator(**kwargs)][0]
             msg = "%16s" % (method)
@@ -259,7 +259,7 @@ def printResultsTable(Tinfo, nRepeat=1, methods='', **kwargs):
             msg += " %11.3f sec" % (telapsed)
             if 'monolithic' in Tinfo:
                 msg += " %11.2f" % (telasped_monolithic / telapsed)
-            print msg
+            print(msg)
 
 
 def plotSpeedupFigure(AllInfo, maxWorker=1, **kwargs):
@@ -299,17 +299,17 @@ def getScaleFactorForTask(
     sliceSize = np.floor(nDocTotal / maxWorker)
 
     kwargs['scaleFactor'] = 1
-    print 'FINDING PROBLEM SCALE WITH SPECIFIED DURATION...'
-    print '  Max possible workers: %d\n  Min duration of slice: %.2f' \
-        % (maxWorker, minSliceDuration)
+    print('FINDING PROBLEM SCALE WITH SPECIFIED DURATION...')
+    print('  Max possible workers: %d\n  Min duration of slice: %.2f' \
+        % (maxWorker, minSliceDuration))
 
     t = workOnSlice(ShMem, 0, sliceSize, fH=fH, **kwargs)
     while t < minSliceDuration:
         kwargs['scaleFactor'] *= 2
         t = workOnSlice(ShMem, 0, sliceSize, fH=fH, **kwargs)
-    print 'FINAL SCALE:'
-    print '  nReps: ', kwargs['scaleFactor']
-    print '  Slice Duration: %.2f sec' % (t)
+    print('FINAL SCALE:')
+    print('  nReps: ', kwargs['scaleFactor'])
+    print('  Slice Duration: %.2f sec' % (t))
     kwargs['minSliceDuration'] = t
     return kwargs['scaleFactor']
 
@@ -328,7 +328,7 @@ def updateBenchmarkInfo(AllInfo, CurInfo, nRepeat, **kwargs):
     """
     for method in CurInfo:
         tvec = np.asarray([
-            CurInfo[method][r]['telapsed_wall'] for r in xrange(nRepeat)])
+            CurInfo[method][r]['telapsed_wall'] for r in range(nRepeat)])
         key = 't_' + method
         loc = np.flatnonzero(AllInfo['nWorker'] == kwargs['nWorker'])
         AllInfo[key][loc] = np.median(tvec)
@@ -401,7 +401,7 @@ def rangeFromHyphen(hyphenString):
     myList : list of integers
     """
     x = [int(x) for x in hyphenString.split('-')]
-    return range(x[0], x[-1] + 1)
+    return list(range(x[0], x[-1] + 1))
 
 
 def sliceGenerator(nDocTotal=0, nWorker=0, nTaskPerWorker=1, **kwargs):

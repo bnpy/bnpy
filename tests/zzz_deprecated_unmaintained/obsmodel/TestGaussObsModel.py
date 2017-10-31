@@ -27,14 +27,14 @@ class TestHardMerge(unittest.TestCase):
         self.beforeK = K
 
     def test_calcHardMergeGap(self):
-        print ''
+        print('')
         beforeELBO = self.beforeModel.calcELBO_Memoized(self.beforeSS)
 
         afterModel = copy.deepcopy(self.beforeModel)
         GapMat = self.beforeModel.calcHardMergeGap_AllPairs(self.beforeSS)
-        for kA in xrange(self.beforeK):
-            for kB in xrange(kA + 1, self.beforeK):
-                print '%d, %d' % (kA, kB)
+        for kA in range(self.beforeK):
+            for kB in range(kA + 1, self.beforeK):
+                print('%d, %d' % (kA, kB))
                 afterSS = self.beforeSS.copy()
                 afterSS.mergeComps(kA, kB)
                 afterModel.update_global_params(afterSS)
@@ -42,7 +42,7 @@ class TestHardMerge(unittest.TestCase):
                 afterELBO = afterModel.calc_evidence(None, afterSS, None)
                 gapAB = afterELBO - beforeELBO
                 gap = self.beforeModel.calcHardMergeGap(self.beforeSS, kA, kB)
-                print gapAB
-                print gap
+                print(gapAB)
+                print(gap)
                 assert np.allclose(gapAB, gap)
                 assert np.allclose(gapAB, GapMat[kA, kB])

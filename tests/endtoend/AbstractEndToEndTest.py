@@ -121,7 +121,7 @@ class AbstractEndToEndTest(unittest.TestCase):
 
     @attr('slow')
     def test_VB_long__monotonic(self):
-        print ''
+        print('')
         for aKwArgs in self.nextAllocKwArgsForVB():
             aName = arg2name(aKwArgs)
             for oKwArgs in self.nextObsKwArgsForVB(aName):
@@ -131,7 +131,7 @@ class AbstractEndToEndTest(unittest.TestCase):
 
     @attr('fast')
     def test_VB__repeatable_and_monotonic(self):
-        print ''
+        print('')
         for aName in self.possibleAllocModelNames:
             for oName in self.possibleObsModelNames:
                 for iName in self.possibleInitNames:
@@ -140,7 +140,7 @@ class AbstractEndToEndTest(unittest.TestCase):
 
     @attr('fast')
     def test_EM__repeatable_and_monotonic(self):
-        print ''
+        print('')
         for aName in self.possibleAllocModelNames:
             if 'EM' not in self.possibleLearnAlgsForAllocModel[aName]:
                 continue
@@ -151,7 +151,7 @@ class AbstractEndToEndTest(unittest.TestCase):
 
     @attr('fast')
     def test_moVB__repeatable_and_monotonic(self):
-        print ''
+        print('')
         for aName in self.possibleAllocModelNames:
             for oName in self.possibleObsModelNames:
                 for iName in self.possibleInitNames:
@@ -173,9 +173,9 @@ class AbstractEndToEndTest(unittest.TestCase):
         maskOK = np.logical_or(maskIncrease, maskWithinTol)
         isMonotonic = np.all(maskOK)
         if not isMonotonic and verbose:
-            print "NOT MONOTONIC!"
-            print '  %d violations found in vector of size %d.' % (
-                np.sum(1 - maskOK), ELBOvec.size)
+            print("NOT MONOTONIC!")
+            print('  %d violations found in vector of size %d.' % (
+                np.sum(1 - maskOK), ELBOvec.size))
         return isMonotonic
 
     def test__isMonotonic(self):
@@ -190,18 +190,18 @@ class AbstractEndToEndTest(unittest.TestCase):
     def pprintResult(self, model, Info):
         """ Pretty print the result of a learning algorithm.
         """
-        print " %25s after %4.1f sec  ELBO=% 7.3f  nLap=%5d  K=%d" % (
+        print(" %25s after %4.1f sec  ELBO=% 7.3f  nLap=%5d  K=%d" % (
             Info['status'][:25],
             Info['elapsedTimeInSec'],
             Info['evBound'],
             Info['lapTrace'][-1],
             model.allocModel.K,
-        )
+        ))
 
     def pprintSingleRun(self, aArg, oArg, algName, iArg):
         """ Pretty print information about current call to bnpy.run
         """
-        print ">>> Run: %s" % (algName)
+        print(">>> Run: %s" % (algName))
         self.pprint(aArg)
         self.pprint(oArg)
         self.pprint(iArg)
@@ -210,13 +210,13 @@ class AbstractEndToEndTest(unittest.TestCase):
         """ Pretty print the provided value.
         """
         if isinstance(val, str):
-            print '  %s' % (val[:40])
+            print('  %s' % (val[:40]))
         elif hasattr(val, 'items'):
             firstMsg = ''
             msg = ''
-            for (k, v) in val.items():
+            for (k, v) in list(val.items()):
                 if k.count('name'):
                     firstMsg = str(v)
                 else:
                     msg += " %s=%s" % (k, str(v))
-            print '  ' + firstMsg + ' ' + msg
+            print('  ' + firstMsg + ' ' + msg)

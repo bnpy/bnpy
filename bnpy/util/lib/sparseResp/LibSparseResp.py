@@ -601,7 +601,7 @@ if __name__ == "__main__":
     spResp_data = np.zeros(N * D * nnzPerRow)
     spResp_colids = np.zeros(N * D * nnzPerRow, dtype=np.int32)
     for d in [0, 1, 2, 3]:
-        print nnzPerRow
+        print(nnzPerRow)
         start = d * (N * nnzPerRow)
         stop = (d+1) * (N * nnzPerRow)
         libTopics.sparseLocalStepSingleDocWithWordCounts(
@@ -616,9 +616,9 @@ if __name__ == "__main__":
             spResp_data[start:stop],
             spResp_colids[start:stop],
             )
-        print ' '.join(['%5.2f' % (x) for x in topicCount_d])
-        print 'sum(topicCount_d)=', topicCount_d.sum()
-        print 'sum(wc_d)=', np.sum(wc_d)
+        print(' '.join(['%5.2f' % (x) for x in topicCount_d]))
+        print('sum(topicCount_d)=', topicCount_d.sum())
+        print('sum(wc_d)=', np.sum(wc_d))
     '''
     from bnpy.util.SparseRespUtil import sparsifyResp_numpy_vectorized
 

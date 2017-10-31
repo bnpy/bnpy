@@ -13,7 +13,7 @@ from bnpy.util import StickBreakUtil
 from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir, L_top
 
-from FiniteMMSB import FiniteMMSB
+from .FiniteMMSB import FiniteMMSB
 
 class HDPMMSB(FiniteMMSB):
 
@@ -54,7 +54,7 @@ class HDPMMSB(FiniteMMSB):
         self.gamma = float(gamma)
 
     def get_active_comp_probs(self):
-        print 'TODO'
+        print('TODO')
 
     def getCompDims(self):
         ''' Get dimensions of latent component interactions.
@@ -112,7 +112,7 @@ class HDPMMSB(FiniteMMSB):
         # Update theta with recently updated info from suff stats
         self.theta, self.thetaRem = updateThetaAndThetaRem(
             SS, rho=self.rho, alpha=self.alpha, gamma=self.gamma)
-        for giter in xrange(nGlobalIters):
+        for giter in range(nGlobalIters):
             self.rho, self.omega = updateRhoOmega(
                 theta=self.theta, thetaRem=self.thetaRem,
                 initrho=self.rho, omega=self.omega, 

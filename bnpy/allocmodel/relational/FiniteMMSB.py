@@ -49,7 +49,7 @@ class FiniteMMSB(AllocModel):
         self.alpha = float(alpha)
 
     def get_active_comp_probs(self):
-        print 'TODO'
+        print('TODO')
 
     def getCompDims(self):
         ''' Get dimensions of latent component interactions.

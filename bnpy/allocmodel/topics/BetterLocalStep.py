@@ -46,13 +46,13 @@ if __name__ == "__main__":
 	logL = np.log( np.ones((N, K)) + 0.1 )
 	alphaEbeta = alpha * np.ones(K) / K
 
-	print 'UNIFORM PROBS'
-	print Lscore(logPvec, logL, alphaEbeta)
-	print Lscore(logPvec-1, logL, alphaEbeta)
-	print Lscore(logPvec-2, logL, alphaEbeta)
-	print Lscore(logPvec+1, logL, alphaEbeta)
-	print Lscore(logPvec+2, logL, alphaEbeta)
+	print('UNIFORM PROBS')
+	print(Lscore(logPvec, logL, alphaEbeta))
+	print(Lscore(logPvec-1, logL, alphaEbeta))
+	print(Lscore(logPvec-2, logL, alphaEbeta))
+	print(Lscore(logPvec+1, logL, alphaEbeta))
+	print(Lscore(logPvec+2, logL, alphaEbeta))
 
 	for i in range(3):
 		logPvec = np.log( np.random.rand(K))
-		print Lscore(logPvec, logL, alphaEbeta)
+		print(Lscore(logPvec, logL, alphaEbeta))

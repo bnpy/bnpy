@@ -28,7 +28,7 @@ def makeInitModelWithMergedComps(model, Data, compsToMerge=[(0,1)], **kwargs):
         for kgroup in compsToMerge.split('/'):
             compsToMerge_new.append(tuple([int(k) for k in kgroup.split(',')]))
         compsToMerge = compsToMerge_new
-        print compsToMerge
+        print(compsToMerge)
     for knew, ktuple in enumerate(compsToMerge):
         for k in ktuple:
             initZ[initZ == k] = 1000 + knew
@@ -68,17 +68,17 @@ def testBSelectMethod_Ldata(
     pvec = np.exp(SS.N.sum() * pvec)
     pvec /= pvec.sum()
 
-    print '  N: ' + ' '.join(['% 9.0f' % (Nk) for Nk in SS.N])
+    print('  N: ' + ' '.join(['% 9.0f' % (Nk) for Nk in SS.N]))
 
-    print '  L: ' + ' '.join(['% .2e' % (Lk) for Lk in Lvec])
+    print('  L: ' + ' '.join(['% .2e' % (Lk) for Lk in Lvec]))
     LvecN = -1* Lvec / SS.N
-    print 'L/N: ' + ' '.join(['% .2e' % (Lk) for Lk in LvecN])
+    print('L/N: ' + ' '.join(['% .2e' % (Lk) for Lk in LvecN]))
 
-    print '  p: ' + ' '.join(['% 9.2f' % (pk) for pk in pvec])
+    print('  p: ' + ' '.join(['% 9.2f' % (pk) for pk in pvec]))
 
     compsToHighlight = np.argmax(pvec)
-    print compsToHighlight
-    print compsToHighlight_true
+    print(compsToHighlight)
+    print(compsToHighlight_true)
     return tmpmodel, Data, compsToHighlight
 
 def plotComps(tmpmodel, Data, compsToHighlight=None):

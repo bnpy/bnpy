@@ -49,7 +49,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         #    then component params by M-step given those single items
         resp = np.zeros((N, K))
         permIDs = PRNG.permutation(N).tolist()
-        for k in xrange(K):
+        for k in range(K):
             resp[permIDs[k], k] = 1.0
 
     elif initname == 'randexamplesbydist':
@@ -73,7 +73,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
             objID = PRNG.choice(N, p=p)
             chosenObjIDs.append(objID)
         resp = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             resp[chosenObjIDs[k], k] = 1.0
 
     elif initname == 'randcontigblocks':
@@ -87,7 +87,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         docIDs = np.arange(nDoc)
         PRNG.shuffle(docIDs)
         resp = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             n = docIDs[k % nDoc]
             start = doc_range[n]
             stop = doc_range[n + 1]
@@ -106,7 +106,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         np.random.seed(seed)
         centroids, labels = kmeans2(data=X, k=K, minit='points')
         resp = np.zeros((N, K))
-        for n in xrange(N):
+        for n in range(N):
             resp[n, labels[n]] = 1
 
     elif initname == 'randsoftpartition':

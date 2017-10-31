@@ -1,6 +1,6 @@
 ''' AllocModel.py
 '''
-from __future__ import division
+
 
 
 class AllocModel(object):
@@ -191,7 +191,7 @@ class AllocModel(object):
         LP['Z'] = np.argmax(LP['resp'], axis=1)
         K = LP['resp'].shape[1]
         LP['resp'].fill(0)
-        for k in xrange(K):
+        for k in range(K):
             LP['resp'][LP['Z'] == k, k] = 1
         return LP
 

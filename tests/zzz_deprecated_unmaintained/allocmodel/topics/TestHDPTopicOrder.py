@@ -68,8 +68,8 @@ if __name__ == '__main__':
 	sortIDs = argsort_bigtosmall_stable(Tvec)
 	Lbest_sorted = L_hdp(beta_opt[sortIDs], omega, Tvec[sortIDs], alpha)
 
-	print " % .5e Lbest" % (Lbest)
-	print " % .5e Lbest after sorting" % (Lbest_sorted)
+	print(" % .5e Lbest" % (Lbest))
+	print(" % .5e Lbest after sorting" % (Lbest_sorted))
 
-	print beta_opt
-	print beta_opt[sortIDs]
+	print(beta_opt)
+	print(beta_opt[sortIDs])

@@ -36,7 +36,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
     if hasattr(Data, 'TrueParams'):
         if 'nodeZ' in Data.TrueParams:
             sortids = np.argsort(Data.TrueParams['nodeZ'])
-            print 'Sorting nodes by true labels...'
+            print('Sorting nodes by true labels...')
         elif 'pi' in Data.TrueParams:
             sortids = np.argsort(Data.TrueParams['pi'].argmax(axis=1))
     else:
@@ -71,7 +71,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
         if isAssortative:
             K = hmodel.allocModel.K
             Ew_tmp = hmodel.allocModel.epsilon * np.ones((K, K, Ew.shape[-1]))
-            for k in xrange(K):
+            for k in range(K):
                 Ew_tmp[k,k] = Ew[k]
             Ew = Ew_tmp
         taskAdjMat = np.zeros((Data.nNodes, Data.nNodes, Data.dim))
@@ -91,7 +91,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
         else:
             Epi = np.exp(hmodel.allocModel.E_logPi())
             for eid, (s,t) in enumerate(Data.edges):
-                for d in xrange(Data.dim):
+                for d in range(Data.dim):
                     taskAdjMat[s,t,d] = np.inner(Epi[s,:], 
                         np.dot(Ew[:,:,d], Epi[t,:]))
         assert taskAdjMat.min() >= 0

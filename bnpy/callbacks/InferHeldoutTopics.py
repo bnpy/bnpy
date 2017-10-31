@@ -675,6 +675,6 @@ if __name__ == '__main__':
             elif level == 'info':
                 level = logging.INFO
             if level >= args.printLevel:
-                print x
+                print(x)
         args.__dict__['printFunc'] = printFunc
     evalTopicModelOnTestDataFromTaskpath(**args.__dict__)

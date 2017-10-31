@@ -8,7 +8,7 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D, toCArray, np2flatstr
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcSpRXXT
-from AbstractObsModel import AbstractObsModel
+from .AbstractObsModel import AbstractObsModel
 
 class GaussRegressYFromFixedXObsModel(AbstractObsModel):
 
@@ -301,7 +301,7 @@ def calcLogSoftEvMatrix_FromPost(
         E_log_soft_ev_NK = np.zeros((Dslice.nObs, K))
     assert E_log_soft_ev_NK.shape == (Dslice.nObs, K)
 
-    for k in xrange(K):
+    for k in range(K):
         E_log_soft_ev_NK[:, k] += (
             - 0.5 * LOGTWOPI \
             + 0.5 * E_log_d_K[k] 
@@ -381,7 +381,7 @@ def calcSummaryStats(Data, SS, LP, **kwargs):
         sqrtResp_k_N = np.sqrt(resp[:, 0])
         sqrtR_X_k_NE = sqrtResp_k_N[:, np.newaxis] * X_NE
         S_xxT_KEE[0] = dotATA(sqrtR_X_k_NE)
-        for k in xrange(1, K):
+        for k in range(1, K):
             np.sqrt(resp[:, k], out=sqrtResp_k_N)
             np.multiply(sqrtResp_k_N[:, np.newaxis], X_NE, out=sqrtR_X_k_NE)
             S_xxT_KEE[k] = dotATA(sqrtR_X_k_NE)
@@ -438,7 +438,7 @@ def calcPostParamsFromSS(
 
     ptau_K = np.zeros(K)
     ptau_K[:] = SS.yy_K + Prior.ptau + Prior.wPw_1
-    for k in xrange(K):
+    for k in range(K):
         ptau_K[k] -= np.dot(w_KE[k], np.dot(P_KEE[k], w_KE[k]))
 
     if not returnParamBag:
@@ -488,7 +488,7 @@ def calcPostParamsFromSSForComp(
 
     ptau_K = np.zeros(K)
     ptau_K[:] = SS_yy_K + Prior.ptau + Prior.wPw_1
-    for k in xrange(K):
+    for k in range(K):
         ptau_K[k] -= np.dot(w_KE[k], np.dot(P_KEE[k], w_KE[k]))
 
     return pnu_K, ptau_K, w_KE, P_KEE
@@ -511,7 +511,7 @@ def calcELBOFromSSAndPost(
         Equal to E[ log p(x) + log p(phi) - log q(phi)]
     """
     elbo_K = np.zeros(SS.K)
-    for k in xrange(SS.K):
+    for k in range(SS.K):
         elbo_K[k] = - (0.5 * LOGTWOPI) * SS.N[k] \
             + c_Func(
                 pnu=Prior.pnu,

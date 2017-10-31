@@ -49,7 +49,7 @@ def expand_then_refine(freshModel, freshSS, freshData,
         xbigModel.allocModel.update_global_params(xbigSS)
     if xbigModel.obsModel.K < Kx:
         xbigModel.obsModel.update_global_params(xbigSS)
-    xbigSS.subtractSpecificComps(freshSS, range(bigSS.K, bigSS.K + freshSS.K))
+    xbigSS.subtractSpecificComps(freshSS, list(range(bigSS.K, bigSS.K + freshSS.K)))
     if kwargs['birthDebug']:
         Info['xbigModelInit'] = xbigModel.copy()
 
@@ -62,7 +62,7 @@ def expand_then_refine(freshModel, freshSS, freshData,
     else:
         xfreshSS = xbigSS.copy()
         xfreshSS.setAllFieldsToZero()
-        for key in xfreshSS._FieldDims.keys():
+        for key in list(xfreshSS._FieldDims.keys()):
             if xfreshSS._FieldDims[key] is None:
                 continue
             arr = getattr(xfreshSS, key)
@@ -128,7 +128,7 @@ def refine_expanded_model_with_VB_iters(xbigModel, freshData,
     logPhase('Refinement')
 
     xInfo = dict()
-    origIDs = range(0, xbigSS.K)
+    origIDs = list(range(0, xbigSS.K))
 
     nIters = kwargs['refineNumIters']
     traceBeta = np.zeros((nIters, xbigSS.K))
@@ -136,7 +136,7 @@ def refine_expanded_model_with_VB_iters(xbigModel, freshData,
     traceELBO = np.zeros(nIters)
 
     xfreshLP = None
-    for riter in xrange(nIters):
+    for riter in range(nIters):
         xfreshLP = xbigModel.calc_local_params(freshData, xfreshLP, **kwargs)
         xfreshSS = xbigModel.get_global_suff_stats(freshData, xfreshLP)
 
@@ -156,7 +156,7 @@ def refine_expanded_model_with_VB_iters(xbigModel, freshData,
         # For all but last iteration, attempt removing empty topics
         if kwargs['cleanupDeleteEmpty'] and riter < kwargs[
                 'refineNumIters'] - 1:
-            for k in reversed(range(Korig, xfreshSS.K)):
+            for k in reversed(list(range(Korig, xfreshSS.K))):
                 if xfreshSS.N[k] < kwargs['cleanupMinSize']:
                     xfreshSS.removeComp(k)
                     xbigSS.removeComp(xbigSS.K - 1)  # last in order!

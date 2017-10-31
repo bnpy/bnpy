@@ -100,7 +100,7 @@ class Worker_IPCData_IPCModel(multiprocessing.Process):
             Dslice, hmodel, LPkwargs = jobArgs
 
             tstart = time.time()
-            for rep in xrange(self.nReps):
+            for rep in range(self.nReps):
                 LPslice = hmodel.calc_local_params(Dslice, **LPkwargs)
                 SSslice = hmodel.get_global_suff_stats(
                     Dslice, LPslice, **LPkwargs)

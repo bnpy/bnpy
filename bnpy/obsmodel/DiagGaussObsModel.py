@@ -8,8 +8,8 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, toCArray, np2flatstr
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcRXX_withDenseResp, calcSpRXX
-from AbstractObsModel import AbstractObsModel
-from GaussObsModel import createECovMatFromUserInput
+from .AbstractObsModel import AbstractObsModel
+from .GaussObsModel import createECovMatFromUserInput
 
 class DiagGaussObsModel(AbstractObsModel):
 
@@ -104,7 +104,7 @@ class DiagGaussObsModel(AbstractObsModel):
             if Sigma is not None:
                 assert Sigma.ndim == 3
                 sigma = np.empty((Sigma.shape[0], Sigma.shape[1]))
-                for k in xrange(K):
+                for k in range(K):
                     sigma[k] = np.diag(Sigma[k])
             assert sigma.ndim == 2
             self.EstParams = ParamBag(K=K, D=mu.shape[1])
@@ -203,7 +203,7 @@ class DiagGaussObsModel(AbstractObsModel):
         '''
         K = self.EstParams.K
         L = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             L[:, k] = - 0.5 * self.D * LOGTWOPI \
                 - 0.5 * np.sum(np.log(self.EstParams.sigma[k])) \
                 - 0.5 * self._mahalDist_EstParam(Data.X, k)
@@ -267,7 +267,7 @@ class DiagGaussObsModel(AbstractObsModel):
 
         m = np.empty((SS.K, SS.D))
         beta = np.empty((SS.K, SS.D))
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             km_x = Prior.kappa * Prior.m + SS.x[k]
             m[k] = 1.0 / kappa[k] * km_x
             beta[k] = PB + SS.xx[k] - 1.0 / kappa[k] * np.square(km_x)
@@ -428,7 +428,7 @@ class DiagGaussObsModel(AbstractObsModel):
         '''
         K = self.Post.K
         L = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             L[:, k] = - 0.5 * self.D * LOGTWOPI \
                 + 0.5 * np.sum(self.GetCached('E_logL', k)) \
                 - 0.5 * self._mahalDist_Post(Data.X, k)
@@ -469,7 +469,7 @@ class DiagGaussObsModel(AbstractObsModel):
         elbo = np.zeros(SS.K)
         Post = self.Post
         Prior = self.Prior
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             elbo[k] = c_Diff(Prior.nu, Prior.beta, Prior.m, Prior.kappa,
                              Post.nu[k], Post.beta[
                                  k], Post.m[k], Post.kappa[k],
@@ -527,8 +527,8 @@ class DiagGaussObsModel(AbstractObsModel):
         Gap2D = np.zeros((SS.K, SS.K))
         cPrior = None
         cPost_K = [None for k in range(SS.K)]
-        for kA in xrange(SS.K):
-            for kB in xrange(kA + 1, SS.K):
+        for kA in range(SS.K):
+            for kB in range(kA + 1, SS.K):
                     Gap2D[kA, kB], cPost_K, cPrior = calcHardMergeGapForPair(
                         SS=SS, Post=self.Post, Prior=self.Prior, kA=kA, kB=kB,
                         cPrior=cPrior, cPost_K=cPost_K)
@@ -583,7 +583,7 @@ class DiagGaussObsModel(AbstractObsModel):
     def calcMargLik_CFuncForLoop(self, SS):
         Prior = self.Prior
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             nu, beta, m, kappa = self.calcPostParamsForComp(SS, k)
             logp[k] = c_Diff(Prior.nu, Prior.beta, Prior.m, Prior.kappa,
                              nu, beta, m, kappa)
@@ -602,7 +602,7 @@ class DiagGaussObsModel(AbstractObsModel):
         pSS.xx += np.square(x)
         pnu, pbeta, pm, pkappa = self.calcPostParams(pSS)
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             logp[k] = c_Diff(nu[k], beta[k], m[k], kappa[k],
                              pnu[k], pbeta[k], pm[k], pkappa[k])
         return np.exp(logp - np.max(logp))
@@ -630,7 +630,7 @@ class DiagGaussObsModel(AbstractObsModel):
         ''' For-loop version
         '''
         p = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             nu, beta, m, kappa = self.calcPostParamsForComp(SS, k)
             kbeta = (kappa + 1) / kappa * beta
             base = np.square(x - m)
@@ -890,7 +890,7 @@ class DiagGaussObsModel(AbstractObsModel):
         VarX = eps * prior_varx
 
         Div = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             muVar_k = Mu[k][0]
             muMean_k = Mu[k][1]
             logdet_MuVar_k = np.sum(np.log(muVar_k))
@@ -961,7 +961,7 @@ class DiagGaussObsModel(AbstractObsModel):
         Div_FVG = np.zeros(K) # fixed variance gaussian
  
         logdet_priorMuVar = np.sum(np.log(priorMuVar))
-        for k in xrange(K):
+        for k in range(K):
             MuVar_k = Mu[k][0]
             MuMean_k = Mu[k][1]
 
@@ -1099,7 +1099,7 @@ def calcLogSoftEvMatrix_FromPost(Dslice,
     assert K == nu.size
     assert K == kappa.size
     L = np.zeros((Dslice.nObs, K))
-    for k in xrange(K):
+    for k in range(K):
         if E_logdetL_K is None:
             E_logdetL_k = E_logdetL(nu=nu[k], beta=beta[k])
         else:
@@ -1215,7 +1215,7 @@ def calcELBOFromSSAndPost(
         Equal to E[ log p(x) + log p(phi) - log q(phi)]
     """
     elbo = np.zeros(SS.K)
-    for k in xrange(SS.K):
+    for k in range(SS.K):
         elbo[k] = c_Diff(
             Prior.nu, Prior.beta, Prior.m, Prior.kappa,
             Post.nu[k], Post.beta[k], Post.m[k], Post.kappa[k],

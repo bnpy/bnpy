@@ -6,5 +6,5 @@ if not testroot.endswith(os.path.sep):
     testroot = testroot + os.path.sep
 
 CMD = "%s -v --nocapture --attr=fast" % (testroot)
-print CMD
+print(CMD)
 result = nose.run(argv=CMD.split())

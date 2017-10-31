@@ -187,7 +187,7 @@ def runDeleteMoveAndUpdateMemory(curModel, curSS, Plan,
 
         # Refine candidate with local/global steps
         didAcceptCur = 0
-        for riter in xrange(nRefineIters):
+        for riter in range(nRefineIters):
             ptargetLP = propModel.calc_local_params(targetData, **LPkwargs)
             propSS -= ptargetSS
             ptargetSS = propModel.get_global_suff_stats(targetData, ptargetLP,
@@ -253,7 +253,7 @@ def runDeleteMoveAndUpdateMemory(curModel, curSS, Plan,
             plotCompsFromHModel(bestModel, Data=targetData,
                                 compsToHighlight=compsToHighlight)
             pylab.show(block=0)
-            raw_input('Press any key to continue>>>')
+            input('Press any key to continue>>>')
             pylab.close()
 
         # Update best model/stats to accepted values
@@ -338,7 +338,7 @@ def makeMPairIDsWith(k, K, excludeIDs=None):
     if excludeIDs is None:
         excludeIDs = list()
     mPairIDs = list()
-    for j in xrange(K):
+    for j in range(K):
         if j in excludeIDs:
             continue
         elif j == k:

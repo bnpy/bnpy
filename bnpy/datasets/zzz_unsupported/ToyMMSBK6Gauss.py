@@ -60,9 +60,9 @@ def get_data(
         # Make source / receiver assignments and pack into TrueZ
         s = np.zeros((N, N), dtype=int)
         r = np.zeros((N, N), dtype=int)
-        for i in xrange(N):
-            s[i, :] = prng.choice(xrange(K), p=pi[i, :], size=nNodes)
-            r[:, i] = prng.choice(xrange(K), p=pi[i, :], size=nNodes)
+        for i in range(N):
+            s[i, :] = prng.choice(range(K), p=pi[i, :], size=nNodes)
+            r[:, i] = prng.choice(range(K), p=pi[i, :], size=nNodes)
         TrueZ = np.zeros((N, N, 2), dtype=int)
         TrueZ[:, :, 0] = s
         TrueZ[:, :, 1] = r
@@ -71,8 +71,8 @@ def get_data(
         # Generate graph
         X = np.zeros((N, N))
         cnt = 0
-        for i in xrange(N):
-            for j in xrange(N):
+        for i in range(N):
+            for j in range(N):
                 if i == j:
                     continue
                 if s[i, j] == r[i, j]:
@@ -80,8 +80,8 @@ def get_data(
                     cnt += 1
 
         M = np.max(np.abs(X))
-        for i in xrange(N):
-            for j in xrange(N):
+        for i in range(N):
+            for j in range(N):
                 if i == j:
                     continue
                 if s[i, j] != r[i, j]:

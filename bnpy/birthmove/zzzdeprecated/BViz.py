@@ -109,8 +109,8 @@ if __name__ == '__main__':
         Lscore_gain.append(Result['Lscore_gain'])
 
     size_grid = size_grid / Data.get_size()
-    print size_grid
-    print Lscore_gain
+    print(size_grid)
+    print(Lscore_gain)
 
     if size_grid.size > 1:
         xs = np.linspace(0,1,10)

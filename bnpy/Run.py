@@ -20,6 +20,8 @@ Usage
 -------
 TODO: write better doc
 '''
+from __future__ import print_function
+from builtins import *
 import os
 import sys
 import logging
@@ -487,7 +489,7 @@ def createUniqueRandomSeed(jobname, taskID=0):
     if len(jobname) > 5:
         jobname = jobname[:5]
 
-    seed = int(hashlib.md5(jobname + str(taskID)).hexdigest(), 16) % 1e7
+    seed = int(hashlib.md5(str(jobname + str(taskID)).encode('utf-8')).hexdigest(), 16) % 1e7
     return int(seed)
 
 

@@ -8,7 +8,7 @@ import numpy as np
 import bnpy.data
 
 from bnpy.util import split_str_into_fixed_width_lines
-from FromTruth import \
+from .FromTruth import \
     convertLPFromHardToSoft, \
     convertLPFromTokensToDocs, \
     convertLPFromDocsToTokens, \
@@ -45,7 +45,7 @@ def init_global_params(hmodel, Data, **kwargs):
 
             if 'logFunc' not in kwargs:
                 def logFunc(msg):
-                    print msg
+                    print(msg)
                 kwargs['logFunc'] = logFunc
 
     '''
@@ -111,7 +111,7 @@ def initSS_BregmanDiv(
     '''
     # Reformat any keyword argument to drop 
     # prefix of 'b_' or 'init_'
-    for key, val in kwargs.items():
+    for key, val in list(kwargs.items()):
         if key.startswith('b_'):
             newkey = key[2:]
             kwargs[newkey] = val
@@ -203,9 +203,9 @@ def initSS_BregmanDiv(
     # By fixing up the cluster means Mu and assignments Z
     Mu = [Mu[k] for k in oldids_bigtosmall] 
     neworder = np.arange(xSS.K)    
-    old2newID=dict(zip(oldids_bigtosmall, neworder))
+    old2newID=dict(list(zip(oldids_bigtosmall, neworder)))
     targetZnew = -1 * np.ones_like(targetZ)
-    for oldk in xrange(xSS.K):
+    for oldk in range(xSS.K):
         old_mask = targetZ == oldk
         targetZnew[old_mask] = old2newID[oldk]
     assert np.all(targetZnew >= 0)
@@ -258,7 +258,7 @@ def runKMeans_BregmanDiv(
             Z[chosenZ] = np.arange(chosenZ.size)
     Lscores = list()
     prevN = np.zeros(K)
-    for riter in xrange(Niter):
+    for riter in range(Niter):
         Div = obsModel.calcSmoothedBregDiv(
             X=X, Mu=Mu, W=W,
             includeOnlyFastTerms=True, 
@@ -282,11 +282,11 @@ def runKMeans_BregmanDiv(
                 if logFunc:
                     logFunc(msg)
                 else:
-                    print msg
+                    print(msg)
                 assert np.all(np.diff(Lscores) <= 1e-5)
 
         N = np.zeros(K)
-        for k in xrange(K):
+        for k in range(K):
             if W is None:
                 W_k = None
                 N[k] = np.sum(Z==k)
@@ -370,7 +370,7 @@ def initKMeans_BregmanDiv(
             # Some rows of X may be exact copies, 
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
-            for emptyk in reversed(range(k, K)):
+            for emptyk in reversed(list(range(k, K))):
                 # Remove remaining entries in the Mu list,
                 # so its total size is now k, not K
                 Mu.pop(emptyk)
@@ -547,7 +547,7 @@ def makeDataSubsetByThresholdResp_BagOfWordsData(
             nDoc=Data.nDoc,
             dataType='BagOfWordsData',
             obsModelName=obsModelName,
-            docIDs=range(Data.nDoc),
+            docIDs=list(range(Data.nDoc)),
             )
         # Raise error if target dataset not big enough.
         Keff = np.minimum(K, Data.nDoc)
@@ -599,7 +599,7 @@ def makeDataSubsetByThresholdResp_BagOfWordsData(
         chosenRespIDs = list()
         for d in docIDs:
             chosenRespIDs.extend(
-                range(d * Data.vocab_size, (d+1) * Data.vocab_size))
+                list(range(d * Data.vocab_size, (d+1) * Data.vocab_size)))
         targetW = None
     else:
         raise ValueError("Should never happen")

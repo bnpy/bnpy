@@ -27,7 +27,7 @@ def Create2DBarsTopicWordParams(V, K, fracMassOnTopic=0.95, PRNG=np.random):
     topics = np.zeros((K, V))
     # Make horizontal bars
     for k in range(K / 2):
-        wordIDs = range(B * k, B * (k + 1))
+        wordIDs = list(range(B * k, B * (k + 1)))
         topics[k, wordIDs] = 1.0
 
     # Make vertical bars
@@ -35,7 +35,7 @@ def Create2DBarsTopicWordParams(V, K, fracMassOnTopic=0.95, PRNG=np.random):
         wordIDs = list()
         for b in range(sqrtV):
             start = b * sqrtV + k * BarWidth
-            wordIDs.extend(range(start, start + BarWidth))
+            wordIDs.extend(list(range(start, start + BarWidth)))
         topics[K / 2 + k, wordIDs] = 1.0
 
     # Add smoothing mass to all entries in "topics"
@@ -48,7 +48,7 @@ def Create2DBarsTopicWordParams(V, K, fracMassOnTopic=0.95, PRNG=np.random):
     topics += (2 * smoothMass) * PRNG.rand(K, V)
 
     # Ensure each row of topics is a probability vector
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] /= np.sum(topics[k, :])
 
     assert np.sum(topics[0, :B]) > fracMassOnTopic - 0.05
@@ -76,9 +76,9 @@ def Create2DBarsTopicWordParams2(V, K, r=0.5, fracMassOnTopic=0.95,
 
     B = V // (K // 2 + 1)
     for k in range(K // 2):
-        wordIDs = range(B * k, B * (k + 1))
+        wordIDs = list(range(B * k, B * (k + 1)))
         topics[2 * k, wordIDs] = np.linspace(1.0, r, B)
-        wordIDs = range(B // 2 + B * k, B // 2 + B * (k + 1))
+        wordIDs = list(range(B // 2 + B * k, B // 2 + B * (k + 1)))
         topics[2 * k + 1, wordIDs] = np.linspace(1.0, r, B)
 
     topics = smoothAndNormalizeTopics(topics, fracMassOnTopic, PRNG)
@@ -99,7 +99,7 @@ def smoothAndNormalizeTopics(topics, fracMassOnTopic=0.95, PRNG=np.random):
         topics : 2D array, size K x V
                  each row sums to one, has no non-zero entries
     '''
-    for k in xrange(topics.shape[0]):
+    for k in range(topics.shape[0]):
         onTopicMass = np.sum(topics[k])
         smoothMass = (1 - fracMassOnTopic) / fracMassOnTopic * onTopicMass
         offTopicWords = topics[k] == 0

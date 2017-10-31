@@ -80,7 +80,7 @@ if __name__ == '__main__':
     import bnpy.viz.BarsViz
     import argparse
     parser = argparse.ArgumentParser()
-    for key, val in Defaults.items():
+    for key, val in list(Defaults.items()):
         if key.count('topic'):
             continue
         parser.add_argument('--' + key, type=type(val), default=val)
@@ -88,4 +88,4 @@ if __name__ == '__main__':
 
     WData = CreateToyDataFromLDAModel(**args.__dict__)
     bnpy.viz.BarsViz.plotExampleBarsDocs(WData, doShowNow=1)
-    raw_input('Press any key to exit. >>')
+    input('Press any key to exit. >>')

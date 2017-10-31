@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.optimize
 import warnings
-from ShapeUtil import as1D, as2D
+from .ShapeUtil import as1D, as2D
 
 
 def estimatePiForDoc_frankwolfe(
@@ -57,12 +57,12 @@ def estimatePiForDoc_frankwolfe(
             initpi_K = make_random_pi_K(K=K, PRNG=PRNG)
     pi_K = initpi_K
     if verbose:
-        print '  0 ' + ' '.join(['%.4f' % (p) for p in pi_K])
+        print('  0 ' + ' '.join(['%.4f' % (p) for p in pi_K]))
 
     x_U = np.dot(pi_K, topics_KU)       
     # Loop
     T_2 = [1, 0]
-    for t in xrange(1, maxiter):
+    for t in range(1, maxiter):
         # Pick a term uniformly at random
         T_2[PRNG.randint(2)] += 1
         # Select a vertex with the largest value of  
@@ -78,7 +78,7 @@ def estimatePiForDoc_frankwolfe(
         x_U += lrate * (topics_KU[kmax,:] - x_U)
         # Print status        
         if verbose and (t < 10 or t % 5 == 0):
-            print '%3d ' % (t) + ' '.join(['%.4f' % (p) for p in pi_K])
+            print('%3d ' % (t) + ' '.join(['%.4f' % (p) for p in pi_K]))
 
     if returnFuncValAndInfo:
         fval = -1 * np.inner(cts_U, np.log(np.dot(pi_K, topics_KU)))
@@ -402,8 +402,8 @@ if __name__ == '__main__':
             trueDTC_K = np.dot(cts_U, Data.TrueParams['resp'][start:stop])
             truePi_K = (trueDTC_K + alpha)
             truePi_K /= truePi_K.sum()
-            print ''
-            print "     True Pi[%d]:\n %s" % (d, pi2str(truePi_K))
+            print('')
+            print("     True Pi[%d]:\n %s" % (d, pi2str(truePi_K)))
 
         if not args.optim_method.count("frankwolfe"):
             numPi_K, numf, numInfo = estimatePiForDoc(
@@ -413,7 +413,7 @@ if __name__ == '__main__':
                 alpha=alpha,
                 scale=scale,
                 approx_grad=True)
-            print "Numerical Pi[%d]:\n %s" % (d, pi2str(numPi_K))
+            print("Numerical Pi[%d]:\n %s" % (d, pi2str(numPi_K)))
 
         estPi_K, estf, estInfo = estimatePiForDoc(
             ids_U=ids_U,
@@ -422,7 +422,7 @@ if __name__ == '__main__':
             alpha=alpha,
             scale=scale,
             )
-        print "Estimated Pi[%d]:\n %s" % (d, pi2str(estPi_K))
+        print("Estimated Pi[%d]:\n %s" % (d, pi2str(estPi_K)))
 
 
         # Generate random initializations,
@@ -442,8 +442,8 @@ if __name__ == '__main__':
             if np.allclose(estPi_K, pi_K, rtol=0, atol=atol):
                 nMatch += 1
             else:
-                print "initrandom Pi[%d]:\n %s" % (
-                    d, pi2str(pi_K))
-                print estf
-                print f
-        print "%d/%d random inits within %s" % (nMatch, nRep, atol)
+                print("initrandom Pi[%d]:\n %s" % (
+                    d, pi2str(pi_K)))
+                print(estf)
+                print(f)
+        print("%d/%d random inits within %s" % (nMatch, nRep, atol))

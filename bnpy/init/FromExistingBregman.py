@@ -66,7 +66,7 @@ def runKMeans_BregmanDiv_existing(
     # (partial) global step: update mean parameters for Kfresh new clusters
     Lscores = list()
     prevN_K = np.zeros(Korig + Kfresh)
-    for riter in xrange(Niter):
+    for riter in range(Niter):
         Div = obsModel.calcSmoothedBregDiv(
             X=X, Mu=Mu, W=W,
             includeOnlyFastTerms=True, 
@@ -89,11 +89,11 @@ def runKMeans_BregmanDiv_existing(
                 if logFunc:
                     logFunc(msg)
                 else:
-                    print msg
+                    print(msg)
                 assert np.all(np.diff(Lscores) <= 1e-5)
 
         curN_K = np.zeros(Korig + Kfresh)
-        for k in xrange(Korig + Kfresh):
+        for k in range(Korig + Kfresh):
             if W is None:
                 W_k = None
                 curN_K[k] = np.sum(Z==k)
@@ -133,7 +133,7 @@ def runKMeans_BregmanDiv_existing(
         # In case a new cluster (index Korig, Korig+1, ... Korig+Kfresh)
         # has mass pushed to zero, we delete it.
         # All original clusters (index 0, 1, ... Korig) remain untouched.
-        for k in reversed(xrange(Korig, Korig + Kfresh)):
+        for k in reversed(range(Korig, Korig + Kfresh)):
             if curN_K[k] == 0:
                 del(Mu[k])
                 Z[Z > k] -= 1
@@ -176,8 +176,8 @@ def initKMeans_BregmanDiv_existing(
     # Initialize list Mu to hold all mean vectors
     # First obsModel.K entries go to existing clusters found in the obsModel.
     # Final K entries are placeholders for the new clusters we'll make below.
-    Mu = [obsModel.getSmoothedMuForComp(k) + noiseSD**2*np.eye(obsModel.D) for k in xrange(obsModel.K)]
-    Mu.extend([None for k in xrange(K)])
+    Mu = [obsModel.getSmoothedMuForComp(k) + noiseSD**2*np.eye(obsModel.D) for k in range(obsModel.K)]
+    Mu.extend([None for k in range(K)])
 
     # Compute minDiv between all data and existing clusters
     minDiv, DivDataVec = obsModel.calcSmoothedBregDiv(
@@ -194,7 +194,7 @@ def initKMeans_BregmanDiv_existing(
             # Some rows of X may be exact copies, 
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
-            for emptyk in reversed(range(k, K)):
+            for emptyk in reversed(list(range(k, K))):
                 # Remove remaining entries in the Mu list,
                 # so its total size is now k, not K
                 Mu.pop(emptyk)

@@ -74,7 +74,7 @@ def plotBoundVsK(KVals=np.arange(1,50),
         for k in range(1, K):
             betaVec[k] = betaVec[k] * (1 - np.sum(betaVec[:k]))
         betaVec[-1] = 1 - np.sum(betaVec[:-1])
-        print betaVec
+        print(betaVec)
         assert np.allclose(betaVec.sum(), 1.0)
         exactVals[ii] = cDir_exact(alpha, betaVec)
         boundVals[ii] = cDir_surrogate(alpha, betaVec)
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     pylab.legend(loc='lower left', fontsize=LEGENDSIZE)
 
     pylab.show(block=False)
-    keypress = raw_input('Press y to save, any other key to close >>')
+    keypress = input('Press y to save, any other key to close >>')
     if keypress.count('y'):
         pylab.figure(1)
         pylab.savefig(

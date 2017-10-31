@@ -11,13 +11,14 @@ Library of efficient vectorized implementations of
 * calcRlogR_specificpairs
 
 '''
+from __future__ import print_function
 import os
-import ConfigParser
+import configparser
 import numpy as np
 import scipy.sparse
 import timeit
 
-from EntropyUtil import calcRlogR, calcRlogRdotv
+from .EntropyUtil import calcRlogR, calcRlogRdotv
 
 def LoadConfig():
     global Config, cfgfilepath
@@ -28,7 +29,7 @@ def LoadConfig():
 
 def UpdateConfig(**kwargs):
     global Config
-    for key in kwargs.keys():
+    for key in list(kwargs.keys()):
         if key in Config:
             Config[key] = kwargs[key]
 
@@ -40,7 +41,7 @@ def readConfigFileIntoDict(confFile, targetSecName=None):
     --------
     dict : dictionary of key-values for each configuration options
     '''
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.SafeConfigParser()
     config.optionxform = str
     config.read(confFile)
     for secName in config.sections():
@@ -206,7 +207,7 @@ def calcRlogR_allpairs(R):
 def calcRlogR_allpairs_numpy(R):
     K = R.shape[1]
     Z = np.zeros((K, K))
-    for jj in xrange(K - 1):
+    for jj in range(K - 1):
         curR = R[:, jj][:, np.newaxis] + R[:, jj + 1:]
         curR *= np.log(curR)
         Z[jj, jj + 1:] = np.sum(curR, axis=0)
@@ -216,7 +217,7 @@ def calcRlogR_allpairs_numpy(R):
 def calcRlogR_allpairs_numexpr(R):
     K = R.shape[1]
     Z = np.zeros((K, K))
-    for jj in xrange(K - 1):
+    for jj in range(K - 1):
         curR = R[:, jj][:, np.newaxis] + R[:, jj + 1:]
         curZ = ne.evaluate("sum(curR * log(curR), axis=0)")
         Z[jj, jj + 1:] = curZ
@@ -306,7 +307,7 @@ def calcRlogRdotv_allpairs_numpy(R, v):
 def calcRlogRdotv_allpairs_numexpr(R, v):
     K = R.shape[1]
     Z = np.zeros((K, K))
-    for jj in xrange(K - 1):
+    for jj in range(K - 1):
         curR = R[:, jj][:, np.newaxis] + R[:, jj + 1:]
         ne.evaluate("curR * log(curR)", out=curR)
         curZ = np.dot(v, curR)
@@ -366,7 +367,7 @@ def autoconfigure():
     ''' Perform timing experiments on current hardware to assess which
          of various implementations is the fastest for each key routine
     '''
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.SafeConfigParser()
     config.optionxform = str
     config.read(cfgfilepath)
     methodNames = ['inplaceExpAndNormalizeRows', 'calcRlogR', 'calcRlogRdotv']
@@ -377,13 +378,13 @@ def autoconfigure():
             expectedGainFactor = runTiming_calcRlogR()
         elif mName == 'calcRlogRdotv':
             expectedGainFactor = runTiming_calcRlogRdotv()
-        print mName,
+        print(mName, end=' ')
         if expectedGainFactor > 1.05:
             config.set('LibraryPrefs', mName, 'numexpr')
-            print "numexpr preferred: %.2f X faster" % (expectedGainFactor)
+            print("numexpr preferred: %.2f X faster" % (expectedGainFactor))
         else:
             config.set('LibraryPrefs', mName, 'numpy')
-            print "numpy preferred: %.2f X faster" % (expectedGainFactor)
+            print("numpy preferred: %.2f X faster" % (expectedGainFactor))
         with open(cfgfilepath, 'w') as f:
             config.write(f)
     LoadConfig()
@@ -447,7 +448,7 @@ if hasNumexpr and 'OMP_NUM_THREADS' in os.environ:
         nThreads = int(os.environ['OMP_NUM_THREADS'])
         ne.set_num_threads(nThreads)
     except TypeError as ValueError:
-        print 'Unrecognized OMP_NUM_THREADS', os.environ['OMP_NUM_THREADS']
+        print('Unrecognized OMP_NUM_THREADS', os.environ['OMP_NUM_THREADS'])
         pass
 
 LoadConfig()

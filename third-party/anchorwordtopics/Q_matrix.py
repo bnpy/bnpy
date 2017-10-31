@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 import time
 import scipy.sparse
@@ -16,7 +16,7 @@ def generate_Q_matrix(M, words_per_doc=None):
     
     diag_M = np.zeros(vocabSize)
 
-    for j in xrange(M.indptr.size - 1):
+    for j in range(M.indptr.size - 1):
         
         # start and end indices for column j
         start = M.indptr[j]
@@ -24,7 +24,7 @@ def generate_Q_matrix(M, words_per_doc=None):
         
         wpd = np.sum(M.data[start:end])
         if words_per_doc != None and wpd != words_per_doc:
-            print 'Error: words per doc incorrect'
+            print('Error: words per doc incorrect')
         
         row_indices = M.indices[start:end]
         

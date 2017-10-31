@@ -67,7 +67,7 @@ def calcLocalParams_SingleDoc(
         DocTopicProb_d = np.zeros_like(alphaEbeta)
 
     prevDocTopicCount_d = DocTopicCount_d.copy()
-    for iter in xrange(nCoordAscentItersLP):
+    for iter in range(nCoordAscentItersLP):
         # Update Prob of Active Topics
         # First, in logspace, so Prob_d[k] = E[ log pi_dk ] + const
         np.add(DocTopicCount_d, alphaEbeta, out=DocTopicProb_d)
@@ -159,7 +159,7 @@ def removeJunkTopics_SingleDoc(
         pDocTopicCount_d[kID] = 0
 
         # Refine initial proposal via standard coord ascent updates
-        for iter in xrange(restartNumItersLP):
+        for iter in range(restartNumItersLP):
             np.add(pDocTopicCount_d, alphaEbeta, out=pDocTopicProb_d)
             digamma(pDocTopicProb_d, out=pDocTopicProb_d)
             np.exp(pDocTopicProb_d, out=pDocTopicProb_d)
@@ -312,7 +312,7 @@ def calcLocalParams_SingleDoc_WithELBOTrace(
 
     ELBOtrace = list()
     prevDocTopicCount_d = DocTopicCount_d.copy()
-    for iter in xrange(nCoordAscentItersLP):
+    for iter in range(nCoordAscentItersLP):
         # Update Prob of Active Topics
         # First, in logspace, so Prob_d[k] = E[ log pi_dk ] + const
         np.add(DocTopicCount_d, alphaEbeta, out=DocTopicProb_d)

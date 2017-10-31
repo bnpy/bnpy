@@ -6,9 +6,9 @@ import os
 import glob
 import scipy.io
 
-from PlotUtil import pylab
+from .PlotUtil import pylab
 from bnpy.ioutil import BNPYArgParser
-from JobFilter import filterJobs
+from .JobFilter import filterJobs
 
 import matplotlib
 matplotlib.rcParams['text.usetex'] = False
@@ -61,7 +61,7 @@ def plotJobs(jpaths, legNames, styles=None, fileSuffix='PredLik.mat',
 
     jitterByJob = np.linspace(-.5, .5, len(jpaths))
 
-    for lineID in xrange(nLines):
+    for lineID in range(nLines):
         if styles is None:
             curStyle = dict(colorID=lineID)
         else:
@@ -112,7 +112,7 @@ def plot_all_tasks_for_job(jobpath, label, taskids=None,
     ''' Create line plot in current figure for each task/run of jobpath
     '''
     if not os.path.exists(jobpath):
-        print 'PATH NOT FOUND', jobpath
+        print('PATH NOT FOUND', jobpath)
         return None
     if not yvar.startswith('avg') and yvar.count('Kactive') == 0:
         yvar = 'avg' + yvar

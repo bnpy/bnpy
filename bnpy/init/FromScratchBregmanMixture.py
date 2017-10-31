@@ -6,12 +6,12 @@ from bnpy.util.OptimizerForPi import \
     estimatePiForDoc_frankwolfe, \
     estimatePiForDoc_graddescent, \
     pi2str
-from FromTruth import \
+from .FromTruth import \
     convertLPFromHardToSoft, \
     convertLPFromTokensToDocs, \
     convertLPFromDocsToTokens, \
     convertLPFromDocsToTypes
-from FromScratchBregman import makeDataSubsetByThresholdResp
+from .FromScratchBregman import makeDataSubsetByThresholdResp
 
 def init_global_params(hmodel, Data,
         initObsModelScale=0.0,
@@ -79,7 +79,7 @@ def initSS_BregmanMixture(
     # Reformat any keyword argument to drop 
     # prefix of 'b_' or 'init_',
     # storing the result back into the kwargs dict
-    for key, val in kwargs.items():
+    for key, val in list(kwargs.items()):
         if key.startswith('b_'):
             newkey = key[2:]
             kwargs[newkey] = val
@@ -127,7 +127,7 @@ def initSS_BregmanMixture(
     # where resp[n,k] = w[k] if z[n] = k, and 0 otherwise
     xtargetLP, _ = convertLPFromHardToSoft(
         dict(Z=targetZ), targetData, initGarbageState=0, returnZ=1)
-    print targetZ, '<<<'
+    print(targetZ, '<<<')
     if K == 1:
         xtargetLP['resp'] = np.zeros((xtargetLP['resp'].shape[0], 1))
 
@@ -167,11 +167,11 @@ def initSS_BregmanMixture(
     # By fixing up the cluster means Mu and assignments Z
     Mu = [Mu[k] for k in oldids_bigtosmall] 
     neworder = np.arange(xSS.K)
-    print neworder
-    print oldids_bigtosmall   
-    old2newID=dict(zip(oldids_bigtosmall, neworder))
+    print(neworder)
+    print(oldids_bigtosmall)   
+    old2newID=dict(list(zip(oldids_bigtosmall, neworder)))
     targetZnew = -1 * np.ones_like(targetZ)
-    for oldk in xrange(xSS.K):
+    for oldk in range(xSS.K):
         old_mask = targetZ == oldk
         targetZnew[old_mask] = old2newID[oldk]
     assert np.allclose(len(Mu), xSS.K)
@@ -224,7 +224,7 @@ def initKMeans_BregmanMixture(Data, K, obsModel, seed=0,
         smoothFrac=1.0)
     Pi = np.ones((X.shape[0], K))
     scoreVsK = list()
-    for k in xrange(1, K):
+    for k in range(1, K):
         # Do not select any doc more than once
         minDiv[chosenZ[setOneToPriorMean:k]] = 0
         # Total up the score
@@ -235,7 +235,7 @@ def initKMeans_BregmanMixture(Data, K, obsModel, seed=0,
             # Some rows of X may be exact copies, 
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
-            for emptyk in reversed(range(k, K)):
+            for emptyk in reversed(list(range(k, K))):
                 # Remove remaining entries in the Mu list,
                 # so its total size is now k, not K
                 Mu.pop(emptyk)
@@ -265,8 +265,8 @@ def initKMeans_BregmanMixture(Data, K, obsModel, seed=0,
             optim_method=optim_method)
         time_k = time.time()
         if verbose:
-            print " completed round %3d/%d after %6.1f sec" % (
-                k+1, K, time_k - starttime)
+            print(" completed round %3d/%d after %6.1f sec" % (
+                k+1, K, time_k - starttime))
     # Every selected doc should have zero distance
     minDiv[chosenZ[setOneToPriorMean:]] = 0
     # Compute final score and add to the list
@@ -408,9 +408,9 @@ if __name__ == '__main__':
         chosenZ, Mu, minDiv, sumDataTerm, scoreVsK = initKMeans_BregmanMixture(
             Data, K, obsModel, seed=trial)
         score = np.sum(minDiv)
-        print "init %d/%d : sum(minDiv) %8.2f" % (
-            trial+1, nTrial, np.sum(minDiv))
+        print("init %d/%d : sum(minDiv) %8.2f" % (
+            trial+1, nTrial, np.sum(minDiv)))
         if score < bestScore:
             bestScore = score
             bestMu = Mu
-            print "*** New best"
+            print("*** New best")

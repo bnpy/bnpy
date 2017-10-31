@@ -12,7 +12,7 @@ def do_recovery(Q, anchors, loss, params):
         
         return A, hp
     else:
-        print "unrecognized loss function", loss, ". Options are KL,L2 or originalRecover"
+        print("unrecognized loss function", loss, ". Options are KL,L2 or originalRecover")
         
         return None
 
@@ -28,7 +28,7 @@ def KL_helper(arg):
 
 def entropy(p):
     e = 0
-    for i in xrange(len(p)):
+    for i in range(len(p)):
         if p[i] > 0:
             e += p[i]*log(p[i])
     return -e
@@ -40,19 +40,19 @@ def KL(p,log_p,q):
     log_diff = log_p - log(q)
     ret = dot(p, log_diff)
     if ret < 0 or isnan(ret):
-        print "invalid KL!"
-        print "p:"
-        for i in xrange(n):
-            print p[i]
+        print("invalid KL!")
+        print("p:")
+        for i in range(n):
+            print(p[i])
             if p[i] <= 0:
-                print "!!"
-        print "\nq:"
-        for i in xrange(n):
-            print q[i]
+                print("!!")
+        print("\nq:")
+        for i in range(n):
+            print(q[i])
             if q[i] <= 0:
-                print "!!"
+                print("!!")
         if ret < 0:
-            print "less than 0", ret
+            print("less than 0", ret)
         sys.exit(1)
     return ret
 
@@ -65,7 +65,7 @@ def fastQuadSolveExpGrad(y, x, eps, initialStepsize, recoveryLog, anchorsTimesAn
     # Multiply the target vector y and the anchors matrix X by X'
     #  (XX' could be passed in as a parameter)
     if anchorsTimesAnchors==None:
-        print "XX' was not passed in"
+        print("XX' was not passed in")
         anchorsTimesAnchors = dot(x, x.transpose())
     targetTimesAnchors = dot(y, x.transpose())
 
@@ -115,7 +115,7 @@ def quadSolveExpGrad(y, x, eps, alpha=None, XX=None):
     c1 = 10**(-4)
     c2 = 0.75
     if XX is None:
-        print 'making XXT'
+        print('making XXT')
         XX = dot(x, x.transpose())
 
     XY = dot(x, y)
@@ -317,7 +317,7 @@ def Recover(Q, anchors):
     orig = Q
     #print "anchors", anchors
     #print "RECOVERY:"
-    permutation = range(len(Q[:,0]))
+    permutation = list(range(len(Q[:,0])))
     for a in anchors:
         permutation.remove(a)
     permutation = anchors + permutation
@@ -358,16 +358,16 @@ def fastRecover(args):
                 alpha, it, dist, stepsize, gap = fastQuadSolveExpGrad(y, x, epsilon, 100, None, XXT)
 
             else:
-                print "invalid divergence!"
+                print("invalid divergence!")
                 if "gurobi" in divergence:
-                    print "gurobi is only valid in single threaded"
+                    print("gurobi is only valid in single threaded")
                 assert(0)
             if isnan(alpha).any():
                 alpha = ones(K)/K
 
         except Exception as inst:
-            print type(inst)     # the exception instance
-            print inst.args      # arguments stored in .args
+            print(type(inst))     # the exception instance
+            print(inst.args)      # arguments stored in .args
             alpha =  ones(K)/K
             it = -1
             dist = -1
@@ -394,7 +394,7 @@ class myIterator:
 
     def __iter__(self):
         return self
-    def next(self):
+    def __next__(self):
         self.v += 1
        # print "generating word", self.v, "of", self.V_max
         if self.v >= self.V_max:
@@ -422,12 +422,12 @@ def nonNegativeRecover(Q, anchors, outfile_name, divergence, max_threads, initia
     A = matrix(zeros((V,K)))
 
     P_w = matrix(diag(dot(Q, ones(V))))
-    for v in xrange(V):
+    for v in range(V):
         if isnan(P_w[v,v]):
             P_w[v,v] = 10**(-16)
     
     #normalize the rows of Q_prime
-    for v in xrange(V):
+    for v in range(V):
         Q[v,:] = Q[v,:] / (Q[v,:].sum() + 1e-14)
 
     s = time.time()
@@ -454,19 +454,19 @@ def nonNegativeRecover(Q, anchors, outfile_name, divergence, max_threads, initia
             scale = 1
             model = Model("distance")
             model.setParam("OutputFlag", 0)
-            alpha = [model.addVar() for _ in xrange(K)]
+            alpha = [model.addVar() for _ in range(K)]
             model.update()
             #sum of c's is 1
             model.addConstr(quicksum(alpha), GRB.EQUAL, 1)
-            for k in xrange(K):
+            for k in range(K):
                 model.addConstr(alpha[k], GRB.GREATER_EQUAL, 0)
 
             o_static = QuadExpr()
-            for i in xrange(K):
-                for j in xrange(K):
+            for i in range(K):
+                for j in range(K):
                     o_static.addTerms(scale*XXT[i,j], alpha[i], alpha[j])
 
-            for w in xrange(V):
+            for w in range(V):
                 tol = 10**(-16)
                 model.setParam("BarConvTol", tol)
                 o = QuadExpr()
@@ -478,10 +478,10 @@ def nonNegativeRecover(Q, anchors, outfile_name, divergence, max_threads, initia
                 o += dot(-2*scale*XY, alpha)
                 model.setObjective(o, GRB.MINIMIZE)
                 model.optimize()
-                print "status", model.status
+                print("status", model.status)
                 while not model.status == 2:
                     tol *= 10
-                    print "status", model.status, "tol", tol
+                    print("status", model.status, "tol", tol)
                     model.setParam("BarConvTol", tol)
                     model.optimize()
                 a = array([z.getAttr("x") for z in alpha])
@@ -493,7 +493,7 @@ def nonNegativeRecover(Q, anchors, outfile_name, divergence, max_threads, initia
                 '''
         
         else:
-            for w in xrange(V):
+            for w in range(V):
                 y = Q[w, :]
                 v, it, obj, alpha, stepsize, t, gap = fastRecover(
                        (y, X, w, outfile_name, anchors, divergence,
@@ -507,7 +507,7 @@ def nonNegativeRecover(Q, anchors, outfile_name, divergence, max_threads, initia
     #normalize columns of A. This is the normalization constant P(z)
     colsums = A.sum(0)
 
-    for k in xrange(K):
+    for k in range(K):
         A[:, k] = A[:, k]/A[:,k].sum()
     
     A = array(A)

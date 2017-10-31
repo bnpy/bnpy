@@ -13,7 +13,7 @@ import os
 from collections import namedtuple
 import pandas as pd
 
-from DataObj import DataObj
+from .DataObj import DataObj
 from bnpy.util import as1D, as2D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -260,17 +260,17 @@ class XData(DataObj):
 
         # Add optional row names
         if row_names is None:
-            self.row_names = map(str, range(self.nObs))
+            self.row_names = list(map(str, list(range(self.nObs))))
         else:
             assert len(row_names) == self.nObs
-            self.row_names = map(str, row_names)
+            self.row_names = list(map(str, row_names))
 
         # Add optional column names
         if column_names is None:
-            self.column_names = map(lambda n: "dim_%d" % n, range(self.dim))
+            self.column_names = ["dim_%d" % n for n in range(self.dim)]
         else:
             assert len(column_names) == self.dim
-            self.column_names = map(str, column_names)
+            self.column_names = list(map(str, column_names))
 
     def _set_dependent_params(self, nObsTotal=None):
         self.nObs = self.X.shape[0]
@@ -319,7 +319,7 @@ class XData(DataObj):
         if hasattr(self, 'row_names'):
             return self.row_names
         else:
-            return map(str, np.arange(self.nObs))
+            return list(map(str, np.arange(self.nObs)))
 
     def get_text_summary(self):
         ''' Get human-readable description of this dataset.

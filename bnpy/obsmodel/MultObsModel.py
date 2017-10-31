@@ -8,7 +8,7 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 from bnpy.util import NumericUtil
-from AbstractObsModel import AbstractObsModel
+from .AbstractObsModel import AbstractObsModel
 
 
 class MultObsModel(AbstractObsModel):
@@ -385,7 +385,7 @@ class MultObsModel(AbstractObsModel):
         Prior = self.Prior
         if not afterGlobalStep:
             Elogphi = self.GetCached('E_logphi', 'all')  # K x V
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             elbo[k] = self.prior_cFunc - self.GetCached('cFunc', k)
             #elbo[k] = c_Diff(Prior.lam, Post.lam[k])
             if not afterGlobalStep:
@@ -465,13 +465,13 @@ class MultObsModel(AbstractObsModel):
 
         Post = self.Post
         c = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             c[k] = c_Func(Post.lam[k])
 
         tmpvec = np.zeros(Post.D)
         Gap = np.zeros((SS.K, SS.K))
-        for j in xrange(SS.K):
-            for k in xrange(j + 1, SS.K):
+        for j in range(SS.K):
+            for k in range(j + 1, SS.K):
                 cjk = self.calcCFuncForMergeComp(SS, j, k, tmpvec=tmpvec)
                 #lam = self.calcPostParamsForComp(SS, j, k)
                 #oldcjk = c_Func(lam)
@@ -522,7 +522,7 @@ class MultObsModel(AbstractObsModel):
     def calcMargLik_CFuncForLoop(self, SS):
         Prior = self.Prior
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             lam = self.calcPostParamsForComp(SS, k)
             logp[k] = c_Diff(Prior.lam, lam)
         return np.sum(logp)
@@ -684,13 +684,13 @@ class MultObsModel(AbstractObsModel):
         K = len(Mu)
         # Compute Div array up to a per-row additive constant indep. of k
         Div = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             Div[:,k] = -1 * np.dot(X, np.log(Mu[k]))
 
         # Compute contribution of prior smoothing
         if smoothFrac > 0:
             smoothVec = smoothFrac * self.Prior.lam
-            for k in xrange(K):
+            for k in range(K):
                 Div[:,k] -= np.sum(smoothVec * np.log(Mu[k]))
             # Equivalent to -1 * np.dot(MuX, np.log(Mu[k])),
             # but without allocating a new matrix MuX
@@ -763,7 +763,7 @@ class MultObsModel(AbstractObsModel):
         priorN = (1-smoothFrac) * (self.Prior.lam[0] / priorMu[0])
 
         Div = np.zeros(K)
-        for k in xrange(K):
+        for k in range(K):
             Div[k] = np.sum(priorMu * np.log(priorMu / Mu[k]))
         return priorN * Div
 
