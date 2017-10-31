@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import os
 import sys
@@ -126,7 +127,7 @@ def makeSingleProposalHTMLStr(DebugInfo, b_debugOutputDir='', **kwargs):
     '''
     htmlstr = htmlstart
     htmlstr += "<table>"
-    # Row 1: original comps    
+    # Row 1: original comps
     htmlstr += "<tr>"
     htmlstr += '<td class="comment">Original model.<br />Before proposal.</td>'
     htmlstr += '<td class="png">%s</td>' % (
@@ -139,7 +140,7 @@ def makeSingleProposalHTMLStr(DebugInfo, b_debugOutputDir='', **kwargs):
     htmlstr += '<td class="comment">Proposal summary:</td>'
     htmlstr += '<td><pre>%s</pre></td>' % ('\n'.join(BLogger.RecentMessages))
     htmlstr += "</tr>\n"
-    
+
     if os.path.exists(
             os.path.join(b_debugOutputDir, "ProposalTrace_ELBO.png")):
         htmlstr += "<tr>"
@@ -195,7 +196,7 @@ def makeSingleProposalHTMLStr(DebugInfo, b_debugOutputDir='', **kwargs):
         htmlstr += "</tr>\n"
 
 
-    htmlstr += "</table>"    
+    htmlstr += "</table>"
     htmlstr += htmlend
     return htmlstr
 
@@ -226,4 +227,3 @@ def _getLineColorFromELBOKey(key):
         return 'c'
     else:
         return 'm'
-

@@ -1,10 +1,11 @@
 '''
 Implementation of parallel memoized variational algorithm for bnpy models.
 '''
+from builtins import *
 import numpy as np
 import multiprocessing
 import os
-from . import ElapsedTimeLogger 
+from . import ElapsedTimeLogger
 import scipy.sparse
 
 from collections import defaultdict
@@ -188,7 +189,7 @@ class MemoVBMovesAlg(LearnAlg):
 
             # Debug
             if self.doDebug() and lapFrac >= 1.0:
-                self.verifyELBOTracking(hmodel, SS, loss, 
+                self.verifyELBOTracking(hmodel, SS, loss,
                     MoveLog=MoveLog, lapFrac=lapFrac)
             self.saveDebugStateAtBatch(
                 'Mstep', batchID,
@@ -339,7 +340,7 @@ class MemoVBMovesAlg(LearnAlg):
                 **kwargs)
             ElapsedTimeLogger.stopEvent('birth', 'plan')
 
-        # Prepare some logging stats        
+        # Prepare some logging stats
         if 'b_nFailedProp' not in MovePlans:
             MovePlans['b_nFailedProp'] = 0
         if 'b_nTrial' not in MovePlans:
@@ -396,7 +397,7 @@ class MemoVBMovesAlg(LearnAlg):
             # Run restricted local step
             DKwargs = self.algParams['delete']
             SSbatch.propXSS[targetUID], rInfo = summarizeRestrictedLocalStep(
-                Dbatch, curModel, LPbatch, 
+                Dbatch, curModel, LPbatch,
                 curSSwhole=curSSwhole,
                 xInitSS=xInitSS,
                 doBuildOnInit=doBuildOnInit,
@@ -621,7 +622,7 @@ class MemoVBMovesAlg(LearnAlg):
 
     def makeMovePlans(self, hmodel, SS,
                       MovePlans=dict(),
-                      MoveRecordsByUID=dict(), 
+                      MoveRecordsByUID=dict(),
                       lapFrac=-1,
                       **kwargs):
         ''' Plan which comps to target for each possible move.
@@ -636,7 +637,7 @@ class MemoVBMovesAlg(LearnAlg):
         if isFirst and self.hasMove('birth'):
            ElapsedTimeLogger.startEvent('birth', 'plan')
            MovePlans = self.makeMovePlans_Birth_AtLapStart(
-               hmodel, SS, 
+               hmodel, SS,
                lapFrac=lapFrac,
                MovePlans=MovePlans,
                MoveRecordsByUID=MoveRecordsByUID,
@@ -645,7 +646,7 @@ class MemoVBMovesAlg(LearnAlg):
         if isFirst and self.hasMove('merge'):
             ElapsedTimeLogger.startEvent('merge', 'plan')
             MovePlans = self.makeMovePlans_Merge(
-                hmodel, SS, 
+                hmodel, SS,
                 lapFrac=lapFrac,
                 MovePlans=MovePlans,
                 MoveRecordsByUID=MoveRecordsByUID,
@@ -654,7 +655,7 @@ class MemoVBMovesAlg(LearnAlg):
         if isFirst and self.hasMove('delete'):
             ElapsedTimeLogger.startEvent('delete', 'plan')
             MovePlans = self.makeMovePlans_Delete(
-                hmodel, SS, 
+                hmodel, SS,
                 lapFrac=lapFrac,
                 MovePlans=MovePlans,
                 MoveRecordsByUID=MoveRecordsByUID,
@@ -844,7 +845,7 @@ class MemoVBMovesAlg(LearnAlg):
             return MovePlans
 
         if self.hasMove('birth'):
-            BArgs = self.algParams['birth']    
+            BArgs = self.algParams['birth']
             msg = "PLANNING birth at lap %.3f batch %d"
             BLogger.pprint(msg % (lapFrac, batchID))
             MovePlans = selectCompsForBirthAtCurrentBatch(
@@ -913,7 +914,7 @@ class MemoVBMovesAlg(LearnAlg):
             nTrial += 1
 
             BLogger.startUIDSpecificLog(targetUID)
-            # Prepare record-keeping            
+            # Prepare record-keeping
             if targetUID not in MoveRecordsByUID:
                 MoveRecordsByUID[targetUID] = defaultdict(int)
             ktarget = SS.uid2k(targetUID)
@@ -1019,7 +1020,7 @@ class MemoVBMovesAlg(LearnAlg):
 
                 if doTryRetain and couldUseMoreData:
                     # If Ldata for subset of data reassigned so far looks good
-                    # we hold onto this proposal for next time! 
+                    # we hold onto this proposal for next time!
                     propSSsubset = SS.propXSS[targetUID].copy(
                         includeELBOTerms=False, includeMergeTerms=False)
                     tmpModel = propModel
@@ -1079,7 +1080,7 @@ class MemoVBMovesAlg(LearnAlg):
                     # Update batch-specific records for this uid
                     uidRec = MoveRecordsByUID[targetUID]
                     uidRec_b = uidRec['byBatch'][uidRec['b_proposalBatchID']]
-                    uidRec_b['nFail'] += 1            
+                    uidRec_b['nFail'] += 1
                     uidRec_b['nEval'] += 1
                     uidRec_b['proposalTotalSize'] = \
                         SS.propXSS[targetUID].getCountVec().sum()
@@ -1107,7 +1108,7 @@ class MemoVBMovesAlg(LearnAlg):
                     " %d/%d succeeded. %d/%d failed eval phase. " + \
                     "%d/%d failed build phase."
                 msg = msg % (
-                    lapFrac, totalKnew, 
+                    lapFrac, totalKnew,
                     nAccept, nTrial,
                     MovePlans['b_nFailedEval'], nTrial,
                     MovePlans['b_nFailedProp'], nTrial)

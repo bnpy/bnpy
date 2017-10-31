@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 
 from . import LocalStepManyDocs
@@ -325,7 +326,7 @@ def L_entropy(Data=None, LP=None, resp=None, returnVector=0):
             resp = LP['resp']
         elif 'spR' in LP:
             spR = LP['spR']
-            N, K = LP['spR'].shape  
+            N, K = LP['spR'].shape
         else:
             raise ValueError("LP dict missing resp or spR")
     if resp is not None:

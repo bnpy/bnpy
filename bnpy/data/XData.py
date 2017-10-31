@@ -5,7 +5,7 @@ XData : dataset_object
     Holds a 2D array X of exchangable observations
     Each observation is a dense row vector inside the array X
 '''
-
+from builtins import *
 import numpy as np
 import scipy.io
 import inspect
@@ -72,7 +72,7 @@ class XData(DataObj):
         except Exception as e:
             X = np.loadtxt(filepath)
         return cls(X, nObsTotal=nObsTotal, **kwargs)
- 
+
     @classmethod
     def read_file(cls, filepath, **kwargs):
         ''' Constructor for loading data from disk into XData instance.
@@ -125,7 +125,7 @@ class XData(DataObj):
         Returns
         -------
         dataset : XData object
-            
+
         Examples
         --------
         >>> dataset_path = os.environ["BNPYDATADIR"]
@@ -151,7 +151,7 @@ class XData(DataObj):
         Returns
         -------
         dataset : XData object
-            
+
         Examples
         --------
         >>> dataset_path = os.environ["BNPYDATADIR"]
@@ -291,7 +291,7 @@ class XData(DataObj):
             assert self.Y.shape[0] == self.X.shape[0]
         if hasattr(self, 'Xprev'):
             assert self.Xprev.shape[0] == self.X.shape[0]
-            
+
     def get_size(self):
         """ Get number of observations in memory for this object.
 

@@ -1,17 +1,18 @@
+from builtins import *
 import numpy as np
 
 
 def argsort_bigtosmall_stable(x, limits=list()):
     ''' Sort indices of vector x so the values in x ranked big to small
 
-    Sort guaranteed to be stable, meaning any adjacent pairs of x 
+    Sort guaranteed to be stable, meaning any adjacent pairs of x
     that are already sorted will not be permuted.
 
     Returns
     -------
     sortids : 1D array
         x[sortids[i]] >= x[sortids[i+1]] for all i.
-    
+
     Examples
     --------
     >>> xs = np.asarray([3, 4, 5, 2, 2, 2, 1])
@@ -214,4 +215,3 @@ def as3D(x):
     while x.ndim < 3:
         x = x[np.newaxis, :]
     return x
-

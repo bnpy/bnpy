@@ -1,3 +1,4 @@
+from builtins import *
 import copy
 import numpy as np
 import logging
@@ -207,11 +208,11 @@ class HDPHMM(AllocModel):
         newTransCount[:, :Kold, :Kold] = LP['TransCount']
         newHtable = np.zeros((Data.nDoc, Knew, Knew))
         newHtable[:, :Kold, :Kold] = LP['Htable']
-        start_t = 0        
+        start_t = 0
         for ii, n in enumerate(targetIDs):
             assert n >= 0
             assert n < Data.nDoc
-            start = Data.doc_range[n]        
+            start = Data.doc_range[n]
             stop = Data.doc_range[n+1]
             stop_t = start_t + (stop-start)
             newResp[start:stop] = targetLP['resp'][start_t:stop_t]

@@ -1,3 +1,4 @@
+from builtins import *
 import argparse
 import numpy as np
 import bnpy
@@ -21,7 +22,7 @@ def makeBestJobPathViaGridSearch(
     if os.path.islink(LINKtobestjobpath):
         os.unlink(LINKtobestjobpath)
     assert os.path.exists(bestjobpath)
-    
+
     # Make a new symlink, if we determined a BEST path among several jobs
     if LINKtobestjobpath.count("BEST"):
         os.symlink(bestjobpath, LINKtobestjobpath)
@@ -64,12 +65,12 @@ def findBestJobViaGridSearch(
         wildVarNames.append(key)
         start = wcloc + 1
 
-    jobpathList = [jpath for jpath in 
+    jobpathList = [jpath for jpath in
         sorted(glob.glob(jobpathPattern.replace(wildcard, '*')))
         if jpath.count("BEST") == 0]
     if len(jobpathList) == 0:
-        raise ValueError("No matching jobs found on disk for pattern:\n" + 
-            jobpathPattern)    
+        raise ValueError("No matching jobs found on disk for pattern:\n" +
+            jobpathPattern)
 
     jobWildDescrList = list()
     jobScores = np.zeros(len(jobpathList))
@@ -82,7 +83,7 @@ def findBestJobViaGridSearch(
             multiTaskRankOrder=multiTaskRankOrder,
             **kwargs)
         jobScores[jj] = multiTaskScoreFunc(taskScores)
-           
+
         '''
         # Loop over the tasks for this job
         taskIDstrList = bnpy.ioutil.BNPYArgParser.parse_task_ids(

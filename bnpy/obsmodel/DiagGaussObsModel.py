@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import scipy.linalg
 from scipy.special import gammaln, digamma
@@ -451,7 +452,7 @@ class DiagGaussObsModel(AbstractObsModel):
     def calcELBO_Memoized(self, SS, returnVec=0, afterMStep=False, **kwargs):
         return calcELBOFromSSAndPost(SS=SS, Post=self.Post, Prior=self.Prior)
 
-    
+
     def _zzz_calcELBO_Memoized(self, SS, returnVec=0, afterMStep=False, **kwargs):
         """ Calculate obsModel's objective using suff stats SS and Post.
 
@@ -487,12 +488,12 @@ class DiagGaussObsModel(AbstractObsModel):
                     - 0.5 * np.inner(bDiff, self._E_L(k)) \
                     + np.inner(cDiff, self.GetCached('E_Lmu', k)) \
                     - 0.5 * dDiff * np.sum(self.GetCached('E_muLmu', k))
-        
+
         elbo += -(0.5 * SS.D * LOGTWOPI) * SS.N
         if returnVec:
             return elbo
         return elbo.sum()
-    
+
 
     def getDatasetScale(self, SS):
         ''' Get number of observed scalars in dataset from suff stats.
@@ -514,7 +515,7 @@ class DiagGaussObsModel(AbstractObsModel):
         '''
         gap, _, _ = calcHardMergeGapForPair(
             SS=SS, Prior=self.Prior, Post=self.Post, kA=kA, kB=kB)
-        return gap        
+        return gap
 
     def calcHardMergeGap_AllPairs(self, SS):
         ''' Calculate change in ELBO for all possible hard merge pairs
@@ -905,18 +906,18 @@ class DiagGaussObsModel(AbstractObsModel):
         if not includeOnlyFastTerms:
             if DivDataVec is None:
                 # Compute DivDataVec : 1D array of size N
-                # This is the per-row additive constant indep. of k. 
+                # This is the per-row additive constant indep. of k.
                 DivDataVec = -0.5 * D * np.ones(N)
                 logdet_VarX = np.sum(np.log(VarX))
                 DivDataVec -= 0.5 * logdet_VarX
-        
+
             Div += DivDataVec[:,np.newaxis]
         # Apply per-atom weights to divergences.
         if W is not None:
             assert W.ndim == 1
             assert W.size == N
             Div *= W[:,np.newaxis]
-        # Verify divergences are strictly non-negative 
+        # Verify divergences are strictly non-negative
         if not includeOnlyFastTerms:
             minDiv = Div.min()
             if minDiv < 0:
@@ -959,7 +960,7 @@ class DiagGaussObsModel(AbstractObsModel):
 
         Div_ZMG = np.zeros(K) # zero-mean gaussian
         Div_FVG = np.zeros(K) # fixed variance gaussian
- 
+
         logdet_priorMuVar = np.sum(np.log(priorMuVar))
         for k in range(K):
             MuVar_k = Mu[k][0]
@@ -1108,8 +1109,8 @@ def calcLogSoftEvMatrix_FromPost(Dslice,
         L[:, k] = - 0.5 * Dslice.dim * LOGTWOPI \
             + 0.5 * np.sum(E_logdetL_k) \
             - 0.5 * _mahalDist_Post(
-                Dslice.X, 
-                nu=nu[k], 
+                Dslice.X,
+                nu=nu[k],
                 beta=beta[k],
                 m=m[k],
                 kappa=kappa[k])
@@ -1132,7 +1133,7 @@ def _mahalDist_Post(X, beta=None, m=None, nu=None, kappa=None, **kwargs):
     return dist
 
 def calcPostParamsFromSS(
-        SS=None, 
+        SS=None,
         Prior=None,
         Post=None,
         returnParamBag=True,
@@ -1164,7 +1165,7 @@ def calcPostParamsFromSS(
 
 
 def calcPostParamsFromSSForComp(
-        SS=None, 
+        SS=None,
         kA=None, kB=None,
         Prior=None,
         **kwargs):
@@ -1314,7 +1315,7 @@ def packParamBagForPost(
     else:
         assert isinstance(Post, ParamBag)
         assert Post.K == K
-        assert Post.D == D        
+        assert Post.D == D
     Post.setField('nu', as1D(nu), dims=('K'))
     Post.setField('beta', beta, dims=('K', 'D'))
     Post.setField('m', m, dims=('K', 'D'))
@@ -1388,7 +1389,7 @@ def createParamBagForPrior(
 
 
 def calcHardMergeGapForPair(
-        SS=None, Prior=None, Post=None, kA=0, kB=1, 
+        SS=None, Prior=None, Post=None, kA=0, kB=1,
         cPost_K=None,
         cPrior=None,
         ):

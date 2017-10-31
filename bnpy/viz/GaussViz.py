@@ -3,6 +3,7 @@ GaussViz.py
 
 Visualizing learned Gaussian mixture models.
 '''
+from builtins import *
 import numpy as np
 from .PlotUtil import pylab
 
@@ -151,7 +152,7 @@ def plotGauss2DFromHModel(
 
     if dataset is not None and hasattr(dataset, 'X'):
         pylab.plot(
-            dataset.X[:, 0], dataset.X[:, 1], '.', 
+            dataset.X[:, 0], dataset.X[:, 1], '.',
             color=(.3,.3,.3),
             alpha=0.5)
 

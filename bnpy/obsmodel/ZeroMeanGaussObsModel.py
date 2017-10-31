@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import scipy.linalg
 from scipy.special import gammaln, digamma
@@ -708,7 +709,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         return Mu
 
     def calcSmoothedBregDiv(
-            self, X, Mu, 
+            self, X, Mu,
             W=None,
             smoothFrac=0.0,
             eps=1e-10,
@@ -761,7 +762,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         if not includeOnlyFastTerms:
             if DivDataVec is None:
                 # Compute DivDataVec : 1D array of size N
-                # This is the per-row additive constant indep. of k. 
+                # This is the per-row additive constant indep. of k.
                 # We do lots of steps in-place, to save memory.
 
                 # FAST VERSION: Use the matrix determinant lemma
@@ -789,7 +790,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
             assert W.ndim == 1
             assert W.size == N
             Div *= W[:,np.newaxis]
-        # Verify divergences are strictly non-negative 
+        # Verify divergences are strictly non-negative
         if not includeOnlyFastTerms:
             minDiv = Div.min()
             if minDiv < 0:

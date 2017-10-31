@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 from scipy.special import digamma, gammaln
 
@@ -39,25 +40,25 @@ def calcLocalParamsWithELBOTraceForSingleDoc(
         np.exp(DocTopicProb_K, out=DocTopicProb_K)
     elif initDocTopicProb_K is not None:
         DocTopicCount_K = np.zeros(K)
-        DocTopicProb_K = initDocTopicProb_K.copy()        
+        DocTopicProb_K = initDocTopicProb_K.copy()
     else:
         # Default initialization!
         DocTopicCount_K = np.zeros(K)
         DocTopicProb_K = alphaEbeta_K.copy()
 
     # Initialize sumResp
-    sumResp_U = np.zeros(U)      
+    sumResp_U = np.zeros(U)
     np.dot(explogLik_UK, DocTopicProb_K, out=sumResp_U)
 
     Ltrace = np.zeros(nCoordAscentItersLP)
     prevDocTopicCount_K = DocTopicCount_K.copy()
     for riter in range(nCoordAscentItersLP):
         # # Update DocTopicCount
-        np.dot(cts_U / sumResp_U, explogLik_UK, 
+        np.dot(cts_U / sumResp_U, explogLik_UK,
                out=DocTopicCount_K)
         DocTopicCount_K *= DocTopicProb_K
         # # Update DocTopicProb
-        np.add(DocTopicCount_K, alphaEbeta_K, 
+        np.add(DocTopicCount_K, alphaEbeta_K,
             out=DocTopicProb_K)
         digamma(DocTopicProb_K, out=DocTopicProb_K)
         np.exp(DocTopicProb_K, out=DocTopicProb_K)
@@ -106,7 +107,7 @@ def calcLocalParamsWithELBOTraceForSingleDoc(
                 else:
                     Ltrace = np.append(Ltrace, curLval)
 
-        nAccept = nOrigActive - nActive 
+        nAccept = nOrigActive - nActive
         print("%d/%d restarts accepted" % (nAccept, nOrigActive))
 
     # Correct ELBO trace for missing additive constant, indep. of topic cts
@@ -115,7 +116,7 @@ def calcLocalParamsWithELBOTraceForSingleDoc(
     return DocTopicCount_K, Ltrace
 
 def calcELBOForSingleDocFromCountVec(
-        DocTopicCount_K=None, 
+        DocTopicCount_K=None,
         cts_U=None,
         sumResp_U=None,
         alphaEbeta_K=None,
@@ -188,10 +189,10 @@ def restartProposalForSingleDoc(
     return propDocTopicCount_K, propLval
 
 def calcELBOForInterpolatedDocTopicCounts(
-        DTCA_K, DTCB_K, cts_U, 
+        DTCA_K, DTCB_K, cts_U,
         logLik_UK=None,
         alphaEbeta_K=None,
-        nGrid=100):        
+        nGrid=100):
     wgrid_G = np.linspace(0, 1.0, nGrid)
     fgrid_G = np.zeros(nGrid)
     for ii in range(nGrid):
@@ -255,7 +256,7 @@ if __name__ == '__main__':
         ax = pylab.subplot(1, 2, 1);
 
         bestL = -np.inf
-        worstL = +np.inf 
+        worstL = +np.inf
         PRNG = np.random.RandomState(101 * d + 1)
         for randiter in range(50):
             randlabel = 'rand + 1'

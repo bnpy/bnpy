@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 from . import HMMUtil
 from bnpy.util import digamma, gammaln

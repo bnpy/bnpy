@@ -1,3 +1,4 @@
+from builtins import *
 import argparse
 import numpy as np
 import time
@@ -139,7 +140,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
             time.time() - starttime))
 
     nontrivialdocIDs = np.flatnonzero(curLP['DocTopicCount'][:, ktarget] > .01)
-    sort_mask = np.argsort(-1*curLP['DocTopicCount'][nontrivialdocIDs, ktarget]) 
+    sort_mask = np.argsort(-1*curLP['DocTopicCount'][nontrivialdocIDs, ktarget])
     nontrivialdocIDs = nontrivialdocIDs[sort_mask]
     docIDs = nontrivialdocIDs[:5]
     if verbose:
@@ -267,7 +268,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
         kplotList = [x for x in kabsorbList]
         kplotList.append(ktarget)
         for d in docIDs:
-            curDTClabels = ['%.1f' % (x) for x in 
+            curDTClabels = ['%.1f' % (x) for x in
                 curLP['DocTopicCount'][d, kplotList]]
             bnpy.viz.PlotComps.plotCompsFromHModel(
                 curModel,
@@ -280,7 +281,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
             fig.canvas.set_window_title('doc %d BEFORE' % (d))
 
             propLP = Info['xLPslice']
-            propDTClabels = ['%.1f' % (x) for x in 
+            propDTClabels = ['%.1f' % (x) for x in
                 propLP['DocTopicCount'][d, :]]
             bnpy.viz.PlotComps.plotCompsFromHModel(
                 propModel,
@@ -291,7 +292,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
             fig.canvas.set_window_title('doc %d AFTER' % (d))
             pylab.show(block=False)
 
-        # Plot docs        
+        # Plot docs
         dIm = np.zeros((docIDs.size*2, 900))
         dImLabels = list()
         tImLabels = list()
@@ -395,7 +396,7 @@ if __name__ == '__main__':
 
     DLogger.configure(args.outputdir,
         doSaveToDisk=0,
-        doWriteStdOut=1) 
+        doWriteStdOut=1)
     tryDeleteProposalForSavedTask(**args.__dict__)
 
 '''

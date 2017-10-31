@@ -1,3 +1,4 @@
+from builtins import *
 import os
 import numpy as np
 import scipy.sparse
@@ -132,7 +133,7 @@ def sparseLocalStep_WordCountData(
     if restartLP > 0:
         LP['Info']['nRestartsAccepted'] = nRAcceptVec[0]
         LP['Info']['nRestartsTried'] = nRTrialVec[0]
-    writeLogMessageForManyDocs(Data, LP['Info'], LP, 
+    writeLogMessageForManyDocs(Data, LP['Info'], LP,
         convThrLP=convThrLP, **kwargs)
     return LP
 
@@ -207,17 +208,17 @@ if __name__ == '__main__':
     Data200 = Data.select_subset_by_mask(list(range(400)))
     Data200.name = 'nips400'
     model, Info = bnpy.run(Data200, 'HDPTopicModel', 'Mult', 'VB',
-        nBatch=1, nLap=2, initname='randexamples', K=200, 
+        nBatch=1, nLap=2, initname='randexamples', K=200,
         nCoordAscentItersLP=100, convThrLP=.01)
 
     '''
     model, Info = bnpy.run('BarsK10V900', 'HDPTopicModel', 'Mult', 'VB',
-        nBatch=1, nDocTotal=50, nLap=2, initname='randexamples', K=200, 
+        nBatch=1, nDocTotal=50, nLap=2, initname='randexamples', K=200,
         nCoordAscentItersLP=100, convThrLP=.01)
     '''
     '''
     model, Info = bnpy.run('BarsK10V900', 'HDPTopicModel', 'Mult', 'VB',
-        nBatch=1, nDocTotal=50, nLap=2, initname='truelabels', 
+        nBatch=1, nDocTotal=50, nLap=2, initname='truelabels',
         nCoordAscentItersLP=100, convThrLP=.01)
     '''
     # Find doc with significant usage by at least 2 topics
@@ -315,4 +316,3 @@ if __name__ == '__main__':
         print('>>> reviseActiveEveryLP=%d  nnzPerRow=%d' % (
             reviseActiveEveryLP, nnzPerRow))
         model.calc_local_params(Data, **LPkwargs)
-

@@ -7,6 +7,7 @@ such as the forward-backward algorithm
 Intentionally separated from rest of HMM code, so that we can swap in
 any fast routine for this calculation with ease.
 '''
+from builtins import *
 import numpy as np
 from bnpy.util import EPS
 from bnpy.util import digamma, gammaln

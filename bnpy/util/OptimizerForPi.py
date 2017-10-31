@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import scipy.optimize
 import warnings
@@ -33,10 +34,10 @@ def estimatePiForDoc_frankwolfe(
 
     Resources
     ---------
-    Dual online inference for latent Dirichlet allocation    
+    Dual online inference for latent Dirichlet allocation
     Than and Doan
-    ACML 2014    
-    http://is.hust.edu.vn/~khoattq/papers/Than36.pdf    
+    ACML 2014
+    http://is.hust.edu.vn/~khoattq/papers/Than36.pdf
     '''
     PRNG = np.random.RandomState(seed)
 
@@ -48,7 +49,7 @@ def estimatePiForDoc_frankwolfe(
         topics_KU = topics_KV[:, np.asarray(ids_U, dtype=np.int32)].copy()
     assert topics_KU.ndim == 2
     K = topics_KU.shape[0]
-    
+
     # Initialize doc-topic prob randomly, if needed
     if initpi_K is None:
         if PRNG is None:
@@ -59,13 +60,13 @@ def estimatePiForDoc_frankwolfe(
     if verbose:
         print('  0 ' + ' '.join(['%.4f' % (p) for p in pi_K]))
 
-    x_U = np.dot(pi_K, topics_KU)       
+    x_U = np.dot(pi_K, topics_KU)
     # Loop
     T_2 = [1, 0]
     for t in range(1, maxiter):
         # Pick a term uniformly at random
         T_2[PRNG.randint(2)] += 1
-        # Select a vertex with the largest value of  
+        # Select a vertex with the largest value of
         # derivative of the objective function
         df_K = T_2[0] * np.dot(topics_KU, cts_U / x_U) + \
              T_2[1] * (alpha - 1) / pi_K
@@ -76,7 +77,7 @@ def estimatePiForDoc_frankwolfe(
         pi_K[kmax] += lrate
         # Update x
         x_U += lrate * (topics_KU[kmax,:] - x_U)
-        # Print status        
+        # Print status
         if verbose and (t < 10 or t % 5 == 0):
             print('%3d ' % (t) + ' '.join(['%.4f' % (p) for p in pi_K]))
 
@@ -86,7 +87,7 @@ def estimatePiForDoc_frankwolfe(
             niter=t,
             initpi_K=initpi_K))
     else:
-        return pi_K   
+        return pi_K
 
 
 def estimatePiForDoc_graddescent(
@@ -105,7 +106,7 @@ def estimatePiForDoc_graddescent(
     Solves the optimization problem
         piVec = min f(piVec)
     where
-        f = 
+        f =
 
     Returns
     -------
@@ -157,7 +158,7 @@ def _estimatePiForDoc(
     '''
     if options is None:
         options = dict(gtol=gtol, maxiter=maxiter)
-    
+
     K = topics_KU.shape[0]
     if initpi_K is None:
         if PRNG is None:
@@ -235,7 +236,7 @@ def lossFuncAndGrad(
             -1.0 * scale * (grad_lik_K + grad_prior_K))
 
 def lossFunc(
-        pi_K=None, 
+        pi_K=None,
         cts_U=None,
         topics_KU=None,
         alpha=1.0,
@@ -334,7 +335,7 @@ def pi2str(arr):
         max_line_width=80, precision=4, suppress_small=1)
     return pistr.replace('[','').replace(']','')
 
-def calcLossFuncForInterpolatedPi(piA_K, piB_K, lossFunc, nGrid=100):        
+def calcLossFuncForInterpolatedPi(piA_K, piB_K, lossFunc, nGrid=100):
     wgrid = np.linspace(0, 1.0, nGrid)
     fgrid = np.zeros(nGrid)
     for ii in range(nGrid):
@@ -342,7 +343,7 @@ def calcLossFuncForInterpolatedPi(piA_K, piB_K, lossFunc, nGrid=100):
         f = lossFunc(pi_K)
         if isinstance(f, tuple):
             f = f[0]
-        fgrid[ii] = f        
+        fgrid[ii] = f
     return fgrid, wgrid
 
 def make_random_pi_K(K=2, seed=0, PRNG=None):
@@ -369,7 +370,7 @@ if __name__ == '__main__':
     Data = datamod.get_data(nDocTotal=args.nDocTotal)
     # Select function
     estimatePiForDoc = locals()['estimatePiForDoc_' + args.optim_method]
-    
+
     if hasattr(Data, 'TrueParams'):
         topics_KV = Data.TrueParams['topics']
         K, V = topics_KV.shape
@@ -390,7 +391,7 @@ if __name__ == '__main__':
     atol = 1e-3
     K, V = topics_KV.shape
     alpha = 1.0 / K
-    
+
     for d in range(Data.nDoc):
         start = Data.doc_range[d]
         stop = Data.doc_range[d+1]

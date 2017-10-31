@@ -31,6 +31,7 @@ For example, during the first 3 laps, we may see the following orders
    lap 2 : batches 0, 1, 2
 Set the "dataorderseed" parameter to get repeatable orders.
 '''
+from builtins import *
 import os
 import sys
 import glob

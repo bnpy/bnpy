@@ -1,3 +1,4 @@
+from builtins import *
 import sys
 import os
 import scipy.sparse
@@ -17,7 +18,7 @@ def loadKeffForTask(
     Keff : 1D array, size nCheckpoint
     '''
     effCountThr = np.maximum(effCountThr, MIN_PRESENT_COUNT)
-    CountMat, Info = loadCountHistoriesForTask(taskpath, 
+    CountMat, Info = loadCountHistoriesForTask(taskpath,
         MIN_PRESENT_COUNT=MIN_PRESENT_COUNT)
     return np.sum(CountMat >= effCountThr, axis=1)
 
@@ -79,7 +80,7 @@ def loadCountHistoriesForTask(
     # Fill out info dict
     Info = dict(
         CountMat=CountMat,
-        allUIDs=allUIDs,        
+        allUIDs=allUIDs,
         ActiveCountMat=ActiveCountMat,
         ElimCountMat=ElimCountMat,
         activeCols=activeCols,

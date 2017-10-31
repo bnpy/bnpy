@@ -5,7 +5,7 @@ BagOfWordsData
     Data object for holding a sparse bag-of-word observations,
     organized as a collection of documents, each containing some words.
 """
-
+from builtins import *
 import numpy as np
 import scipy.sparse
 import scipy.io
@@ -141,7 +141,7 @@ class BagOfWordsData(DataObj):
                 nSlice=nSlice,
                 filesize=filesize,
                 **kwargs)
-        
+
         # Estimate num tokens in the file
         fileSize_bytes = os.path.getsize(filepath)
         nTokensPerByte = 1.0 / 5
@@ -861,7 +861,7 @@ class BagOfWordsData(DataObj):
         if hasattr(self, 'vocabList'):
             newVocabList = self.vocabList
         else:
-            newVocabList = None            
+            newVocabList = None
 
         return BagOfWordsData(word_id, word_count, doc_range, self.vocab_size,
                          nDocTotal=nDocTotal,
@@ -935,7 +935,7 @@ class BagOfWordsData(DataObj):
         if hasattr(self, 'vocabList'):
             newVocabList = self.vocabList
         else:
-            newVocabList = None            
+            newVocabList = None
 
         Dtarget = BagOfWordsData(
             word_id=new_word_id,
@@ -1367,7 +1367,7 @@ def processLine_ldac__fromstring_fillexisting(line, word_id, word_ct, start):
     data = np.fromstring(line, sep=' ', dtype=np.int32)
     stop = start + (len(data) - 1) // 2
     if stop >= word_id.size:
-        raise IndexError("Provided array not large enough")    
+        raise IndexError("Provided array not large enough")
     word_id[start:stop] = data[1::2]
     word_ct[start:stop] = data[2::2]
     return data[0]

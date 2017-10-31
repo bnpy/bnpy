@@ -466,12 +466,18 @@ def writeArgsToFile(ReqArgs, KwArgs, task_output_path, UnkArgs):
                 val = ArgDict[key][k]
                 if isinstance(val, dict):
                     continue
-                fout.write('%s %s\n' % (k, val))
+                try:
+                    fout.write('%s %s\n' % (k, val))
+                except:
+                    fout.write('%s %s\n' % (unicode(k), unicode(val)))
 
     unkfile = os.path.join(task_output_path, 'args-DatasetPrefs.txt')
     with open(unkfile, 'w') as fout:
         for key, val in UnkArgs.items():
-            fout.write('%s %s\n' % (key, val))
+            try:
+                fout.write('%s %s\n' % (key, val))
+            except:
+                fout.write('%s %s\n' % (unicode(key), unicode(val)))
 
 
 def createUniqueRandomSeed(jobname, taskID=0):

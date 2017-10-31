@@ -1,3 +1,4 @@
+from builtins import *
 from .PlotTrace import plotJobsThatMatchKeywords, plotJobs, parse_args
 
 if __name__ == "__main__":

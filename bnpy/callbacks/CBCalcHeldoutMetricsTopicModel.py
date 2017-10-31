@@ -25,7 +25,7 @@ defined here will be called at appropriate time in *every* learning algorithm.
 See LearnAlg.py's eval_custom_function for details.
 '''
 
-
+from builtins import *
 import os
 import numpy as np
 import scipy.io
@@ -95,4 +95,3 @@ def runHeldoutCallback(**kwargs):
             queryLap=kwargs['lapFrac'],
             printFunc=HeldoutMetricsLogger.pprint,
             **kwargs)
-

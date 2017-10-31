@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 from scipy.special import gammaln, digamma
 import scipy.sparse
@@ -64,7 +65,7 @@ class MultObsModel(AbstractObsModel):
 
     def setupWithAllocModel(self, allocModel):
         ''' Using the allocation model, determine the modeling scenario.
-              
+
         doc  : multinomial : each atom is vector of empirical counts in doc
         word : categorical : each atom is single word token (one of vocab_size)
         '''
@@ -365,7 +366,7 @@ class MultObsModel(AbstractObsModel):
                 ElogphiT=ElogphiT, **kwargs)
             return dict(E_log_soft_ev=E_log_soft_ev, ElogphiT=ElogphiT)
 
-    def calcELBO_Memoized(self, SS, 
+    def calcELBO_Memoized(self, SS,
             returnVec=0, afterGlobalStep=False, **kwargs):
         """ Calculate obsModel's objective using suff stats SS and Post.
 
@@ -668,7 +669,7 @@ class MultObsModel(AbstractObsModel):
             if False, includes all terms in divergence calculation.
                 Returns Div[n,:] guaranteed to be non-negative.
             if True, includes only terms that vary with cluster index k
-                Returns Div[n,:] equal to divergence up to additive constant 
+                Returns Div[n,:] equal to divergence up to additive constant
 
         Returns
         -------
@@ -698,7 +699,7 @@ class MultObsModel(AbstractObsModel):
         if not includeOnlyFastTerms:
             if DivDataVec is None:
                 # Compute DivDataVec : 1D array of size N
-                # This is the per-row additive constant indep. of k. 
+                # This is the per-row additive constant indep. of k.
                 # We do lots of steps in-place, to save memory.
                 if smoothFrac > 0:
                     MuX = X + smoothVec
@@ -720,7 +721,7 @@ class MultObsModel(AbstractObsModel):
                     DivDataVec += np.dot(logMuX, smoothVec)
                 logMuX *= X
                 XlogMuX = logMuX
-                DivDataVec += np.sum(XlogMuX, axis=1)             
+                DivDataVec += np.sum(XlogMuX, axis=1)
 
             Div += DivDataVec[:,np.newaxis]
 
@@ -729,7 +730,7 @@ class MultObsModel(AbstractObsModel):
             assert W.ndim == 1
             assert W.size == N
             Div *= W[:,np.newaxis]
-        # Verify divergences are strictly non-negative 
+        # Verify divergences are strictly non-negative
         if not includeOnlyFastTerms:
             minDiv = Div.min()
             if minDiv < 0:

@@ -1,3 +1,4 @@
+from builtins import *
 import argparse
 import numpy as np
 import os
@@ -70,7 +71,7 @@ def tryBirthForTask(
         Data, curLP,
         trackDocUsage=1, doPrecompEntropy=1, trackTruncationGrowth=1)
     curLscore = curModel.calc_evidence(SS=curSS)
-    
+
     print("Target UID: %d" % (targetUID))
     print("Current count: %.2f" % (curSS.getCountForUID(targetUID)))
 
@@ -141,5 +142,5 @@ if __name__ == '__main__':
     BLogger.configure(args.outputdir,
         doSaveToDisk=0,
         doWriteStdOut=1,
-        stdoutLevel=0) 
+        stdoutLevel=0)
     tryBirthForTask(**args.__dict__)

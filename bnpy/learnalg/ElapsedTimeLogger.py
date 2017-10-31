@@ -1,3 +1,4 @@
+from builtins import *
 import logging
 import os
 import sys
@@ -14,7 +15,7 @@ EVENTNAMES = [
     'all', 'local', 'global', 'io', 'callback']
 
 def startEvent(eventName, subeventName='', level=logging.DEBUG):
-    ''' 
+    '''
 
     Post condition
     --------------
@@ -23,7 +24,7 @@ def startEvent(eventName, subeventName='', level=logging.DEBUG):
     StartTimesDict[eventName][subeventName] = time.time()
 
 def stopEvent(eventName, subeventName='', level=logging.DEBUG):
-    ''' 
+    '''
     Post condition
     --------------
     '''

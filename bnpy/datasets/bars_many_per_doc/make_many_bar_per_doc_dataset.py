@@ -5,6 +5,7 @@ Toy Bars data, with K=6 topics and vocabulary size 144.
 Generated via the standard mixture model
 see BagOfWordsData.CreateToyDataFromLDAModel for details.
 '''
+from builtins import *
 import numpy as np
 import bnpy
 

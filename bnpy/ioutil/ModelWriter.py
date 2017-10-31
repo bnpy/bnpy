@@ -7,6 +7,7 @@ See Also
 -------
 ModelReader.py : load bnpy models from disk.
 '''
+from builtins import *
 import numpy as np
 import scipy.io
 import os
@@ -154,7 +155,7 @@ def create_best_link(hardmatfile, linkmatfile):
 
 
 def saveTopicModel(hmodel, SS, fpath, prefix,
-                   didExactUpdateWithSS=True, 
+                   didExactUpdateWithSS=True,
                    tryToSparsifyOutput=False,
                    doLinkBest=False,
                    sparseEPS=0.002, **kwargs):

@@ -1,3 +1,4 @@
+from builtins import *
 import copy
 import numpy as np
 from .ParamBag import ParamBag
@@ -488,7 +489,7 @@ class SuffStatBag(object):
 
                 if mdims[0] == 'M':
                     if rowID is None:
-                        raise ValueError("Badness: rowID is None." + 
+                        raise ValueError("Badness: rowID is None." +
                             "Probably forget to call setMergeUIDPairs()")
                     if mArr.ndim == 3 and mArr.shape[1] == 2:
                         arr[kA, :] = mArr[rowID, 0]
@@ -536,7 +537,7 @@ class SuffStatBag(object):
                     mArr[kA] = mArr[kA] + mArr[kB]
 
 
-    def replaceCompsWithContraction(self, 
+    def replaceCompsWithContraction(self,
             removeUIDs=[],
             replaceUIDs=[],
             replaceSS=None,

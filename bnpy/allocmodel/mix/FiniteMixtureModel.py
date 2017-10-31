@@ -1,6 +1,7 @@
 '''
 Bayesian parametric mixture model with finite number of components K.
 '''
+from builtins import *
 import numpy as np
 
 from bnpy.allocmodel import AllocModel
@@ -345,7 +346,7 @@ class FiniteMixtureModel(AllocModel):
                 Hresp = np.sum(calcHrespFromLP(LP=LP))
             if SS.hasAmpFactor():
                 Hresp *= SS.ampF
-            evZ = self.E_logpZ(SS) + 
+            evZ = self.E_logpZ(SS) +
             return evZ + evW
             '''
         else:
@@ -459,7 +460,7 @@ class FiniteMixtureModel(AllocModel):
         return cPrior - cPost
 
 def c_Dir(tvec):
-    return gammaln(tvec.sum()) - gammaln(tvec).sum() 
+    return gammaln(tvec.sum()) - gammaln(tvec).sum()
 
 def Lalloc(Nvec=None, SS=None, gamma=0.5, theta=None, Elogw=None):
     assert theta is not None

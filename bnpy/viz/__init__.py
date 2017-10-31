@@ -1,7 +1,7 @@
 """
 The :mod:`viz` module provides visualization capability
 """
-
+from builtins import *
 from . import BarsViz
 from . import BernViz
 from . import GaussViz

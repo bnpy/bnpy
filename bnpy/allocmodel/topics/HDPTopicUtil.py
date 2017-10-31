@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 
 from .OptimizerRhoOmegaBetter import kvec
@@ -293,7 +294,7 @@ def calcHrespForMergePairs(resp, Data, mPairIDs, returnVec=1):
     Returns
     ---------
     Hresp : 2D array, size K x K
-    or 
+    or
     Hresp : 1D array, size M
         where each entry corresponds to one merge pair in mPairIDs
     '''
@@ -459,13 +460,13 @@ def calcELBO_FixedDocTopicCountIgnoreEntropy(
         gamma=gamma,
         rho=rho,
         omega=omega,
-        Hresp=np.zeros(K),        
+        Hresp=np.zeros(K),
         gammalnTheta=np.zeros(K),
         gammalnSumTheta=0,
         gammalnThetaRem=0,
         slackTheta=np.zeros(K),
         slackThetaRem=0,
-        todict=ignoreTermsConstWRTRhoOmega) 
+        todict=ignoreTermsConstWRTRhoOmega)
 
     Llinear = calcELBO_LinearTerms(alpha=alpha, gamma=gamma,
                                    rho=rho, omega=omega,
@@ -485,7 +486,7 @@ def calcMergeTermsFromSeparateLP(
         LPb=None, SSb=None,
         mUIDPairs=None):
     ''' Compute merge terms that combine two comps from separate LP dicts.
-    
+
     Returns
     -------
     Mdict : dict of key, array-value pairs
@@ -523,4 +524,3 @@ def calcMergeTermsFromSeparateLP(
         gammalnTheta=m_gammalnTheta,
         slackTheta=m_slackTheta,
         sumLogPi=m_sumLogPi)
-

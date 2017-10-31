@@ -2,6 +2,7 @@
 Bayesian nonparametric mixture model with Dirichlet process prior.
 '''
 
+from builtins import *
 import numpy as np
 
 from bnpy.allocmodel import AllocModel
@@ -79,7 +80,7 @@ def calcHrespFromLP(LP=None, resp=None):
         nnzPerRow = LP['nnzPerRow']
         if nnzPerRow > 1:
             # Handles multiply by -1 already
-            Hresp = calcSparseRlogR(**LP) 
+            Hresp = calcSparseRlogR(**LP)
             assert np.all(np.isfinite(Hresp))
         else:
             Hresp = 0.0
@@ -562,7 +563,7 @@ class DPMixtureModel(AllocModel):
         w or theta will be set exactly equal to hmodel's allocModel.
         """
         self.K = hmodel.allocModel.K
-        if hasattr(hmodel.allocModel, 'eta1'):        
+        if hasattr(hmodel.allocModel, 'eta1'):
             self.eta1 = hmodel.allocModel.eta1.copy()
             self.eta0 = hmodel.allocModel.eta0.copy()
         elif hasattr(hmodel.allocModel, 'rho'):
@@ -1025,7 +1026,7 @@ def calcSummaryStats(Data, LP,
             if LP['nnzPerRow'] > 1:
                 m_Hresp = calcSparseMergeRlogR(
                     spR_csr=LP['spR'],
-                    nnzPerRow=LP['nnzPerRow'], 
+                    nnzPerRow=LP['nnzPerRow'],
                     mPairIDs=mPairIDs)
         else:
             raise ValueError("Need resp or spR in LP")

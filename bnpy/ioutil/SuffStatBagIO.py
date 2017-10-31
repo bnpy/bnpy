@@ -1,3 +1,4 @@
+from builtins import *
 import os
 import numpy as np
 try:

@@ -5,7 +5,7 @@ Neal Hughes (no relation to Mike)
 Blog post on "Fast Python loops with Cython"
 http://nealhughes.net/cython1/
 """
-
+from builtins import *
 import numpy as np
 from libc.math cimport log
 

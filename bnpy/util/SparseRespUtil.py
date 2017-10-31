@@ -1,3 +1,4 @@
+from builtins import *
 import argparse
 import numpy as np
 import scipy.sparse

@@ -1,3 +1,4 @@
+from builtins import *
 import os
 import numpy as np
 import bnpy.data
@@ -101,11 +102,11 @@ def loadDataKwargsFromDisk(taskoutpath):
 
     Returns
     -------
-    dataKwargs : dict with options for loading dataset 
+    dataKwargs : dict with options for loading dataset
     '''
     return loadKwargsFromDisk(taskoutpath, 'args-DatasetPrefs.txt')
 
-def loadKwargsFromDisk(taskoutpath, 
+def loadKwargsFromDisk(taskoutpath,
         txtfile='args-birth.txt',
         suffix=None):
     ''' Load keyword options from specified txtfile.
@@ -135,7 +136,7 @@ def loadLPKwargsFromDisk(taskoutpath):
 
     Returns
     -------
-    dataKwargs : dict with options for loading dataset 
+    dataKwargs : dict with options for loading dataset
     '''
     from bnpy.ioutil.BNPYArgParser import algChoices
     chosentxtfile = None

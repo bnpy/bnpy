@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import logging
 
@@ -228,10 +229,10 @@ class HDPTopicModel(AllocModel):
         '''
         alphaEbeta = self.alpha_E_beta()
         alphaEbetaRem = self.alpha_E_beta_rem()
-        assert np.allclose(alphaEbeta[0], 
+        assert np.allclose(alphaEbeta[0],
             self.alpha * self.rho[0])
         if alphaEbeta.size > 1:
-            assert np.allclose(alphaEbeta[1], 
+            assert np.allclose(alphaEbeta[1],
                 self.alpha * self.rho[1] * (1-self.rho[0]))
         doSparse1 = 'activeonlyLP' in kwargs and kwargs['activeonlyLP'] == 2
         doSparse2 = 'nnzPerRowLP' in kwargs and \
@@ -876,7 +877,7 @@ def calcSummaryStats(Dslice, LP=None,
         digammaSumTheta = digamma(LP['theta'].sum(axis=1) + LP['thetaRem'])
         LP['digammaSumTheta'] = digammaSumTheta # Used for merges
 
-    if 'ElogPi' not in LP:        
+    if 'ElogPi' not in LP:
         LP['ElogPiRem'] = digamma(LP['thetaRem']) - LP['digammaSumTheta']
         LP['ElogPi'] = digamma(LP['theta']) - \
             LP['digammaSumTheta'][:, np.newaxis]
@@ -966,4 +967,3 @@ def calcSummaryStats(Dslice, LP=None,
         SumPi = np.sum(Pi, axis=0)
         SS.setSelectionTerm('SumPi', SumPi, dims='K')
     return SS
-

@@ -10,6 +10,7 @@ Usage (command-line)
 -------
 python -m bnpy.viz.PlotTrace dataName jobpattern [kwargs]
 '''
+from builtins import *
 import numpy as np
 import argparse
 import glob
@@ -118,7 +119,7 @@ def plotJobs(jpaths, legNames, styles=None, density=2,
         if (not np.allclose(ymax, ymin)) and allRunsHaveXBeyond1:
             pylab.ylim([ymin, ymax + 0.1 * (ymax - ymin)])
         pylab.xlim([xmin, xmax + .05 * (xmax - xmin)])
-    
+
     if loc is not None and len(jpaths) > 1:
         pylab.legend(loc=loc, bbox_to_anchor=bbox_to_anchor)
     if tickfontsize is not None:
@@ -251,7 +252,7 @@ def plot_all_tasks_for_job(jobpath, label, taskids=None,
             mask = laps >= showOnlyAfterLap
             xs = xs[mask]
             ys = ys[mask]
-            
+
         # Force plot density (data points per lap) to desired specification
         # This avoids making plots that have huge file sizes,
         # due to too much content in the given display space
@@ -307,7 +308,7 @@ def loadXYFromTopicModelSummaryFiles(jobpath, taskid, xvar='laps', yvar='K'):
     elif xvar.count('time'):
         xpath = os.path.join(jobpath, taskid, 'predlik-timeTrain.txt')
     else:
-        xpath = os.path.join(jobpath, taskid, 'predlik-' + xvar + '.txt')       
+        xpath = os.path.join(jobpath, taskid, 'predlik-' + xvar + '.txt')
     xs = np.loadtxt(xpath)
     ys = np.loadtxt(ypath)
     # HACK!

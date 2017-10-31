@@ -3,6 +3,7 @@ FromScratchBregman.py
 
 Initialize suff stats for observation models via Bregman clustering.
 '''
+from builtins import *
 import re
 import numpy as np
 import bnpy.data
@@ -16,7 +17,7 @@ from .FromTruth import \
 
 def init_global_params(hmodel, Data, **kwargs):
     ''' Initialize parameters of observation model.
-    
+
     Post Condition
     --------------
     hmodel internal parameters updated to reflect sufficient statistics.
@@ -41,7 +42,7 @@ def init_global_params(hmodel, Data, **kwargs):
         elif name.count("setlasttoprior"):
             kwargs['init_setOneToPriorMean'] = int(value)
         elif name.count("iter"):
-            kwargs['init_NiterForBregmanKMeans'] = int(value)    
+            kwargs['init_NiterForBregmanKMeans'] = int(value)
 
             if 'logFunc' not in kwargs:
                 def logFunc(msg):
@@ -69,16 +70,16 @@ def init_global_params(hmodel, Data, **kwargs):
     if kwargs['init_NiterForBregmanKMeans'] > 0:
         hmodel.allocModel.update_global_params(SS)
     else:
-        hmodel.allocModel.init_global_params(Data, **kwargs)    
+        hmodel.allocModel.init_global_params(Data, **kwargs)
     Info['targetSS'] = SS
     return Info
 
 def initSS_BregmanDiv(
-        Dslice=None, 
-        curModel=None, 
+        Dslice=None,
+        curModel=None,
         curLPslice=None,
-        K=5, 
-        ktarget=None, 
+        K=5,
+        ktarget=None,
         seed=0,
         includeAllocSummary=False,
         NiterForBregmanKMeans=1,
@@ -109,7 +110,7 @@ def initSS_BregmanDiv(
     DebugInfo : dict
         contains info about provenance of this initialization.
     '''
-    # Reformat any keyword argument to drop 
+    # Reformat any keyword argument to drop
     # prefix of 'b_' or 'init_'
     for key, val in list(kwargs.items()):
         if key.startswith('b_'):
@@ -201,8 +202,8 @@ def initSS_BregmanDiv(
     xSS.reorderComps(oldids_bigtosmall)
     # Be sure to account for the sorting that just happened.
     # By fixing up the cluster means Mu and assignments Z
-    Mu = [Mu[k] for k in oldids_bigtosmall] 
-    neworder = np.arange(xSS.K)    
+    Mu = [Mu[k] for k in oldids_bigtosmall]
+    neworder = np.arange(xSS.K)
     old2newID=dict(list(zip(oldids_bigtosmall, neworder)))
     targetZnew = -1 * np.ones_like(targetZ)
     for oldk in range(xSS.K):
@@ -261,7 +262,7 @@ def runKMeans_BregmanDiv(
     for riter in range(Niter):
         Div = obsModel.calcSmoothedBregDiv(
             X=X, Mu=Mu, W=W,
-            includeOnlyFastTerms=True, 
+            includeOnlyFastTerms=True,
             smoothFrac=smoothFrac, eps=eps)
         Z = np.argmin(Div, axis=1)
         Ldata = Div.min(axis=1).sum()
@@ -364,10 +365,10 @@ def initKMeans_BregmanDiv(
 
     # Sample each cluster id using distance heuristic
     for k in range(1, K):
-        sum_minDiv = np.sum(minDiv)        
+        sum_minDiv = np.sum(minDiv)
         if sum_minDiv == 0.0:
             # Duplicate rows corner case
-            # Some rows of X may be exact copies, 
+            # Some rows of X may be exact copies,
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
             for emptyk in reversed(list(range(k, K))):
@@ -402,7 +403,7 @@ def initKMeans_BregmanDiv(
 
 
 def makeDataSubsetByThresholdResp(
-        Data, curModel, 
+        Data, curModel,
         curLP=None,
         ktarget=None,
         K=None,
@@ -486,7 +487,7 @@ def makeDataSubsetByThresholdResp(
         targetData = Data.make_subset(example_id_list=chosenRespIDs)
         targetX = targetData.X
         if curLP is None:
-            targetW = None    
+            targetW = None
         elif 'resp' in curLP:
             targetW = curLP['resp'][chosenRespIDs,ktarget]
         elif 'spR' in curLP:
@@ -508,7 +509,7 @@ def makeDataSubsetByThresholdResp(
 
 
 def makeDataSubsetByThresholdResp_BagOfWordsData(
-        Data, curModel, 
+        Data, curModel,
         curLP=None,
         ktarget=None,
         minNumAtomsInEachTargetDoc=0,
@@ -643,7 +644,7 @@ def makeDataSubsetByThresholdResp_BagOfWordsData(
         raise ValueError('WHOA! Found some empty rows in the targetX')
     return DebugInfo, targetData, targetX, targetW, chosenRespIDs
 
-def makeSummaryStrForTargetResp(respVec, 
+def makeSummaryStrForTargetResp(respVec,
         nDoc=None,
         vocab_size=None,
         doc_range=None,
@@ -655,7 +656,7 @@ def makeSummaryStrForTargetResp(respVec,
 
     Args
     ----
-    respVec : 
+    respVec :
     doc_range : 1D array
         Attrib of ORIGINAL dataset.
     word_count : 1D array

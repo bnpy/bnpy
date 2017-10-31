@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 from . import BLogger
 
@@ -47,4 +48,4 @@ def makeExpansionSSFromZ(
     xSSslice = MakeSSFromZFuncMap[allocModelName](
         Dslice=Dslice, curModel=curModel, curLPslice=curLPslice,
         **kwargs)
-    return xSSslice    
+    return xSSslice

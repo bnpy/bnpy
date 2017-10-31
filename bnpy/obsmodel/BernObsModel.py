@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import itertools
 
@@ -58,7 +59,7 @@ class BernObsModel(AbstractObsModel):
         assert isinstance(self.CompDims, tuple)
 
     def createPrior(
-            self, Data, lam1=1.0, lam0=1.0, 
+            self, Data, lam1=1.0, lam0=1.0,
             priorMean=None, priorScale=None,
             eps_phi=1e-8, **kwargs):
         ''' Initialize Prior ParamBag attribute.
@@ -460,7 +461,7 @@ class BernObsModel(AbstractObsModel):
             return Ldata
         else:
             raise ValueError("Unrecognized compdims: " + str(self.CompDims))
-            
+
     def getDatasetScale(self, SS, extraSS=None):
         ''' Get number of observed scalars in dataset from suff stats.
 
@@ -744,7 +745,7 @@ class BernObsModel(AbstractObsModel):
         Mu /= (NX + self.Prior.lam1 + self.Prior.lam0)
         return Mu
 
-    def calcSmoothedBregDiv(self, 
+    def calcSmoothedBregDiv(self,
             X, Mu, W=None,
             smoothFrac=0.0,
             includeOnlyFastTerms=False,
@@ -794,14 +795,14 @@ class BernObsModel(AbstractObsModel):
         if not includeOnlyFastTerms:
             if DivDataVec is None:
                 # Compute DivDataVec : 1D array of size N
-                # This is the per-row additive constant indep. of k. 
+                # This is the per-row additive constant indep. of k.
 
                 # STEP 1: Compute MuX * log(MuX)
                 logMuX = np.log(MuX)
                 MuXlogMuX = logMuX
                 MuXlogMuX *= MuX
                 DivDataVec = np.sum(MuXlogMuX, axis=1)
-                
+
                 # STEP 2: Compute (1-MuX) * log(1-MuX)
                 OneMinusMuX = MuX
                 OneMinusMuX *= -1
@@ -818,7 +819,7 @@ class BernObsModel(AbstractObsModel):
             assert W.ndim == 1
             assert W.size == N
             Div *= W[:,np.newaxis]
-        # Verify divergences are strictly non-negative 
+        # Verify divergences are strictly non-negative
         if not includeOnlyFastTerms:
             minDiv = Div.min()
             if minDiv < 0:

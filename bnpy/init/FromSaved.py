@@ -3,6 +3,7 @@ FromSaved.py
 
 Initialize params of a bnpy model from a previous result saved to disk.
 '''
+from builtins import *
 import numpy as np
 import scipy.io
 import os

@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import os
 
@@ -6,7 +7,7 @@ from bnpy.allocmodel import make_xPiVec_and_emptyPi
 from bnpy.util import NumericUtil
 
 def summarizeRestrictedLocalStep_HDPTopicModel(
-        Dslice=None, 
+        Dslice=None,
         curModel=None,
         curLPslice=None,
         curSSwhole=None,
@@ -42,7 +43,7 @@ def summarizeRestrictedLocalStep_HDPTopicModel(
     # If it doesn't exist already
     if xObsModel is None:
         xObsModel = curModel.obsModel.copy()
-    if xInitSS is not None:      
+    if xInitSS is not None:
         xObsModel.update_global_params(xInitSS)
     assert xObsModel.K == Kfresh
     xPiVec, emptyPi = make_xPiVec_and_emptyPi(
@@ -75,9 +76,9 @@ def summarizeRestrictedLocalStep_HDPTopicModel(
     # If desired, add merge terms into the expanded summaries,
     if mUIDPairs is not None and len(mUIDPairs) > 0:
         Mdict = curModel.allocModel.calcMergeTermsFromSeparateLP(
-            Data=Dslice, 
+            Data=Dslice,
             LPa=curLPslice, SSa=curSSwhole,
-            LPb=xLPslice, SSb=xSSslice, 
+            LPb=xLPslice, SSb=xSSslice,
             mUIDPairs=mUIDPairs)
         xSSslice.setMergeUIDPairs(mUIDPairs)
         for key, arr in list(Mdict.items()):
@@ -93,7 +94,7 @@ def summarizeRestrictedLocalStep_HDPTopicModel(
 
 
 def restrictedLocalStep_HDPTopicModel(
-        Dslice=None, 
+        Dslice=None,
         curLPslice=None,
         ktarget=0,
         xObsModel=None,
@@ -199,8 +200,8 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
         ktarget=0,
         Kfresh=None,
         xalphaPi=None,
-        xLPslice=None, 
-        xInitLPslice=None,       
+        xLPslice=None,
+        xInitLPslice=None,
         LPkwargs=dict(),
         obsModelName='Mult',
         **kwargs):
@@ -248,7 +249,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
     lumpMass_d = np.sum(
         curLPslice['resp'][start + lumpmask_d, ktarget] * wc_lump_d)
     # Allocate temporary memory for this document
-    xsumResp_d = np.zeros_like(targetsumResp_d)      
+    xsumResp_d = np.zeros_like(targetsumResp_d)
     xDocTopicCount_d = np.zeros(Kfresh)
     # Run coordinate ascent that alternatively updates
     # doc-topic counts and resp for document d
@@ -271,7 +272,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
         for riter in range(LPkwargs['nCoordAscentItersLP']):
             # xalphaEbeta_active_d potentially includes counts
             # for absorbing states from curLPslice_d
-            np.add(xDocTopicCount_d, xalphaPi, 
+            np.add(xDocTopicCount_d, xalphaPi,
                 out=xDocTopicProb_d)
             digamma(xDocTopicProb_d, out=xDocTopicProb_d)
             xDocTopicProb_d -= xDocTopicProb_d.max()
@@ -282,10 +283,10 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
 
             # Update sumResp for active tokens in document
             np.dot(xCLik_d, xDocTopicProb_d, out=xsumResp_d)
-            
+
             # Update DocTopicCount_d: 1D array, shape K
             #     sum(DocTopicCount_d) equals Nd[ktarget]
-            np.dot(targetsumResp_d / xsumResp_d, xCLik_d, 
+            np.dot(targetsumResp_d / xsumResp_d, xCLik_d,
                    out=xDocTopicCount_d)
             xDocTopicCount_d *= xDocTopicProb_d
 
@@ -301,7 +302,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
         # Make proposal resp for relevant atoms in current doc d
         if np.any(np.isnan(xDocTopicCount_d)):
             print('WHOA! NaN ALERT')
-            # Edge case! Common only when deleting... 
+            # Edge case! Common only when deleting...
             # Recover from numerical issues in coord ascent
             # by falling back to likelihood only to make resp
             xResp_d = xCLik_d
@@ -388,7 +389,7 @@ def makeExpansionLPFromZ_HDPTopicModel(
     N = curLPslice['resp'].shape[0]
     # Compute prior probability of each proposed comp
     xPiVec, emptyPi = make_xPiVec_and_emptyPi(
-        curModel=curModel, ktarget=ktarget, Kfresh=Kfresh, 
+        curModel=curModel, ktarget=ktarget, Kfresh=Kfresh,
         xInitSS=xInitSS, **kwargs)
     xalphaPi = curModel.allocModel.alpha * xPiVec
     emptyalphaPi = curModel.allocModel.alpha * emptyPi
@@ -429,7 +430,7 @@ def makeExpansionLPFromZ_HDPTopicModel(
                 #xresp[bstart + words_d, :] = 1e-100
                 #xresp[bstart + words_d, targetZ[pos]] = 1.0
 
-    else:        
+    else:
         for pos, n in enumerate(chosenDataIDs):
             xresp[n, :] = 1e-100
             xresp[n, targetZ[pos]] = 1.0
@@ -453,7 +454,7 @@ def makeExpansionLPFromZ_HDPTopicModel(
                 curModel.getObsModelName().count('Bern'):
             bstart = d * Dslice.vocab_size
             bstop = (d+1) * Dslice.vocab_size
-            xDocTopicCount[d] = np.sum(xresp[bstart:bstop], axis=0)            
+            xDocTopicCount[d] = np.sum(xresp[bstart:bstop], axis=0)
         else:
             xDocTopicCount[d] = np.sum(xresp[start:stop], axis=0)
     # Create xtheta
@@ -467,7 +468,7 @@ def makeExpansionLPFromZ_HDPTopicModel(
                        curLPslice['DocTopicCount'][:, ktarget])
     assert np.allclose(xtheta.sum(axis=1) + emptyalphaPi,
                        curLPslice['theta'][:, ktarget])
-    
+
     # Compute other LP quantities related to log prob (topic | doc)
     # and fill these into the expanded LP dict
     digammaSumTheta = curLPslice['digammaSumTheta'].copy()
@@ -512,8 +513,8 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel_SlowerButStable(
         ktarget=0,
         Kfresh=None,
         xalphaPi=None,
-        xLPslice=None, 
-        xInitLPslice=None,       
+        xLPslice=None,
+        xInitLPslice=None,
         LPkwargs=dict(),
         **kwargs):
     ''' Perform restricted local step on one document.
@@ -549,7 +550,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel_SlowerButStable(
     xCLik_mask_d = xLPslice['E_log_soft_ev'][start + mask_d]
     xCLik_mask_d -= np.max(xCLik_mask_d, axis=1)[:,np.newaxis]
     # Allocate temporary memory for this document
-    xsumResp_d = np.zeros_like(targetsumResp_d)      
+    xsumResp_d = np.zeros_like(targetsumResp_d)
     xDocTopicCount_d = np.zeros(Kfresh)
 
 
@@ -560,13 +561,13 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel_SlowerButStable(
             xDocTopicCount_d[:] = xInitLPslice['DocTopicCount'][d, :]
 
         xresp_mask_d = np.zeros_like(xCLik_mask_d)
- 
+
         xDocTopicProb_d = np.zeros_like(xDocTopicCount_d)
         prevxDocTopicCount_d = -1 * np.ones(Kfresh)
         for riter in range(LPkwargs['nCoordAscentItersLP']):
             # xalphaEbeta_active_d potentially includes counts
             # for absorbing states from curLPslice_d
-            np.add(xDocTopicCount_d, xalphaPi, 
+            np.add(xDocTopicCount_d, xalphaPi,
                 out=xDocTopicProb_d)
             digamma(xDocTopicProb_d, out=xDocTopicProb_d)
             xDocTopicProb_d -= xDocTopicProb_d.max()

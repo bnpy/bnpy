@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import time
 import os
@@ -85,7 +86,7 @@ def test_correctness_calcRlogRdotv(N=1000, K=10):
 
 def test_speed_calcRlogR(N=1000, K=10, nRep=1):
     R = np.random.rand(N, K)
-    
+
     for calcRlogR_func in [
             calcRlogR_numpy_forloop,
             calcRlogR_numpy_vectorized,
@@ -247,7 +248,7 @@ if __name__ == '__main__':
         pylab.xlabel('time (sec)')
         pylab.ylabel('memory (MiB)')
         pylab.show(block=True)
-        
+
     elif args.funcToEval.count('dotv'):
         if args.testType.count('correctness'):
             test_correctness_calcRlogRdotv(args.N, args.K)

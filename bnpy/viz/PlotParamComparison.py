@@ -22,6 +22,7 @@ Loop over panels
         Plot line
 
 '''
+from builtins import *
 import numpy as np
 import argparse
 import glob
@@ -257,7 +258,7 @@ def plotSingleLineAcrossJobsByXVar(jpathPattern,
         for tid in alltaskids:
             y = loadYValFromDisk(jobpath, tid, yvar=yvar)
             pylab.plot(x, y, '.', **plotargs)
-        
+
 
     # Plot top-ranked tasks as solid points connected by line
     for i, jobpath in enumerate(jpathList):

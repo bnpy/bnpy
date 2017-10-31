@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import argparse
 
@@ -46,7 +47,7 @@ def tryMergeProposalForSpecificTarget(
 
     def makeListOfBestPairsForCompByObsGap(k):
         pairList = makePairsForComp(k)
-        gapVec = curModel.obsModel.calcHardMergeGap_SpecificPairs(curSS, 
+        gapVec = curModel.obsModel.calcHardMergeGap_SpecificPairs(curSS,
             makePairsForComp(k))
         gapVec /= scaleF
         bestLocs = np.argsort(-1 * gapVec)
@@ -83,7 +84,7 @@ def tryMergeProposalForSpecificTarget(
             Data, dict(resp=propResp))
     else:
         raise ValueError("Unrecognized getAllocModelName")
-    
+
     propSS = propModel.get_global_suff_stats(Data, propLP, doPrecompEntropy=1)
 
     propModel.obsModel.update_global_params(propSS)
@@ -163,5 +164,5 @@ if __name__ == '__main__':
 
     MLogger.configure(args.outputdir,
         doSaveToDisk=0,
-        doWriteStdOut=1) 
+        doWriteStdOut=1)
     tryMergeProposalForSavedTask(**args.__dict__)

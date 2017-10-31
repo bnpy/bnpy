@@ -1,3 +1,4 @@
+from builtins import *
 import scipy.io
 import os
 import numpy as np
@@ -27,7 +28,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
         taskids = BNPYArgParser.parse_task_ids(jobpath, taskids)
     elif isinstance(taskids, int):
         taskids = [str(taskids)]
-    taskpath = os.path.join(jobpath, taskids[0])    
+    taskpath = os.path.join(jobpath, taskids[0])
 
     # Load data, with same dataset size prefs as specified at inference time.
     dataKwargs = bnpy.ioutil.DataReader.loadDataKwargsFromDisk(taskpath)
@@ -40,7 +41,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
         elif 'pi' in Data.TrueParams:
             sortids = np.argsort(Data.TrueParams['pi'].argmax(axis=1))
     else:
-        sortids = np.arange(AdjMaj.shape[0])    
+        sortids = np.arange(AdjMaj.shape[0])
     # Rearrange the rows/cols of AdjMat
     AdjMat = AdjMat[sortids, :]
     AdjMat = AdjMat[:, sortids]
@@ -54,7 +55,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
     pylab.subplots(nrows=1, ncols=ncols, figsize=(3*ncols, 3))
     pylab.subplot(1, ncols, 1)
     pylab.imshow(AdjMat, cmap='Greys', interpolation='nearest', vmin=0, vmax=1)
-    
+
     if len(nodeNames) < 25:
         pylab.gca().set_yticks(np.arange(len(nodeNames)))
         pylab.gca().set_yticklabels(nodeNames)
@@ -92,7 +93,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
             Epi = np.exp(hmodel.allocModel.E_logPi())
             for eid, (s,t) in enumerate(Data.edges):
                 for d in range(Data.dim):
-                    taskAdjMat[s,t,d] = np.inner(Epi[s,:], 
+                    taskAdjMat[s,t,d] = np.inner(Epi[s,:],
                         np.dot(Ew[:,:,d], Epi[t,:]))
         assert taskAdjMat.min() >= 0
         assert taskAdjMat.max() <= 1.0
@@ -102,7 +103,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
         pylab.subplot(1, ncols, 2+tt)
         pylab.imshow(taskAdjMat,
                    cmap='Greys', interpolation='nearest', vmin=0, vmax=1)
-        
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

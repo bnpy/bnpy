@@ -18,6 +18,7 @@ Options
     ids of the tasks (individual runs) of the given job to plot.
     Ex: "1" or "3" or "1,2,3" or "1-6"
 '''
+from builtins import *
 from .PlotUtil import pylab
 import numpy as np
 import argparse
@@ -416,7 +417,7 @@ def uidsAndCounts2strlist(SS):
     if SS.hasSelectionTerm('DocUsageCount'):
         usagevec = SS._SelectTerms.DocUsageCount
         return ['%5d : %s \n %s docs' % (
-            SS.uids[k], 
+            SS.uids[k],
             count2str(countvec[k]),
             count2str(usagevec[k])) for k in range(SS.K)]
     else:

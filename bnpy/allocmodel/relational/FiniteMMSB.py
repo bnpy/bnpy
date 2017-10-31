@@ -1,7 +1,7 @@
 '''
 FiniteMMSB.py
 '''
-
+from builtins import *
 import numpy as np
 
 from scipy.sparse import csc_matrix
@@ -82,13 +82,13 @@ class FiniteMMSB(AllocModel):
         LP : dict
             Local parameters, must contain fields
             * E_log_soft_ev : nEdges x K x K
-        
+
         Returns
         -------
         LP : dict
             Local parameters, will contain updated fields:
             * resp : nEdges x K x K
-                resp[e,j,k] = prob that edge e is explained by 
+                resp[e,j,k] = prob that edge e is explained by
                 connection from state/block j to block k
         '''
         if self.inferType.count('EM') > 0:
@@ -289,7 +289,7 @@ class FiniteMMSB(AllocModel):
 
     def calc_estZ(self):
         ''' Calculate hard assignment for each node.
-        
+
         Returns
         -------
         Z : 1D array, size nNodes

@@ -1,6 +1,6 @@
 ''' AllocModel.py
 '''
-
+from builtins import *
 
 
 class AllocModel(object):
@@ -16,7 +16,7 @@ class AllocModel(object):
         '''
         return list()
 
-    
+
     def getCompDims(self):
         ''' Get the dimensions of the latent clusters for this object.
 
@@ -32,7 +32,7 @@ class AllocModel(object):
         This is the E-step of EM algorithm.
 
         Returned LP contains optimal values of local parameters
-        specific to the provided dataset. 
+        specific to the provided dataset.
         Updated values computed using current global parameter attributes.
 
         Possible keyword arguments control model-specific computations.

@@ -1,3 +1,4 @@
+from builtins import *
 import ctypes
 from numpy.ctypeslib import ndpointer
 
@@ -39,4 +40,3 @@ def LoadFuncFromCPPLib(libpath, srcpath, funcName):
         def errorFunc(*args, **kwargs):
             raise ImportError("Could not import C++ func: %s" % (funcName))
         return errorFunc
-

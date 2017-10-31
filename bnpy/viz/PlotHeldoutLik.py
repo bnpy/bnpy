@@ -1,5 +1,6 @@
 '''
 '''
+from builtins import *
 import numpy as np
 import argparse
 import os
@@ -145,11 +146,11 @@ def plot_all_tasks_for_job(jobpath, label, taskids=None,
             else:
                 raise ValueError("Unrecognized xvar: " + xvar)
             if yvar.count('Kactive') and not yvar.count('Percentile'):
-                ys = np.loadtxt(os.path.join(taskoutpath, 
+                ys = np.loadtxt(os.path.join(taskoutpath,
                         prefix + '-' + yvar + 'Percentile50.txt'))
-                ys_lo = np.loadtxt(os.path.join(taskoutpath, 
+                ys_lo = np.loadtxt(os.path.join(taskoutpath,
                     prefix + '-' + yvar + 'Percentile10.txt'))
-                ys_hi = np.loadtxt(os.path.join(taskoutpath, 
+                ys_hi = np.loadtxt(os.path.join(taskoutpath,
                     prefix + '-' + yvar + 'Percentile90.txt'))
             else:
                 ys = np.loadtxt(

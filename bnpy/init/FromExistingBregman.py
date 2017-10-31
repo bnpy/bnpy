@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 from bnpy.util import split_str_into_fixed_width_lines
 
@@ -30,7 +31,7 @@ def runKMeans_BregmanDiv_existing(
     -------
     Z : 1D array, size N
         Contains assignments to Korig + K possible clusters
-        if Niter == 0, unassigned data items have value Z[n] = -1 
+        if Niter == 0, unassigned data items have value Z[n] = -1
 
     Mu : 2D array, size (Korig + Kfresh) x D
         Includes original Korig clusters and Kfresh new clusters
@@ -69,7 +70,7 @@ def runKMeans_BregmanDiv_existing(
     for riter in range(Niter):
         Div = obsModel.calcSmoothedBregDiv(
             X=X, Mu=Mu, W=W,
-            includeOnlyFastTerms=True, 
+            includeOnlyFastTerms=True,
             smoothFrac=smoothFrac, eps=eps)
         Z = np.argmin(Div, axis=1)
         Ldata = Div.min(axis=1).sum()
@@ -121,7 +122,7 @@ def runKMeans_BregmanDiv_existing(
 
             str_sum_w_exist = countvec2str(curN_K[:Korig])
             logFunc(str_sum_w_exist)
-            
+
             str_sum_w_fresh = countvec2str(curN_K[Korig:])
             logFunc(str_sum_w_fresh)
 
@@ -188,10 +189,10 @@ def initKMeans_BregmanDiv_existing(
 
     # Sample each cluster id using distance heuristic
     for k in range(0, K):
-        sum_minDiv = np.sum(minDiv)        
+        sum_minDiv = np.sum(minDiv)
         if sum_minDiv == 0.0:
             # Duplicate rows corner case
-            # Some rows of X may be exact copies, 
+            # Some rows of X may be exact copies,
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
             for emptyk in reversed(list(range(k, K))):
@@ -229,7 +230,7 @@ def initKMeans_BregmanDiv_existing(
         curDiv[chosenZ[k]] = 0
         # Update distance between each atom and its nearest cluster
         minDiv = np.minimum(minDiv, curDiv)
-    
+
     # Some final verification
     assert len(Mu) == chosenZ.size + obsModel.K
     return chosenZ, Mu, minDiv, np.sum(DivDataVec)

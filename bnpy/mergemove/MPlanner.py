@@ -3,6 +3,7 @@ MPlanner.py
 
 Functions for deciding which merge pairs to track.
 '''
+from builtins import *
 import numpy as np
 import sys
 import os
@@ -25,7 +26,7 @@ def selectCandidateMergePairs(hmodel, SS,
         m_pair_ranking_exclusion_thr=-0.000001,
         **kwargs):
     ''' Select candidate pairs to consider for merge move.
-    
+
     Returns
     -------
     Info : dict, with fields
@@ -172,7 +173,7 @@ def selectCandidateMergePairs(hmodel, SS,
             MLogger.pprint("Chosen uid pairs:", 'debug')
         MLogger.pprint(
             "%4d, %4d : pair_score %.3e, size %s %s" % (
-                uidA, uidB, 
+                uidA, uidB,
                 rank_scores_per_pair[loc],
                 count2str(uid2count[uidA]),
                 count2str(uid2count[uidB]),
@@ -181,7 +182,7 @@ def selectCandidateMergePairs(hmodel, SS,
         nKeep += 1
     Info = dict()
     Info['m_UIDPairs'] = mUIDPairs
-    Info['m_GainVals'] = mGainVals 
+    Info['m_GainVals'] = mGainVals
     Info['mPairIDs'] = mAIDPairs
     targetUIDs = set()
     for uidA, uidB in mUIDPairs:

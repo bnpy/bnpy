@@ -5,7 +5,7 @@ Neal Hughes
 Blog post on "Fast Python loops with Cython"
 http://nealhughes.net/cython1/
 """
-
+from builtins import *
 import numpy as np
 
 def calcSpRData_cython(double[:,:] R, long[:,:] ColIDs, int nnzPerRow):

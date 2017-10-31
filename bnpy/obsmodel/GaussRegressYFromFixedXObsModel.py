@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import scipy.linalg
 from scipy.special import gammaln, digamma
@@ -117,7 +118,7 @@ class GaussRegressYFromFixedXObsModel(AbstractObsModel):
         return calcLogSoftEvMatrix_FromPost(
             Data,
             pnu_K=self.Post.pnu_K,
-            ptau_K=self.Post.ptau_K, 
+            ptau_K=self.Post.ptau_K,
             w_KE=self.Post.w_KE,
             P_KEE=self.Post.P_KEE,
             **kwargs)
@@ -211,7 +212,7 @@ class GaussRegressYFromFixedXObsModel(AbstractObsModel):
 
         Returns
         -------
-        val_E : 1D array 
+        val_E : 1D array
         '''
         pdict = self._unpack_params(k=k)
         return E_d_w(**pdict)
@@ -276,7 +277,7 @@ def calcLogSoftEvMatrix_FromPost(
     Returns
     -------
     E_log_soft_ev_NK : 2D array, size N x K
-    '''        
+    '''
     if not hasattr(Dslice, 'X_NE'):
         Dslice.X_NE = np.hstack([Dslice.X, np.ones(Dslice.nObs)[:,np.newaxis]])
 
@@ -304,7 +305,7 @@ def calcLogSoftEvMatrix_FromPost(
     for k in range(K):
         E_log_soft_ev_NK[:, k] += (
             - 0.5 * LOGTWOPI \
-            + 0.5 * E_log_d_K[k] 
+            + 0.5 * E_log_d_K[k]
             - 0.5 * E_mahal_dist_N(
                 Dslice.Y, Dslice.X_NE,
                 E_d=E_d_K[k],
@@ -323,7 +324,7 @@ def E_mahal_dist_N(Y_N, X_NE,
         chol_P_EE=None):
     ''' Calculate expected mahalanobis distance under regression model
 
-    For each data index n, computes expected distance using provided 
+    For each data index n, computes expected distance using provided
     cluster-specific parameters:
     $$
     d_n = E[ delta_k (y_n - w_k^T x_n)^2 ]
@@ -345,7 +346,7 @@ def E_mahal_dist_N(Y_N, X_NE,
 
     xPx_EN = np.linalg.solve(chol_P_EE, X_NE.T)
     xPx_EN *= xPx_EN
-    xPx_N = np.sum(xPx_EN, axis=0) 
+    xPx_N = np.sum(xPx_EN, axis=0)
 
     E_mahal_dist_N = sq_diff_YX_N
     E_mahal_dist_N += xPx_N
@@ -465,7 +466,7 @@ def calcPostParamsFromSSForComp(
     '''
     K = 1
     E = SS.E
-    
+
     if kB is None:
         SS_N_K = SS.N[kA]
         SS_xxT_KEE = SS.xxT_KEE[kA]
@@ -530,7 +531,7 @@ def calcELBOFromSSAndPost(
             A_1 = SS.N[k] + Prior.pnu - Post.pnu_K[k]
             Elogd_k_1 = E_log_d(
                 pnu=Post.pnu_K[k],
-                ptau=Post.ptau_K[k]) 
+                ptau=Post.ptau_K[k])
             elbo_K[k] -= 0.5 * A_1 * Elogd_k_1
             # B : delta term
             B_1 = SS.yy_K[k] \
@@ -731,7 +732,7 @@ def createParamBagForPrior(
     return Prior
 
 def calcHardMergeGapForPair(
-        SS=None, Prior=None, Post=None, kA=0, kB=1, 
+        SS=None, Prior=None, Post=None, kA=0, kB=1,
         cPost_K=None,
         cPrior=None,
         ):
@@ -765,4 +766,3 @@ def calcHardMergeGapForPair(
             w_E=Prior.w_E, P_EE=Prior.P_EE)
     cAB = c_Func(*calcPostParamsFromSSForComp(SS, kA, kB, Prior))
     return cAB + cPrior - cA - cB, cPost_K, cPrior
-

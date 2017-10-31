@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import scipy.linalg
 from scipy.special import gammaln, digamma

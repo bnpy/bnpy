@@ -8,6 +8,7 @@ Usage (command-line)
 python -m bnpy.viz.PlotComps dataName aModelName obsModelName algName [kwargs]
 
 '''
+from builtins import *
 import numpy as np
 import argparse
 import os
@@ -113,7 +114,7 @@ def plotCompsFromSS(hmodel, SS, outfilepath=None, **kwargs):
     '''
     if 'xlabels' not in kwargs:
         xlabels = uidsAndCounts2strlist(SS)
-        kwargs['xlabels'] = xlabels    
+        kwargs['xlabels'] = xlabels
     tmpModel = hmodel.copy()
     tmpModel.obsModel.update_global_params(SS)
     plotCompsFromHModel(tmpModel, **kwargs)

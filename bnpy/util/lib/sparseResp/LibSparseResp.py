@@ -1,6 +1,7 @@
 '''
 LibSparseResp.py
 '''
+from builtins import *
 import os
 import numpy as np
 from numpy.ctypeslib import ndpointer
@@ -34,7 +35,7 @@ def sparsifyResp_cpp(Resp, nnzPerRow, order='C'):
 
     # Here, both spR_data and spR_colids have been created
     # Assemble these into a row-based sparse matrix (scipy object)
-    spR_indptr = np.arange(0, N * nnzPerRow + nnzPerRow, 
+    spR_indptr = np.arange(0, N * nnzPerRow + nnzPerRow,
                            step=nnzPerRow, dtype=spR_colids.dtype)
     spR = scipy.sparse.csr_matrix(
         (spR_data, spR_colids, spR_indptr),
@@ -107,7 +108,7 @@ def sparsifyLogResp_cpp(logResp, nnzPerRow, order='C'):
 
     # Here, both spR_data and spR_colids have been created
     # Assemble these into a row-based sparse matrix (scipy object)
-    spR_indptr = np.arange(0, N * nnzPerRow + nnzPerRow, 
+    spR_indptr = np.arange(0, N * nnzPerRow + nnzPerRow,
                            step=nnzPerRow, dtype=spR_colids.dtype)
     spR = scipy.sparse.csr_matrix(
         (spR_data, spR_colids, spR_indptr),
@@ -194,7 +195,7 @@ def calcMergeRlogR_withSparseRespCSR_cpp(
     elif nnzPerRow > 1 and nnzPerRow <= K:
         # Preallocate memory
         m_Hvec_OUT = np.zeros(len(mPairIDs), dtype=np.float64)
-        for mID, (kA, kB) in enumerate(mPairIDs): 
+        for mID, (kA, kB) in enumerate(mPairIDs):
             # Execute C++ code (fills in output array Hvec_OUT in-place)
             m_Hvec_OUT[mID] = lib.calcMergeRlogR_withSparseRespCSR(
                 spR_csr.data,
@@ -209,7 +210,7 @@ def calcMergeRlogR_withSparseRespCSR_cpp(
         raise ValueError("Bad nnzPerRow value %d. Need >= 1" % (nnzPerRow))
 
 def calcMergeRlogRdotv_withSparseRespCSR_cpp(
-        spR_csr=None, nnzPerRow=-1, v=None, 
+        spR_csr=None, nnzPerRow=-1, v=None,
         order='C', mPairIDs=None, **kwargs):
     '''
     '''
@@ -224,7 +225,7 @@ def calcMergeRlogRdotv_withSparseRespCSR_cpp(
     elif nnzPerRow > 1 and nnzPerRow <= K:
         # Preallocate memory
         m_Hvec_OUT = np.zeros(len(mPairIDs), dtype=np.float64)
-        for mID, (kA, kB) in enumerate(mPairIDs): 
+        for mID, (kA, kB) in enumerate(mPairIDs):
             # Execute C++ code (fills in output array Hvec_OUT in-place)
             m_Hvec_OUT[mID] = lib.calcMergeRlogRdotv_withSparseRespCSR(
                 spR_csr.data,
@@ -273,7 +274,7 @@ def calcRXX_withSparseRespCSC_cpp(
     L = spR_csc.data.size
 
     X = np.asarray(X, order=order)
-    
+
     stat_RXX = np.zeros((K, D), order=order)
 
     lib.calcRXX_withSparseRespCSC(
@@ -306,7 +307,7 @@ def calcRXX_withSparseRespCSR_cpp(
 
 def calcSparseLocalParams_SingleDoc(
         wc_d, Lik_d, alphaEbeta, alphaEbetaRem=None,
-        topicCount_d_OUT=None, 
+        topicCount_d_OUT=None,
         spResp_data_OUT=None,
         spResp_colids_OUT=None,
         nCoordAscentItersLP=10, convThrLP=0.001,

@@ -7,6 +7,7 @@ See Also
 -------
 ModelWriter.py : save bnpy models to disk.
 '''
+from builtins import *
 import numpy as np
 import scipy.io
 import os
@@ -276,11 +277,11 @@ def loadTopicModelFromMEDLDA(filepath,
 
 
 def loadTopicModel(
-        matfilepath, 
+        matfilepath,
         queryLap=None,
         prefix=None,
         returnWordCounts=0,
-        returnTPA=0, 
+        returnTPA=0,
         normalizeTopics=0,
         normalizeProbs=0,
         **kwargs):

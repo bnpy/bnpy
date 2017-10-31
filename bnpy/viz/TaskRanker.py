@@ -1,3 +1,4 @@
+from builtins import *
 import os
 import numpy as np
 import glob
@@ -98,7 +99,7 @@ def scoreTasksForSingleJob(
             scores[tid] = np.nan
             continue
         kwargs = dict()
-        if extraTxtFileDict is not None:       
+        if extraTxtFileDict is not None:
             for key, xTxtFile in extraTxtFileDict:
                 kwargs[key] = np.loadtxt(
                     os.path.join(joboutpath, taskidstr, xTxtFile))

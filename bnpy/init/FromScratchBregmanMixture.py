@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import re
 import time
@@ -17,7 +18,7 @@ def init_global_params(hmodel, Data,
         initObsModelScale=0.0,
         **kwargs):
     ''' Initialize parameters of observation model.
-    
+
     Post Condition
     --------------
     hmodel internal parameters updated to reflect sufficient statistics.
@@ -39,7 +40,7 @@ def init_global_params(hmodel, Data,
         elif name.count("distexp"):
             kwargs['init_distexp'] = float(value)
         elif name.count("iter"):
-            pass    
+            pass
     # Obtain initial suff statistics
     SS, Info = initSS_BregmanMixture(
         Data, hmodel, includeAllocSummary=False, **kwargs)
@@ -51,17 +52,17 @@ def init_global_params(hmodel, Data,
     # Execute global step from these stats
     hmodel.obsModel.update_global_params(SS)
     # Finally, initialize allocation model params
-    hmodel.allocModel.init_global_params(Data, **kwargs)    
+    hmodel.allocModel.init_global_params(Data, **kwargs)
     Info['targetSS'] = SS
     return Info
 
 
 def initSS_BregmanMixture(
-        Dslice=None, 
-        curModel=None, 
+        Dslice=None,
+        curModel=None,
         curLPslice=None,
-        K=5, 
-        ktarget=None, 
+        K=5,
+        ktarget=None,
         seed=0,
         includeAllocSummary=False,
         NiterForBregmanKMeans=0,
@@ -76,7 +77,7 @@ def initSS_BregmanMixture(
     DebugInfo : dict
         contains info about provenance of this initialization.
     '''
-    # Reformat any keyword argument to drop 
+    # Reformat any keyword argument to drop
     # prefix of 'b_' or 'init_',
     # storing the result back into the kwargs dict
     for key, val in list(kwargs.items()):
@@ -165,10 +166,10 @@ def initSS_BregmanMixture(
     xSS.reorderComps(oldids_bigtosmall)
     # Be sure to account for the sorting that just happened.
     # By fixing up the cluster means Mu and assignments Z
-    Mu = [Mu[k] for k in oldids_bigtosmall] 
+    Mu = [Mu[k] for k in oldids_bigtosmall]
     neworder = np.arange(xSS.K)
     print(neworder)
-    print(oldids_bigtosmall)   
+    print(oldids_bigtosmall)
     old2newID=dict(list(zip(oldids_bigtosmall, neworder)))
     targetZnew = -1 * np.ones_like(targetZ)
     for oldk in range(xSS.K):
@@ -228,11 +229,11 @@ def initKMeans_BregmanMixture(Data, K, obsModel, seed=0,
         # Do not select any doc more than once
         minDiv[chosenZ[setOneToPriorMean:k]] = 0
         # Total up the score
-        sum_minDiv = np.sum(minDiv)        
+        sum_minDiv = np.sum(minDiv)
         scoreVsK.append(sum_minDiv)
         if sum_minDiv == 0.0:
             # Duplicate rows corner case
-            # Some rows of X may be exact copies, 
+            # Some rows of X may be exact copies,
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
             for emptyk in reversed(list(range(k, K))):
@@ -317,10 +318,10 @@ def estimatePiAndDiv_ManyDocs(Data, obsModel, Mu,
     if k is None:
         k = K
     if isinstance(Mu, list):
-        topics = np.vstack(Mu[:k])    
+        topics = np.vstack(Mu[:k])
     else:
         topics = Mu[:k]
-    
+
     if Pi is None:
         Pi = np.ones((Data.nDoc, K))
     if minDiv is None:
@@ -330,7 +331,7 @@ def estimatePiAndDiv_ManyDocs(Data, obsModel, Mu,
         stop_d = Data.doc_range[d+1]
         wids_d = Data.word_id[start_d:stop_d]
         wcts_d = Data.word_count[start_d:stop_d]
-        
+
         if doActiveOnly:
             activeIDs_d = np.flatnonzero(Pi[d, :k] > .01)
             if activeIDs_d[-1] != k-1:
@@ -348,10 +349,10 @@ def estimatePiAndDiv_ManyDocs(Data, obsModel, Mu,
         initpiVec_d[:-1] *= 0.9
         initpiVec_d /= initpiVec_d.sum()
         assert np.allclose(initpiVec_d.sum(), 1.0)
-        
+
         if optim_method == 'frankwolfe':
             piVec_d = estimatePiForDoc_frankwolfe(
-                ids_U=wids_d, 
+                ids_U=wids_d,
                 cts_U=wcts_d,
                 topics_KV=topics_d,
                 initpiVec_K=initpiVec_d,
@@ -361,10 +362,10 @@ def estimatePiAndDiv_ManyDocs(Data, obsModel, Mu,
                 returnFuncValAndInfo=False,
                 verbose=False)
             piVec_d *= Pi[d, activeIDs_d[:-1]].sum()
-            Pi[d, activeIDs_d] = piVec_d 
+            Pi[d, activeIDs_d] = piVec_d
         else:
             Pi[d, :k], _, _ = estimatePiForDoc_graddescent(
-                ids_d=wids_d, 
+                ids_d=wids_d,
                 cts_d=wcts_d,
                 topics=topics,
                 alpha=alpha,
@@ -372,7 +373,7 @@ def estimatePiAndDiv_ManyDocs(Data, obsModel, Mu,
                 piInit=None)
 
         assert np.allclose(Pi[d,:k].sum(), 1.0)
-        minDiv[d] = -1 * np.inner(wcts_d, 
+        minDiv[d] = -1 * np.inner(wcts_d,
             np.log(np.dot(Pi[d,:k], topics[:, wids_d])))
 
     minDiv_check = -1 * np.sum(
@@ -383,7 +384,7 @@ def estimatePiAndDiv_ManyDocs(Data, obsModel, Mu,
     if isinstance(smoothVec, str) and smoothVec.count('lam'):
         minDiv -= np.dot(np.log(np.dot(Pi[:, :k], topics)), obsModel.Prior.lam)
     elif isinstance(smoothVec, np.ndarray):
-        minDiv -= np.dot(np.log(np.dot(Pi[:, :k], topics)), smoothVec)    
+        minDiv -= np.dot(np.log(np.dot(Pi[:, :k], topics)), smoothVec)
     if DivDataVec is not None:
         minDiv += DivDataVec
     assert np.min(minDiv) > -1e-6
@@ -395,7 +396,7 @@ if __name__ == '__main__':
     Data = CleanBarsK10.get_data(nDocTotal=100, nWordsPerDoc=500)
     K = 3
 
-    hmodel, Info = bnpy.run(Data, 'DPMixtureModel', 'Mult', 'memoVB', 
+    hmodel, Info = bnpy.run(Data, 'DPMixtureModel', 'Mult', 'memoVB',
         initname='bregmankmeans+iter0',
         K=K,
         nLap=0)

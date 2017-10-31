@@ -1,3 +1,4 @@
+from builtins import *
 from scipy.special import digamma, gammaln
 import numpy as np
 import warnings
@@ -53,7 +54,7 @@ def calcLocalParams_SingleDoc(
     # Initialize prior from global topic probs
     if DocTopicCount_d is None:
         DocTopicCount_d = np.zeros_like(alphaEbeta)
-    
+
     if initDocTopicCountLP.count('setDocProbsToEGlobalProbs'):
         # Here, we initialize pi_d to alphaEbeta
         DocTopicProb_d = alphaEbeta.copy()
@@ -63,7 +64,7 @@ def calcLocalParams_SingleDoc(
         np.dot(wc_d / sumResp_d, Lik_d, out=DocTopicCount_d)
         DocTopicCount_d *= DocTopicProb_d
     else:
-        # Set E[pi_d] to exp E log[ alphaEbeta ] 
+        # Set E[pi_d] to exp E log[ alphaEbeta ]
         DocTopicProb_d = np.zeros_like(alphaEbeta)
 
     prevDocTopicCount_d = DocTopicCount_d.copy()

@@ -1,3 +1,4 @@
+from builtins import *
 from .DataIterator import DataIterator
 
 class DataObj(object):

@@ -3,6 +3,7 @@ VerificationUtil.py
 
 Verification utilities, for checking whether numerical variables are "equal".
 '''
+from builtins import *
 import numpy as np
 
 

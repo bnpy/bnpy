@@ -3,6 +3,7 @@ BarsViz.py
 
 Visualization tools for toy bars data for topic models.
 '''
+from builtins import *
 import numpy as np
 
 from .PlotUtil import pylab
@@ -29,7 +30,7 @@ def show_square_images(
     --------------
     Provided axes have plots updated.
     '''
-    global imshowArgs    
+    global imshowArgs
     local_imshowArgs = dict(**imshowArgs)
     for key in local_imshowArgs:
         if key in kwargs:
@@ -233,7 +234,7 @@ def showTopicsAsSquareImages(topics,
                              ncols=5,
                              W=1, H=1, figH=None,
                              **kwargs):
-    global imshowArgs    
+    global imshowArgs
     local_imshowArgs = dict(**imshowArgs)
     for key in local_imshowArgs:
         if key in kwargs:

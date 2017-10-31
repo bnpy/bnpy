@@ -15,7 +15,7 @@ Constraints:
 * rho satisfies: 0 < rho[k] < 1
 * omega satisfies: 0 < omega[k]
 '''
-
+from builtins import *
 import warnings
 import numpy as np
 import scipy.optimize

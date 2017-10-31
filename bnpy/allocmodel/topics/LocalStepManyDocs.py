@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 import copy
 import time
@@ -109,7 +110,7 @@ def calcLocalParams(
             lstop = (d+1) * Data.vocab_size
         else:
             lstart = start - slice_start
-            lstop = stop - slice_start        
+            lstop = stop - slice_start
         if hasattr(Data, 'word_count') and not obsModelName.count('Bern'):
             wc_d = Data.word_count[start:stop].copy()
         else:
@@ -131,7 +132,7 @@ def calcLocalParams(
         if not DO_DENSE:
             m_start = nnzPerRowLP * start
             m_stop = nnzPerRowLP * stop
-            
+
             # SPARSE RESP
             calcSparseLocalParams_SingleDoc(
                 wc_d,
@@ -150,7 +151,7 @@ def calcLocalParams(
                 **kwargs)
         else:
             Lik_d = Lik[lstart:lstop].copy()  # Local copy
-            (DocTopicCount[d], DocTopicProb[d], 
+            (DocTopicCount[d], DocTopicProb[d],
                 sumRespTilde[lstart:lstop], Info_d) \
                 = calcLocalParams_SingleDoc(
                     wc_d, Lik_d, alphaEbeta, alphaEbetaRem,
@@ -187,7 +188,7 @@ def calcInitSparseResp(LP, alphaEbeta, nnzPerRowLP=0, **kwargs):
     ''' Compute initial sparse responsibilities
     '''
     assert 'ElogphiT' in LP
-    # Determine the top-L for each 
+    # Determine the top-L for each
     logS = LP['ElogphiT'].copy()
     logS += np.log(alphaEbeta)[np.newaxis,:]
     init_spR = sparsifyLogResp(logS, nnzPerRowLP)
@@ -228,7 +229,7 @@ def updateLPGivenDocTopicCount(LP, DocTopicCount,
     return LP
 
 
-def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde, 
+def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde,
         cslice=(0, None), doSparseOnlyAtFinalLP=0, nnzPerRowLP=0):
     ''' Compute assignment responsibilities given output of local step.
 
@@ -275,7 +276,7 @@ def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde,
     else:
         LP['resp'] /= sumRespTilde[:, np.newaxis]
         np.maximum(LP['resp'], 1e-300, out=LP['resp'])
-    # Time consuming: 
+    # Time consuming:
     # >>> assert np.allclose(LP['resp'].sum(axis=1), 1.0)
     return LP
 

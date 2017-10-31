@@ -3,6 +3,7 @@ FiniteAssortativeMMSB.py
 
 Assortative mixed membership stochastic blockmodel.
 '''
+from builtins import *
 import numpy as np
 import itertools
 
@@ -60,7 +61,7 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         '''
         ElogPi = digamma(self.theta) - \
             digamma(np.sum(self.theta, axis=1))[:, np.newaxis]
-        return ElogPi        
+        return ElogPi
 
     def calc_local_params(self, Data, LP, **kwargs):
         ''' Compute local parameters for provided dataset.
@@ -70,12 +71,12 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         Data : GraphData object
         LP : dict of local params, with fields
             * E_log_soft_ev : nEdges x K
-        
+
         Returns
         -------
         LP : dict of local params, with fields
             * resp : nEdges x K
-                resp[e,k] = prob that edge e is explained by 
+                resp[e,k] = prob that edge e is explained by
                 connection from state/block combination k,k
         '''
         K = self.K
@@ -121,9 +122,9 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         LP['resp_bg'] = resp_bg
 
         # src/rcv resp_bg : 2D array, size nEdges x K
-        #     srcresp_bg[n,k] = sum of resp mass 
+        #     srcresp_bg[n,k] = sum of resp mass
         #         when edge n's src asgned to k, but rcv is not
-        #     rcvresp_bg[n,k] = sum of resp mass 
+        #     rcvresp_bg[n,k] = sum of resp mass
         #         when edge n's rcv asgned to k, but src is not
         epsEvVec /= respNormConst
         expElogPi_bg = sumexpElogPi[:,np.newaxis] - expElogPi
@@ -172,7 +173,7 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         LP['Lentropy_bg'] = \
             -1 * np.sum(NodeStateCount_bg * ElogPi) + \
             -1 * LP['Ldata_bg'] + \
-            np.inner(np.log(respNormConst), LP['resp_bg'])            
+            np.inner(np.log(respNormConst), LP['resp_bg'])
         return LP
 
 
@@ -237,14 +238,14 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         if doPrecompEntropy:
             Hresp_fg = LP['Lentropy_fg'] # = -1 * calcRlogR(LP['resp'])
             Hresp_bg = LP['Lentropy_bg']
-                        
+
             SS.setELBOTerm('Hresp', Hresp_fg, dims='K')
             SS.setELBOTerm('Hresp_bg', Hresp_bg, dims=None)
-            
-            
+
+
         return SS
 
- 
+
     def calc_evidence(self, Data, SS, LP, todict=0, **kwargs):
         ''' Compute training objective function on provided input.
 
@@ -266,7 +267,7 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         else:
             Lbgdata = LP['Ldata_bg']
         if todict:
-            return dict(Lentropy=Lentropy, 
+            return dict(Lentropy=Lentropy,
                 Lalloc=Lalloc, Lslack=Lslack,
                 Lbgdata=Lbgdata)
         return Lalloc + Lentropy + Lslack + Lbgdata
@@ -292,7 +293,7 @@ class FiniteAssortativeMMSB(FiniteMMSB):
         Data : GraphData object
         LP : dict of local params, with fields
             * E_log_soft_ev : nEdges x K
-        
+
         Returns
         -------
         LP : dict
@@ -370,4 +371,3 @@ class FiniteAssortativeMMSB(FiniteMMSB):
 
     def get_prior_dict(self):
         return dict(alpha=self.alpha, epsilon=self.epsilon)
-

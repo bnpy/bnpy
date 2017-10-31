@@ -1,6 +1,7 @@
 """
 The:mod:`learnalg' module provides learning algorithms.
 """
+from builtins import *
 from .LearnAlg import LearnAlg
 from .VBAlg import VBAlg
 from .MOVBAlg import MOVBAlg

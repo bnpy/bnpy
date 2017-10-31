@@ -1,3 +1,4 @@
+from builtins import *
 import numpy as np
 EPS = 1e-8
 
