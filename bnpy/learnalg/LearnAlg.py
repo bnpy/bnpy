@@ -9,6 +9,7 @@ LearnAlg
         * recording run-time
 '''
 from builtins import *
+import six
 import numpy as np
 import time
 import logging
@@ -70,13 +71,6 @@ class LearnAlg(object):
         for k, v in list(algParams.items()):
             if k.count('LP') > 0:
                 self.algParamsLP[k] = v
-
-    @staticmethod
-    def writeOut(text, fileobj):
-        try:
-            fileobj.write(text)
-        except:
-            fileobj.write(unicode(text))
 
     def fit(self, hmodel, Data):
         ''' Execute learning algorithm to train hmodel on Data.
@@ -206,15 +200,15 @@ class LearnAlg(object):
 
         # Record current state to plain-text files
         with open(self.mkfile('trace_lap.txt'), 'a') as f:
-            self.writeOut('%.4f\n' % (lap), f)
+            f.write(six.text_type('%.4f\n' % (lap)))
         with open(self.mkfile('trace_loss.txt'), 'a') as f:
-            self.writeOut('%.9e\n' % (loss), f)
+            f.write(six.text_type('%.9e\n' % (loss)))
         with open(self.mkfile('trace_elapsed_time_sec.txt'), 'a') as f:
-            self.writeOut('%.3f\n' % (self.get_elapsed_time()), f)
+            f.write(six.text_type('%.3f\n' % (self.get_elapsed_time())))
         with open(self.mkfile('trace_K.txt'), 'a') as f:
-            self.writeOut('%d\n' % (SS.K), f)
+            f.write(six.text_type('%d\n' % (SS.K)))
         with open(self.mkfile('trace_n_examples_total.txt'), 'a') as f:
-            self.writeOut('%d\n' % (self.totalDataUnitsProcessed), f)
+            f.write(six.text_type('%d\n' % (self.totalDataUnitsProcessed)))
 
         # Record active counts in plain-text files
         counts = SS.getCountVec()
@@ -223,7 +217,7 @@ class LearnAlg(object):
         np.maximum(counts, 0, out=counts)
         with open(self.mkfile('active_counts.txt'), 'a') as f:
             flatstr = ' '.join(['%.3f' % x for x in counts])
-            self.writeOut(flatstr + '\n',f)
+            f.write(six.text_type(flatstr + '\n'))
 
         with open(self.mkfile('active_uids.txt'), 'a') as f:
             if ActiveIDVec is None:
@@ -232,7 +226,7 @@ class LearnAlg(object):
                 else:
                     ActiveIDVec = SS.uids
             flatstr = ' '.join(['%d' % x for x in ActiveIDVec])
-            self.writeOut(flatstr + '\n', f)
+            f.write(six.text_type(flatstr + '\n'))
 
         if SS.hasSelectionTerm('DocUsageCount'):
             ucount = SS.getSelectionTerm('DocUsageCount')
@@ -296,9 +290,9 @@ class LearnAlg(object):
         self.SavedIters.add(lap)
         prefix = ModelWriter.makePrefixForLap(lap)
         with open(self.mkfile('snapshot_lap.txt'), 'a') as f:
-            self.writeOut('%.4f\n' % (lap),f)
+            f.write(six.text_type('%.4f\n' % (lap)))
         with open(self.mkfile('snapshot_elapsed_time_sec.txt'), 'a') as f:
-            self.writeOut('%.3f\n' % (self.get_elapsed_time()),f)
+            f.write(six.text_type('%.3f\n' % (self.get_elapsed_time())))
         if self.outputParams['doSaveFullModel']:
             ModelWriter.save_model(
                 hmodel, self.task_output_path, prefix,

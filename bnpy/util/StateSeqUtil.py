@@ -1,3 +1,4 @@
+from __future__ import print_function
 from builtins import *
 import numpy as np
 try:

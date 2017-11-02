@@ -22,6 +22,7 @@ TODO: write better doc
 '''
 from __future__ import print_function
 from builtins import *
+import six
 import os
 import sys
 import logging
@@ -466,10 +467,7 @@ def writeArgsToFile(ReqArgs, KwArgs, task_output_path, UnkArgs):
                 val = ArgDict[key][k]
                 if isinstance(val, dict):
                     continue
-                try:
-                    fout.write('%s %s\n' % (k, val))
-                except:
-                    fout.write('%s %s\n' % (unicode(k), unicode(val)))
+                fout.write(six.text_type('%s %s\n' % (k, val)))
 
     unkfile = os.path.join(task_output_path, 'args-DatasetPrefs.txt')
     with open(unkfile, 'w') as fout:
