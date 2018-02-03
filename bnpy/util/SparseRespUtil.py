@@ -8,9 +8,10 @@ import sys
 
 hasCPP = True
 try:
-    from SparseRespUtilX import calcSpRData_cython
+    import lib.sparseResp.LibSparseResp
     from lib.sparseResp.LibSparseResp import sparsifyResp_cpp
     from lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
+    hasCPP = lib.sparseResp.LibSparseResp.hasEigenLibReady
 except ImportError:
     hasCPP = False
 
@@ -115,6 +116,7 @@ def sparsifyResp_numpy_with_cython(resp, nnzPerRow=1):
     -------
     spR : sparse csr matrix, shape N x K
     '''
+    from SparseRespUtilX import calcSpRData_cython
     N, K = resp.shape
     if nnzPerRow == 1:
         spR_data = np.ones(N, dtype=np.float64)
