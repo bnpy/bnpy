@@ -57,6 +57,7 @@ Train DP-GMM via scalable incremental or "memoized" variational coordinate ascen
 Train HDP-HMM model to capture sequential structure in the dataset
 
 .. code-block:: bash
+
     python -m bnpy.Run /path/to/dataset.csv HDPHMM DiagGauss memoVB --K 8
 
 

@@ -81,8 +81,8 @@ data_ax_h = pylab.gca()
 
 ###############################################################################
 #
-# Setup: Func to print things nicely
-# -------------------------
+# Setup: Func to print resp array nicely
+# --------------------------------------
 
 def pprint_sparse_or_dense_resp(LP, target_example_ids=target_example_ids):
     np.set_printoptions(suppress=True, precision=4)
@@ -97,7 +97,7 @@ def pprint_sparse_or_dense_resp(LP, target_example_ids=target_example_ids):
 ###############################################################################
 #
 # VB with DP mixture model and diagonal Gaussian observations
-# -------------------------
+# -----------------------------------------------------------
 #
 # Assumes exactly 3 clusters
 # 
@@ -125,7 +125,7 @@ bnpy.viz.PlotComps.plotCompsFromHModel(
 ###############################################################################
 #
 # Do inference with L=1 sparsity
-# -----------------------------------
+# ------------------------------
 #
 # Kwarg to set is "nnzPerRowLP = 1"
 #
@@ -141,7 +141,7 @@ pprint_sparse_or_dense_resp(LP1)
 ###############################################################################
 #
 # Do inference with L=2 sparsity
-# -----------------------------------
+# ------------------------------
 
 print('SPARSITY LEVEL: 2 of 3')
 LP2 = full_trained_model.calc_local_params(dataset, nnzPerRowLP=2)
@@ -151,7 +151,7 @@ pprint_sparse_or_dense_resp(LP2)
 ###############################################################################
 #
 # Do inference with L=3 sparsity
-# -----------------------------------
+# ------------------------------
 
 
 print('SPARSITY LEVEL: 3 of 3 (DENSE)')
@@ -175,5 +175,5 @@ pylab.show()
 ###############################################################################
 #
 # How to incorporate sparsity during training?
-# -----------------------------------
+# --------------------------------------------
 # Just pass "nnzPerRowLP" kwarg to bnpy.run(...)

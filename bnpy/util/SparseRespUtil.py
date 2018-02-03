@@ -5,10 +5,10 @@ import timeit
 import time
 import sys
 
-from SparseRespUtilX import calcSpRData_cython
 
 hasCPP = True
 try:
+    from SparseRespUtilX import calcSpRData_cython
     from lib.sparseResp.LibSparseResp import sparsifyResp_cpp
     from lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
 except ImportError:

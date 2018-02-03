@@ -1,7 +1,7 @@
 """
-=============================================
+=================================================
 VB coordinate descent for Mixture of Multinomials
-=============================================
+=================================================
 
 
 """
@@ -46,7 +46,7 @@ bnpy.viz.PrintTopics.plotCompsFromWordCounts(
 ###############################################################################
 #
 # Train with K=1 cluster
-# ----------------------------------------
+# ----------------------
 # 
 # This is a simple baseline.
 
@@ -65,8 +65,8 @@ bnpy.viz.PrintTopics.plotCompsFromHModel(
 ###############################################################################
 #
 # Train with K=3 clusters
-# ------------------------------------------
-# 
+# -----------------------
+#
 # Take the best of 10 initializations
 
 trained_model, info_dict = bnpy.run(
@@ -85,7 +85,7 @@ bnpy.viz.PrintTopics.plotCompsFromHModel(
 ###############################################################################
 #
 # Train with K=10 clusters
-# ------------------------------------------
+# ------------------------
 # 
 # Take the best of 10 initializations
 
@@ -104,7 +104,7 @@ bnpy.viz.PrintTopics.plotCompsFromHModel(
 ###############################################################################
 #
 # Train with K=30 clusters
-# ------------------------------------------
+# ------------------------
 # 
 # Take the best of 10 initializations
 

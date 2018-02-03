@@ -39,6 +39,7 @@ Using mixtures with other **bnpy** modules
 As usual, to train a hierarchical model whose allocation is done by FiniteMixtureModel,  
 
 .. code::
+
 	>>> hmodel, Info = bnpy.Run(Data, 'FiniteMixtureModel', obsModelName, algName, **kwargs)
 	>>> # or
 	>>> hmodel, Info = bnpy.Run(Data, 'DPMixtureModel', obsModelName, algName, **kwargs)

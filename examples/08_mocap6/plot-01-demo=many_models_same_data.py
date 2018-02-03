@@ -1,7 +1,7 @@
 """
-==============================================
+====================================
 Comparing models for sequential data
-==============================================
+====================================
 
 How to train mixtures and HMMs with various observation models on the same dataset.
 
