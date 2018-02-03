@@ -60,13 +60,13 @@ def init_global_params_from_bnpy_format(hmodel, Data, initname,
     '''
     """
     if initLapFrac > -1:
-        storedModel, lap = ModelReader.loadModelForLap(initname, initLapFrac)
+        storedModel, lap = ModelReader.load_model_at_lap(initname, initLapFrac)
     else:
-        storedModel = ModelReader.load_model(initname, prefix)
+        storedModel = ModelReader.load_model_at_prefix(initname, prefix)
     try:
         hmodel.set_global_params(hmodel=storedModel,
                                  obsModel=storedModel.obsModel)
-    except AttributeError:
+    except Exception:
         LP = storedModel.calc_local_params(Data)
         SS = hmodel.get_global_suff_stats(Data, LP)
         hmodel.update_global_params(SS)
