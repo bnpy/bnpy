@@ -5,6 +5,18 @@ Warm Starting from a Previously Trained Mixture of Gaussians
 
 Here, we show how to "warm start" from an existing model.
 
+This may be useful for several situations, such as:
+
+* An "online" setting, where you have gained some additional data,
+and wish to apply a previous model without starting from scratch.
+
+* You wish to take a previous run which might not have converged
+and train for several more laps (aka epochs or passes thru full data).
+
+* You wish to try a slightly different model (alternative prior
+hyperparameters, etc.) or a slightly different algorithm, and see if 
+the previously discovered solution is still preferred.
+
 The existing model should be saved on disk, in BNPy format.
 
 Any previous call to bnpy.run that specifies a valid output_path
@@ -85,6 +97,8 @@ def show_clusters_over_time(
         cur_ax_handle.set_xticks([-2, -1, 0, 1, 2])
         cur_ax_handle.set_yticks([-2, -1, 0, 1, 2])
         cur_ax_handle.set_xlabel("lap: %d" % lap_val)
+        cur_ax_handle.set_xlim([-2, 2])
+        cur_ax_handle.set_ylim([-2, 2])
     pylab.tight_layout()
 
 ###############################################################################
@@ -168,7 +182,8 @@ show_clusters_over_time(warm_stoch_info_dict['task_output_path'])
 # -------------------------------------------------
 # We can apply a different model to the same warm initialization.
 #
-# Here, we'll sw memoized VB with proposals.
+# Here, we'll apply a Dirichlet Process (DP) mixture model
+# and use the memoized VB algorithm with birth and merge proposals.
 #
 warm_proposals_model, warm_proposals_info_dict = bnpy.run(
     dataset, 'DPMixtureModel', 'Gauss', 'memoVB',
