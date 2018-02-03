@@ -22,15 +22,15 @@ is explained by each of the K clusters.
 
 For example, for a specific data point we might have a resp vector of:
 
-```
-[ 0.      0.9262  0.0738]
-```
+    [ 0.      0.9262  0.0738]
+
 which we interpret as saying this point is 92% explained by the 
 2nd cluster, 7% by the 3rd cluster, and 0% by the first.
 
 This short demo just shows how we can deliberately enforce sparsity
-in learned responsibilities, so that each example may have only 1 or 2
-non-zero entries in its resp vector. 
+in learned responsibilities, so that each example may have only L 
+non-zero entries in its resp vector. For example, we'll fit a K=3 model
+below, and show how we can enforce L=1 or L=2 sparsity. 
 
 For a technical introduction, see our ArXiv paper:
 

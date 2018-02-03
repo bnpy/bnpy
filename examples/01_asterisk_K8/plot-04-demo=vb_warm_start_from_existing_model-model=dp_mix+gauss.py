@@ -7,20 +7,22 @@ Here, we show how to "warm start" from an existing model.
 
 This may be useful for several situations, such as:
 
-* An "online" setting, where you have gained some additional data,
-and wish to apply a previous model without starting from scratch.
+* An "online" setting, where you have gained some additional data, and wish to apply a previous model without starting from scratch.
 
-* You wish to take a previous run which might not have converged
-and train for several more laps (aka epochs or passes thru full data).
+* You wish to take a previous run which might not have converged and train for several more laps (aka epochs or passes thru full data).
 
-* You wish to try a slightly different model (alternative prior
-hyperparameters, etc.) or a slightly different algorithm, and see if 
-the previously discovered solution is still preferred.
+* You wish to try a slightly different model (alternative prior hyperparameters, etc.) or a slightly different algorithm, and see if the previously discovered solution is still preferred.
 
 The existing model should be saved on disk, in BNPy format.
 
 Any previous call to bnpy.run that specifies a valid output_path
 will produce a file of the required format. 
+
+The key idea to warm starting with BNPy is that you can specify the
+full path of the desired previous training run 
+as the "initname" keyword argument when you call bnpy.run:
+
+    bnpy.run(..., initname='/path/to/previous_training_output/', ...)
 """
 import bnpy
 import numpy as np
