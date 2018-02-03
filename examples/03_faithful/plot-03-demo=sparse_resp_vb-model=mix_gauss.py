@@ -1,20 +1,43 @@
 """
-==============================================
-Variational training for Mixtures of Gaussians
-==============================================
+==================================================================
+Demonstration of Sparse Responsibilities for Mixtures of Gaussians
+==================================================================
 
-Demo of sparse responsibilities for mixture models.
+This demo illustrates "sparse responsibilities" for mixture models.
 
-In this example, we show how bnpy makes it easy to vary
+In this example, we show how BNPy makes it easy to vary
 per-example inference, so that for a 3-cluster model
-we can manually try:
+we can manually try each of the following:
 
 * each data point assigned to up to 1 cluster
 * each data point assigned to up to 2 clusters
 * each data point assigned to up to 3 clusters
 
-This code just prints out the responsibilities for each of these cases
-using the same (fixed) Gaussian mixture model.
+In our variational approximation, when we fit
+a K-cluster mixture model to a specific data point,
+we learn a vector of posterior **responsibilities** --
+we often call these "resp" for short in the code --
+indicating how much of the unit probability mass for this example
+is explained by each of the K clusters.
+
+For example, for a specific data point we might have a resp vector of:
+
+```
+[ 0.      0.9262  0.0738]
+```
+which we interpret as saying this point is 92% explained by the 
+2nd cluster, 7% by the 3rd cluster, and 0% by the first.
+
+This short demo just shows how we can deliberately enforce sparsity
+in learned responsibilities, so that each example may have only 1 or 2
+non-zero entries in its resp vector. 
+
+For a technical introduction, see our ArXiv paper:
+
+    Michael C. Hughes and Erik B. Sudderth (2016)
+    "Fast Learning of Clusters and Topics via Sparse Posteriors."
+    https://arxiv.org/abs/1609.07521
+
 
 """
 from __future__ import print_function
