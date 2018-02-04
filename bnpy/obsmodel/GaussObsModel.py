@@ -65,7 +65,7 @@ class GaussObsModel(AbstractObsModel):
         ''' Initialize Prior ParamBag attribute.
 
         Post Condition
-        ------
+        --------------
         Prior expected covariance matrix set to match provided value.
         '''
         D = self.D
@@ -1220,20 +1220,24 @@ def _mahalDist_Post(X, k, D=None,
 def createECovMatFromUserInput(D=0, Data=None, ECovMat='eye', sF=1.0):
     ''' Create expected covariance matrix defining Wishart prior.
 
-        The creation process follows user-specified criteria.
+    User specifies desired type of expected covariance matrix.
 
     Args
-    --------
+    ----
     D : positive integer, size of each observation
     Data : [optional] dataset to use to make Sigma in data-driven way
     ECovMat : string name of the procedure to use to create Sigma
-        'eye' : make Sigma a multiple of the identity matrix
-        'covdata' : set Sigma to a multiple of the data covariance matrix
-        'fromtruelabels' : set Sigma to the empirical mean of the
-            covariances for each true cluster in the dataset
+
+        * 'eye' : set Sigma to sF * identity matrix
+            May be multiplied by scalar sF
+        * 'covdata' : set Sigma to sF * data covariance matrix
+            May be multiplied by scalar sF
+        * 'fromtruelabels' : set Sigma using labeled data
+            Across all true clusters, we compute the empirical mean
+            of the covariances of data belonging to each cluster.
 
     Returns
-    --------
+    -------
     Sigma : 2D array, size D x D
         Symmetric and positive definite.
     '''

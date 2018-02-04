@@ -29,6 +29,7 @@ def make_extensions():
     ext_list = [
         make_cython_extension_SparseRespUtilX(),
         make_cython_extension_EntropyUtilX(),
+        make_cython_extension_TextFileReaderX(),
         ]
     if get_path_to_eigen():
         ext_list.append(make_cpp_extension_libfwdbwd())
@@ -95,6 +96,15 @@ def make_cython_extension_SparseRespUtilX():
         sources=["bnpy/util/SparseRespUtilX.pyx"],
         libraries=["m"],
         extra_compile_args = ["-O3", "-ffast-math"],
+        )
+    return add_directives_to_cython_ext(ext)
+
+def make_cython_extension_TextFileReaderX():
+    ext = Extension(
+        "bnpy.util.TextFileReaderX",
+        sources=["bnpy/util/TextFileReaderX.pyx"],
+        libraries=["m"],
+        extra_compile_args = [],
         )
     return add_directives_to_cython_ext(ext)
 

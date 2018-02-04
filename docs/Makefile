@@ -55,19 +55,18 @@ clean:
 	rm -rf $(SRCDIR)/api/*
 	
 apidoc:
-	sphinx-apidoc -f -o source/api/ $(BNPYROOT)/bnpy/
+	sphinx-apidoc -f -o $(SRCDIR)/api/ ../bnpy/
 
 localhost:
 	cd $(BUILDDIR)/html/ && python -m SimpleHTTPServer
 	@echo "Local server running. Point browser to localhost:8000"
 
-
-html:
+html: apidoc
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
-html-noplot:
+html-noplot: apidoc
 	$(SPHINXBUILD) -D plot_gallery=False -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

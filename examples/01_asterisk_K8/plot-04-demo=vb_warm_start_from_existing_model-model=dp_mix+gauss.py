@@ -251,6 +251,3 @@ extra_data_proposals_model, extra_data_proposals_info_dict = bnpy.run(
 # -------------------------------------------------
 
 show_clusters_over_time(extra_data_proposals_info_dict['task_output_path'])
-
-
-pylab.show()

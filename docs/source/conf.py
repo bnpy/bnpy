@@ -232,10 +232,6 @@ html_static_path = ['_static']
 # using the given strftime format.
 html_last_updated_fmt = '%Y %B %d'
 
-# If true, SmartyPants will be used to convert quotes and dashes to
-# typographically correct entities.
-html_use_smartypants = True
-
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 html_sidebars = {'**': [
@@ -405,7 +401,7 @@ napoleon_use_rtype = False
 # -- Examples gallery settings ----------------------------------
 sphinx_gallery_conf = {    
 
-    #plot_gallery = True,
+    'plot_gallery' : 'True', # dont worry, this string will cast to bool
 
     # path to examples scripts
     'examples_dirs' : '../../examples/',
@@ -414,5 +410,5 @@ sphinx_gallery_conf = {
     'gallery_dirs' : 'examples/',
 
     # path where module info goes
-    'mod_example_dir': 'api/',
+    'backreferences_dir': 'modules/generated/',
     }

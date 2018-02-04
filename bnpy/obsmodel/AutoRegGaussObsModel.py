@@ -279,14 +279,16 @@ class AutoRegGaussObsModel(AbstractObsModel):
 
         This avoids numerical problems due to incremental add/subtract ops
         which can cause computations like
+
             x = 10.
             x += 1e-15
             x -= 10
             x -= 1e-15
+
         to be slightly different than zero instead of exactly zero.
 
         Post Condition
-        -------
+        --------------
         Field N is guaranteed to be positive.
         '''
         np.maximum(SS.N, 0, out=SS.N)
@@ -322,7 +324,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         ''' Compute log soft evidence matrix for Dataset under EstParams.
 
         Returns
-        ---------
+        -------
         L : 2D array, size N x K
             L[n,k] = log p( data n | EstParams for comp k )
         '''
@@ -338,12 +340,12 @@ class AutoRegGaussObsModel(AbstractObsModel):
         ''' Calc Mahalanobis distance from comp k to every row of X.
 
         Args
-        -----
+        ----
         X : 2D array, size N x D
         k : integer ID of comp
 
         Returns
-        ------
+        -------
         dist : 1D array, size N
         '''
         deltaX = X - np.dot(Xprev, self.EstParams.A[k].T)
@@ -356,7 +358,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         ''' Calculate lower cholesky decomposition of Sigma[k]
 
         Returns
-        --------
+        -------
         L : 2D array, size D x D, lower triangular
             Sigma = np.dot(L, L.T)
         '''
@@ -366,7 +368,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         ''' Calculate log determinant of EstParam.Sigma for comp k
 
         Returns
-        ---------
+        -------
         logdet : scalar real
         '''
         return 2 * np.sum(np.log(np.diag(self.GetCached('cholSigma', k))))

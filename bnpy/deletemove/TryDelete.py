@@ -5,7 +5,7 @@ import time
 import bnpy.deletemove.DLogger as DLogger
 from bnpy.ioutil.DataReader import loadDataFromSavedTask, loadLPKwargsFromDisk
 from bnpy.ioutil.DataReader import loadKwargsFromDisk
-from bnpy.ioutil.ModelReader import loadModelForLap
+from bnpy.ioutil.ModelReader import load_model_at_lap
 
 def parse_list_of_absorbing_comps(kabsorbList, ktarget, K):
     if kabsorbList == 'all':
@@ -365,7 +365,7 @@ def tryDeleteProposalForSavedTask(
     if lap is not None:
         lapFrac = lap
 
-    hmodel, lapFrac = loadModelForLap(taskoutpath, lapFrac)
+    hmodel, lapFrac = load_model_at_lap(taskoutpath, lapFrac)
     Data = loadDataFromSavedTask(taskoutpath, batchID=batchID)
     kwargs['LPkwargs'] = loadLPKwargsFromDisk(taskoutpath)
 

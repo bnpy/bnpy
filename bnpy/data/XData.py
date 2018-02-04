@@ -14,6 +14,8 @@ from collections import namedtuple
 import pandas as pd
 
 from DataObj import DataObj
+
+from bnpy import DATASET_PATH
 from bnpy.util import as1D, as2D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -97,9 +99,8 @@ class XData(DataObj):
 
         Examples
         --------
-        >>> dataset_path = os.environ["BNPYDATADIR"]
         >>> dataset = XData.read_mat(
-        ...     os.path.join(dataset_path, 'AsteriskK8', 'x_dataset.mat'))
+        ...     os.path.join(DATASET_PATH, 'AsteriskK8', 'x_dataset.mat'))
         >>> dataset.dim
         2
         '''
@@ -128,9 +129,8 @@ class XData(DataObj):
             
         Examples
         --------
-        >>> dataset_path = os.environ["BNPYDATADIR"]
         >>> dataset = XData.read_npz(
-        ...     os.path.join(dataset_path, 'AsteriskK8', 'x_dataset.npz'))
+        ...     os.path.join(DATASET_PATH, 'AsteriskK8', 'x_dataset.npz'))
         >>> dataset.dim
         2
         '''
@@ -154,9 +154,8 @@ class XData(DataObj):
             
         Examples
         --------
-        >>> dataset_path = os.environ["BNPYDATADIR"]
         >>> dataset = XData.read_csv(
-        ...     os.path.join(dataset_path, 'AsteriskK8', 'x_dataset.csv'))
+        ...     os.path.join(DATASET_PATH, 'AsteriskK8', 'x_dataset.csv'))
         >>> dataset.dim
         2
         >>> dataset.column_names

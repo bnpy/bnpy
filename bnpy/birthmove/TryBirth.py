@@ -4,7 +4,7 @@ import os
 
 from bnpy.ioutil.DataReader import loadDataFromSavedTask, loadLPKwargsFromDisk
 from bnpy.ioutil.DataReader import loadKwargsFromDisk
-from bnpy.ioutil.ModelReader import loadModelForLap
+from bnpy.ioutil.ModelReader import load_model_at_lap
 from bnpy.util import StateSeqUtil
 from bnpy.birthmove.BCreateOneProposal import \
     makeSummaryForBirthProposal_HTMLWrapper
@@ -49,7 +49,7 @@ def tryBirthForTask(
     if lap is not None:
         lapFrac = lap
 
-    curModel, lapFrac = loadModelForLap(taskoutpath, lapFrac)
+    curModel, lapFrac = load_model_at_lap(taskoutpath, lapFrac)
     Data = loadDataFromSavedTask(taskoutpath, batchID=batchID)
 
     LPkwargs = loadLPKwargsFromDisk(taskoutpath)

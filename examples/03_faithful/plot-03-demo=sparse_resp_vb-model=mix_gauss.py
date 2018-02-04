@@ -169,7 +169,6 @@ pylab.xlabel(dataset.column_names[0])
 pylab.ylabel(dataset.column_names[1])
 pylab.tight_layout()
 pylab.title('Trained model with targeted examples')
-pylab.show()
 
 
 ###############################################################################

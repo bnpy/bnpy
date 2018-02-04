@@ -3,6 +3,7 @@
 # This examples/ folder is auto-generated
 # when building the documentation
 docs/source/examples/
+docs/source/modules/generated/
 
 # EXCLUDE DIRECTORIES
 # -------------------

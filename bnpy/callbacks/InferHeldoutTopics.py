@@ -13,7 +13,7 @@ from scipy.special import digamma
 from scipy.misc import logsumexp
 from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
 from bnpy.ioutil.ModelReader import \
-    getPrefixForLapQuery, loadTopicModel, loadModelForLap
+    getPrefixForLapQuery, loadTopicModel, load_model_at_lap
 from bnpy.ioutil.DataReader import \
     loadDataFromSavedTask, loadLPKwargsFromDisk, loadDataKwargsFromDisk
 from bnpy.ioutil.DataReader import str2numorstr
@@ -62,7 +62,7 @@ def evalTopicModelOnTestDataFromTaskpath(
             returnTPA=1, normalizeTopics=1, normalizeProbs=1)
         K = probs.size
     else:
-        hmodel, foundLap = loadModelForLap(taskpath, queryLap)
+        hmodel, foundLap = load_model_at_lap(taskpath, queryLap)
         if hasattr(Data, 'word_count'):
             # Convert to topics 2D array (K x V)
             topics = hmodel.obsModel.getTopics()
