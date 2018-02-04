@@ -308,11 +308,6 @@ class LearnAlg(object):
         Returns
         -------
         fpath : str
-
-        Examples
-        -------
-        >>> mkfile("K.txt")
-        "/path/to/output/K.txt"
         """
         return os.path.join(self.task_output_path, fname)
 
