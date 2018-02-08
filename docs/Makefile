@@ -59,14 +59,15 @@ apidoc:
 
 localhost:
 	cd $(BUILDDIR)/html/ && python -m SimpleHTTPServer
-	@echo "Local server running. Point browser to localhost:8000"
+	@echo "Local server running. Pointing browser to localhost:8000"
+	open -a firefox http://localhost:8000
 
-html: apidoc
+html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
-html-noplot: apidoc
+html-noplot:
 	$(SPHINXBUILD) -D plot_gallery=False -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

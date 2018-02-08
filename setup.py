@@ -1,6 +1,6 @@
 import os
 from setuptools import setup, Extension
-from Cython.Distutils import build_ext
+from distutils.command.build_ext import build_ext
 from distutils.sysconfig import customize_compiler
 
 def get_path_to_eigen():
@@ -227,5 +227,5 @@ setup(
         ],
     zip_safe=False,
     ext_modules=make_extensions(),
-    cmdclass=dict(build_ext=CustomizedBuildExt),
+    cmdclass={"build_ext":CustomizedBuildExt},
 )
