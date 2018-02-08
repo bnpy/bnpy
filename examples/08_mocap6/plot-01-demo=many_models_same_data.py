@@ -6,6 +6,8 @@ Comparing models for sequential data
 How to train mixtures and HMMs with various observation models on the same dataset.
 
 """
+# sphinx_gallery_thumbnail_number = 1
+
 import bnpy
 import numpy as np
 import os
@@ -59,10 +61,13 @@ show_single_sequence(1)
 # Setup: hyperparameters
 # ----------------------------------------------------------
 
-alpha = 0.5
-gamma = 5.0
-sF = 1.0
-K = 20
+K = 20            # Number of clusters/states
+
+gamma = 5.0       # top-level Dirichlet concentration parameter
+transAlpha = 0.5  # trans-level Dirichlet concentration parameter 
+
+sF = 1.0          # Set observation model prior so E[covariance] = identity
+ECovMat = 'eye'
 
 ###############################################################################
 #
@@ -74,7 +79,7 @@ mixdiag_trained_model, mixdiag_info_dict = bnpy.run(
     dataset, 'DPMixtureModel', 'DiagGauss', 'memoVB',
     output_path='/tmp/mocap6/showcase-K=20-model=DP+DiagGauss-ECovMat=1*eye/',
     nLap=50, nTask=1, nBatch=1, convergeThr=0.0001,
-    alpha=alpha, gamma=gamma, sF=sF, ECovMat='eye',
+    gamma=gamma, sF=sF, ECovMat=ECovMat,
     K=K, initname='randexamples',
     )
 
@@ -92,7 +97,7 @@ hmmdiag_trained_model, hmmdiag_info_dict = bnpy.run(
     dataset, 'HDPHMM', 'DiagGauss', 'memoVB',
     output_path='/tmp/mocap6/showcase-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye/',
     nLap=50, nTask=1, nBatch=1, convergeThr=0.0001,
-    alpha=alpha, gamma=gamma, sF=sF, ECovMat='eye',
+    transAlpha=transAlpha, gamma=gamma, sF=sF, ECovMat=ECovMat,
     K=K, initname='randexamples',
     )
 
@@ -110,7 +115,7 @@ hmmfull_trained_model, hmmfull_info_dict = bnpy.run(
     dataset, 'HDPHMM', 'Gauss', 'memoVB',
     output_path='/tmp/mocap6/showcase-K=20-model=HDPHMM+Gauss-ECovMat=1*eye/',
     nLap=50, nTask=1, nBatch=1, convergeThr=0.0001,
-    alpha=alpha, gamma=gamma, sF=sF, ECovMat='eye',
+    transAlpha=transAlpha, gamma=gamma, sF=sF, ECovMat=ECovMat,
     K=K, initname='randexamples',
     )
 
@@ -128,7 +133,7 @@ hmmar_trained_model, hmmar_info_dict = bnpy.run(
     dataset, 'HDPHMM', 'AutoRegGauss', 'memoVB',
     output_path='/tmp/mocap6/showcase-K=20-model=HDPHMM+AutoRegGauss-ECovMat=1*eye/',
     nLap=50, nTask=1, nBatch=1, convergeThr=0.0001,
-    alpha=alpha, gamma=gamma, sF=sF, ECovMat='eye',
+    transAlpha=transAlpha, gamma=gamma, sF=sF, ECovMat=ECovMat,
     K=K, initname='randexamples',
     )
 

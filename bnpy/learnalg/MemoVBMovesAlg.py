@@ -1191,6 +1191,8 @@ class MemoVBMovesAlg(LearnAlg):
                 MLogger.pprint("%4d, %4d : skipped." % (
                     uidA, uidB), 'debug')
                 continue
+            # Skip uids that have already been edited
+            # by another move (birth/delete) in most recent lap
             uid_already_edited = False
             for log_tuple in MoveLog[::-1]:
                 lap, name, move_args, orig_uids, prop_uids = log_tuple
@@ -1205,7 +1207,6 @@ class MemoVBMovesAlg(LearnAlg):
                     break
             if uid_already_edited:
                 continue
-
 
             nTrial += 1
             # Update records for when each uid was last attempted
@@ -1230,9 +1231,9 @@ class MemoVBMovesAlg(LearnAlg):
                 nAccept += 1
                 Ndiff += minPairCount
                 MLogger.pprint(
-                    "%4d, %4d : accepted." % (uidA, uidB) +
-                    " gain %.3e  " % (proploss - loss) +
-                    " size %s  " % (propSizeStr),
+                    "%4d, %4d : ACCEPTED." % (uidA, uidB) +
+                    " changed_loss % .3e  " % (proploss - loss) +
+                    " merged_size %s  " % (propSizeStr),
                     'debug')
 
                 acceptedUIDs.add(uidA)
@@ -1256,8 +1257,8 @@ class MemoVBMovesAlg(LearnAlg):
             else:
                 MLogger.pprint(
                     "%4d, %4d : rejected." % (uidA, uidB) +
-                    " gain %.3f  " % (proploss - loss) +
-                    " size %s  " % (propSizeStr),
+                    " changed_loss % .3e  " % (proploss - loss) +
+                    " merged_size %s  " % (propSizeStr),
                     'debug')
                 MoveRecordsByUID[pairTuple]['m_nFailRecent'] += 1
 
@@ -1400,13 +1401,13 @@ class MemoVBMovesAlg(LearnAlg):
             propLdict = propModel.calc_evidence(SS=propSS, todict=1)
             proploss = -1 * propLdict['Ltotal']
             msg = 'targetUID %d' % (targetUID)
-            msg += '\n   gain_loss % .3e' % (proploss-loss)
+            msg += '\n change_loss % .3e' % (proploss-loss)
             msg += "\n    cur_loss % .3e" % (loss)
             msg += "\n   prop_loss % .3e" % (proploss)
             for key in sorted(curLdict.keys()):
                 if key.count('_') or key.count('total'):
                     continue
-                msg += "\n   gain_%8s % .3e" % (
+                msg += "\n change_%8s % .3e" % (
                     key, propLdict[key] - curLdict[key])
 
             DLogger.pprint(msg)
