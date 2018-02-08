@@ -4,7 +4,7 @@ HModel.py
 Class for representing hierarchical Bayesian models in bnpy.
 
 Attributes
--------
+----------
 allocModel : bnpy.allocmodel.AllocModel subclass
              model for generating latent cluster assignments
 
@@ -12,7 +12,7 @@ obsModel : bnpy.obsmodel.ObsCompModel subclass
            model for generating observed data given cluster assignments
 
 Key functions
--------
+-------------
 * calc_local_params
 * get_global_suff_stats
 * update_global_params

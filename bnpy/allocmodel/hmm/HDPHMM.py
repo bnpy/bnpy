@@ -62,11 +62,12 @@ class HDPHMM(AllocModel):
         self.inferType = inferType
         self.K = 0
 
-    def set_prior(self, gamma=10, alpha=0.5,
+    def set_prior(self, gamma=10,
+                  transAlpha=0.5,
                   startAlpha=5.0, hmmKappa=0.0,
                   nGlobalIters=1, nGlobalItersBigChange=10, **kwargs):
         self.gamma = gamma
-        self.alpha = alpha
+        self.transAlpha = transAlpha
         self.startAlpha = startAlpha
         self.kappa = hmmKappa
         self.nGlobalIters = nGlobalIters
@@ -291,7 +292,7 @@ class HDPHMM(AllocModel):
                     startAlphaLogPi=self.startAlpha * startELogPi,
                     nDoc=self.K + 1,
                     gamma=self.gamma,
-                    alpha=self.alpha,
+                    alpha=self.transAlpha,
                     kappa=self.kappa,
                     initrho=initRho,
                     initomega=initOmega)
@@ -386,7 +387,7 @@ class HDPHMM(AllocModel):
 
         # Calculate E_q[alpha * Beta_l] for l = 1, ..., K+1
         Ebeta = StickBreakUtil.rho2beta(self.rho)
-        alphaEBeta = self.alpha * Ebeta
+        alphaEBeta = self.transAlpha * Ebeta
 
         # transTheta_kl = M_kl + E_q[alpha * Beta_l] + kappa * 1_{k==l}
         transTheta = np.zeros((K, K + 1))
@@ -493,7 +494,7 @@ class HDPHMM(AllocModel):
         '''
         assert hasattr(self, 'rho')
         return calcELBO(Data=Data, SS=SS, LP=LP,
-                        startAlpha=self.startAlpha, alpha=self.alpha,
+                        startAlpha=self.startAlpha, alpha=self.transAlpha,
                         kappa=self.kappa, gamma=self.gamma,
                         rho=self.rho, omega=self.omega,
                         transTheta=self.transTheta, startTheta=self.startTheta,
@@ -507,7 +508,7 @@ class HDPHMM(AllocModel):
         L : float
         '''
         return calcELBO_LinearTerms(
-            startAlpha=self.startAlpha, alpha=self.alpha,
+            startAlpha=self.startAlpha, alpha=self.transAlpha,
             kappa=self.kappa, gamma=self.gamma,
             rho=self.rho, omega=self.omega,
             transTheta=self.transTheta, startTheta=self.startTheta,
@@ -552,7 +553,7 @@ class HDPHMM(AllocModel):
         m_startTheta[:m_K] += m_SS.StartStateCount
 
         # Create candidate transTheta
-        m_transTheta = self.alpha * np.tile(m_beta, (m_K, 1))
+        m_transTheta = self.transAlpha * np.tile(m_beta, (m_K, 1))
         if self.kappa > 0:
             m_transTheta[:, :m_K] += self.kappa * np.eye(m_K)
         m_transTheta[:, :m_K] += m_SS.TransStateCount
@@ -561,13 +562,13 @@ class HDPHMM(AllocModel):
         Lcur = calcELBO_LinearTerms(
             SS=SS, rho=self.rho, omega=self.omega,
             startTheta=self.startTheta, transTheta=self.transTheta,
-            alpha=self.alpha, startAlpha=self.startAlpha,
+            alpha=self.transAlpha, startAlpha=self.startAlpha,
             gamma=self.gamma, kappa=self.kappa)
 
         Lprop = calcELBO_LinearTerms(
             SS=m_SS, rho=m_rho, omega=m_omega,
             startTheta=m_startTheta, transTheta=m_transTheta,
-            alpha=self.alpha, startAlpha=self.startAlpha,
+            alpha=self.transAlpha, startAlpha=self.startAlpha,
             gamma=self.gamma, kappa=self.kappa)
 
         # Note: This gap relies on fact that all nonlinear terms are entropies,
@@ -604,7 +605,7 @@ class HDPHMM(AllocModel):
         self.rho = myDict['rho']
 
     def get_prior_dict(self):
-        return dict(gamma=self.gamma, alpha=self.alpha, K=self.K,
+        return dict(gamma=self.gamma, alpha=self.transAlpha, K=self.K,
                     hmmKappa=self.kappa, startAlpha=self.startAlpha)
 
     def getSerializableParamsForLocalStep(self):
