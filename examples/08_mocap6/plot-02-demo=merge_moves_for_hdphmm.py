@@ -4,6 +4,14 @@ Merge moves with HDP-HMM
 ========================
 
 How to try merge moves efficiently for time-series datasets.
+
+This example reviews three possible ways to plan and execute merge
+proposals.
+
+* try merging all pairs of clusters
+* pick fewer merge pairs (at most 5 per cluster) in a size-biased way
+* pick fewer merge pairs (at most 5 per cluster) in objective-driven way
+
 """
 # sphinx_gallery_thumbnail_number = 2
 
@@ -41,7 +49,7 @@ init_kwargs = dict(
     )
 
 alg_kwargs = dict(
-    nLap=40,
+    nLap=29,
     nTask=1, nBatch=1, convergeThr=0.0001,
     )
 
@@ -70,6 +78,8 @@ gauss_kwargs = dict(
 #
 # All-Pairs : Try all possible pairs of merges every 10 laps
 # ----------------------------------------------------------
+#
+# This is expensive, but a good exhaustive test.
 
 allpairs_merge_kwargs = dict(
     m_startLap = 10,
@@ -103,6 +113,8 @@ allpairs_trained_model, allpairs_info_dict = bnpy.run(
 #
 # Large-Pairs : Try 5-largest-size pairs of merges every 10 laps
 # -------------------------------------------------------------
+#
+# This is much cheaper than all pairs. Let's see how well it does.
 
 largepairs_merge_kwargs = dict(
     m_startLap = 10,
@@ -136,6 +148,9 @@ largepairs_trained_model, largepairs_info_dict = bnpy.run(
 #
 # Good-ELBO-Pairs : Rank pairs of merges by improvement to observation model
 # --------------------------------------------------------------------------
+#
+# This is much cheaper than all pairs and perhaps more principled.
+# Let's see how well it does.
 
 goodelbopairs_merge_kwargs = dict(
     m_startLap = 10,
@@ -185,8 +200,7 @@ for info_dict, color_str, label_str in [
 pylab.legend(loc='upper right')
 pylab.xlabel('elapsed time (sec)')
 pylab.ylabel('loss')
-pylab.draw()
-pylab.tight_layout()
+
 
 ###############################################################################
 # 
@@ -207,5 +221,5 @@ for info_dict, color_str, label_str in [
 pylab.legend(loc='upper right')
 pylab.xlabel('elapsed time (sec)')
 pylab.ylabel('num. clusters (K)')
-pylab.draw()
-pylab.tight_layout()
+
+pylab.show()
