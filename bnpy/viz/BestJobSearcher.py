@@ -73,7 +73,6 @@ def findBestJobViaGridSearch(
 
     jobWildDescrList = list()
     jobScores = np.zeros(len(jobpathList))
-    from IPython import embed; embed()
     for jj, jobpath in enumerate(jobpathList):
         taskScores, taskids = TaskRanker.rankTasksForSingleJobOnDisk(
             jobpath, taskids=taskids,

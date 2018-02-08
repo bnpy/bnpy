@@ -383,7 +383,6 @@ def letter2covmat(Lstr, N=100, sig=0.01):
 if __name__ == "__main__":
 	from matplotlib import pylab; pylab.ion()
 	Data = get_data()
-	from IPython import embed; embed()
 	'''
 	ncols=3
 	figH = pylab.subplots(nrows=1, ncols=ncols)
