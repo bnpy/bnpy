@@ -41,7 +41,7 @@ dataset = bnpy.data.GroupXData.read_npz(
 ###############################################################################
 #
 # Setup: Initialization hyperparameters
-# ------------------------------
+# -------------------------------------
 
 init_kwargs = dict(
     K=20,
@@ -112,7 +112,7 @@ allpairs_trained_model, allpairs_info_dict = bnpy.run(
 ###############################################################################
 #
 # Large-Pairs : Try 5-largest-size pairs of merges every 10 laps
-# -------------------------------------------------------------
+# --------------------------------------------------------------
 #
 # This is much cheaper than all pairs. Let's see how well it does.
 
