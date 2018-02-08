@@ -9,6 +9,9 @@ In this example, we show how merge moves alone may not be enough
 to reliably escape local optima. Instead, we show that more flexible
 delete moves can escape from situations where merges alone fail.
 """
+# SPECIFY WHICH PLOT CREATED BY THIS SCRIPT IS THE THUMBNAIL IMAGE
+# sphinx_gallery_thumbnail_number = 2
+
 import bnpy
 import numpy as np
 import os

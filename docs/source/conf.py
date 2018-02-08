@@ -399,8 +399,9 @@ napoleon_use_rtype = False
 
 
 # -- Examples gallery settings ----------------------------------
-sphinx_gallery_conf = {    
+from sphinx_gallery.sorting import FileNameSortKey
 
+sphinx_gallery_conf = {    
     'plot_gallery' : 'True', # dont worry, this string will cast to bool
 
     # path to examples scripts
@@ -411,4 +412,8 @@ sphinx_gallery_conf = {
 
     # path where module info goes
     'backreferences_dir': 'modules/generated/',
+
+    # ordering examples within a subsection
+    'within_subsection_order': FileNameSortKey,
+
     }

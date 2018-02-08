@@ -26,13 +26,15 @@ using K=10 randomly chosen examples ('randexamples' procedure),
 and then perform coordinate descent updates
 (alternating local step and global step) until convergence.
 """
+# SPECIFY WHICH PLOT CREATED BY THIS SCRIPT IS THE THUMBNAIL IMAGE
+# sphinx_gallery_thumbnail_number = 3
+
 import bnpy
 import numpy as np
 import os
 
 from matplotlib import pylab
 import seaborn as sns
-# sphinx_gallery_thumbnail_number = 3
 
 FIG_SIZE = (3, 3)
 pylab.rcParams['figure.figsize'] = FIG_SIZE

@@ -24,13 +24,15 @@ as the "initname" keyword argument when you call bnpy.run:
 
     bnpy.run(..., initname='/path/to/previous_training_output/', ...)
 """
+# SPECIFY WHICH PLOT CREATED BY THIS SCRIPT IS THE THUMBNAIL IMAGE
+# sphinx_gallery_thumbnail_number = 4
+
 import bnpy
 import numpy as np
 import os
 
 from matplotlib import pylab
 import seaborn as sns
-# sphinx_gallery_thumbnail_number = 4
 
 FIG_SIZE = (3, 3)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
