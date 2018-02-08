@@ -18,7 +18,10 @@ import ElapsedTimeLogger
 
 from sklearn.externals import joblib
 from bnpy.ioutil import ModelWriter
-from bnpy.util import isEvenlyDivisibleFloat
+from bnpy.util import (
+    isEvenlyDivisibleFloat,
+    getMemUsageOfCurProcess_MiB,
+    )
 
 Log = logging.getLogger('bnpy')
 Log.setLevel(logging.DEBUG)
@@ -343,7 +346,6 @@ class LearnAlg(object):
                         isFinal=0, rho=None):
         """ Print state of provided model and progress variables to log.
         """
-        from bnpy import getCurMemCost_MiB
         if hasattr(self, 'ConvergeInfo') and 'maxDiff' in self.ConvergeInfo:
             countStr = 'Ndiff%9.3f' % (self.ConvergeInfo['maxDiff'])
         else:
@@ -366,7 +368,7 @@ class LearnAlg(object):
         logmsg = logmsg % (lapStr,
                            maxLapStr,
                            self.get_elapsed_time(),
-                           getCurMemCost_MiB(),
+                           getMemUsageOfCurProcess_MiB(),
                            hmodel.allocModel.K,
                            loss,
                            countStr,

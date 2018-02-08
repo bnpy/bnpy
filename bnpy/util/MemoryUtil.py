@@ -6,7 +6,7 @@ import psutil
 def getMemUsageOfCurProcess_MiB(field='rss'):
     # return the memory usage in MB
     process = psutil.Process(os.getpid())
-    mem = getattr(process.memory_info_ex(), field)
+    mem = getattr(process.memory_info(), field)
     mem_MiB = mem / float(2 ** 20)
     return mem_MiB
 
