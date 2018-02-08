@@ -1,7 +1,13 @@
 import os
 from setuptools import setup, Extension
-from distutils.command.build_ext import build_ext
 from distutils.sysconfig import customize_compiler
+
+try:
+    from Cython.Distutils import build_ext
+    HAS_CYTHON = True
+except ImportError:
+    from distutils.command.build_ext import build_ext
+    HAS_CYTHON = False
 
 def get_path_to_eigen():
     try:
@@ -210,19 +216,20 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: BSD License"],
+    setup_requires=["Cython>=0.25"],
     install_requires=[
-        "matplotlib>=1.5",
+        "Cython>=0.25",
+        "scipy>=0.18",
         "numpy>=1.11",
         "pandas>=0.18",
-        "scipy>=0.18",
-        "Cython>=0.25",
         "ipython>=5.1",
+        "scikit_learn>=0.18",
+        "matplotlib>=1.5",
         "joblib>=0.10",
         "memory_profiler>=0.41",
         "munkres>=1.0",
         "numexpr>=2.6",
         "psutil>=5.0",
-        "scikit_learn>=0.18",
         "sphinx_gallery>=0.1",
         ],
     zip_safe=False,
