@@ -1,12 +1,14 @@
 """
-====================================
-Comparing models for sequential data
-====================================
+================================================================
+Visualizing learned state sequences and transition probabilities
+================================================================
 
-How to train mixtures and HMMs with various observation models on the same dataset.
+Train a sticky HDP-HMM model on small motion capture data, then visualize the MAP state sequences under the estimated model parameters by running Viterbi.
+
+Also has some info on how to inspect the learned HMM parameters of a sticky HDP-HMM model trained on small motion capture data.
 
 """
-# sphinx_gallery_thumbnail_number = 1
+# sphinx_gallery_thumbnail_number = 3
 
 import bnpy
 import numpy as np
