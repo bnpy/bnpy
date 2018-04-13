@@ -519,10 +519,12 @@ def runViterbiAlg(logSoftEv, logPi0, logPi):
     logSoftEv : 2D array, T x K
         log soft evidence matrix
         each row t := log p( x[t] | z[t]=k )
-    pi0 : 1D array, length K
-        initial state probability vector, sums to one
-    pi : 2D array, shape K x K
-        j-th row is is transition probability vector for state j
+    logPi0 : 1D array, K
+        initial state log probability vector
+        sums to one after exponentiating
+    logPi : 2D array, K x K
+        j-th row is is log transition probability vector for state j
+        each row sums to one after exponentiating
 
     Returns
     ------
@@ -558,7 +560,7 @@ def runViterbiAlg(logSoftEv, logPi0, logPi):
             + ScoreMat_t[(bestIDvec, ids0toK)]
 
     # Follow backward pointers to construct most likely state sequence
-    z = np.zeros(T)
+    z = np.zeros(T, dtype=np.int32)
     z[-1] = np.argmax(ScoreTable[-1])
     for t in reversed(xrange(T - 1)):
         z[t] = PtrTable[t + 1, z[t + 1]]
