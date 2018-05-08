@@ -113,8 +113,10 @@ class AutoRegGaussObsModel(AbstractObsModel):
             if MMat == 'zero':
                 M = np.zeros((D, E))
             elif MMat == 'eye':
-                assert D == E
+                assert D <= E
                 M = sM * np.eye(D)
+                M = np.hstack([M, np.zeros((D, E-D))])
+                assert M.shape == (D,E)
             else:
                 raise ValueError('Unrecognized MMat: %s' % (MMat))
         else:

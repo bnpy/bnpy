@@ -1254,13 +1254,17 @@ def createECovMatFromUserInput(D=0, Data=None, ECovMat='eye', sF=1.0):
         if not hasattr(Data, 'Xprev'):
             raise ValueError(
                 'covfirstdiff only applies to auto-regressive datasets')
-        Xdiff = Data.X - Data.Xprev
+        E = Data.Xprev.shape[1]
+        assert E >= D        
+        Xdiff = Data.X - Data.Xprev[:, :D]
         Sigma = sF * np.cov(Xdiff.T, bias=1)
     elif ECovMat == 'diagcovfirstdiff':
         if not hasattr(Data, 'Xprev'):
             raise ValueError(
                 'covfirstdiff only applies to auto-regressive datasets')
-        Xdiff = Data.X - Data.Xprev
+        E = Data.Xprev.shape[1]
+        assert E >= D
+        Xdiff = Data.X - Data.Xprev[:, :D]
         Sigma = sF * np.diag(np.diag(np.cov(Xdiff.T, bias=1)))
 
     elif ECovMat == 'fromtruelabels':
