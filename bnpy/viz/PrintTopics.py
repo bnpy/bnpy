@@ -81,6 +81,7 @@ def htmlTopWordsFromTopics(
         ncols=5, maxKToDisplay=100,
         proba_fmt_str='%.4f',
         wordSizeLimit=30,
+        show_longer_words_via_tooltip=0,
         label_per_topic=None,
         **kwargs):
     K, W = topics_KV.shape
@@ -121,6 +122,12 @@ def htmlTopWordsFromTopics(
                 dataline = htmlPattern % (
                     topics_KV[k, topID],
                     vocabList[topID][:wordSizeLimit])
+                if show_longer_words_via_tooltip:
+                    if len(vocabList[topID]) > wordSizeLimit:
+                        dataline = dataline.replace(
+                            '<pre class="word">',
+                            '<pre class="word" title="%s">' % vocabList[topID],                            
+                            )
                 htmllines.append(dataline + "<br />")
             htmllines.append('    </td>')
         else:
