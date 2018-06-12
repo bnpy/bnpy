@@ -22,14 +22,14 @@ class AutoRegGaussObsModel(AbstractObsModel):
         degrees of freedom
     B : 2D array, size D x D
         scale matrix that sets mean of parameter Sigma
-    M : 2D array, size D x D
+    M : 2D array, size D x E
         sets mean of parameter A
-    V : 2D array, size D x D
+    V : 2D array, size E x E
         scale matrix that sets covariance of parameter A
 
     Attributes for k-th component of EstParams (EM point estimates)
     ---------
-    A[k] : 2D array, size D x D
+    A[k] : 2D array, size D x E
         coefficient matrix for auto-regression.
     Sigma[k] : 2D array, size D x D
         covariance matrix.
@@ -38,8 +38,8 @@ class AutoRegGaussObsModel(AbstractObsModel):
     ---------
     nu[k] : float
     B[k] : 2D array, size D x D
-    M[k] : 2D array, size D x D
-    V[k] : 2D array, size D x D
+    M[k] : 2D array, size D x E
+    V[k] : 2D array, size E x E
     '''
 
     def __init__(self, inferType='EM', D=None, E=None,
@@ -140,18 +140,18 @@ class AutoRegGaussObsModel(AbstractObsModel):
         self.Prior.setField('M', M, dims=('D', 'E'))
 
     def get_mean_for_comp(self, k=None):
-        if hasattr(self, 'EstParams'):
-            return np.diag(self.EstParams.A[k])
-        elif k is None or k == 'prior':
+        if k is None or k == 'prior':
             return np.diag(self.Prior.M)
+        elif hasattr(self, 'EstParams'):
+            return np.diag(self.EstParams.A[k])
         else:
             return np.diag(self.Post.M[k])
 
     def get_covar_mat_for_comp(self, k=None):
-        if hasattr(self, 'EstParams'):
-            return self.EstParams.Sigma[k]
-        elif k is None or k == 'prior':
+        if k is None or k == 'prior':
             return self._E_CovMat()
+        elif hasattr(self, 'EstParams'):
+            return self.EstParams.Sigma[k]
         else:
             return self._E_CovMat(k)
 
@@ -195,18 +195,19 @@ class AutoRegGaussObsModel(AbstractObsModel):
         else:
             A = as3D(A)
             Sigma = as3D(Sigma)
-            self.EstParams = ParamBag(K=A.shape[0], D=A.shape[1])
-            self.EstParams.setField('A', A, dims=('K', 'D', 'D'))
+            self.EstParams = ParamBag(
+                K=A.shape[0], D=A.shape[1], E=A.shape[2])
+            self.EstParams.setField('A', A, dims=('K', 'D', 'E'))
             self.EstParams.setField('Sigma', Sigma, dims=('K', 'D', 'D'))
 
     def setEstParamsFromPost(self, Post):
         ''' Convert from Post to EstParams.
         '''
         D = Post.D
-        self.EstParams = ParamBag(K=Post.K, D=D)
+        self.EstParams = ParamBag(K=Post.K, D=D, E=Post.E)
         A = Post.M.copy()
         Sigma = Post.B / (Post.nu - D - 1)[:, np.newaxis, np.newaxis]
-        self.EstParams.setField('A', A, dims=('K', 'D', 'D'))
+        self.EstParams.setField('A', A, dims=('K', 'D', 'E'))
         self.EstParams.setField('Sigma', Sigma, dims=('K', 'D', 'D'))
         self.K = self.EstParams.K
 
@@ -249,6 +250,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         '''
         K = EstParams.K
         D = EstParams.D
+        E = EstParams.E
         if Data is not None:
             N = Data.nObsTotal
         N = np.asarray(N, dtype=np.float)
@@ -260,11 +262,11 @@ class AutoRegGaussObsModel(AbstractObsModel):
         M = EstParams.A.copy()
         V = as3D(self.Prior.V)
 
-        self.Post = ParamBag(K=K, D=D)
+        self.Post = ParamBag(K=K, D=D, E=E)
         self.Post.setField('nu', nu, dims=('K'))
         self.Post.setField('B', B, dims=('K', 'D', 'D'))
-        self.Post.setField('M', M, dims=('K', 'D', 'D'))
-        self.Post.setField('V', V, dims=('K', 'D', 'D'))
+        self.Post.setField('M', M, dims=('K', 'D', 'E'))
+        self.Post.setField('V', V, dims=('K', 'E', 'E'))
         self.K = self.Post.K
 
     def calcSummaryStats(self, Data, SS, LP, **kwargs):
@@ -386,22 +388,27 @@ class AutoRegGaussObsModel(AbstractObsModel):
         '''
         self.ClearCache()
         if not hasattr(self, 'EstParams') or self.EstParams.K != SS.K:
-            self.EstParams = ParamBag(K=SS.K, D=SS.D)
+            self.EstParams = ParamBag(K=SS.K, D=SS.D, E=SS.E)
         minCovMat = self.min_covar * np.eye(SS.D)
-        A = np.zeros((SS.K, self.D, self.D))
+        if SS.E == SS.D:
+            minCovMat_EE = minCovMat
+        else:
+            minCovMat_EE = self.min_covar * np.eye(SS.E)
+        A = np.zeros((SS.K, self.D, self.E))
         Sigma = np.zeros((SS.K, self.D, self.D))
         for k in xrange(SS.K):
             # Add small pos multiple of identity to make invertible
             # TODO: This is source of potential stability issues.
-            A[k] = np.linalg.solve(SS.ppT[k] + minCovMat,
+            A[k] = np.linalg.solve(SS.ppT[k] + minCovMat_EE,
                                    SS.pxT[k]).T
+            
             Sigma[k] = SS.xxT[k] \
                 - 2 * np.dot(SS.pxT[k].T, A[k].T) \
                 + np.dot(A[k], np.dot(SS.ppT[k], A[k].T))
             Sigma[k] /= SS.N[k]
             # Sigma[k] = 0.5 * (Sigma[k] + Sigma[k].T) # symmetry!
             Sigma[k] += minCovMat
-        self.EstParams.setField('A', A, dims=('K', 'D', 'D'))
+        self.EstParams.setField('A', A, dims=('K', 'D', 'E'))
         self.EstParams.setField('Sigma', Sigma, dims=('K', 'D', 'D'))
         self.K = SS.K
 
@@ -416,7 +423,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         '''
         self.ClearCache()
         if not hasattr(self, 'EstParams') or self.EstParams.K != SS.K:
-            self.EstParams = ParamBag(K=SS.K, D=SS.D)
+            self.EstParams = ParamBag(K=SS.K, D=SS.D, E=SS.E)
         raise NotImplemented('TODO')
 
     def updatePost(self, SS):
@@ -813,7 +820,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         raise NotImplementedError('TODO')
 
     def _E_CovMat(self, k=None):
-        if k is None:
+        if k is None or k == 'prior':
             B = self.Prior.B
             nu = self.Prior.nu
         else:
