@@ -462,7 +462,7 @@ class XData(DataObj):
         >>> dataset.to_csv('/tmp/x_dataset.csv')
         '''
         X_df = self.to_dataframe()
-        X_df.to_csv(csv_file_path)
+        X_df.to_csv(csv_file_path, index=False)
 
     def to_dataframe(self):
         ''' Convert this dataset object to a dictionary.
