@@ -10,11 +10,22 @@ The basic idea is that we use the same Gaussian mixture model for each
 group of data, but the *appearance probabilities* are allowed to be 
 learned in a customized way for each group.
 
-Here, we'll analyze motion capture data. Although this data is inherently
-sequential, we'll ignore that for now and focus on it's *grouped* nature.
+Here, we'll analyze motion capture data from 6 different sequences
+of an individual actor peforming different exercises.
 
-That is, even if we were to scramble up the timestamps related to the
-joint position data we see in each sequence, it is probably better to 
+Although this data is inherently sequential in nature and it is smart to 
+use a model that accounts for time, we'll ignore that for now and
+focus on the dataset's *grouped* nature.
+
+
+That is, we can compare the following two models:
+
+* Baseline: Gaussian mixture model that pools all observations from all sequences
+* Smarter alternative: Latent Dirichlet Allocation with a Gaussian likelihood
+
+That is, we treat each sequence as a separate collection of data examples,
+modeled by *group* specific appearance probabilities but *shared* cluster
+means and covariances.
 
 """
 # sphinx_gallery_thumbnail_number = 1
