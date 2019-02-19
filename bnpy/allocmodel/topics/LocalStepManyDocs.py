@@ -161,7 +161,7 @@ def calcLocalParams(
     #if initDocTopicCountLP.startswith('fast'):
     #    AggInfo['time_extra'] = telapsed
     LP['DocTopicCount'] = DocTopicCount
-    if hasattr(Data, 'word_count'):
+    if hasattr(Data, 'word_count') and LP['obsModelName'] == 'MultObsModel':
         if cslice is None or (cslice[0] == 0 and cslice[1] is None):
             assert np.allclose(np.sum(DocTopicCount), np.sum(Data.word_count))
     LP = updateLPGivenDocTopicCount(LP, DocTopicCount,

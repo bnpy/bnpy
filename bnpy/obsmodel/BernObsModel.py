@@ -1013,7 +1013,7 @@ def calcSummaryStats(Dslice, SS, LP, DataAtomType='doc', **kwargs):
             rstart_d = d * Dslice.vocab_size
             rstop_d = (d+1) * Dslice.vocab_size
             if 'resp' in LP:
-                Count_d = Resp[rstart_d:rstop_d, :].T
+                Count_d = LP['resp'][rstart_d:rstop_d, :].T
             else:
                 raise NotImplementedError("TODO")
             CountOFF += Count_d
