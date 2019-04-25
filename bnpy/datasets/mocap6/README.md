@@ -6,6 +6,17 @@ This data is an exact copy of the 6-sequence dataset released by Mike Hughes at 
 
 <https://github.com/michaelchughes/mocap6dataset>
 
+Academic Paper:
+
+```
+"Joint Modeling of Multiple Time Series via the Beta Process with Application to Motion Capture Segmentation".
+Fox, Hughes, Sudderth, and Jordan
+AOAS 2014
+```
+
+* Publisher website: https://projecteuclid.org/euclid.aoas/1414091214
+* PDF: https://www.michaelchughes.com/papers/FoxHughesSudderthJordan_AOAS_2014.pdf
+
 Citation:
 
 ```
