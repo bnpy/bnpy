@@ -9,7 +9,15 @@ This data is an exact copy of the 6-sequence dataset released by Mike Hughes at 
 Citation:
 
 ```
-Fox, E., Hughes, M., Sudderth, E., and Jordan, M. "Joint modeling of multiple time series via the beta process with application to motion capture segmentation." Annals of Applied Statistics (2014). Volume 8, Number 3, Pages 1281-1313.
+@article{foxJointModelingMultiple2014a,
+  author = {Fox, Emily B. and Hughes, Michael C. and Sudderth, Erik B. and Jordan, Michael I.},
+  title = {Joint Modeling of Multiple Time Series via the Beta Process with Application to Motion Capture Segmentation},
+  journal = {Annals of Applied Statistics},
+  year = {2014},
+  volume = {8},
+  number = {3},
+  pages = {1281-1313}
+}
 ```
 
 ## Dataset Summary
