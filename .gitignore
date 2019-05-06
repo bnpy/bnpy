@@ -21,6 +21,7 @@ api/
 bnpy.egg-info/
 .ipynb_checkpoints/
 .idea/
+experiments/
 
 # EXCLUDE FILE PATTERNS
 # ---------------------

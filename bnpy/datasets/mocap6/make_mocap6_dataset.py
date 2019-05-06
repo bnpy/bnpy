@@ -3,7 +3,8 @@ import scipy.io
 import bnpy
 
 if __name__ == '__main__':
-    Q = scipy.io.loadmat('/Users/mhughes/git/mocap6dataset/mocap6.mat')
+    Q = scipy.io.loadmat('MoCap6.mat')
+    print Q.keys()
     Q = Q['DataBySeq']
 
     X_list = list()

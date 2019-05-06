@@ -139,7 +139,7 @@ def calcLocalParams(Data, LP,
     return LP
 
 
-def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
+def FwdBwdAlg(PiInit, PiMat, logSoftEv):
     '''Execute forward-backward algorithm for one sequence.
 
     Args
@@ -194,6 +194,7 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
     # resp.sum(axis=1) == 1
 
     # Rank state posterior probabilities
+    nnzPerRow = 2
     top_colids = np.argpartition(resp, K - nnzPerRow, axis=1)
     top_colids = top_colids[:, -nnzPerRow:]
     np.save('top_colds.npy', top_colids)
@@ -412,8 +413,6 @@ def FwdAlg_py(PiInit, PiMat, SoftEv):
             fmsg[t] = np.dot(PiTMat, fmsg[t - 1]) * SoftEv[t]
         margPrObs[t] = np.sum(fmsg[t])
         fmsg[t] /= margPrObs[t]
-
-    print 'here'
     return fmsg, margPrObs
 
 

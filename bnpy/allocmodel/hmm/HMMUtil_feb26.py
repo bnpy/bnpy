@@ -139,7 +139,7 @@ def calcLocalParams(Data, LP,
     return LP
 
 
-def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
+def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRowLP=0):
     '''Execute forward-backward algorithm for one sequence.
 
     Args
@@ -181,63 +181,52 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
 
     SoftEv, lognormC = expLogLik(logSoftEv)
 
-    fmsg, margPrObs = FwdAlg(PiInit, PiMat, SoftEv)
+    fmsg, margPrObs, top_colids = FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP)
     if not np.all(np.isfinite(margPrObs)):
         raise ValueError('NaN values found. Numerical badness!')
 
-    bmsg = BwdAlg(PiInit, PiMat, SoftEv, margPrObs)
-    resp = fmsg * bmsg # (T, K)
-    np.save('before_resp.npy', resp)
+    if nnzPerRowLP and (nnzPerRowLP == 1):
+        # Viterbi (L = 1) assignments
+        zhat = runViterbiAlg(logSoftEv, np.log(PiInit), np.log(PiMat))
 
-    ### Sparsify attempt ###
-    # resp.shape == (T, K)
-    # resp.sum(axis=1) == 1
+        resp = np.zeros((T, K))
+        resp[np.arange(T), zhat] = 1
 
-    # Rank state posterior probabilities
-    top_colids = np.argpartition(resp, K - nnzPerRow, axis=1)
-    top_colids = top_colids[:, -nnzPerRow:]
-    np.save('top_colds.npy', top_colids)
-    assert top_colids.shape == (T, nnzPerRow)
+        respPair = np.zeros((T, K, K))
+        respPair[np.arange(1, T), zhat[:-1], zhat[1:]] = 1
+    else:
+        # DENSE Assignments
+        #print 'DENSE Assignments'
+        bmsg = BwdAlg(PiInit, PiMat, SoftEv, margPrObs, top_colids)
+        resp = fmsg * bmsg # (T, L)
+        respPair = calcRespPair_forloop(PiMat, SoftEv, margPrObs,
+                                        fmsg, bmsg, K, T, top_colids)
 
-    ## Renormalize resp probabilities
-    tmp = fmsg * bmsg
-    resp = np.zeros_like(tmp)
-    for t in xrange(T):
-        resp[t, top_colids[t]] = tmp[t, top_colids[t]]
-    resp /= resp.sum(axis=1).reshape((-1, 1))
-    np.save('after_resp.npy', resp)
+        # Reconstruct arrays
+        if nnzPerRowLP and (0 < nnzPerRowLP < K):
+            sparse_resp = resp
+            sparse_respPair = respPair
+
+            resp = np.zeros((T, K))
+            active_rows = np.repeat(np.arange(T), nnzPerRowLP)
+            active_cols = top_colids.flatten()
+            resp[active_rows, active_cols] = sparse_resp.flatten()
+
+            respPair = np.zeros((T, K, K))
+            for t in xrange(1, T):
+                active_idx = np.ix_(top_colids[t-1], top_colids[t])
+                respPair[t][active_idx] = sparse_respPair[t]
+
+            assert np.all(np.sum(resp != 0, axis=1) <= nnzPerRowLP)
+            assert np.all(np.sum(respPair != 0, axis=1) <= nnzPerRowLP)
+            assert np.all(np.sum(respPair != 0, axis=2) <= nnzPerRowLP)
+    
     assert np.allclose(1.0, resp.sum(axis=1))
-
-    ## Renormalize
-    tmp = calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T) # (T, K, K)
-    np.save('before_respPair.npy', tmp)
-    respPair = np.zeros_like(tmp)
-    for t in xrange(1, T):
-        from_ids = top_colids[t - 1]
-        to_ids = top_colids[t]
-        respPair[t][np.ix_(from_ids, to_ids)] = tmp[t][np.ix_(from_ids, to_ids)]
-    np.save('before_norm_respPair.npy', respPair)
-    respPair[1:] /= respPair[1:].sum(axis=(1, 2)).reshape((-1, 1, 1))
-    np.save('after_norm_respPair.npy', respPair)
     assert np.all(respPair[0] == 0)
     assert np.allclose(1.0, respPair.sum(axis=(1, 2))[1:])
-
-    # Make sure respPair marginalizes into resp
-    print np.argmax(np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:]))
-    print np.max(np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:]))
-    #print 2, np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
-    #print 3, np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
-    #print respPair[1:].sum(axis=1)[:-1]
-    #print respPair[1:].sum(axis=2)[1:]
-    #a = np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:])
-    #b = np.abs(respPair[1:].sum(axis=1) - resp[1:])
-    #print a == b
-
     assert np.allclose(respPair[1:].sum(axis=1)[:-1], respPair[1:].sum(axis=2)[1:])
     assert np.allclose(respPair[1:].sum(axis=1), resp[1:]), np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
     assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
-
-    ### end ###
 
     logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
     return resp, respPair, logMargPrSeq
@@ -280,7 +269,8 @@ def FwdBwdAlg_LimitMemory(PiInit, PiMat, logSoftEv, mPairIDs):
     return resp, logMargPrSeq, TransStateCount, Htable, mHtable
 
 
-def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T):
+def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T,
+                         top_colids=None):
     ''' Calculate pair-wise responsibilities for all adjacent timesteps
 
     Uses a simple, for-loop implementation.
@@ -296,10 +286,21 @@ def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T):
         Formally = p( z[t-1,j] = 1, z[t,k] = 1 | x[1], x[2], ... x[T])
         respPair[0,:,:] is undefined, but kept so indexing consistent.
     '''
-    respPair = np.zeros((T, K, K))
-    for t in xrange(1, T):
-        respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv[t])
-        respPair[t] *= PiMat / margPrObs[t]
+    if top_colids is not None:
+        L = top_colids.shape[1]
+        respPair = np.zeros((T, L, L))
+        for t in xrange(1, T):
+            # Sparse assignments
+            PiMat_t = PiMat[np.ix_(top_colids[t-1], top_colids[t])] # (L, L)
+            SoftEv_t = SoftEv[t, top_colids[t]] # (L, )
+    
+            respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv_t)
+            respPair[t] *= PiMat_t / margPrObs[t]
+    else:
+        respPair = np.zeros((T, K, K))
+        for t in xrange(1, T):                
+            respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv[t])
+            respPair[t] *= PiMat / margPrObs[t]
     return respPair
 
 
@@ -332,7 +333,7 @@ def calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T,
     return respPair
 
 
-def FwdAlg(PiInit, PiMat, SoftEv):
+def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0):
     ''' Forward algorithm for a single HMM sequence. Wrapper for py/cpp.
 
     Related
@@ -349,10 +350,10 @@ def FwdAlg(PiInit, PiMat, SoftEv):
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
         return FwdAlg_cpp(PiInit, PiMat, SoftEv)
     else:
-        return FwdAlg_py(PiInit, PiMat, SoftEv)
+        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP)
 
 
-def BwdAlg(PiInit, PiMat, SoftEv, margPrObs):
+def BwdAlg(PiInit, PiMat, SoftEv, margPrObs, top_colids):
     ''' Backward algorithm for a single HMM sequence.
 
     Wrapper for BwdAlg_py/BwdAlg_cpp.
@@ -371,10 +372,10 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs):
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
         return BwdAlg_cpp(PiInit, PiMat, SoftEv, margPrObs)
     else:
-        return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs)
+        return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
 
 
-def FwdAlg_py(PiInit, PiMat, SoftEv):
+def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0):
     ''' Forward algorithm for a single HMM sequence. In pure python.
 
     Execute forward message-passing on an observed sequence
@@ -401,23 +402,46 @@ def FwdAlg_py(PiInit, PiMat, SoftEv):
     '''
     T = SoftEv.shape[0]
     K = PiInit.size
-    PiTMat = PiMat.T
+    PiTMat = PiMat.T # each col sums to one
 
-    fmsg = np.empty((T, K))
-    margPrObs = np.zeros(T)
-    for t in xrange(0, T):
-        if t == 0:
-            fmsg[t] = PiInit * SoftEv[0]
-        else:
-            fmsg[t] = np.dot(PiTMat, fmsg[t - 1]) * SoftEv[t]
-        margPrObs[t] = np.sum(fmsg[t])
-        fmsg[t] /= margPrObs[t]
+    if nnzPerRowLP and (nnzPerRowLP > 0 and nnzPerRowLP < K):
+        # SPARSE Assignments
+        fmsg = np.empty((T, nnzPerRowLP))
+        top_colids = np.empty((T, nnzPerRowLP), dtype=int)
+        margPrObs = np.zeros(T)
 
-    print 'here'
-    return fmsg, margPrObs
+        for t in xrange(0, T):
+            if t == 0:
+                tmp_fmsg = PiInit * SoftEv[0]
+            else:
+                tmp_PiTMat = PiTMat[:, top_colids[t-1]]
+                tmp_fmsg = np.dot(tmp_PiTMat, fmsg[t - 1]) * SoftEv[t] # (K, )
+
+            # Pick top states
+            tmp_colids = np.argpartition(tmp_fmsg, K - nnzPerRowLP)
+        
+            # Renormalize
+            top_colids[t] = tmp_colids[-nnzPerRowLP:]
+            margPrObs[t] = np.sum(tmp_fmsg[top_colids[t]])
+            fmsg[t] = tmp_fmsg[top_colids[t]] / margPrObs[t]
+    else:
+        # DENSE Assignments
+        fmsg = np.empty((T, K))
+        top_colids = None
+        margPrObs = np.zeros(T)
+        for t in xrange(0, T):
+            if t == 0:
+                fmsg[t] = PiInit * SoftEv[0]
+            else:
+                fmsg[t] = np.dot(PiTMat, fmsg[t - 1]) * SoftEv[t]    
+            margPrObs[t] = np.sum(fmsg[t])
+            fmsg[t] /= margPrObs[t]
+
+    assert np.allclose(fmsg.sum(axis=1), 1)
+    return fmsg, margPrObs, top_colids
 
 
-def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs):
+def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids=None):
     '''Backward algorithm for a single HMM sequence. In pure python.
 
     Takes as input the HMM state transition params,
@@ -449,10 +473,24 @@ def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs):
     '''
     T = SoftEv.shape[0]
     K = PiInit.size
-    bmsg = np.ones((T, K))
-    for t in xrange(T - 2, -1, -1):
-        bmsg[t] = np.dot(PiMat, bmsg[t + 1] * SoftEv[t + 1])
-        bmsg[t] /= margPrObs[t + 1]
+
+    if top_colids is not None:
+        # SPARSE Assignments
+        L = top_colids.shape[1]
+        bmsg = np.ones((T, L))
+        for t in xrange(T - 2, -1, -1):
+            tmp_PiMat = PiMat[np.ix_(top_colids[t], top_colids[t+1])] # (L, L)
+            tmp_SoftEv = SoftEv[t+1, top_colids[t+1]] # (L, )
+            bmsg[t] = np.dot(tmp_PiMat, bmsg[t+1] * tmp_SoftEv)
+            bmsg[t] /= margPrObs[t + 1]
+    else:
+        # DENSE Assignments
+        bmsg = np.ones((T, K))
+        for t in xrange(T - 2, -1, -1):
+            bmsg[t] = np.dot(PiMat, bmsg[t + 1] * SoftEv[t + 1])
+            bmsg[t] /= margPrObs[t + 1]
+            print bmsg[t]
+
     return bmsg
 
 

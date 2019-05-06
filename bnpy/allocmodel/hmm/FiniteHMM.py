@@ -1,6 +1,7 @@
 import numpy as np
 
-import HMMUtil
+import HMMUtil_mar6 as HMMUtil
+#import HMMUtil_feb26 as HMMUtil
 from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
 from bnpy.util import digamma, gammaln, as2D
@@ -107,7 +108,7 @@ class FiniteHMM(AllocModel):
                             digammasumVec[:, np.newaxis])
         return EPiMat
 
-    def calc_local_params(self, Data, LP, **kwargs):
+    def calc_local_params(self, Data, LP, nnzPerRowLP=0, blockedLP=0, **kwargs):
         ''' Local update step
 
         Args
@@ -158,7 +159,8 @@ class FiniteHMM(AllocModel):
             logSoftEv_n[0] += ELogPi0  # adding in start state log probs
 
             seqResp, seqRespPair, seqLogMargPr = \
-                HMMUtil.FwdBwdAlg(initParam, transParam, logSoftEv_n)
+                HMMUtil.FwdBwdAlg(initParam, transParam, logSoftEv_n,
+                	              nnzPerRowLP, blocked=blockedLP)
 
             resp[start:stop] = seqResp
             respPair[start:stop] = seqRespPair
@@ -385,6 +387,7 @@ class FiniteHMM(AllocModel):
             if SS.hasELBOTerm('Elogqz'):
                 entropy = SS.getELBOTerm('Elogqz')
             else:
+            	# our case
                 entropy = self.elbo_entropy(Data, LP)
             # For stochastic (soVB), we need to scale up the entropy
             # Only used when --doMemoELBO is set to 0 (not recommended)

@@ -96,6 +96,7 @@ def run(dataName=None, allocModelName=None, obsModelName=None, algName=None,
             bestModel = hmodel
             best_loss = info_dict['loss']
             best_info_dict = info_dict
+            best_info_dict['taskid'] = taskid
     return bestModel, best_info_dict
 
 def _run_task_internal(jobname, taskid, nTask,

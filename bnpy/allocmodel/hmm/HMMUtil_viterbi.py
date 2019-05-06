@@ -139,7 +139,7 @@ def calcLocalParams(Data, LP,
     return LP
 
 
-def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
+def FwdBwdAlg(PiInit, PiMat, logSoftEv):
     '''Execute forward-backward algorithm for one sequence.
 
     Args
@@ -186,59 +186,8 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
         raise ValueError('NaN values found. Numerical badness!')
 
     bmsg = BwdAlg(PiInit, PiMat, SoftEv, margPrObs)
-    resp = fmsg * bmsg # (T, K)
-    np.save('before_resp.npy', resp)
-
-    ### Sparsify attempt ###
-    # resp.shape == (T, K)
-    # resp.sum(axis=1) == 1
-
-    # Rank state posterior probabilities
-    top_colids = np.argpartition(resp, K - nnzPerRow, axis=1)
-    top_colids = top_colids[:, -nnzPerRow:]
-    np.save('top_colds.npy', top_colids)
-    assert top_colids.shape == (T, nnzPerRow)
-
-    ## Renormalize resp probabilities
-    tmp = fmsg * bmsg
-    resp = np.zeros_like(tmp)
-    for t in xrange(T):
-        resp[t, top_colids[t]] = tmp[t, top_colids[t]]
-    resp /= resp.sum(axis=1).reshape((-1, 1))
-    np.save('after_resp.npy', resp)
-    assert np.allclose(1.0, resp.sum(axis=1))
-
-    ## Renormalize
-    tmp = calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T) # (T, K, K)
-    np.save('before_respPair.npy', tmp)
-    respPair = np.zeros_like(tmp)
-    for t in xrange(1, T):
-        from_ids = top_colids[t - 1]
-        to_ids = top_colids[t]
-        respPair[t][np.ix_(from_ids, to_ids)] = tmp[t][np.ix_(from_ids, to_ids)]
-    np.save('before_norm_respPair.npy', respPair)
-    respPair[1:] /= respPair[1:].sum(axis=(1, 2)).reshape((-1, 1, 1))
-    np.save('after_norm_respPair.npy', respPair)
-    assert np.all(respPair[0] == 0)
-    assert np.allclose(1.0, respPair.sum(axis=(1, 2))[1:])
-
-    # Make sure respPair marginalizes into resp
-    print np.argmax(np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:]))
-    print np.max(np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:]))
-    #print 2, np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
-    #print 3, np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
-    #print respPair[1:].sum(axis=1)[:-1]
-    #print respPair[1:].sum(axis=2)[1:]
-    #a = np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:])
-    #b = np.abs(respPair[1:].sum(axis=1) - resp[1:])
-    #print a == b
-
-    assert np.allclose(respPair[1:].sum(axis=1)[:-1], respPair[1:].sum(axis=2)[1:])
-    assert np.allclose(respPair[1:].sum(axis=1), resp[1:]), np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
-    assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
-
-    ### end ###
-
+    resp = fmsg * bmsg
+    respPair = calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T)
     logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
     return resp, respPair, logMargPrSeq
 
@@ -412,8 +361,6 @@ def FwdAlg_py(PiInit, PiMat, SoftEv):
             fmsg[t] = np.dot(PiTMat, fmsg[t - 1]) * SoftEv[t]
         margPrObs[t] = np.sum(fmsg[t])
         fmsg[t] /= margPrObs[t]
-
-    print 'here'
     return fmsg, margPrObs
 
 
