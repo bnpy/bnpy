@@ -17,11 +17,14 @@ SMALL_FIG_SIZE = (1,1)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
 
 ###############################################################################
-# Read toy "bars" dataset from file.
+# Read toy "bars" dataset from file as BINARY
 
 dataset_path = os.path.join(bnpy.DATASET_PATH, 'bars_one_per_doc')
 dataset = bnpy.data.BagOfWordsData.read_npz(
     os.path.join(dataset_path, 'dataset.npz'))
+
+dataset.word_count = np.asarray(
+    dataset.word_count > 0, dtype=dataset.word_count.dtype)
 
 ###############################################################################
 #
@@ -37,13 +40,13 @@ pylab.tight_layout()
 #
 # Let's do one single run of the VB algorithm.
 # 
-# Using 10 clusters and the 'randexamples' initializatio procedure.
+# Using 10 clusters and the 'randexamples' initialization procedure.
 
 trained_model, info_dict = bnpy.run(
     dataset, 'FiniteTopicModel', 'Bern', 'VB',
     output_path='/tmp/bars_one_per_doc/helloworld-lik=bernoulli-K=10/',
-    nLap=1000, convergeThr=0.0001,
-    K=10,
+    nLap=1000, convergeThr=0.0005,
+    K=10, initname='randexamples',
     alpha=0.5, lambda1=0.1, lambda0=0.1)
 
 ###############################################################################
@@ -75,7 +78,8 @@ def show_bars_over_time(
         nrows=nrows, ncols=ncols, sharex=True, sharey=True)
     for row_id, lap_val in enumerate(query_laps):
         cur_model, lap_val = bnpy.load_model_at_lap(task_output_path, lap_val)
-        cur_topics_KV = cur_model.obsModel.getTopics()
+        cur_topics_KV = cur_model.obsModel.Post.lam1 / (
+            trained_model.obsModel.Post.lam1 + trained_model.obsModel.Post.lam0)
         # Plot the current model
         cur_ax_list = ax_handles_RC[row_id].flatten().tolist()
         bnpy.viz.BarsViz.show_square_images(
