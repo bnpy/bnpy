@@ -242,7 +242,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                              K=K, output_path=sparse_path,
                                              convergeThr=tol, nLap=max_laps,
                                              printEvery=25, taskid=taskid,
-                                             nnzPerRowLP=L)
+                                             nnzPerRowLP=L, **kwargs)
         sparse_alg = 'One-pass sparse' if L > 1 else 'Viterbi'
         sparse_label = '%s L = %d %s %s' % (sparse_alg, L, obs_model, alg)
         experiment_out.append((sparse_model, sparse_dict, sparse_label))
@@ -254,7 +254,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                    K=K, output_path=blocked_path,
                                                    convergeThr=tol, nLap=max_laps,
                                                    printEvery=25, taskid=taskid,
-                                                   nnzPerRowLP=L, blocked=1)
+                                                   nnzPerRowLP=L, blocked=1, **kwargs)
             blocked_label = 'Two-pass sparse L = %d %s %s' % (L, obs_model, alg)
             experiment_out.append((blocked_model, blocked_dict, blocked_label))
 

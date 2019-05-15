@@ -50,12 +50,111 @@ extern "C" {
 // Simple names for array types
 typedef Array<double, Dynamic, Dynamic, RowMajor> Arr2D;
 typedef Array<double, 1, Dynamic, RowMajor> Arr1D;
+typedef Array<int, Dynamic, Dynamic, RowMajor> Arr2D_i;
 
 // Simple names for array types with externally allocated memory
 typedef Map<Arr2D> ExtArr2D;
 typedef Map<Arr1D> ExtArr1D;
+typedef Map<Arr2D_i> ExtArr2D_i;
 
+// Exactly the same as in util/lib/sparseResp/SparsifyRespCPPX.cpp - how to reuse?
+struct LessThanFor1DArray {
+    const double* xptr;
 
+    LessThanFor1DArray(const double * xptrIN) {
+        xptr = xptrIN;
+    }
+
+    bool operator()(int i, int j) {
+        return xptr[i] < xptr[j];
+    }
+
+};
+
+struct GreaterThanFor1DArray {
+    const double* xptr;
+
+    GreaterThanFor1DArray(const double * xptrIN) {
+        xptr = xptrIN;
+    }
+
+    bool operator()(int i, int j) {
+        return xptr[i] > xptr[j];
+    }
+};
+
+struct Argsortable1DArray {
+    double* xptr;
+    int* iptr;
+    int size;
+    
+    // Constructor
+    Argsortable1DArray(double* xptrIN, int sizeIN) {
+        xptr = xptrIN;
+        size = sizeIN;
+        iptr = new int[size];
+        resetIndices(size);
+    }
+
+    // Helper method: reset iptr array to 0, 1, ... K-1 
+    void resetIndices(int cursize) {
+        assert(cursize <= size);
+        for (int i = 0; i < cursize; i++) {
+            iptr[i] = i;
+        }
+    }
+
+    void pprint() {
+        for (int i = 0; i < size; i++) {
+            printf("%03d:% 05.2f ",
+                this->iptr[i],
+                this->xptr[this->iptr[i]]);
+        }
+        printf("\n");
+    }
+
+    void argsort() {
+        this->argsort_AscendingOrder();
+    }
+
+    void argsort_AscendingOrder() {
+        std::sort(
+            this->iptr,
+            this->iptr + this->size,
+            LessThanFor1DArray(this->xptr)
+            );
+    }
+
+    void argsort_DescendingOrder() {
+        std::sort(
+            this->iptr,
+            this->iptr + this->size,
+            GreaterThanFor1DArray(this->xptr)
+            );
+    }
+
+    void findSmallestL(int L) {
+        assert(L >= 0);
+        assert(L < this->size);
+        std::nth_element(
+            this->iptr,
+            this->iptr + L,
+            this->iptr + this->size,
+            LessThanFor1DArray(this->xptr)
+            );
+    }
+
+    void findLargestL(int L, int Kactive) {
+        assert(L >= 0);
+        assert(L <= Kactive);
+        std::nth_element(
+            this->iptr,
+            this->iptr + L,
+            this->iptr + Kactive,
+            GreaterThanFor1DArray(this->xptr)
+            );
+    }
+};
 
 // ======================================================== Forward Algorithm
 // ======================================================== 
@@ -79,6 +178,7 @@ void FwdAlg(
 
     // Base case update for first time-step
     fwdMsg.row(0) = initPi * SoftEv.row(0);
+    // find L largest 
     margPrObs(0) = fwdMsg.row(0).sum();
     fwdMsg.row(0) /= margPrObs(0);
     
@@ -93,7 +193,67 @@ void FwdAlg(
     }
 }
 
+void FwdAlg_onepass(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * fwdMsgOUT,
+    double * margPrObsOUT,
+    int * topColIDsOUT,
+    int K,
+    int T,
+    int L)
+{
+    // Prep input
+    ExtArr1D initPi (initPiIN, K);
+    ExtArr2D transPi (transPiIN, K, K);
+    ExtArr2D SoftEv (SoftEvIN, T, K);
 
+    // Prep output
+    //SparseMatrix<double, RowMajor> fwdMsg(T, L);
+    //fwdMsg.reserve(VectorXi::Constant(T, L));
+    ExtArr2D fwdMsg (fwdMsgOUT, T, L); // (T, L)
+    ExtArr1D margPrObs (margPrObsOUT, T);
+    ExtArr2D_i topColIDs (topColIDsOUT, T, L); // (T, L)
+
+    // Prep tmp vars
+    Arr1D fwdMsgTmp (K);
+
+    // Base case update for first time-step
+    fwdMsgTmp = initPi * SoftEv.row(0);
+
+    // Pick and save top states
+    Argsortable1DArray sorter = Argsortable1DArray(fwdMsgTmp.data(), K);
+    sorter.findLargestL(L, K);
+    for (int ell = 0; ell < L; ell++) {
+        int k = sorter.iptr[ell];
+        topColIDs(0, ell) = k;
+        fwdMsg(0, ell) = sorter.xptr[k]; // This insertion takes L time
+    }
+
+    margPrObs(0) = fwdMsg.row(0).sum();
+    fwdMsg.row(0) /= margPrObs(0);
+    
+    // Recursive update of timesteps 1, 2, ... T-1
+    // Note: fwdMsg.row(t) is a *row vector* 
+    //       so needs to be left-multiplied to square matrix transPi
+    for (int t = 1; t < T; t++) {
+        Arr2D transPi_t = transPi(topColIDs.row(t-1), all);
+        fwdMsgTmp = fwdMsg.row(t-1).matrix() * transPi_t.matrix();
+        fwdMsgTmp *= SoftEv.row(t);
+
+        sorter = Argsortable1DArray(fwdMsgTmp.data(), K);
+        sorter.findLargestL(L, K);
+        for (int ell = 0; ell < L; ell++) {
+            int k = sorter.iptr[ell];
+            topColIDs(t, ell) = k;
+            fwdMsg(t, ell) = sorter.xptr[k]; // This insertion takes L time
+        }
+
+        margPrObs(t) = fwdMsg.row(t).sum();
+        fwdMsg.row(t) /= margPrObs(t);
+    }
+}
 
 // ======================================================== Backward Algorithm
 // ======================================================== 

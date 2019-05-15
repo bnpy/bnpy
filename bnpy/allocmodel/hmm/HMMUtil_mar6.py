@@ -353,9 +353,9 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0):
     margPrObs : 1D array, size T
         margPrObs[t] = p( x[t] | x[1], x[2], ... x[t-1] )
     '''
-    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp" and nnzPerRowLP != 1:
         print 'I am cpp ready'
-        return FwdAlg_cpp(PiInit, PiMat, SoftEv)
+        return FwdAlg_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
         return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP)
 
@@ -446,6 +446,47 @@ def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0):
 
     assert np.allclose(fmsg.sum(axis=1), 1)
     return fmsg, margPrObs, top_colids
+
+#def FwdAlg_onepass_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0):
+#    T = SoftEv.shape[0]
+#    K = PiInit.size
+#    PiTMat = PiMat.T # each col sums to one
+#
+#    if nnzPerRowLP and (nnzPerRowLP > 0 and nnzPerRowLP < K):
+#        # SPARSE Assignments
+#        fmsg = np.empty((T, nnzPerRowLP))
+#        top_colids = np.empty((T, nnzPerRowLP), dtype=int)
+#        margPrObs = np.zeros(T)
+#
+#        for t in xrange(0, T):
+#            if t == 0:
+#                tmp_fmsg = PiInit * SoftEv[0]
+#            else:
+#                tmp_PiTMat = PiTMat[:, top_colids[t-1]]
+#                tmp_fmsg = np.dot(tmp_PiTMat, fmsg[t - 1]) * SoftEv[t] # (K, )
+#
+#            # Pick top states
+#            tmp_colids = np.argpartition(tmp_fmsg, K - nnzPerRowLP)
+#        
+#            # Renormalize
+#            top_colids[t] = tmp_colids[-nnzPerRowLP:]
+#            margPrObs[t] = np.sum(tmp_fmsg[top_colids[t]])
+#            fmsg[t] = tmp_fmsg[top_colids[t]] / margPrObs[t]
+#    else:
+#        # DENSE Assignments
+#        fmsg = np.empty((T, K))
+#        top_colids = None
+#        margPrObs = np.zeros(T)
+#        for t in xrange(0, T):
+#            if t == 0:
+#                fmsg[t] = PiInit * SoftEv[0]
+#            else:
+#                fmsg[t] = np.dot(PiTMat, fmsg[t - 1]) * SoftEv[t]    
+#            margPrObs[t] = np.sum(fmsg[t])
+#            fmsg[t] /= margPrObs[t]
+#
+#    assert np.allclose(fmsg.sum(axis=1), 1)
+#    return fmsg, margPrObs, top_colids
 
 def BlockedFwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg):
     ''' Forward algorithm for a single HMM sequence. In pure python.

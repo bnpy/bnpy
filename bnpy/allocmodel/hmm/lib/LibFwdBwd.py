@@ -7,9 +7,10 @@ from bnpy.util import as2D
 def cppReady():
     ''' Returns true if compiled cpp library available, false o.w.
     '''
+    #return False
     return hasEigenLibReady
 
-def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
+def FwdAlg_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     ''' Forward algorithm for a single HMM sequence. Implemented in C++/Eigen.
     '''
     if not hasEigenLibReady:
@@ -26,9 +27,10 @@ def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
     # Allocate outputs
     fwdMsg = np.zeros((T, K), order=order)
     margPrObs = np.zeros(T, order=order)
+    top_colids = np.zeros((T, nnzPerRowLP), dtype=np.int32, order=order)
 
     # Execute C++ code (fills in outputs in-place)
-    lib.FwdAlg(initPi, transPi, SoftEv, fwdMsg, margPrObs, K, T)
+    lib.FwdAlg(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
     return fwdMsg, margPrObs
 
 
