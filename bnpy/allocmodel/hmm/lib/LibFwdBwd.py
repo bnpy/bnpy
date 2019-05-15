@@ -106,6 +106,17 @@ hasEigenLibReady = True
 
 try:
     lib = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename))
+
+    lib.FwdAlg_onepass.restype = None
+    lib.FwdAlg_onepass.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int, ctypes.c_int, ctypes.c_int]
+
     lib.FwdAlg.restype = None
     lib.FwdAlg.argtypes = \
         [ndpointer(ctypes.c_double),

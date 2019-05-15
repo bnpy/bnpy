@@ -18,6 +18,17 @@ extern "C" {
     int K,
     int T);
 
+  void FwdAlg_onepass(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * fwdMsgOUT,
+    double * margPrObsOUT,
+    int * topColIDsOUT,
+    int K,
+    int T,
+    int L);
+
   void BwdAlg(
     double * initPiIN,
     double * transPiIN,
