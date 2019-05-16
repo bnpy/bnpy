@@ -253,7 +253,8 @@ void FwdAlg_onepass(
         fwdMsgTmp = fwdMsg.row(t-1).matrix() * transPi_t.matrix();
         fwdMsgTmp *= SoftEv.row(t);
 
-        sorter = Argsortable1DArray(fwdMsgTmp.data(), K);
+        //sorter = Argsortable1DArray(fwdMsgTmp.data(), K);
+        sorter.resetIndices(K);        
         sorter.findLargestL(L, K);
         for (int ell = 0; ell < L; ell++) {
             int k = sorter.iptr[ell];
