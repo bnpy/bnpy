@@ -10,7 +10,7 @@ def cppReady():
     #return False
     return hasEigenLibReady
 
-def FwdAlg_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
+def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
     ''' Forward algorithm for a single HMM sequence. Implemented in C++/Eigen.
     '''
     if not hasEigenLibReady:
@@ -27,11 +27,35 @@ def FwdAlg_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     # Allocate outputs
     fwdMsg = np.zeros((T, K), order=order)
     margPrObs = np.zeros(T, order=order)
+
+    # Execute C++ code (fills in outputs in-place)
+    lib.FwdAlg(initPi, transPi, SoftEv, fwdMsg, margPrObs, K, T)
+    return fwdMsg, margPrObs
+
+
+
+def FwdAlg_onepass_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
+    ''' Sparse forward algorithm for a single HMM sequence. Implemented in C++/Eigen.
+    '''
+    if not hasEigenLibReady:
+        raise ValueError("Cannot find library %s. Please recompile."
+                         % (libfilename))
+    if order != 'C':
+        raise NotImplementedError("LibFwdBwd only supports row-major order.")
+    T, K = SoftEv.shape
+    # Prep inputs
+    initPi = np.asarray(initPi, order=order)
+    transPi = np.asarray(transPi, order=order)
+    SoftEv = np.asarray(SoftEv, order=order)
+
+    # Allocate outputs
+    fwdMsg = np.zeros((T, nnzPerRowLP), order=order)
+    margPrObs = np.zeros(T, order=order)
     top_colids = np.zeros((T, nnzPerRowLP), dtype=np.int32, order=order)
 
     # Execute C++ code (fills in outputs in-place)
-    lib.FwdAlg(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
-    return fwdMsg, margPrObs
+    lib.FwdAlg_onepass(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
+    return fwdMsg, top_colids, margPrObs
 
 
 def BwdAlg_cpp(initPi, transPi, SoftEv, margPrObs, order='C'):

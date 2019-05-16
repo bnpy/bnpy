@@ -23,7 +23,7 @@ util_entropy:
 # -DNDEBUG : disable all eigen assertions and other runtime checks
 libfwdbwd: hasEigenpath
 	cd bnpy/allocmodel/hmm/lib/; \
-	g++ FwdBwdRowMajor.cpp -o libfwdbwd.so \
+	g++ FwdBwdRowMajor.cpp -o libfwdbwdcpp.so \
 		-I$(EIGENPATH) \
 		$(EIGENOPTFLAGS) \
 		--shared -fPIC -w $(PYARCH);
