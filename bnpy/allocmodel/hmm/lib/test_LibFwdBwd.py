@@ -5,8 +5,8 @@ import bnpy
 if __name__ == '__main__':
     K = 3
     D = 2
-    T = 10
-    L = 2
+    T = 5
+    L = K
 
     mu_KD = np.zeros((K,D))
     covar_KDD = np.zeros((K, D, D))
