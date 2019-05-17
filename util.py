@@ -247,6 +247,18 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
         sparse_label = '%s L = %d %s %s' % (sparse_alg, L, obs_model, alg)
         experiment_out.append((sparse_model, sparse_dict, sparse_label))
 
+
+        print 'Training O(L^2) model L =', L
+        OL2_path = '/'.join((out_path, 'OL2-L=%d' % L))
+        OL2_model, OL2_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                       K=K, output_path=OL2_path,
+                                       convergeThr=tol, nLap=max_laps,
+                                       printEvery=25, taskid=taskid,
+                                       nnzPerRowLP=L, useL2=1, **kwargs)
+        OL2_label = 'O(L^2) sparse L = %d %s %s' % (L, obs_model, alg)
+        experiment_out.append((OL2_model, OL2_dict, OL2_label))
+
+
         if L > 1:
             print 'Training "blocked" model L =', L
             blocked_path = '/'.join((out_path, 'blocked-L=%d' % L))

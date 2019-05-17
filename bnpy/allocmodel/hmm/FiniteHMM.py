@@ -108,7 +108,7 @@ class FiniteHMM(AllocModel):
                             digammasumVec[:, np.newaxis])
         return EPiMat
 
-    def calc_local_params(self, Data, LP, nnzPerRowLP=0, blockedLP=0, **kwargs):
+    def calc_local_params(self, Data, LP, nnzPerRowLP=0, blockedLP=0, useL2LP=0, **kwargs):
         ''' Local update step
 
         Args
@@ -160,7 +160,7 @@ class FiniteHMM(AllocModel):
 
             seqResp, seqRespPair, seqLogMargPr = \
                 HMMUtil.FwdBwdAlg(initParam, transParam, logSoftEv_n,
-                	              nnzPerRowLP, blocked=blockedLP)
+                	              nnzPerRowLP, blocked=blockedLP, useL2=useL2LP)
 
             resp[start:stop] = seqResp
             respPair[start:stop] = seqRespPair
