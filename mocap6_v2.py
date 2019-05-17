@@ -22,3 +22,4 @@ kwargs = {
 # experiment = util.run_experiment(dataset, alloc_model, obs_model, learn_alg, K, out_path, **kwargs)
 experiment = util.load_experiment(out_path)
 util.plot_loss(experiment, dataset_title, ymax=2.45)
+util.plot_hamming(experiment, dataset_title)
