@@ -12,7 +12,7 @@ Using GNU C++ compiler (aka g++) on UNIX machines:
 
 ```
 >> export EIGENPATH=/path/to/eigen3/
->> g++ FwdBwdRowMajor.cpp -o libfwdbwd.so --shared -fPIC -DNDEBUG -O3 -I$EIGENPATH 
+>> g++ FwdBwdRowMajor.cpp -o libfwdbwdcpp.so --shared -fPIC -DNDEBUG -O3 -I$EIGENPATH
 ```
 
 Explanation of flags:

@@ -33,8 +33,7 @@ def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
     return fwdMsg, margPrObs
 
 
-
-def FwdAlg_onepass_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
+def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     ''' Sparse forward algorithm for a single HMM sequence. Implemented in C++/Eigen.
     '''
     if not hasEigenLibReady:
@@ -131,8 +130,8 @@ hasEigenLibReady = True
 try:
     lib = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename))
 
-    lib.FwdAlg_onepass.restype = None
-    lib.FwdAlg_onepass.argtypes = \
+    lib.FwdAlg_sparse.restype = None
+    lib.FwdAlg_sparse.argtypes = \
         [ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),

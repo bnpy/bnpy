@@ -18,7 +18,7 @@ extern "C" {
     int K,
     int T);
 
-  void FwdAlg_onepass(
+  void FwdAlg_sparse(
     double * initPiIN,
     double * transPiIN,
     double * SoftEvIN,
@@ -204,7 +204,7 @@ void FwdAlg(
     }
 }
 
-void FwdAlg_onepass(
+void FwdAlg_sparse(
     double * initPiIN,
     double * transPiIN,
     double * SoftEvIN,

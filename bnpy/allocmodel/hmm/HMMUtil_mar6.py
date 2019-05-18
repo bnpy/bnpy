@@ -15,7 +15,7 @@ from bnpy.util.NumericUtil import sumRtimesS
 from bnpy.util.NumericUtil import inplaceLog
 from bnpy.util import as2D
 
-from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import cppReady, FwdAlg_cpp, FwdAlg_sparse_cpp, BwdAlg_cpp, SummaryAlg_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -139,7 +139,7 @@ def calcLocalParams(Data, LP,
     return LP
 
 
-def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRowLP=0, blocked=0, useL2=0):
+def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRowLP=0, blocked=0, useL2=1):
     '''Execute forward-backward algorithm for one sequence.
 
     Args
@@ -339,7 +339,7 @@ def calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T,
     return respPair
 
 
-def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=0):
+def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
     ''' Forward algorithm for a single HMM sequence. Wrapper for py/cpp.
 
     Related
@@ -355,9 +355,13 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=0):
     '''
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp" and nnzPerRowLP != 1:
         print 'I am cpp ready'
-        return FwdAlg_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2)
+        if nnzPerRowLP == 0:  # TODO: K
+            return FwdAlg_cpp(PiInit, PiMat, SoftEv)
+        else:
+            print 'sparse fwd alg'
+            return FwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
-        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2)
+        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2=useL2)
 
 
 def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
@@ -382,7 +386,7 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
 
 
-def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2LP=0):
+def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2LP=1):
     ''' Forward algorithm for a single HMM sequence. In pure python.
 
     Execute forward message-passing on an observed sequence
