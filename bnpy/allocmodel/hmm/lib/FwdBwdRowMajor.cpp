@@ -221,49 +221,39 @@ void FwdAlg_sparse(
     ExtArr2D SoftEv (SoftEvIN, T, K);
 
     // Prep output
-    //SparseMatrix<double, RowMajor> fwdMsg(T, L);
-    //fwdMsg.reserve(VectorXi::Constant(T, L));
     ExtArr2D fwdMsg (fwdMsgOUT, T, L); // (T, L)
     ExtArr1D margPrObs (margPrObsOUT, T);
     ExtArr2D_i topColIDs (topColIDsOUT, T, L); // (T, L)
 
-    // Prep tmp vars
-    Arr1D fwdMsgTmp (K);
+    // compute equilibrium distribution
+    Matrix<double, Dynamic, Dynamic, RowMajor> A = transPi.matrix().transpose()
+                                                   - MatrixXd::Identity(K, K);
+    A.row(T-1).fill(1.0);
+    Matrix<double, Dynamic, RowMajor> b = MatrixXd::Zero(K, 1);
+    b.row(T-1).fill(1.0);
+    Arr1D equilibrium = A.partialPivLu().solve(b).array();
 
-    // Base case update for first time-step
-    fwdMsgTmp = initPi * SoftEv.row(0);
-
-    // Pick and save top states
-    Argsortable1DArray sorter = Argsortable1DArray(fwdMsgTmp.data(), K);
-    sorter.findLargestL(L, K);
-    for (int ell = 0; ell < L; ell++) {
-        int k = sorter.iptr[ell];
-        topColIDs(0, ell) = k;
-        fwdMsg(0, ell) = sorter.xptr[k]; // This insertion takes L time
-    }
-
-    margPrObs(0) = fwdMsg.row(0).sum();
-    fwdMsg.row(0) /= margPrObs(0);
-    
-    // Recursive update of timesteps 1, 2, ... T-1
-    // Note: fwdMsg.row(t) is a *row vector* 
-    //       so needs to be left-multiplied to square matrix transPi
-    for (int t = 1; t < T; t++) {
-        Arr2D transPi_t = transPi(topColIDs.row(t-1), all);
-        fwdMsgTmp = fwdMsg.row(t-1).matrix() * transPi_t.matrix();
-        fwdMsgTmp *= SoftEv.row(t);
-
-        //sorter = Argsortable1DArray(fwdMsgTmp.data(), K);
-        sorter.resetIndices(K);        
+    // Forward pass with complexity O(T * L^2)
+    Arr1D iid_resp(K);
+    Argsortable1DArray sorter = Argsortable1DArray(iid_resp.data(), K);
+    for (int t = 0; t < T; t++) {
+        // Pick and save top states of time t
+        iid_resp = equilibrium * SoftEv.row(t);
+        sorter.resetIndices(K);
         sorter.findLargestL(L, K);
-        for (int ell = 0; ell < L; ell++) {
-            int k = sorter.iptr[ell];
-            topColIDs(t, ell) = k;
-            fwdMsg(t, ell) = sorter.xptr[k]; // This insertion takes L time
+        for (int l = 0; l < L; l++)
+            topColIDs(t, l) = sorter.iptr[l];
+        // Do forward pass only between top states of t-1 and t
+        Arr1D fwdMsg_t = SoftEv(t, topColIDs.row(t));
+        if (t == 0)
+            fwdMsg_t *= initPi(topColIDs.row(0));
+        else {
+            Arr2D transPi_t = transPi(topColIDs.row(t-1), topColIDs.row(t));
+            fwdMsg_t *= (fwdMsg.row(t-1).matrix() * transPi_t.matrix()).array();
         }
-
-        margPrObs(t) = fwdMsg.row(t).sum();
-        fwdMsg.row(t) /= margPrObs(t);
+        // Normalize and save fwdMsg_t
+        margPrObs(t) = fwdMsg_t.sum();
+        fwdMsg.row(t) = fwdMsg_t / margPrObs(t);
     }
 }
 

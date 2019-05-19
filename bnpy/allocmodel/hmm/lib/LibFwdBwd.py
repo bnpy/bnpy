@@ -53,7 +53,7 @@ def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     top_colids = np.zeros((T, nnzPerRowLP), dtype=np.int32, order=order)
 
     # Execute C++ code (fills in outputs in-place)
-    lib.FwdAlg_onepass(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
+    lib.FwdAlg_sparse(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
     return fwdMsg, top_colids, margPrObs
 
 
