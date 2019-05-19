@@ -15,7 +15,8 @@ from bnpy.util.NumericUtil import sumRtimesS
 from bnpy.util.NumericUtil import inplaceLog
 from bnpy.util import as2D
 
-from lib.LibFwdBwd import cppReady, FwdAlg_cpp, FwdAlg_sparse_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import FwdAlg_sparse_cpp, BwdAlg_sparse_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -354,11 +355,9 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
         margPrObs[t] = p( x[t] | x[1], x[2], ... x[t-1] )
     '''
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp" and nnzPerRowLP != 1:
-        print 'I am cpp ready'
         if nnzPerRowLP == 0:  # TODO: K
             return FwdAlg_cpp(PiInit, PiMat, SoftEv)
         else:
-            print 'sparse fwd alg'
             return FwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
         return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2=useL2)
@@ -381,12 +380,15 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
                         p( x[t+1], x[t+2], ... x[T] |  x[1] ... x[t])
     '''
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
-        return BwdAlg_cpp(PiInit, PiMat, SoftEv, margPrObs)
+        if top_colids is None:
+            return BwdAlg_cpp(PiInit, PiMat, SoftEv, margPrObs)
+        else:
+            return BwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, margPrObs, top_colids)
     else:
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
 
 
-def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2LP=1):
+def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
     ''' Forward algorithm for a single HMM sequence. In pure python.
 
     Execute forward message-passing on an observed sequence
@@ -421,7 +423,7 @@ def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2LP=1):
         top_colids = np.empty((T, nnzPerRowLP), dtype=int)
         margPrObs = np.zeros(T)
 
-        if useL2LP:
+        if useL2:
             A = PiTMat - np.eye(K)
             A[-1] = 1.0
             b = np.zeros(K)

@@ -30,7 +30,7 @@ def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
 
     # Execute C++ code (fills in outputs in-place)
     lib.FwdAlg(initPi, transPi, SoftEv, fwdMsg, margPrObs, K, T)
-    return fwdMsg, margPrObs
+    return fwdMsg, margPrObs, None
 
 
 def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
@@ -53,8 +53,8 @@ def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     top_colids = np.zeros((T, nnzPerRowLP), dtype=np.int32, order=order)
 
     # Execute C++ code (fills in outputs in-place)
-    lib.FwdAlg_onepass(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
-    return fwdMsg, top_colids, margPrObs
+    lib.FwdAlg_sparse(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
+    return fwdMsg, margPrObs, top_colids
 
 
 def BwdAlg_cpp(initPi, transPi, SoftEv, margPrObs, order='C'):
@@ -71,7 +71,10 @@ def BwdAlg_cpp(initPi, transPi, SoftEv, margPrObs, order='C'):
     initPi = np.asarray(initPi, order=order)
     transPi = np.asarray(transPi, order=order)
     SoftEv = np.asarray(SoftEv, order=order)
-    margPrObs = np.asarray(margPrObs, order=order)
+    if margPrObs is None:
+        margPrObs = -np.ones(T, order=order)
+    else:
+        margPrObs = np.asarray(margPrObs, order=order)
 
     # Allocate outputs
     bMsg = np.zeros((T, K), order=order)
@@ -80,6 +83,30 @@ def BwdAlg_cpp(initPi, transPi, SoftEv, margPrObs, order='C'):
     lib.BwdAlg(initPi, transPi, SoftEv, margPrObs, bMsg, K, T)
     return bMsg
 
+def BwdAlg_sparse_cpp(initPi, transPi, SoftEv, margPrObs, top_colids, order='C'):
+    ''' Backward algorithm for a single HMM sequence. Implemented in C++/Eigen.
+    '''
+    if not hasEigenLibReady:
+        raise ValueError("Cannot find library %s. Please recompile."
+                         % (libfilename))
+    if order != 'C':
+        raise NotImplementedError("LibFwdBwd only supports row-major order.")
+
+    # Prep inputs
+    T, K = SoftEv.shape
+    L = top_colids.shape[1]
+    initPi = np.asarray(initPi, order=order)
+    transPi = np.asarray(transPi, order=order)
+    SoftEv = np.asarray(SoftEv, order=order)
+    margPrObs = np.asarray(margPrObs, order=order)
+    top_colids = np.asarray(top_colids, dtype=np.int32, order=order)
+
+    # Allocate outputs
+    bMsg = np.zeros((T, L), order=order)
+
+    # Execute C++ code for backward pass (fills in bMsg in-place)
+    lib.BwdAlg_sparse(initPi, transPi, SoftEv, margPrObs, top_colids, bMsg, K, T, L)
+    return bMsg
 
 def SummaryAlg_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
                    mPairIDs=None,
@@ -148,6 +175,16 @@ try:
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ctypes.c_int, ctypes.c_int]
+
+    lib.BwdAlg_sparse.restype = None
+    lib.BwdAlg_sparse.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int, ctypes.c_int, ctypes.c_int]
 
     lib.BwdAlg.restype = None
     lib.BwdAlg.argtypes = \
