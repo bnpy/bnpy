@@ -140,7 +140,7 @@ def calcLocalParams(Data, LP,
     return LP
 
 
-def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRowLP=0, blocked=0, useL2=1):
+def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRowLP=0, blocked=0, equilibrium=None):
     '''Execute forward-backward algorithm for one sequence.
 
     Args
@@ -186,7 +186,7 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRowLP=0, blocked=0, useL2=1):
         bmsg = BwdAlg(PiInit, PiMat, SoftEv) # Need to introduce margPrObs later
         fmsg, margPrObs, top_colids = BlockedFwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg)
     else:
-        fmsg, margPrObs, top_colids = FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2)
+        fmsg, margPrObs, top_colids = FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP, equilibrium)
     if not np.all(np.isfinite(margPrObs)):
         raise ValueError('NaN values found. Numerical badness!')
 
@@ -340,7 +340,7 @@ def calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T,
     return respPair
 
 
-def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
+def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, equilibrium=None):
     ''' Forward algorithm for a single HMM sequence. Wrapper for py/cpp.
 
     Related
@@ -358,14 +358,15 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
         print 'I am cpp ready'
         if nnzPerRowLP == 0:  # TODO: K
             return FwdAlg_cpp(PiInit, PiMat, SoftEv)
-        elif useL2:
+        elif equilibrium is not None:  # O(T * L^2)
             print 'sparse fwd alg with complexity O(T * L^2)'
-            return FwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
+            return FwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP, equilibrium)
         else:
             print 'sparse one-pass fwd alg'
             return FwdAlg_onepass_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
-        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2LP=useL2)
+        return FwdAlg_py(PiInit, PiMat, SoftEv,
+                         nnzPerRowLP=nnzPerRowLP, equilibrium=equilibrium)
 
 
 def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
@@ -390,7 +391,7 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
 
 
-def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2LP=1):
+def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, equilibrium=None):
     ''' Forward algorithm for a single HMM sequence. In pure python.
 
     Execute forward message-passing on an observed sequence
@@ -425,16 +426,8 @@ def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2LP=1):
         top_colids = np.empty((T, nnzPerRowLP), dtype=int)
         margPrObs = np.zeros(T)
 
-        if useL2LP:
-            A = PiTMat - np.eye(K)
-            A[-1] = 1.0
-            b = np.zeros(K)
-            b[-1] = 1.0
-            equilibrium = np.linalg.solve(A, b)
-            if np.allclose(equilibrium, 0):
-                raise ValueError('Low-rank A?')
-            else:
-                assert np.allclose(np.sum(equilibrium), 1.0)
+        if equilibrium is not None:
+            assert np.allclose(np.sum(equilibrium), 1.0)
             for t in xrange(T):
                 iid_resp = equilibrium * SoftEv[t]
                 top_colids[t] = np.argpartition(iid_resp, K - nnzPerRowLP)[-nnzPerRowLP:]

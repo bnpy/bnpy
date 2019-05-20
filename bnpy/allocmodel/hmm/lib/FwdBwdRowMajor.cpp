@@ -22,6 +22,7 @@ extern "C" {
     double * initPiIN,
     double * transPiIN,
     double * SoftEvIN,
+    double * equilibriumIN,
     double * fwdMsgOUT,
     double * margPrObsOUT,
     int * topColIDsOUT,
@@ -219,6 +220,7 @@ void FwdAlg_sparse(
     double * initPiIN,
     double * transPiIN,
     double * SoftEvIN,
+    double * equilibriumIN,
     double * fwdMsgOUT,
     double * margPrObsOUT,
     int * topColIDsOUT,
@@ -230,19 +232,20 @@ void FwdAlg_sparse(
     ExtArr1D initPi (initPiIN, K);
     ExtArr2D transPi (transPiIN, K, K);
     ExtArr2D SoftEv (SoftEvIN, T, K);
+    ExtArr1D equilibrium (equilibriumIN, K);
 
     // Prep output
     ExtArr2D fwdMsg (fwdMsgOUT, T, L); // (T, L)
     ExtArr1D margPrObs (margPrObsOUT, T);
     ExtArr2D_i topColIDs (topColIDsOUT, T, L); // (T, L)
 
-    // compute equilibrium distribution
-    Matrix<double, Dynamic, Dynamic, RowMajor> A = transPi.matrix().transpose()
-                                                   - MatrixXd::Identity(K, K);
-    A.row(T-1).fill(1.0);
-    Matrix<double, Dynamic, RowMajor> b = MatrixXd::Zero(K, 1);
-    b.row(T-1).fill(1.0);
-    Arr1D equilibrium = A.partialPivLu().solve(b).array();
+//    // compute equilibrium distribution
+//    Matrix<double, Dynamic, Dynamic, RowMajor> A = transPi.matrix().transpose()
+//                                                   - MatrixXd::Identity(K, K);
+//    A.row(T-1).fill(1.0);
+//    Matrix<double, Dynamic, RowMajor> b = MatrixXd::Zero(K, 1);
+//    b.row(T-1).fill(1.0);
+//    Arr1D equilibrium = A.partialPivLu().solve(b).array();
 
     // Forward pass with complexity O(T * L^2)
     Arr1D iid_resp(K);
