@@ -33,7 +33,7 @@ def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
     return fwdMsg, margPrObs, None
 
 
-def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
+def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, equilibrium, order='C'):
     ''' Sparse forward algorithm for a single HMM sequence. Implemented in C++/Eigen.
     '''
     if not hasEigenLibReady:
@@ -46,6 +46,7 @@ def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     initPi = np.asarray(initPi, order=order)
     transPi = np.asarray(transPi, order=order)
     SoftEv = np.asarray(SoftEv, order=order)
+    equilibrium = np.asarray(equilibrium, order=order)
 
     # Allocate outputs
     fwdMsg = np.zeros((T, nnzPerRowLP), order=order)
@@ -61,10 +62,10 @@ def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     assert(np.all(np.isfinite([K, T, nnzPerRowLP])))
 
     # Execute C++ code (fills in outputs in-place)
-    lib.FwdAlg_sparse(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
-    print 'fwdMsg', fwdMsg
-    print 'margPrObs', margPrObs
+    lib.FwdAlg_sparse(initPi, transPi, SoftEv, equilibrium,
+                      fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
     return fwdMsg, margPrObs, top_colids
+
 
 def FwdAlg_onepass_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
     ''' Sparse forward algorithm for a single HMM sequence. Implemented in C++/Eigen.
@@ -218,6 +219,7 @@ try:
     lib.FwdAlg_sparse.restype = None
     lib.FwdAlg_sparse.argtypes = \
         [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),

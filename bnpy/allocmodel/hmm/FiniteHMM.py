@@ -148,6 +148,16 @@ class FiniteHMM(AllocModel):
 
         initParam = np.ones(K)
 
+        # calculate equilibrium distribution
+        if useL2LP:
+            A = transParam.T - np.eye(K)
+            A[-1] = 1.0
+            b = np.zeros(K)
+            b[-1] = 1.0
+            equilibrium = np.linalg.solve(A, b)
+        else:
+            equilibrium = None
+
         # Run forward-backward algorithm on each sequence
         logMargPr = np.empty(Data.nDoc)
         resp = np.empty((Data.nObs, K))
@@ -160,7 +170,9 @@ class FiniteHMM(AllocModel):
 
             seqResp, seqRespPair, seqLogMargPr = \
                 HMMUtil.FwdBwdAlg(initParam, transParam, logSoftEv_n,
-                	              nnzPerRowLP, blocked=blockedLP, useL2=useL2LP)
+                	              nnzPerRowLP=nnzPerRowLP,
+                                  blocked=blockedLP,
+                                  equilibrium=equilibrium)
 
             resp[start:stop] = seqResp
             respPair[start:stop] = seqRespPair
