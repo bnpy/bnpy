@@ -53,14 +53,6 @@ def FwdAlg_zeropass_cpp(initPi, transPi, SoftEv, nnzPerRow, equilibrium, order='
     margPrObs = np.zeros(T, order=order)
     top_colids = np.zeros((T, nnzPerRow), dtype=np.int32, order=order)
 
-    assert(np.all(np.isfinite(initPi)))
-    assert(np.all(np.isfinite(transPi)))
-    assert(np.all(np.isfinite(SoftEv)))
-    assert(np.all(np.isfinite(fwdMsg)))
-    assert(np.all(np.isfinite(margPrObs)))
-    assert(np.all(np.isfinite(top_colids)))
-    assert(np.all(np.isfinite([K, T, nnzPerRow])))
-
     # Execute C++ code (fills in outputs in-place)
     lib.FwdAlg_zeropass(initPi, transPi, SoftEv, equilibrium,
                         fwdMsg, margPrObs, top_colids, K, T, nnzPerRow)
