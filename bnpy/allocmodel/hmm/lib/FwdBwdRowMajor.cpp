@@ -50,6 +50,17 @@ extern "C" {
     int K,
     int T);
 
+  void BwdAlg_sparse(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * margPrObsIN,
+    int * topColIDsIN,
+    double * bwdMsgOUT,
+    int K,
+    int T,
+    int L);
+
   void SummaryAlg(
     double * initPiIN,
     double * transPiIN,
@@ -365,9 +376,53 @@ void BwdAlg(
     for (int t = T-2; t >= 0; t--) {
         bMsg.row(t) = (bMsg.row(t+1) * SoftEv.row(t+1)).matrix() \
                        * transPi.transpose().matrix();
-        bMsg.row(t) /= margPrObs(t+1);
+        if (margPrObs(t+1) == -1)
+            bMsg.row(t) /= bMsg.row(t).maxCoeff();
+        else
+            bMsg.row(t) /= margPrObs(t+1);
     }
 
+}
+
+void BwdAlg_sparse(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * margPrObsIN,
+    int * topColIDsIN,
+    double * bwdMsgOUT,
+    int K,
+    int T,
+    int L)
+{
+    // Prep input
+    ExtArr1D initPi (initPiIN, K);
+    ExtArr2D transPi (transPiIN, K, K);
+    ExtArr2D SoftEv (SoftEvIN, T, K);
+    ExtArr1D margPrObs (margPrObsIN, T);
+    ExtArr2D_i topColIDs (topColIDsIN, T, L); // (T, L)
+
+    // Prep output
+    ExtArr2D bMsg (bwdMsgOUT, T, L);
+
+    // Base case update for last time-step
+    bMsg.row(T-1).fill(1.0);
+    
+    // Recursive update of timesteps T-2, T-3, ... 3, 2, 1, 0
+    // Note: bMsg.row(t) is a *row vector*
+    //       so needs to be left-multiplied to square matrix transPi.T
+    for (int t = T-2; t >= 0; t--) {
+        // Pick a subset of active states from the transition matrix
+        Arr2D transPi_t = transPi(topColIDs.row(t), topColIDs.row(t+1));
+
+        // Pick a subset of active states from the evidence
+        Arr1D SoftEv_t = SoftEv(t+1, topColIDs.row(t+1));
+
+        // Compute sparse backward message
+        bMsg.row(t) = (bMsg.row(t+1) * SoftEv_t).matrix() \
+                       * transPi_t.transpose().matrix();
+        bMsg.row(t) /= margPrObs(t+1);
+    }
 }
 
 

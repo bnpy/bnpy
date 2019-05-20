@@ -15,8 +15,8 @@ from bnpy.util.NumericUtil import sumRtimesS
 from bnpy.util.NumericUtil import inplaceLog
 from bnpy.util import as2D
 
-from lib.LibFwdBwd import cppReady, FwdAlg_cpp, FwdAlg_sparse_cpp, FwdAlg_onepass_cpp, \
-                          BwdAlg_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import FwdAlg_sparse_cpp, FwdAlg_onepass_cpp, BwdAlg_sparse_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -355,14 +355,13 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, equilibrium=None):
         margPrObs[t] = p( x[t] | x[1], x[2], ... x[t-1] )
     '''
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp" and nnzPerRowLP != 1:
-        print 'I am cpp ready'
         if nnzPerRowLP == 0:  # TODO: K
             return FwdAlg_cpp(PiInit, PiMat, SoftEv)
         elif equilibrium is not None:  # O(T * L^2)
-            print 'sparse fwd alg with complexity O(T * L^2)'
+            # sparse fwd alg with complexity O(T * L^2)
             return FwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP, equilibrium)
         else:
-            print 'sparse one-pass fwd alg'
+            # sparse one-pass fwd alg
             return FwdAlg_onepass_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
         return FwdAlg_py(PiInit, PiMat, SoftEv,
@@ -386,7 +385,10 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
                         p( x[t+1], x[t+2], ... x[T] |  x[1] ... x[t])
     '''
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
-        return BwdAlg_cpp(PiInit, PiMat, SoftEv, margPrObs)
+        if top_colids is None:
+            return BwdAlg_cpp(PiInit, PiMat, SoftEv, margPrObs)
+        else:
+            return BwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, margPrObs, top_colids)
     else:
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
 
