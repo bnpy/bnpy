@@ -108,7 +108,7 @@ class FiniteHMM(AllocModel):
                             digammasumVec[:, np.newaxis])
         return EPiMat
 
-    def calc_local_params(self, Data, LP, nnzPerRowLP=0, blockedLP=0, useL2LP=0, **kwargs):
+    def calc_local_params(self, Data, LP, nnzPerRowLP, sparseOptLP, **kwargs):
         ''' Local update step
 
         Args
@@ -148,40 +148,82 @@ class FiniteHMM(AllocModel):
 
         initParam = np.ones(K)
 
-        # calculate equilibrium distribution
-        if useL2LP:
-            A = transParam.T - np.eye(K)
-            A[-1] = 1.0
-            b = np.zeros(K)
-            b[-1] = 1.0
-            equilibrium = np.linalg.solve(A, b)
-        else:
-            equilibrium = None
-
         # Run forward-backward algorithm on each sequence
-        logMargPr = np.empty(Data.nDoc)
-        resp = np.empty((Data.nObs, K))
-        respPair = np.zeros((Data.nObs, K, K))
-        for n in xrange(Data.nDoc):
-            start = Data.doc_range[n]
-            stop = Data.doc_range[n + 1]
-            logSoftEv_n = logSoftEv[start:stop]
-            logSoftEv_n[0] += ELogPi0  # adding in start state log probs
+        if 0 < nnzPerRowLP < K:
+            # SPARSE Assignments
+            logMargPr = np.empty(Data.nDoc)
+            resp = np.empty((Data.nObs, K))
+            respPair = np.empty((Data.nObs, K, K))
 
-            seqResp, seqRespPair, seqLogMargPr = \
-                HMMUtil.FwdBwdAlg(initParam, transParam, logSoftEv_n,
-                	              nnzPerRowLP=nnzPerRowLP,
-                                  blocked=blockedLP,
-                                  equilibrium=equilibrium)
+            # TO DO:
+            #logMargPr = np.empty(Data.nDoc)
+            #resp = np.empty((Data.nObs, nnzPerRowLP))
+            #respPair = np.empty((Data.nObs, nnzPerRowLP, nnzPerRowLP))
+            #top_colids = np.empty((Data.nObs, nnzPerRowLP))
 
-            resp[start:stop] = seqResp
-            respPair[start:stop] = seqRespPair
-            logMargPr[n] = seqLogMargPr
+            # Calculate equilibrium distribution
+            if 1 < nnzPerRowLP < K and sparseOptLP == 'zeropass':
+                A = transParam.T - np.eye(K)
+                A[-1] = 1.0
+                b = np.zeros(K)
+                b[-1] = 1.0
+                equilibrium = np.linalg.solve(A, b)
+                assert np.allclose(np.sum(equilibrium), 1.0)
+            else:
+                equilibrium = None
+            
+            for n in xrange(Data.nDoc):
+                start = Data.doc_range[n]
+                stop = Data.doc_range[n + 1]
+                logSoftEv_n = logSoftEv[start:stop]
+                logSoftEv_n[0] += ELogPi0  # adding in start state log probs
+    
+                seqResp, seqRespPair, seqLogMargPr = \
+                    HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
+                                             nnzPerRowLP, sparseOptLP, equilibrium)
 
-        LP['resp'] = resp
-        LP['respPair'] = respPair
+                # TO DO:
+                #seqResp, seqRespPair, seqLogMargPr, seqColIDs = \
+                #    HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
+                #                             nzPerRowLP, sparseOptLP, equilibrium)
+    
+                resp[start:stop] = seqResp
+                respPair[start:stop] = seqRespPair
+                logMargPr[n] = seqLogMargPr
+                #top_colids[start:stop] = seqColIDs
+    
+            # TO DO:
+            #LP['spR'] = to_csr(resp, top_colids)
+            #LP['spRP'] = to_csr(respPair, top_colids)
+
+            LP['resp'] = resp
+            LP['respPair'] = respPair
+            
+        else:
+            # DENSE Assignments
+            logMargPr = np.empty(Data.nDoc)
+            resp = np.empty((Data.nObs, K))
+            respPair = np.empty((Data.nObs, K, K))
+            
+            for n in xrange(Data.nDoc):
+                start = Data.doc_range[n]
+                stop = Data.doc_range[n + 1]
+                logSoftEv_n = logSoftEv[start:stop]
+                logSoftEv_n[0] += ELogPi0  # adding in start state log probs
+    
+                seqResp, seqRespPair, seqLogMargPr = \
+                    HMMUtil.FwdBwdAlg(initParam, transParam, logSoftEv_n)
+    
+                resp[start:stop] = seqResp
+                respPair[start:stop] = seqRespPair
+                logMargPr[n] = seqLogMargPr
+    
+            LP['resp'] = resp
+            LP['respPair'] = respPair
+        
         if self.inferType == 'EM':
             LP['evidence'] = np.sum(logMargPr)
+        
         return LP
 
     def initLPFromResp(self, Data, LP, deleteCompID=None):

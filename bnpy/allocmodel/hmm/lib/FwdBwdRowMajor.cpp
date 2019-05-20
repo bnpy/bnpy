@@ -18,7 +18,7 @@ extern "C" {
     int K,
     int T);
 
-  void FwdAlg_sparse(
+  void FwdAlg_zeropass(
     double * initPiIN,
     double * transPiIN,
     double * SoftEvIN,
@@ -239,7 +239,7 @@ void FwdAlg(
     }
 }
 
-void FwdAlg_sparse(
+void FwdAlg_zeropass(
     double * initPiIN,
     double * transPiIN,
     double * SoftEvIN,
@@ -458,10 +458,15 @@ void BwdAlg(
     for (int t = T-2; t >= 0; t--) {
         bMsg.row(t) = (bMsg.row(t+1) * SoftEv.row(t+1)).matrix() \
                        * transPi.transpose().matrix();
-        if (margPrObs(t+1) == -1)
+        if (margPrObs(t+1) == -1) {
+            // First backward pass in the two-pass sparse algorithm
+            // In this case, margPrObs has not been computed
             bMsg.row(t) /= bMsg.row(t).maxCoeff();
-        else
+        }
+        else {
+            // Regular dense backward pass
             bMsg.row(t) /= margPrObs(t+1);
+        }
     }
 
 }

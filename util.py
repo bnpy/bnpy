@@ -19,8 +19,8 @@ plt.rcParams['font.size'] = 20
 def create_title(plot_title, dataset_title, obs_model, learn_alg='VB'):
     return "%s, %s, %s - %s" % (dataset_title, obs_model, learn_alg, plot_title)
 
-def plot_ax(axes, max_iters, y_vals, L, blocked, useL2, summary):
-    L_vals, sparse_y, blocked_y, useL2_y = summary
+def plot_ax(axes, max_iters, y_vals, L, sparse_opt, summary):
+    L_vals, zeropass_y, onepass_y, twopass_y = summary
     y_final = y_vals[-1]
 
     # Append y_vals so all lines in one plot have the same lengths
@@ -35,38 +35,38 @@ def plot_ax(axes, max_iters, y_vals, L, blocked, useL2, summary):
     # Determine axes
     ax1, ax2, ax3 = axes
     plot_axes = []
-    if L == 0 or L == 1:
-        # Both (one-pass and two-pass and L2) subplots
+
+    if L == 0 or L == 1: # Dense or Viterbi (L = 1) case
+        # Include in all (0-, 1-, and 2-pass) subplots
         plot_axes.extend([ax1, ax2, ax3])
 
         # Summarize info for y vs L plot
-        #L_tmp = L if L == 1 else info_dict['K_history'][-1]
         L_vals.append(L)
-        blocked_y.append(y_final)
-        sparse_y.append(y_final)
-        useL2_y.append(y_final)
+        zeropass_y.append(y_final)
+        onepass_y.append(y_final)
+        twopass_y.append(y_final)
 
-    elif blocked:
+    elif sparse_opt == 'zeropass':
+        # Zero-pass subplot
+        plot_axes.append(ax3)
+
+        # Summarize info for y vs L plot
+        zeropass_y.append(y_final)
+
+    elif sparse_opt == 'onepass':
+        # One-pass subplot
+        plot_axes.append(ax1)
+
+        # Summarize info for y vs L plot
+        onepass_y.append(y_final)
+
+    else:
         # Two-pass subplot
         plot_axes.append(ax2)
 
         # Summarize info for y vs L plot
         L_vals.append(L)
-        blocked_y.append(y_final)
-
-    else:
-        if useL2:
-            # useL2 subplot
-            plot_axes.append(ax3)
-
-            # Summarize info for y vs L plot
-            useL2_y.append(y_final)
-        else:
-            # One-pass subplot
-            plot_axes.append(ax1)
-
-            # Summarize info for y vs L plot
-            sparse_y.append(y_final)
+        twopass_y.append(y_final)
 
     # Plot
     for ax in plot_axes:
@@ -78,7 +78,7 @@ def plot_setup(experiment_out, plot_title, dataset_title, ylab):
     ax2 = plt.subplot(1, 3, 2)
     ax3 = plt.subplot(1, 3, 3)
     axes = [ax1, ax2, ax3]
-    max_iters = np.max([len(d['lap_history']) for _, d, _ in experiment_out])
+    max_iters = np.max([len(d['lap_history']) for _, d in experiment_out])
     obs_model = d['ReqArgs']['obsModelName']
 
     for i, ax in enumerate(axes):
@@ -108,9 +108,8 @@ def plot_show(axes, ymin=None, ymax=None):
 def unpack_info(info_dict):
     alg_dict = info_dict['KwArgs']['VB']
     L = alg_dict['nnzPerRowLP']
-    blocked = alg_dict['blockedLP']
-    useL2 = alg_dict['useL2LP']
-    return L, blocked, useL2
+    sparse_opt = alg_dict['sparseOptLP']
+    return L, sparse_opt
 
 def compute_hamming(model_dict):
     dataset = model_dict['Data']
@@ -147,20 +146,20 @@ def plot_y_vs_iter(experiment_out, plot_title, dataset_title,
                    get_y_vals, ylab, ymin=None, ymax=None):
     # Summarize info for y vs L plot
     L_vals = []
-    sparse_y = []
-    blocked_y = []
-    useL2 = []
-    summary = [L_vals, sparse_y, blocked_y, useL2]
+    zeropass_y = []
+    onepass_y = []
+    twopass_y = []
+    summary = [L_vals, zeropass_y, onepass_y, twopass_y]
 
     # Plot setup
     axes, max_iters, obs_model = plot_setup(experiment_out,
                                             plot_title, dataset_title, ylab)
 
     # Plot each L
-    for _, info_dict, _ in experiment_out:
-        L, blocked, useL2 = unpack_info(info_dict)
+    for _, info_dict in experiment_out:
+        L, sparse_opt = unpack_info(info_dict)
         y_vals = get_y_vals(info_dict)
-        plot_ax(axes, max_iters, y_vals, L, blocked, useL2, summary)
+        plot_ax(axes, max_iters, y_vals, L, sparse_opt, summary)
     plot_show(axes, ymin, ymax)
 
     # Return summary
@@ -168,12 +167,20 @@ def plot_y_vs_iter(experiment_out, plot_title, dataset_title,
     return summary
 
 def plot_y_vs_L(summary, plot_title, dataset_title, ylab):
-    L_vals, sparse_y, blocked_y, useL2_y, obs_model = summary
+    L_vals, zeropass_y, onepass_y, twopass_y, obs_model = summary
 
-    plt.plot(L_vals[:-1], sparse_y[:-1], label='One-pass', marker='o')
-    plt.plot(L_vals[:-1], blocked_y[:-1], label='Two-pass', marker='o')
-    plt.plot(L_vals[:-1], useL2_y[:-1], label='L2', marker='o')
-    plt.hlines(sparse_y[-1], L_vals[0], L_vals[-2], label='Dense')
+    # Plot three sparse y values vs L
+    plt.plot(L_vals[:-1], onepass_y[:-1], label='One-pass', marker='o')
+    plt.plot(L_vals[:-1], twopass_y[:-1], label='Two-pass', marker='o')
+    plt.plot(L_vals[:-1], zeropass_y[:-1], label='L2', marker='o')
+    
+    # Last element of *_y should all store the same dense y value
+    assert(zeropass_y[-1] == onepass_y[-1] == twopass_y[-1])
+
+    # Plot dense y value as a horizontal line
+    plt.hlines(onepass_y[-1], L_vals[0], L_vals[-2], label='Dense')
+    
+    # Title, labels, legend, etc.
     plt.xlabel('L')
     plt.ylabel(ylab)
     plt.legend()
@@ -210,7 +217,7 @@ def plot_clusters(experiment_out, dataset_title):
     n_rows = np.ceil(n_plots / 2.0)
     
     plt.figure(figsize=(18, n_rows * 4))
-    for i, (model, info_dict, _) in enumerate(experiment_out):
+    for i, (model, info_dict) in enumerate(experiment_out):
         # Make dense model the first subplot
         if i == len(experiment_out) - 1:
             i = -1
@@ -220,14 +227,18 @@ def plot_clusters(experiment_out, dataset_title):
         bnpy.viz.PlotComps.plotCompsFromHModel(model, dataset=dataset)
 
         # Subplot title
-        L, blocked = unpack_info(info_dict)
+        L, sparse_opt = unpack_info(info_dict)
         if L == 0:
             label = 'Dense'
         elif L == 1:
             label = 'Viterbi L = 1'
+        elif sparse_opt == 'zeropass':
+            label = 'Zero-pass L = %d' % L
+        elif sparse_opt == 'onepass':
+            label = 'One-pass L = %d' % L
         else:
-            sparse = 'Two-pass' if blocked else 'One-pass'
-            label = '%s L = %d' % (sparse, L)
+            label = 'Two-pass L = %d' % L
+
         plt.title(label)
 
     obs_model = info_dict['ReqArgs']['obsModelName']
@@ -247,45 +258,43 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                        K=K, output_path=dense_path,
                                        convergeThr=tol, nLap=max_laps,
                                        printEvery=25, nTask=n_task, **kwargs)
-    dense_label = 'Dense %s %s' % (obs_model, alg)
     taskid = dense_dict['taskid']
 
     # Save trials in a sorted order from lowest to highest (dense) L
     experiment_out = []
     for L in xrange(min_L, max_L + 1):
-        print 'Training sparse model L =', L
-        sparse_path = '/'.join((out_path, 'sparse-L=%d' % L))
-        sparse_model, sparse_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                             K=K, output_path=sparse_path,
-                                             convergeThr=tol, nLap=max_laps,
-                                             printEvery=25, taskid=taskid,
-                                             nnzPerRowLP=L, **kwargs)
-        sparse_alg = 'One-pass sparse' if L > 1 else 'Viterbi'
-        sparse_label = '%s L = %d %s %s' % (sparse_alg, L, obs_model, alg)
-        experiment_out.append((sparse_model, sparse_dict, sparse_label))
+        print 'Training one-pass sparse model L =', L
+        onepass_path = '/'.join((out_path, 'onepass-L=%d' % L))
+        onepass_model, onepass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                               K=K, output_path=onepass_path,
+                                               convergeThr=tol, nLap=max_laps,
+                                               printEvery=25, taskid=taskid,
+                                               nnzPerRowLP=L, sparseOptLP='onepass',
+                                               **kwargs)
+        experiment_out.append((onepass_model, onepass_dict))
 
         if L > 1:
-            print 'Training O(L^2) model L =', L
-            OL2_path = '/'.join((out_path, 'OL2-L=%d' % L))
-            OL2_model, OL2_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                           K=K, output_path=OL2_path,
-                                           convergeThr=tol, nLap=max_laps,
-                                           printEvery=25, taskid=taskid,
-                                           nnzPerRowLP=L, useL2=1, **kwargs)
-            OL2_label = 'O(L^2) sparse L = %d %s %s' % (L, obs_model, alg)
-            experiment_out.append((OL2_model, OL2_dict, OL2_label))
-
-            print 'Training "blocked" model L =', L
-            blocked_path = '/'.join((out_path, 'blocked-L=%d' % L))
-            blocked_model, blocked_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                                   K=K, output_path=blocked_path,
+            print 'Training two-pass sparse model L =', L
+            twopass_path = '/'.join((out_path, 'twopass-L=%d' % L))
+            twopass_model, twopass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                                   K=K, output_path=twopass_path,
                                                    convergeThr=tol, nLap=max_laps,
                                                    printEvery=25, taskid=taskid,
-                                                   nnzPerRowLP=L, blocked=1, **kwargs)
-            blocked_label = 'Two-pass sparse L = %d %s %s' % (L, obs_model, alg)
-            experiment_out.append((blocked_model, blocked_dict, blocked_label))
+                                                   nnzPerRowLP=L, sparseOptLP='twopass',
+                                                   **kwargs)
+            experiment_out.append((twopass_model, twopass_dict))
 
-    experiment_out.append((dense_model, dense_dict, dense_label))
+            print 'Training O(L^2) sparse model L =', L
+            zeropass_path = '/'.join((out_path, 'zeropass-L=%d' % L))
+            zeropass_model, zeropass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                                     K=K, output_path=zeropass_path,
+                                                     convergeThr=tol, nLap=max_laps,
+                                                     printEvery=25, taskid=taskid,
+                                                     nnzPerRowLP=L, sparseOptLP='zeropass',
+                                                     **kwargs)
+            experiment_out.append((zeropass_model, zeropass_dict))
+
+    experiment_out.append((dense_model, dense_dict))
 
     # Save experiment_out
     if save:
