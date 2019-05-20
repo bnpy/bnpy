@@ -17,7 +17,7 @@ from bnpy.util import as2D
 
 from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
 from lib.LibFwdBwd import FwdAlg_sparse_cpp, BwdAlg_sparse_cpp
-from lib.LibFwdBwd import FwdAlg_onepass_cpp
+from lib.LibFwdBwd import FwdAlg_onepass_cpp, FwdAlg_twopass_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -365,8 +365,14 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
             print 'sparse one-pass fwd alg'
             return FwdAlg_onepass_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
-        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2LP=useL2)
+        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2=useL2)
 
+def BlockedFwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg):
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp" and nnzPerRowLP != 1:
+        print 'Two pass fwd cpp'
+        return FwdAlg_twopass_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg)
+    else:
+        return BlockedFwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg)
 
 def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
     ''' Backward algorithm for a single HMM sequence.
@@ -388,6 +394,7 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):
         if top_colids is None:
             return BwdAlg_cpp(PiInit, PiMat, SoftEv, margPrObs)
         else:
+            print 'Sparse bwd cpp'
             return BwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, margPrObs, top_colids)
     else:
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
@@ -520,7 +527,7 @@ def FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
 #    assert np.allclose(fmsg.sum(axis=1), 1)
 #    return fmsg, margPrObs, top_colids
 
-def BlockedFwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg):
+def BlockedFwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, bmsg):
     ''' Forward algorithm for a single HMM sequence. In pure python.
 
     Execute forward message-passing on an observed sequence
