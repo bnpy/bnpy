@@ -7,6 +7,7 @@ from bnpy.util import LOGTWO, LOGPI, LOGTWOPI, EPS
 from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
+from bnpy.util.SparseRespStatsUtil import calcSpRXXT, calcSpRXYT
 
 from AbstractObsModel import AbstractObsModel
 from GaussObsModel import createECovMatFromUserInput
@@ -1018,34 +1019,47 @@ def calcSummaryStats(Data, SS, LP,
     '''
     X = Data.X
     Xprev = Data.Xprev
-    resp = LP['resp']
-    K = resp.shape[1]
-    D = Data.X.shape[1]
-    E = Data.Xprev.shape[1]
+    D = X.shape[1]
+    E = Xprev.shape[1]
+
+    if 'resp' in LP:
+        resp = LP['resp']
+        K = resp.shape[1]
+        # Expected outer products
+        sqrtResp = np.sqrt(resp)
+        xxT = np.empty((K, D, D))
+        ppT = np.empty((K, E, E))
+        pxT = np.empty((K, E, D))
+        for k in xrange(K):
+            sqrtResp_k = sqrtResp[:, k][:, np.newaxis]
+            xxT[k] = dotATA(sqrtResp_k * Data.X)
+            ppT[k] = dotATA(sqrtResp_k * Data.Xprev)
+            pxT[k] = np.dot(Data.Xprev.T, resp[:, k][:, np.newaxis] * Data.X)
+    elif 'spR' in LP:
+        spR = LP['spR']
+        K = spR.shape[1]
+        xxT = calcSpRXXT(X=X, spR_csr=spR)
+        ppT = calcSpRXXT(X=Xprev, spR_csr=spR)
+        pxT = calcSpRXYT(X=Xprev, Y=X, spR_csr=spR)
+    else:
+        raise ValueError("LP does not contain resp or spR")
 
     if SS is None:
         SS = SuffStatBag(K=K, D=D, E=E)
     elif not hasattr(SS, 'E'):
         SS._Fields.E = E
 
-    # Expected count for each k
-    #  Usually computed by allocmodel. But just in case...
-    if not hasattr(SS, 'N'):
-        SS.setField('N', np.sum(resp, axis=0), dims='K')
-
-    # Expected outer products
-    sqrtResp = np.sqrt(resp)
-    xxT = np.empty((K, D, D))
-    ppT = np.empty((K, E, E))
-    pxT = np.empty((K, E, D))
-    for k in xrange(K):
-        sqrtResp_k = sqrtResp[:, k][:, np.newaxis]
-        xxT[k] = dotATA(sqrtResp_k * Data.X)
-        ppT[k] = dotATA(sqrtResp_k * Data.Xprev)
-        pxT[k] = np.dot(Data.Xprev.T, resp[:, k][:, np.newaxis] * Data.X)
     SS.setField('xxT', xxT, dims=('K', 'D', 'D'))
     SS.setField('ppT', ppT, dims=('K', 'E', 'E'))
     SS.setField('pxT', pxT, dims=('K', 'E', 'D'))
+
+    # Expected count for each k
+    #  Usually computed by allocmodel. But just in case...
+    if not hasattr(SS, 'N'):
+        if 'resp' in LP:
+            SS.setField('N', LP['resp'].sum(axis=0), dims='K')
+        else:
+            SS.setField('N', as1D(toCArray(LP['spR'].sum(axis=0))), dims='K')
     return SS
 
 

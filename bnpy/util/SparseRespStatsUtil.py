@@ -16,6 +16,7 @@ try:
         import calcRlogRdotv_withSparseRespCSR_cpp
     from lib.sparseResp.LibSparseResp import calcRlogR_withSparseRespCSR_cpp
     from lib.sparseResp.LibSparseResp import calcRXXT_withSparseRespCSR_cpp
+    from lib.sparseResp.LibSparseResp import calcRXYT_withSparseRespCSR_cpp
     from lib.sparseResp.LibSparseResp import calcRXX_withSparseRespCSR_cpp
     from lib.sparseResp.LibSparseResp import calcRXX_withSparseRespCSC_cpp
 
@@ -74,6 +75,18 @@ def calcSpRXXT(X=None, spR_csr=None, **kwargs):
         raise ValueError("Required compiled C++ library not found.")
     return calcRXXT_withSparseRespCSR_cpp(X, spR_csr)
 
+def calcSpRXYT(X=None, Y=None, spR_csr=None, **kwargs):
+    ''' Compute expected outer-product statistic for each state.
+
+    Returns
+    -------
+    S_xyT : 3D array, K x D x E
+    '''
+    if not hasCPPLib:
+        raise ValueError("Required compiled C++ library not found.")
+    return calcRXYT_withSparseRespCSR_cpp(X, Y, spR_csr)
+
+
 def calcRlogR_withDenseResp(R=None, **kwargs):
     return -1 * calcRlogR(R)
 
@@ -122,6 +135,17 @@ def calcRXXT_withDenseResp(R=None, X=None, **kwargs):
         #stat_XXT[k] = np.dot(RX_k.T, X)
     return stat_XXT
 
+def calcRXYT_withDenseResp(R=None, X=None, Y=None, **kwargs):
+    N, K = R.shape
+    NX, D = X.shape
+    NY, E = Y.shape
+    assert N == NX
+    assert N == NY
+    stat_XYT = np.zeros((K, D, E))
+    for k in xrange(K):
+        stat_XYT[k] = np.dot(X.T, R[:,k][:,np.newaxis] * Y)
+    return stat_XYT
+
 
 def make_funcList(prefix='calcRXX_'):
     funcList = []
@@ -131,15 +155,17 @@ def make_funcList(prefix='calcRXX_'):
     return [f for f in sorted(funcList)]
 
 def test_speed(X=None, R=None, nnzPerRow=2,
-                           N=100, K=3, D=2,
-                           funcList=None,
-                           prefix='calcRXX_',
-                           nRep=1, **kwargs):
+               N=100, K=3, D=2,
+               Y=None, E=None,
+               funcList=None,
+               prefix='calcRXX_',
+               nRep=1, **kwargs):
     if funcList is None:
         funcList = make_funcList(prefix=prefix)
     kwargs = _make_kwarg_dict(
-            X=X, R=R, nnzPerRow=nnzPerRow, N=N, K=K, D=D)
+            X=X, R=R, nnzPerRow=nnzPerRow, N=N, K=K, D=D, Y=Y, E=E)
     assert 'X' in kwargs
+    assert 'Y' in kwargs
     for func in funcList:
         do_timing_test_for_func(func, (), kwargs, nRep=nRep)
 
@@ -151,24 +177,25 @@ def do_timing_test_for_func(func, args, kwargs, nRep=1):
         tstop = time.time()
         times.append(tstop - tstart)
     print " AVG %.4f sec  MEDIAN %.4f sec | %s" % (
-        np.mean(times), np.median(times), func.__name__)
+        np.mean(times), np.median(times), func.__name__, 
+        )
 
 
 def test_correctness(X=None, R=None, nnzPerRow=2,
-                                         N=100, K=3, D=2,
-                                         funcList=None,
-                                         prefix='calcRXX_'):
+                     N=100, K=3, D=2,
+                     Y=None, E=None,
+                     funcList=None,
+                     prefix='calcRXX_'):
     if funcList is None:
         funcList = make_funcList(prefix=prefix)
     kwargs = _make_kwarg_dict(
-            X=X, R=R, nnzPerRow=nnzPerRow, N=N, K=K, D=D)
+            X=X, R=R, nnzPerRow=nnzPerRow, N=N, K=K, D=D, Y=Y, E=E)
     for i in range(len(funcList)):
         for j in range(i+1, len(funcList)):
             func_i = funcList[i]
             func_j = funcList[j]
             ans_i = func_i(**kwargs)
             ans_j = func_j(**kwargs)
-
             if prefix.count('calcRlogR') and kwargs['nnzPerRow'] == 1:
                 # SPARSE routine gives scalar 0.0
                 # but DENSE routine gives vector of all zeros
@@ -183,26 +210,36 @@ def test_correctness(X=None, R=None, nnzPerRow=2,
 
 def _make_kwarg_dict(
                 X=None, R=None, nnzPerRow=2,
-                N=100, K=3, D=2):
+                N=100, K=3, D=2,
+                Y=None, E=None):
     if X is None:
         X = np.random.randn(N, D)
     if R is None:
         R = np.random.rand(N, K)
         R *= R
         R /= R.sum(axis=1)[:,np.newaxis]
+
+    if E is None:
+        E = D + 2
+    if Y is None:
+        Y = np.random.randn(N, E)
+
     # Sparsify R
     spR_csr = sparsifyResp(R, nnzPerRow)
     spR_csc = spR_csr.tocsc()
     R = spR_csc.toarray()
     np.maximum(R, 1e-100, out=R) # avoid NaN values
-    return dict(X=X, R=R, spR_csc=spR_csc, spR_csr=spR_csr,
-            nnzPerRow=nnzPerRow)
+    return dict(
+        X=X, R=R,
+        spR_csc=spR_csc, spR_csr=spR_csr, nnzPerRow=nnzPerRow,
+        Y=Y)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--N', type=int, default=3)
     parser.add_argument('--K', type=int, default=10)
     parser.add_argument('--D', type=int, default=64)
+    parser.add_argument('--E', type=int, default=30)
     parser.add_argument('--nnzPerRow', type=int, default=2)
     parser.add_argument('--nRep', type=int, default=1)
     parser.add_argument('--prefix', type=str, default='calcRXX_')
