@@ -17,6 +17,7 @@ from bnpy.util import as2D
 
 from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
 from lib.LibFwdBwd import FwdAlg_sparse_cpp, BwdAlg_sparse_cpp
+from lib.LibFwdBwd import FwdAlg_onepass_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -357,10 +358,14 @@ def FwdAlg(PiInit, PiMat, SoftEv, nnzPerRowLP=0, useL2=1):
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp" and nnzPerRowLP != 1:
         if nnzPerRowLP == 0:  # TODO: K
             return FwdAlg_cpp(PiInit, PiMat, SoftEv)
-        else:
+        elif useL2:
+            print 'sparse fwd alg with complexity O(T * L^2)'
             return FwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
+        else:
+            print 'sparse one-pass fwd alg'
+            return FwdAlg_onepass_cpp(PiInit, PiMat, SoftEv, nnzPerRowLP)
     else:
-        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2=useL2)
+        return FwdAlg_py(PiInit, PiMat, SoftEv, nnzPerRowLP, useL2LP=useL2)
 
 
 def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None, top_colids=None):

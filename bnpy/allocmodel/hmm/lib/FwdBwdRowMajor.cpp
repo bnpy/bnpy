@@ -29,6 +29,17 @@ extern "C" {
     int T,
     int L);
 
+  void FwdAlg_onepass(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * fwdMsgOUT,
+    double * margPrObsOUT,
+    int * topColIDsOUT,
+    int K,
+    int T,
+    int L);
+
   void BwdAlg(
     double * initPiIN,
     double * transPiIN,
@@ -236,6 +247,59 @@ void FwdAlg_sparse(
     ExtArr1D margPrObs (margPrObsOUT, T);
     ExtArr2D_i topColIDs (topColIDsOUT, T, L); // (T, L)
 
+    // compute equilibrium distribution
+    Matrix<double, Dynamic, Dynamic, RowMajor> A = transPi.matrix().transpose()
+                                                   - MatrixXd::Identity(K, K);
+    A.row(T-1).fill(1.0);
+    Matrix<double, Dynamic, RowMajor> b = MatrixXd::Zero(K, 1);
+    b.row(T-1).fill(1.0);
+    Arr1D equilibrium = A.partialPivLu().solve(b).array();
+
+    // Forward pass with complexity O(T * L^2)
+    Arr1D iid_resp(K);
+    Argsortable1DArray sorter = Argsortable1DArray(iid_resp.data(), K);
+    for (int t = 0; t < T; t++) {
+        // Pick and save top states of time t
+        iid_resp = equilibrium * SoftEv.row(t);
+        sorter.resetIndices(K);
+        sorter.findLargestL(L, K);
+        for (int l = 0; l < L; l++)
+            topColIDs(t, l) = sorter.iptr[l];
+        // Do forward pass only between top states of t-1 and t
+        Arr1D fwdMsg_t = SoftEv(t, topColIDs.row(t));
+        if (t == 0)
+            fwdMsg_t *= initPi(topColIDs.row(0));
+        else {
+            Arr2D transPi_t = transPi(topColIDs.row(t-1), topColIDs.row(t));
+            fwdMsg_t *= (fwdMsg.row(t-1).matrix() * transPi_t.matrix()).array();
+        }
+        // Normalize and save fwdMsg_t
+        margPrObs(t) = fwdMsg_t.sum();
+        fwdMsg.row(t) = fwdMsg_t / margPrObs(t);
+    }
+}
+
+void FwdAlg_onepass(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * fwdMsgOUT,
+    double * margPrObsOUT,
+    int * topColIDsOUT,
+    int K,
+    int T,
+    int L)
+{
+    // Prep input
+    ExtArr1D initPi (initPiIN, K);
+    ExtArr2D transPi (transPiIN, K, K);
+    ExtArr2D SoftEv (SoftEvIN, T, K);
+
+    // Prep output
+    ExtArr2D fwdMsg (fwdMsgOUT, T, L); // (T, L)
+    ExtArr1D margPrObs (margPrObsOUT, T);
+    ExtArr2D_i topColIDs (topColIDsOUT, T, L); // (T, L)
+
     // Prep tmp vars
     Arr1D fwdMsgTmp (K);
 
@@ -253,14 +317,14 @@ void FwdAlg_sparse(
 
     margPrObs(0) = fwdMsg.row(0).sum();
     fwdMsg.row(0) /= margPrObs(0);
-    
+
     // Recursive update of timesteps 1, 2, ... T-1
-    // Note: fwdMsg.row(t) is a *row vector* 
+    // Note: fwdMsg.row(t) is a *row vector*
     //       so needs to be left-multiplied to square matrix transPi
     for (int t = 1; t < T; t++) {
         // Pick the subset of active states from the trans matrix
         Arr2D transPi_t = transPi(topColIDs.row(t-1), all);
-        
+
         // Compute (temporary) dense forward message
         fwdMsgTmp = fwdMsg.row(t-1).matrix() * transPi_t.matrix();
         fwdMsgTmp *= SoftEv.row(t);
