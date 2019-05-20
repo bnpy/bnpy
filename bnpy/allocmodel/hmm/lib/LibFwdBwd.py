@@ -56,7 +56,7 @@ def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, equilibrium, order='
     # Execute C++ code (fills in outputs in-place)
     lib.FwdAlg_sparse(initPi, transPi, SoftEv, equilibrium,
                       fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
-    return fwdMsg, top_colids, margPrObs
+    return fwdMsg, margPrObs, top_colids
 
 
 def FwdAlg_onepass_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
@@ -80,7 +80,7 @@ def FwdAlg_onepass_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
 
     # Execute C++ code (fills in outputs in-place)
     lib.FwdAlg_onepass(initPi, transPi, SoftEv, fwdMsg, margPrObs, top_colids, K, T, nnzPerRowLP)
-    return fwdMsg, top_colids, margPrObs
+    return fwdMsg, margPrObs, top_colids
 
 
 def BwdAlg_cpp(initPi, transPi, SoftEv, margPrObs, order='C'):

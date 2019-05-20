@@ -26,14 +26,14 @@ if __name__ == '__main__':
         lik_TK[:,k] = scipy.stats.multivariate_normal.pdf(x_TD, mu_KD[k], covar_KDD[k])
 
     fmsg_TK, marglik_T, _ = bnpy.allocmodel.hmm.lib.LibFwdBwd.FwdAlg_cpp(start_pi_K, trans_pi_KK, lik_TK)
-    sp_fmsg_TL, sp_col_TL, sp_marglik_T = bnpy.allocmodel.hmm.lib.LibFwdBwd.FwdAlg_onepass_cpp(start_pi_K, trans_pi_KK, lik_TK, L)
+    sp_fmsg_TL, sp_marglik_T, sp_col_TL = bnpy.allocmodel.hmm.lib.LibFwdBwd.FwdAlg_onepass_cpp(start_pi_K, trans_pi_KK, lik_TK, L)
 
     A = trans_pi_KK.T - np.eye(K)
     A[-1] = 1.0
     b = np.zeros(K)
     b[-1] = 1.0
     equilibrium_K = np.linalg.solve(A, b)
-    sp_fmsg_TL_2, sp_col_TL_2, sp_marglik_T_2 = bnpy.allocmodel.hmm.lib.LibFwdBwd.FwdAlg_sparse_cpp(
+    sp_fmsg_TL_2, sp_marglik_T_2, sp_col_TL_2 = bnpy.allocmodel.hmm.lib.LibFwdBwd.FwdAlg_sparse_cpp(
                                                 start_pi_K, trans_pi_KK, lik_TK, L, equilibrium_K)
 
     sp_fmsg_TK = np.zeros((T,K))
