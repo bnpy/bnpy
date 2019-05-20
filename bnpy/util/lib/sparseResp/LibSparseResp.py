@@ -262,6 +262,27 @@ def calcRXXT_withSparseRespCSR_cpp(
         stat_RXX)
     return stat_RXX
 
+def calcRXYT_withSparseRespCSR_cpp(
+        X=None, Y=None, spR_csr=None, order='C', **kwargs):
+    if not hasEigenLibReady:
+        raise ValueError("Cannot find library %s. Please recompile."
+                         % (libfilename))
+    if order != 'C':
+        raise NotImplementedError("LibFwdBwd only supports row-major order.")
+    N, K = spR_csr.shape
+    N1, D = X.shape
+    N2, E = Y.shape
+    assert N == N1
+    assert N == N2
+    nnzPerRow = spR_csr.data.size // N
+    X = np.asarray(X, order=order)
+    Y = np.asarray(Y, order=order)
+    stat_RXY = np.zeros((K, D, E), order=order)
+    lib.calcRXYT_withSparseRespCSR(
+        X, Y, spR_csr.data, spR_csr.indices, spR_csr.indptr,
+        D, E, K, N, nnzPerRow,
+        stat_RXY)
+    return stat_RXY
 
 def calcRXX_withSparseRespCSC_cpp(
         X=None, spR_csc=None, order='C', **kwargs):
@@ -408,6 +429,7 @@ libpath = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
 libfilename = 'libsparsemix.so'
 libfilename2 = 'libsparsetopics.so'
 hasEigenLibReady = True
+hasTopicsLibReady = True
 
 try:
     # Load the compiled C++ library from disk
@@ -495,6 +517,21 @@ try:
          ndpointer(ctypes.c_double),
          ]
 
+    lib.calcRXYT_withSparseRespCSR.restype = None
+    lib.calcRXYT_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ]
+
     lib.calcRXX_withSparseRespCSR.restype = None
     lib.calcRXX_withSparseRespCSR.argtypes = \
         [ndpointer(ctypes.c_double),
@@ -520,8 +557,14 @@ try:
          ctypes.c_int,
          ndpointer(ctypes.c_double),
          ]
+except OSError as e:
+    # No compiled C++ library exists
+    hasEigenLibReady = False
 
+try:
+    # Load the compiled C++ library from disk
     libTopics = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename2))
+
     libTopics.sparseLocalStepSingleDoc.restype = None
     libTopics.sparseLocalStepSingleDoc.argtypes = \
         [ndpointer(ctypes.c_double),
@@ -586,10 +629,16 @@ try:
          ]
 except OSError as e:
     # No compiled C++ library exists
-    hasEigenLibReady = False
-
+    hasTopicsLibReady = False
+    error_topicsLib = e
 
 if __name__ == "__main__":
+    print("libsparsemix status: %s" % hasEigenLibReady)
+    print("libsparsetopics status: %s" % hasTopicsLibReady)
+
+    if not hasTopicsLibReady:
+        raise error_topicsLib
+
     from scipy.special import digamma
     N = 3
     K = 7
@@ -603,18 +652,20 @@ if __name__ == "__main__":
     topicCount_d = np.zeros(K)
     spResp_data = np.zeros(N * D * nnzPerRow)
     spResp_colids = np.zeros(N * D * nnzPerRow, dtype=np.int32)
+    do_init_Ebeta = 1
     for d in [0, 1, 2, 3]:
-        print nnzPerRow
         start = d * (N * nnzPerRow)
         stop = (d+1) * (N * nnzPerRow)
         libTopics.sparseLocalStepSingleDocWithWordCounts(
-            wc_d, logLik_d,
+            wc_d,
+            logLik_d,
             alphaEbeta,
             nnzPerRow,
             N,
             K,
             MAXITER,
             convThr,
+            do_init_Ebeta,
             topicCount_d,
             spResp_data[start:stop],
             spResp_colids[start:stop],

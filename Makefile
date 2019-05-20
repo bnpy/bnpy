@@ -2,7 +2,9 @@ SHELL := /bin/bash
 
 EIGENOPTFLAGS=-O3 -ffast-math -DNDEBUG
 
-all: util_entropy libfwdbwd libsparsetopics libsparseresp libsparseManyDocs
+CXX?=g++
+
+all: util_entropy libfwdbwd libsparsemix libsparsetopics libsparseManyDocs
 
 clean:
 	rm -rf dist/
@@ -23,32 +25,32 @@ util_entropy:
 # -DNDEBUG : disable all eigen assertions and other runtime checks
 libfwdbwd: hasEigenpath
 	cd bnpy/allocmodel/hmm/lib/; \
-	g++ FwdBwdRowMajor.cpp -o libfwdbwdcpp.so \
+	$(CXX) FwdBwdRowMajor.cpp -o libfwdbwdcpp.so \
 		-I$(EIGENPATH) \
 		$(EIGENOPTFLAGS) \
-		--shared -fPIC -w $(PYARCH);
+		--shared -fPIC -Wall;
 
-libsparseresp: hasEigenpath
+libsparsemix: hasEigenpath
 	echo "$(PYVERSION)"; \
 	cd bnpy/util/lib/sparseResp/; \
-	g++ SparsifyRespCPPX.cpp -o libsparseresp.so \
+	$(CXX) SparsifyRespCPPX.cpp -o libsparsemix.so \
 		-I$(EIGENPATH) \
 		$(EIGENOPTFLAGS) \
-		--shared -fPIC -w $(PYARCH);
+		--shared -fPIC;
 
 libsparsetopics: hasEigenpath
 	cd bnpy/util/lib/sparseResp/; \
-	g++ TopicModelLocalStepCPPX.cpp -o libsparsetopics.so \
+	$(CXX) TopicModelLocalStepCPPX.cpp -o libsparsetopics.so \
 		-I$(BOOSTMATHPATH) -I$(EIGENPATH) \
 		$(EIGENOPTFLAGS) \
-		--shared -fPIC -w $(PYARCH);
+		--shared -fPIC;
 
 libsparseManyDocs: hasEigenpath
 	cd bnpy/util/lib/sparseResp/; \
-	g++ TopicModelLocalStepManyDocsCPPX.cpp -o libsparseManyDocs.so \
+	$(CXX) TopicModelLocalStepManyDocsCPPX.cpp -o libsparseManyDocs.so \
 		-I$(BOOSTMATHPATH) -I$(EIGENPATH) \
 		$(EIGENOPTFLAGS) \
-		--shared -fPIC -w $(PYARCH);
+		--shared -fPIC;
 
 # Rule: verify that EIGENPATH exists, or instruct user to download it.
 hasEigenpath:

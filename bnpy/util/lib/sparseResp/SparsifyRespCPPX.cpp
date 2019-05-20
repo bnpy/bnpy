@@ -88,6 +88,21 @@ extern "C" {
         double* stat_RXX_OUT
         );
 
+    void calcRXYT_withSparseRespCSR(
+        double* X_IN,
+        double* Y_IN,
+        double* spR_data_IN,
+        int* spR_colids_IN,
+        int* spR_rowptr_IN,
+        int D,
+        int E,
+        int K,
+        int N,
+        int nnzPerRow,
+        double* stat_RXY_OUT
+        );
+
+
     void calcRXX_withSparseRespCSR(
         double* X_IN,
         double* spR_data_IN,
@@ -534,6 +549,50 @@ void calcRXXT_withSparseRespCSR(
         }
     }
 }
+
+void calcRXYT_withSparseRespCSR(
+        double* X_IN,
+        double* Y_IN,
+        double* spR_data_IN,
+        int* spR_colids_IN,
+        int* spR_rowptr_IN,
+        int D,
+        int E,
+        int K,
+        int N,
+        int nnzPerRow,
+        double* stat_RXX_OUT)
+{
+    ExtMat2D_d X (X_IN, N, D);
+    ExtMat2D_d Y (Y_IN, N, E);
+    ExtArr1D_d spR_data (spR_data_IN, N * nnzPerRow);
+    ExtArr1D_i spR_colids (spR_colids_IN, N * nnzPerRow);
+    ExtArr1D_i spR_rowptr (spR_rowptr_IN, K+1);
+    ExtArr2D_d stat_RXY (stat_RXX_OUT, K, D * E);
+
+    // Create storage for holding the outer-product of each data item
+    // Using the Matrix type (not the Array type) avoids temporary allocation
+    Mat2D_d xyT = Mat2D_d::Zero(D, E);
+    Map<Arr1D_d> xyTvec (xyT.data(), xyT.size());
+    //internal::set_is_malloc_allowed(false);
+    //Arr2D_d xxT = Arr2D_d::Zero(D, D);
+    //internal::set_is_malloc_allowed(true);
+
+    for (int n = 0; n < N; n++) {
+        // Compute outer-product
+        // using noalias avoids any additional memory allocation
+        xyT.noalias() = X.row(n).transpose() * Y.row(n);
+        //internal::set_is_malloc_allowed(false);
+        //xxT = X.row(n).matrix().transpose() * X.row(n).matrix();
+        //internal::set_is_malloc_allowed(true);
+
+        for (int nzk = 0; nzk < nnzPerRow; nzk++) {
+            int l = n * nnzPerRow + nzk;
+            stat_RXY.row(spR_colids(l)) += spR_data(l) * xyTvec.array();
+        }
+    }
+}
+
 
 void calcRXX_withSparseRespCSR(
         double* X_IN,
