@@ -30,7 +30,7 @@ def FwdAlg_cpp(initPi, transPi, SoftEv, order='C'):
 
     # Execute C++ code (fills in outputs in-place)
     lib.FwdAlg(initPi, transPi, SoftEv, fwdMsg, margPrObs, K, T)
-    return fwdMsg, margPrObs
+    return fwdMsg, margPrObs, None
 
 
 def FwdAlg_sparse_cpp(initPi, transPi, SoftEv, nnzPerRowLP, order='C'):
