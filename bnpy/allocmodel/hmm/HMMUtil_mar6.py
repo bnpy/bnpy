@@ -191,7 +191,8 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv):
     logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
     return resp, respPair, logMargPrSeq
 
-def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibrium):
+
+def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibrium, spOut=1):
     PiInit, PiMat, K = _parseInput_TransParams(PiInit, PiMat)
     logSoftEv = _parseInput_SoftEv(logSoftEv, K)
     T = logSoftEv.shape[0]
@@ -205,13 +206,13 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
         # Compute margPrObs
         margPrObs = FwdAlg_viterbi_py(PiInit, PiMat, SoftEv, zhat)
 
-        # TO DO: turn resp and respPair into sparse csr matrices
-        # resp, respPair, margPrObs = FwdBwdAlg_viterbi(...)
-        resp = np.zeros((T, K))
-        resp[np.arange(T), zhat] = 1
+        if True:
+            # TODO: return based on spOout
+            resp = np.zeros((T, K))
+            resp[np.arange(T), zhat] = 1
 
-        respPair = np.zeros((T, K, K))
-        respPair[np.arange(1, T), zhat[:-1], zhat[1:]] = 1
+            respPair = np.zeros((T, K, K))
+            respPair[np.arange(1, T), zhat[:-1], zhat[1:]] = 1
 
     else:
         # One-pass sparse forward algorithm
@@ -233,21 +234,27 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
             raise ValueError('NaN values found. Numerical badness!')
 
         bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
-        resp = fmsg * bmsg # (T, L)
+        resp = fmsg * bmsg  # (T, L)
         respPair = calcRespPair_forloop(PiMat, SoftEv, margPrObs,
-                                        fmsg, bmsg, K, T, top_colids)
+                                        fmsg, bmsg, K, T, top_colids)  # (T, L, L)
 
-        # Reconstruct arrays
-        # TO DO: Use sparse csr matrices instead for resp and respPair
-        if nnzPerRow and (0 < nnzPerRow < K):
+        if spOut:
+            # compute Htable (T, L, L)
+            Htable = np.zeros((T, nnzPerRow, nnzPerRow))
+            for t in xrange(1, T):
+                respPair_t = respPair[t] + 1e-100
+                rowwiseSum = np.sum(respPair_t, axis=1)
+                Htable[t] = -1 * (respPair_t * np.log(respPair_t) -
+                                  respPair_t * np.log(rowwiseSum)[:, np.newaxis])
+        else:
+            # reconstruct the dense resp and respPair
             sparse_resp = resp
-            sparse_respPair = respPair
-
             resp = np.zeros((T, K))
             active_rows = np.repeat(np.arange(T), nnzPerRow)
             active_cols = top_colids.flatten()
             resp[active_rows, active_cols] = sparse_resp.flatten()
 
+            sparse_respPair = respPair
             respPair = np.zeros((T, K, K))
             for t in xrange(1, T):
                 active_idx = np.ix_(top_colids[t-1], top_colids[t])
@@ -266,7 +273,10 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
     #assert np.allclose(respPair[1:].sum(axis=1), resp[1:]), np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
     #assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
     
-    return resp, respPair, logMargPrSeq
+    if spOut and nnzPerRow > 1:
+        return resp, respPair, logMargPrSeq, Htable, top_colids
+    else:
+        return resp, respPair, logMargPrSeq
 
 def FwdBwdAlg_LimitMemory(PiInit, PiMat, logSoftEv, mPairIDs):
     '''Execute forward-backward algorithm using only O(K) memory.
