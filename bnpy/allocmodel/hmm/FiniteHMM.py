@@ -117,6 +117,7 @@ class FiniteHMM(AllocModel):
         Data : bnpy data object
         sparseOptLP : string; one of 'zeropass', 'onepass', or 'twopass'
             if 0 < nnzPerRowLP < K, specifies which sparsifying method to use
+        spOutLP : use sparse summary statistics when 0 < nnzPerRowLP < K
 
         Returns
         -------
