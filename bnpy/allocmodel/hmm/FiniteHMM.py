@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.sparse import csr_matrix
 
 import HMMUtil_mar6 as HMMUtil
 #import HMMUtil_feb26 as HMMUtil
@@ -108,7 +109,7 @@ class FiniteHMM(AllocModel):
                             digammasumVec[:, np.newaxis])
         return EPiMat
 
-    def calc_local_params(self, Data, LP, nnzPerRowLP, sparseOptLP, **kwargs):
+    def calc_local_params(self, Data, LP, nnzPerRowLP, sparseOptLP, spOutLP=1, **kwargs):
         ''' Local update step
 
         Args
@@ -152,16 +153,16 @@ class FiniteHMM(AllocModel):
 
         # Run forward-backward algorithm on each sequence
         if 0 < nnzPerRowLP < K:
-            # SPARSE Assignments
             logMargPr = np.empty(Data.nDoc)
-            resp = np.empty((Data.nObs, K))
-            respPair = np.empty((Data.nObs, K, K))
-
-            # TO DO:
-            #logMargPr = np.empty(Data.nDoc)
-            #resp = np.empty((Data.nObs, nnzPerRowLP))
-            #respPair = np.empty((Data.nObs, nnzPerRowLP, nnzPerRowLP))
-            #top_colids = np.empty((Data.nObs, nnzPerRowLP))
+            if spOutLP and nnzPerRowLP > 1:
+                # sparse LP summary
+                spR = csr_matrix((Data.nObs, K))
+                TransStateCount = np.zeros((K, K))
+                Htable = np.zeros((K, K))
+            else:
+                # dense LP summary
+                resp = np.empty((Data.nObs, K))
+                respPair = np.empty((Data.nObs, K, K))
 
             # Calculate equilibrium distribution
             if 1 < nnzPerRowLP < K and sparseOptLP == 'zeropass':
@@ -179,27 +180,39 @@ class FiniteHMM(AllocModel):
                 stop = Data.doc_range[n + 1]
                 logSoftEv_n = logSoftEv[start:stop]
                 logSoftEv_n[0] += ELogPi0  # adding in start state log probs
-    
-                seqResp, seqRespPair, seqLogMargPr = \
-                    HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
-                                             nnzPerRowLP, sparseOptLP, equilibrium)
 
-                # TO DO:
-                #seqResp, seqRespPair, seqLogMargPr, seqColIDs = \
-                #    HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
-                #                             nzPerRowLP, sparseOptLP, equilibrium)
-    
-                resp[start:stop] = seqResp
-                respPair[start:stop] = seqRespPair
+                if spOutLP and nnzPerRowLP > 1:
+                    seqResp, seqRespPair, seqLogMargPr, seqHtable, seqColIDs = \
+                       HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
+                                                nnzPerRowLP, sparseOptLP, equilibrium,
+                                                spOut=spOutLP)
+                    # update spR, TransStateCount and Htable
+                    T_n = stop - start
+                    row_ind = np.repeat(np.arange(T_n), nnzPerRowLP)
+                    col_ind = seqColIDs.flatten()
+                    spR[start:stop] = csr_matrix((seqResp.flatten(), (row_ind, col_ind)),
+                                                 shape=(T_n, K))
+                    for t in xrange(1, T_n):
+                        active_idx = np.ix_(seqColIDs[t-1], seqColIDs[t])
+                        TransStateCount[active_idx] += seqRespPair[t]
+                        Htable[active_idx] += seqHtable[t]
+                else:
+                    seqResp, seqRespPair, seqLogMargPr = \
+                        HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
+                                                 nnzPerRowLP, sparseOptLP, equilibrium,
+                                                 spOut=spOutLP)
+                    # update resp and respPair
+                    resp[start:stop] = seqResp
+                    respPair[start:stop] = seqRespPair
                 logMargPr[n] = seqLogMargPr
-                #top_colids[start:stop] = seqColIDs
     
-            # TO DO:
-            #LP['spR'] = to_csr(resp, top_colids)
-            #LP['spRP'] = to_csr(respPair, top_colids)
-
-            LP['resp'] = resp
-            LP['respPair'] = respPair
+            if spOutLP and nnzPerRowLP > 1:
+                LP['spR'] = spR
+                LP['TransStateCount'] = TransStateCount
+                LP['Htable'] = Htable
+            else:
+                LP['resp'] = resp
+                LP['respPair'] = respPair
             
         else:
             # DENSE Assignments
@@ -282,19 +295,31 @@ class FiniteHMM(AllocModel):
 
         (see the documentation for information about resp and respPair)
         '''
-        resp = LP['resp']
-        respPair = LP['respPair']
-        K = resp.shape[1]
-        startLocIDs = Data.doc_range[:-1]
 
-        StartStateCount = np.sum(resp[startLocIDs], axis=0)
-        N = np.sum(resp, axis=0)
-        TransStateCount = np.sum(respPair, axis=0)
+        startLocIDs = Data.doc_range[:-1]
+        if 'resp' in LP:
+            resp = LP['resp']
+            K = resp.shape[1]
+            N = np.sum(resp, axis=0)
+            StartStateCount = np.sum(resp[startLocIDs], axis=0)
+        else:
+            assert 'spR' in LP
+            spR = LP['spR']
+            K = spR.shape[1]
+            N = np.array(spR.sum(axis=0)).squeeze()
+            StartStateCount = np.array(spR[startLocIDs].sum(axis=0)).squeeze()
+
+        if 'TransStateCount' in LP:
+            TransStateCount = LP['TransStateCount']
+        else:
+            respPair = LP['respPair']
+            TransStateCount = np.sum(respPair, axis=0)
 
         SS = SuffStatBag(K=K, D=Data.dim)
         SS.setField('StartStateCount', StartStateCount, dims=('K'))
         SS.setField('TransStateCount', TransStateCount, dims=('K', 'K'))
         SS.setField('N', N, dims=('K'))
+        SS.setField('nDoc', Data.nDoc, dims=None)
 
         if doPrecompEntropy is not None:
             entropy = self.elbo_entropy(Data, LP)
@@ -455,7 +480,17 @@ class FiniteHMM(AllocModel):
             raise NotImplementedError(emsg)
 
     def elbo_entropy(self, Data, LP):
-        return HMMUtil.calcEntropyFromResp(LP['resp'], LP['respPair'], Data)
+        if 'resp' in LP:
+            entropy = HMMUtil.calcEntropyFromResp(LP['resp'], LP['respPair'], Data)
+        else:
+            assert 'spR' in LP
+            spR = LP['spR']
+            startLocIDs = Data.doc_range[:-1]
+            resp_start = spR[startLocIDs].data
+            Hstart = -1 * np.sum(resp_start * np.log(resp_start + 1e-100))
+            assert 'Htable' in LP
+            entropy = Hstart + np.sum(LP['Htable'])
+        return entropy
 
     def elbo_alloc(self):
         K = self.K

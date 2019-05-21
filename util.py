@@ -251,13 +251,15 @@ def plot_clusters(experiment_out, dataset_title):
 def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                    min_L=1, max_L=5, n_task=5, tol=1e-4, max_laps=500, save=True,
                    **kwargs):
+    spOut = 1
     # Find the best seed for the dense model
     print 'Training dense model'
     dense_path = '/'.join((out_path, 'dense'))
     dense_model, dense_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
                                        K=K, output_path=dense_path,
                                        convergeThr=tol, nLap=max_laps,
-                                       printEvery=25, nTask=n_task, **kwargs)
+                                       printEvery=25, nTask=n_task, spOut=spOut,
+                                       **kwargs)
     taskid = dense_dict['taskid']
 
     # Save trials in a sorted order from lowest to highest (dense) L
@@ -270,7 +272,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                convergeThr=tol, nLap=max_laps,
                                                printEvery=25, taskid=taskid,
                                                nnzPerRowLP=L, sparseOptLP='onepass',
-                                               **kwargs)
+                                               spOut=spOut, **kwargs)
         experiment_out.append((onepass_model, onepass_dict))
 
         if L > 1:
@@ -281,7 +283,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                    convergeThr=tol, nLap=max_laps,
                                                    printEvery=25, taskid=taskid,
                                                    nnzPerRowLP=L, sparseOptLP='twopass',
-                                                   **kwargs)
+                                                   spOut=spOut, **kwargs)
             experiment_out.append((twopass_model, twopass_dict))
 
             print 'Training O(L^2) sparse model L =', L
@@ -291,7 +293,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                      convergeThr=tol, nLap=max_laps,
                                                      printEvery=25, taskid=taskid,
                                                      nnzPerRowLP=L, sparseOptLP='zeropass',
-                                                     **kwargs)
+                                                     spOut=spOut, **kwargs)
             experiment_out.append((zeropass_model, zeropass_dict))
 
     experiment_out.append((dense_model, dense_dict))
