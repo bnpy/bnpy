@@ -193,7 +193,8 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv):
     return resp, respPair, logMargPrSeq
 
 
-def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibrium, spOut=1):
+def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibrium,
+                     spOut=1, TransStateCount=None, Htable=None):
     PiInit, PiMat, K = _parseInput_TransParams(PiInit, PiMat)
     logSoftEv = _parseInput_SoftEv(logSoftEv, K)
     T = logSoftEv.shape[0]
@@ -234,15 +235,14 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
         if not np.all(np.isfinite(margPrObs)):
             raise ValueError('NaN values found. Numerical badness!')
 
-        print 'Calling backward'
         bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
         resp = fmsg * bmsg  # (T, L)        
 
         if spOut:
-            #print 'Calling summary'
-            TransStateCount, Htable = \
-                SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs,
-                                  fmsg, bmsg, top_colids)
+            assert (TransStateCount is not None and Htable is not None)
+            TransStateCount, Htable = SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs,
+                                                        fmsg, bmsg, top_colids,
+                                                        TransStateCount, Htable)
         else:
             respPair = calcRespPair_forloop(PiMat, SoftEv, margPrObs,
                                             fmsg, bmsg, K, T, top_colids)  # (T, L, L)
@@ -274,7 +274,7 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
     #assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
     
     if spOut and nnzPerRow > 1:
-        return resp, TransStateCount, Htable, logMargPrSeq, top_colids
+        return resp, top_colids, logMargPrSeq, TransStateCount, Htable
     else:
         return resp, respPair, logMargPrSeq
 
@@ -700,14 +700,10 @@ def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
     return TransStateCount, Htable, mHtable
 
 def SummaryAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg,
-                         top_colids):
+                         top_colids, TransStateCount, Htable):
     K = PiInit.size
     T = SoftEv.shape[0]
     L = top_colids.shape[1]
-
-    respPair_t = np.zeros((L, L))
-    Htable = np.zeros((K, K))
-    TransStateCount = np.zeros((K, K))
     
     for t in xrange(1, T):
         # Pick the subset of active states
@@ -725,9 +721,8 @@ def SummaryAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg,
         # Update Htable
         respPair_t += 1e-100
         rowwiseSum = np.sum(respPair_t, axis=1)
-        Htable[active_idx] += (respPair_t * np.log(respPair_t) -
+        Htable[active_idx] -= (respPair_t * np.log(respPair_t) -
                                respPair_t * np.log(rowwiseSum)[:, np.newaxis])
-    Htable *= -1
 
     return TransStateCount, Htable
 
