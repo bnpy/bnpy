@@ -109,7 +109,7 @@ class FiniteHMM(AllocModel):
                             digammasumVec[:, np.newaxis])
         return EPiMat
 
-    def calc_local_params(self, Data, LP, nnzPerRowLP, sparseOptLP, spOutLP=1, **kwargs):
+    def calc_local_params(self, Data, LP, nnzPerRowLP, sparseOptLP, **kwargs):
         ''' Local update step
 
         Args
@@ -117,7 +117,6 @@ class FiniteHMM(AllocModel):
         Data : bnpy data object
         sparseOptLP : string; one of 'zeropass', 'onepass', or 'twopass'
             if 0 < nnzPerRowLP < K, specifies which sparsifying method to use
-        spOutLP : use sparse summary statistics when 0 < nnzPerRowLP < K
 
         Returns
         -------
@@ -154,17 +153,12 @@ class FiniteHMM(AllocModel):
 
         # Run forward-backward algorithm on each sequence
         if 0 < nnzPerRowLP < K:
+            # SPARSE Assignments
             logMargPr = np.empty(Data.nDoc)
-            if spOutLP and nnzPerRowLP > 1:
-                # sparse LP summary
-                spR_data = np.empty((Data.nObs, nnzPerRowLP))
-                spR_colids = np.empty((Data.nObs, nnzPerRowLP), dtype=np.int32)
-                TransStateCount = np.zeros((K, K))
-                Htable = np.zeros((K, K))
-            else:
-                # dense LP summary
-                resp = np.empty((Data.nObs, K))
-                respPair = np.empty((Data.nObs, K, K))
+            spR_data = np.empty((Data.nObs, nnzPerRowLP))
+            spR_colids = np.empty((Data.nObs, nnzPerRowLP), dtype=np.int32)
+            TransStateCount = np.zeros((K, K))
+            Htable = np.zeros((K, K))
 
             # Calculate equilibrium distribution
             if 1 < nnzPerRowLP < K and sparseOptLP == 'zeropass':
@@ -183,45 +177,27 @@ class FiniteHMM(AllocModel):
                 logSoftEv_n = logSoftEv[start:stop]
                 logSoftEv_n[0] += ELogPi0  # adding in start state log probs
 
-                if spOutLP and nnzPerRowLP > 1:
-                    seqResp, seqColIDs, seqLogMargPr, TransStateCount, Htable = \
-                       HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
-                                                nnzPerRowLP, sparseOptLP, equilibrium,
-                                                spOut=spOutLP,
-                                                TransStateCount=TransStateCount,
-                                                Htable=Htable)
-                    
-                    # update spR and spR_colids
-                    spR_data[start:stop] = seqResp
-                    spR_colids[start:stop] = seqColIDs
-
-                else:
-                    seqResp, seqRespPair, seqLogMargPr = \
-                        HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
-                                                 nnzPerRowLP, sparseOptLP, equilibrium,
-                                                 spOut=spOutLP)
-                    # update resp and respPair
-                    resp[start:stop] = seqResp
-                    respPair[start:stop] = seqRespPair
+                seqResp, seqColIDs, seqLogMargPr = \
+                   HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
+                                            nnzPerRowLP, sparseOptLP, equilibrium,
+                                            TransStateCount, Htable)
+                
+                # update spR_data, spR_colids, and logMargPr
+                spR_data[start:stop] = seqResp
+                spR_colids[start:stop] = seqColIDs
                 logMargPr[n] = seqLogMargPr
 
             # Assemble spR into common sparse matrix
-            if spOutLP and nnzPerRowLP > 1:
-                spR_indptr = np.arange(0, Data.nObs * nnzPerRowLP + nnzPerRowLP,
-                                       step=nnzPerRowLP, dtype=spR_colids.dtype)
-                spR = csr_matrix(
-                    (spR_data.flatten(), spR_colids.flatten(), spR_indptr),
-                    shape=(Data.nObs, K),
-                )
+            spR_indptr = np.arange(0, Data.nObs * nnzPerRowLP + nnzPerRowLP,
+                                   step=nnzPerRowLP, dtype=spR_colids.dtype)
+            spR = csr_matrix(
+                (spR_data.flatten(), spR_colids.flatten(), spR_indptr),
+                shape=(Data.nObs, K),
+            )
 
-            # print 'Completed all sequences'
-            if spOutLP and nnzPerRowLP > 1:
-                LP['spR'] = spR
-                LP['TransStateCount'] = TransStateCount
-                LP['Htable'] = Htable
-            else:
-                LP['resp'] = resp
-                LP['respPair'] = respPair
+            LP['spR'] = spR
+            LP['TransStateCount'] = TransStateCount
+            LP['Htable'] = Htable
             
         else:
             # DENSE Assignments

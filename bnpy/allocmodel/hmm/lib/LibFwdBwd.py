@@ -225,7 +225,7 @@ def SummaryAlg_sparse_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
     lib.SummaryAlg_sparse(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
                           top_colids, TransStateCount, Htable, K, T, L)
     
-    return TransStateCount, Htable
+    #return TransStateCount, Htable
 
 ''' This block of code loads the shared library and defines wrapper functions
     that can take numpy array objects.

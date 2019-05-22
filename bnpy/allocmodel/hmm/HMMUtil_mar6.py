@@ -194,7 +194,7 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv):
 
 
 def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibrium,
-                     spOut=1, TransStateCount=None, Htable=None):
+                     TransStateCount, Htable):
     PiInit, PiMat, K = _parseInput_TransParams(PiInit, PiMat)
     logSoftEv = _parseInput_SoftEv(logSoftEv, K)
     T = logSoftEv.shape[0]
@@ -203,21 +203,25 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
 
     if nnzPerRow == 1: # Viterbi (L = 1) special case
         # Use the most likely states as the only active states
-        zhat = runViterbiAlg(logSoftEv, np.log(PiInit), np.log(PiMat))
+        top_colids = runViterbiAlg(logSoftEv, np.log(PiInit), np.log(PiMat))
 
         # Compute margPrObs
-        margPrObs = FwdAlg_viterbi_py(PiInit, PiMat, SoftEv, zhat)
+        margPrObs = FwdAlg_viterbi_py(PiInit, PiMat, SoftEv, top_colids)
 
-        #if spOut:
-        #    resp = np.ones((T, 1))
+        resp = np.ones((T, 1))
+        respPair = np.zeros((T, K, K))
+        respPair[np.arange(1, T), top_colids[:-1], top_colids[1:]] = 1
+        top_colids = top_colids.reshape((T, 1))
 
-        if True:
-            # TODO: return based on spOout
-            resp = np.zeros((T, K))
-            resp[np.arange(T), zhat] = 1
+        # Update TransStateCount
+        TransStateCount += respPair.sum(axis=0)
 
-            respPair = np.zeros((T, K, K))
-            respPair[np.arange(1, T), zhat[:-1], zhat[1:]] = 1
+        # Update Htable
+        respPair += 1e-100
+        rowwiseSum = np.sum(respPair, axis=2) # (T, K)
+        Htable -= np.sum(respPair * np.log(respPair) -
+                         respPair * np.log(rowwiseSum)[:,:, np.newaxis],
+                         axis=0)
 
     else:
         # One-pass sparse forward algorithm
@@ -241,27 +245,8 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
         bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
         resp = fmsg * bmsg  # (T, L)        
 
-        if spOut:
-            assert (TransStateCount is not None and Htable is not None)
-            TransStateCount, Htable = SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs,
-                                                        fmsg, bmsg, top_colids,
-                                                        TransStateCount, Htable)
-        else:
-            respPair = calcRespPair_forloop(PiMat, SoftEv, margPrObs,
-                                            fmsg, bmsg, K, T, top_colids)  # (T, L, L)
-
-            # reconstruct the dense resp and respPair
-            sparse_resp = resp
-            resp = np.zeros((T, K))
-            active_rows = np.repeat(np.arange(T), nnzPerRow)
-            active_cols = top_colids.flatten()
-            resp[active_rows, active_cols] = sparse_resp.flatten()
-
-            sparse_respPair = respPair
-            respPair = np.zeros((T, K, K))
-            for t in xrange(1, T):
-                active_idx = np.ix_(top_colids[t-1], top_colids[t])
-                respPair[t][active_idx] = sparse_respPair[t]
+        SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg, 
+                          top_colids, TransStateCount, Htable)
 
     logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
 
@@ -276,10 +261,7 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
     #assert np.allclose(respPair[1:].sum(axis=1), resp[1:]), np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
     #assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
     
-    if spOut and nnzPerRow > 1:
-        return resp, top_colids, logMargPrSeq, TransStateCount, Htable
-    else:
-        return resp, respPair, logMargPrSeq
+    return resp, top_colids, logMargPrSeq
 
 def FwdBwdAlg_LimitMemory(PiInit, PiMat, logSoftEv, mPairIDs):
     '''Execute forward-backward algorithm using only O(K) memory.
@@ -648,9 +630,9 @@ def SummaryAlg(*args):
 
 def SummaryAlg_sparse(*args):
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
-        return SummaryAlg_sparse_cpp(*args)
+        SummaryAlg_sparse_cpp(*args)
     else:
-        return SummaryAlg_sparse_py(*args)
+        SummaryAlg_sparse_py(*args)
 
 
 def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
@@ -727,7 +709,7 @@ def SummaryAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg,
         Htable[active_idx] -= (respPair_t * np.log(respPair_t) -
                                respPair_t * np.log(rowwiseSum)[:, np.newaxis])
 
-    return TransStateCount, Htable
+    #return TransStateCount, Htable
 
 
 def expLogLik(logSoftEv, axis=1):

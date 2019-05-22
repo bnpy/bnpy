@@ -7,7 +7,7 @@ from scipy import stats
 from matplotlib import pyplot as plt
 
 from bnpy.allocmodel.hmm.HMMUtil import runViterbiAlg
-from bnpy.data import SpeakerDiar
+from bnpy.data import SpeakerDiar, MoCap124
 from bnpy.util.StateSeqUtil import alignEstimatedStateSeqToTruth
 from bnpy.util.StateSeqUtil import calcHammingDistance
 
@@ -251,14 +251,13 @@ def plot_clusters(experiment_out, dataset_title):
 def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                    min_L=1, max_L=5, n_task=5, tol=1e-4, max_laps=500, save=True,
                    **kwargs):
-    spOut = 1
     # Find the best seed for the dense model
     print 'Training dense model'
     dense_path = '/'.join((out_path, 'dense'))
     dense_model, dense_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
                                        K=K, output_path=dense_path,
                                        convergeThr=tol, nLap=max_laps,
-                                       printEvery=25, nTask=n_task, spOut=spOut,
+                                       printEvery=25, nTask=n_task,
                                        **kwargs)
     taskid = dense_dict['taskid']
 
@@ -272,7 +271,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                convergeThr=tol, nLap=max_laps,
                                                printEvery=25, taskid=taskid,
                                                nnzPerRowLP=L, sparseOptLP='onepass',
-                                               spOut=spOut, **kwargs)
+                                               **kwargs)
         experiment_out.append((onepass_model, onepass_dict))
 
         if L > 1:
@@ -283,7 +282,7 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                    convergeThr=tol, nLap=max_laps,
                                                    printEvery=25, taskid=taskid,
                                                    nnzPerRowLP=L, sparseOptLP='twopass',
-                                                   spOut=spOut, **kwargs)
+                                                   **kwargs)
             experiment_out.append((twopass_model, twopass_dict))
 
             print 'Training O(L^2) sparse model L =', L
@@ -293,10 +292,53 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                      convergeThr=tol, nLap=max_laps,
                                                      printEvery=25, taskid=taskid,
                                                      nnzPerRowLP=L, sparseOptLP='zeropass',
-                                                     spOut=spOut, **kwargs)
+                                                     **kwargs)
             experiment_out.append((zeropass_model, zeropass_dict))
 
     experiment_out.append((dense_model, dense_dict))
+
+    # Save experiment_out
+    if save:
+        pickle.dump(experiment_out, open('%s/summary.p' % out_path, 'wb'))
+
+    return experiment_out
+
+def run_experiment_sparse(dataset, alloc_model, obs_model, alg, K, out_path,
+                          min_L=1, max_L=5, taskid=1, tol=1e-4, max_laps=500,
+                          save=True, **kwargs):
+    # Save trials in a sorted order from lowest to highest (dense) L
+    experiment_out = []
+    for L in xrange(min_L, max_L + 1):
+        print 'Training one-pass sparse model L =', L
+        onepass_path = '/'.join((out_path, 'onepass-L=%d' % L))
+        onepass_model, onepass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                               K=K, output_path=onepass_path,
+                                               convergeThr=tol, nLap=max_laps,
+                                               printEvery=25, taskid=taskid,
+                                               nnzPerRowLP=L, sparseOptLP='onepass',
+                                               **kwargs)
+        experiment_out.append((onepass_model, onepass_dict))
+
+        if L > 1:
+            print 'Training two-pass sparse model L =', L
+            twopass_path = '/'.join((out_path, 'twopass-L=%d' % L))
+            twopass_model, twopass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                                   K=K, output_path=twopass_path,
+                                                   convergeThr=tol, nLap=max_laps,
+                                                   printEvery=25, taskid=taskid,
+                                                   nnzPerRowLP=L, sparseOptLP='twopass',
+                                                   **kwargs)
+            experiment_out.append((twopass_model, twopass_dict))
+
+            print 'Training O(L^2) sparse model L =', L
+            zeropass_path = '/'.join((out_path, 'zeropass-L=%d' % L))
+            zeropass_model, zeropass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                                     K=K, output_path=zeropass_path,
+                                                     convergeThr=tol, nLap=max_laps,
+                                                     printEvery=25, taskid=taskid,
+                                                     nnzPerRowLP=L, sparseOptLP='zeropass',
+                                                     **kwargs)
+            experiment_out.append((zeropass_model, zeropass_dict))
 
     # Save experiment_out
     if save:
@@ -353,3 +395,6 @@ def load_speaker_data(meeting_id):
 def load_mocap_data():
     dataset_path = os.path.join(bnpy.DATASET_PATH, 'mocap6', 'dataset.mat')
     return bnpy.data.GroupXData.read_mat(dataset_path)
+
+def load_full_mocap_data():
+    return MoCap124.get_data()
