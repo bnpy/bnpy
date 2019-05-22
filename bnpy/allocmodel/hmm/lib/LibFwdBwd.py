@@ -198,6 +198,36 @@ def SummaryAlg_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
                    TransStateCount, Htable, mPairIDs, mHtable, K, T, M)
     return TransStateCount, Htable, mHtable
 
+def SummaryAlg_sparse_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
+                          top_colids, order='C'):
+    # (initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
+    #  top_colids, TransStateCount, Htable, order='C')
+    if not hasEigenLibReady:
+        raise ValueError("Cannot find library %s. Please recompile."
+                         % (libfilename))
+    if order != 'C':
+        raise NotImplementedError("LibFwdBwd only supports row-major order.")
+
+    # Prep inputs
+    T, K = SoftEv.shape
+    L = top_colids.shape[1]
+    initPi = np.asarray(initPi, order=order)
+    transPi = np.asarray(transPi, order=order)
+    SoftEv = np.asarray(SoftEv, order=order)
+    margPrObs = np.asarray(margPrObs, order=order)
+    fMsg = np.asarray(fMsg, order=order)
+    bMsg = np.asarray(bMsg, order=order)
+    top_colids = np.asarray(top_colids, order=order)
+
+    # Allocate outputs
+    TransStateCount = np.zeros((K, K), order=order)
+    Htable = np.zeros((K, K), order=order)
+
+    # Execute C++ code for backward pass (fills in bMsg in-place)
+    lib.SummaryAlg_sparse(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
+                          top_colids, TransStateCount, Htable, K, T, L)
+    return TransStateCount, Htable
+
 ''' This block of code loads the shared library and defines wrapper functions
     that can take numpy array objects.
 '''
@@ -278,6 +308,19 @@ try:
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int, ctypes.c_int, ctypes.c_int]
+
+    lib.SummaryAlg_sparse.restype = None
+    lib.SummaryAlg_sparse.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ctypes.c_int, ctypes.c_int, ctypes.c_int]

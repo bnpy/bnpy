@@ -177,26 +177,32 @@ class FiniteHMM(AllocModel):
                 equilibrium = None
             
             for n in xrange(Data.nDoc):
+                print 'Not even here yet'
                 start = Data.doc_range[n]
                 stop = Data.doc_range[n + 1]
                 logSoftEv_n = logSoftEv[start:stop]
                 logSoftEv_n[0] += ELogPi0  # adding in start state log probs
 
                 if spOutLP and nnzPerRowLP > 1:
-                    seqResp, seqRespPair, seqLogMargPr, seqHtable, seqColIDs = \
+                    seqResp, seqTransStateCount, seqHtable, seqLogMargPr, seqColIDs = \
                        HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
                                                 nnzPerRowLP, sparseOptLP, equilibrium,
                                                 spOut=spOutLP)
+                    #print seqResp, seqTransStateCount, seqHtable, seqLogMargPr, seqColIDs
+
                     # update spR, TransStateCount and Htable
                     T_n = stop - start
                     row_ind = np.repeat(np.arange(T_n), nnzPerRowLP)
                     col_ind = seqColIDs.flatten()
                     spR[start:stop] = csr_matrix((seqResp.flatten(), (row_ind, col_ind)),
                                                  shape=(T_n, K))
-                    for t in xrange(1, T_n):
-                        active_idx = np.ix_(seqColIDs[t-1], seqColIDs[t])
-                        TransStateCount[active_idx] += seqRespPair[t]
-                        Htable[active_idx] += seqHtable[t]
+
+                    TransStateCount += seqTransStateCount
+                    Htable += seqHtable
+                    #for t in xrange(1, T_n):
+                    #    active_idx = np.ix_(seqColIDs[t-1], seqColIDs[t])
+                    #    TransStateCount[active_idx] += seqRespPair[t]
+                    #    Htable[active_idx] += seqHtable[t]
                 else:
                     seqResp, seqRespPair, seqLogMargPr = \
                         HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
@@ -206,7 +212,9 @@ class FiniteHMM(AllocModel):
                     resp[start:stop] = seqResp
                     respPair[start:stop] = seqRespPair
                 logMargPr[n] = seqLogMargPr
+                #print 'Completed sequence', n
     
+            print 'Completed all sequences'
             if spOutLP and nnzPerRowLP > 1:
                 LP['spR'] = spR
                 LP['TransStateCount'] = TransStateCount

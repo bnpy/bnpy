@@ -87,6 +87,20 @@ extern "C" {
     int K,
     int T,
     int M);
+
+  void SummaryAlg_sparse(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * margPrObsIN,
+    double * fwdMsgIN,
+    double * bwdMsgIN,
+    int * topColIDsIN,
+    double * TransStateCountOUT,
+    double * HtableOUT,
+    int K,
+    int T,
+    int L);
 }
 
 
@@ -628,6 +642,99 @@ void SummaryAlg(
           respPair_t.col(k) *= logrowwiseSum;
         }
         Htable -= respPair_t; 
+
+        /*
+        printf("----------- t=%d\n", t);
+        for (int j = 0; j < K; j++) {
+          for (int k = 0; k < K; k++) {
+            printf(" %.3f", respPair_t(j,k));
+          }
+          printf("\n");
+        }
+        */
+    }
+
+    Htable *= -1.0;
+}
+
+void SummaryAlg_sparse(
+    double * initPiIN,
+    double * transPiIN,
+    double * SoftEvIN,
+    double * margPrObsIN,
+    double * fwdMsgIN,
+    double * bwdMsgIN,
+    int * topColIDsIN,
+    double * TransStateCountOUT,
+    double * HtableOUT,
+    int K,
+    int T,
+    int L)
+{
+    // Prep input
+    ExtArr1D initPi (initPiIN, K);
+    ExtArr2D transPi (transPiIN, K, K);
+    ExtArr2D SoftEv (SoftEvIN, T, K);
+    ExtArr1D margPrObs (margPrObsIN, T);
+    ExtArr2D fwdMsg (fwdMsgIN, T, L);
+    ExtArr2D bwdMsg (bwdMsgIN, T, L);
+    ExtArr2D_i topColIDs (topColIDsIN, T, L);
+
+    // Prep output
+    ExtArr2D TransStateCount (TransStateCountOUT, K, K);
+    ExtArr2D Htable (HtableOUT, K, K);
+
+    // Temporary KxK array for storing respPair at timestep t
+    Arr2D respPair_t = ArrayXXd::Zero(L, L);
+    Arr1D rowwiseSum = ArrayXd::Zero(L);
+    Arr1D logrowwiseSum = ArrayXd::Zero(L);
+    Arr2D epsArr = 1e-100 * ArrayXXd::Ones(L, L);
+    
+    for (int t = 1; t < T; t++) {
+        // Pick a subset of active states from the transition matrix
+        Arr2D transPi_t = transPi(topColIDs.row(t-1), topColIDs.row(t));
+
+        // Pick a subset of active states from the evidence
+        Arr1D SoftEv_t = SoftEv(t, topColIDs.row(t));
+
+        // In Python, we want:
+        // >>> respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv_t)
+        // >>> respPair[t] *= PiMat_t / margPrObs[t]
+        respPair_t = fwdMsg.row(t-1).transpose().matrix() \
+                      * (bwdMsg.row(t) * SoftEv_t).matrix();
+        respPair_t *= transPi_t;
+        respPair_t /= margPrObs(t);
+
+
+        // Aggregate pairwise transition counts
+        TransStateCount(topColIDs.row(t-1), topColIDs.row(t)) += respPair_t;
+        //TransStateCount += respPair_t;
+        cout << "Grr" << endl;
+        cout << TransStateCount << endl;
+
+        // Aggregate entropy in a KxK matrix
+
+        // Make numerically safe for logarithms
+        // Each entry in respPair_t will be at least eps (1e-100)
+        // Remember, cwiseMax only works with arrays, not scalars :(
+        // https://forum.kde.org/viewtopic.php?f=74&t=98384
+        respPair_t = respPair_t.cwiseMax(epsArr);
+        rowwiseSum = respPair_t.rowwise().sum();
+        logrowwiseSum = log(rowwiseSum);
+
+        // Increment by rP log rP
+        Htable(topColIDs.row(t-1), topColIDs.row(t)) += respPair_t * respPair_t.log();
+        //Htable += respPair_t * respPair_t.log();
+
+        // Decrement by rP log rP.rowwise().sum()
+        // Remember, broadcasting with *= doesnt work
+        // https://forum.kde.org/viewtopic.php?f=74&t=95629 
+        // so we use a forloop instead
+        for (int k=0; k < K; k++) {
+          respPair_t.col(k) *= logrowwiseSum;
+        }
+        Htable(topColIDs.row(t-1), topColIDs.row(t)) -= respPair_t; 
+        //Htable -= respPair_t; 
 
         /*
         printf("----------- t=%d\n", t);

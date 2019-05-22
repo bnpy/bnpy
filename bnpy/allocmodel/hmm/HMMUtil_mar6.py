@@ -17,7 +17,8 @@ from bnpy.util import as2D
 
 from lib.LibFwdBwd import cppReady, FwdAlg_cpp, FwdAlg_zeropass_cpp
 from lib.LibFwdBwd import FwdAlg_onepass_cpp, FwdAlg_twopass_cpp
-from lib.LibFwdBwd import BwdAlg_cpp, BwdAlg_sparse_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import BwdAlg_cpp, BwdAlg_sparse_cpp
+from lib.LibFwdBwd import SummaryAlg_cpp, SummaryAlg_sparse_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -233,20 +234,19 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
         if not np.all(np.isfinite(margPrObs)):
             raise ValueError('NaN values found. Numerical badness!')
 
+        print 'Calling backward'
         bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
-        resp = fmsg * bmsg  # (T, L)
-        respPair = calcRespPair_forloop(PiMat, SoftEv, margPrObs,
-                                        fmsg, bmsg, K, T, top_colids)  # (T, L, L)
+        resp = fmsg * bmsg  # (T, L)        
 
         if spOut:
-            # compute Htable (T, L, L)
-            Htable = np.zeros((T, nnzPerRow, nnzPerRow))
-            for t in xrange(1, T):
-                respPair_t = respPair[t] + 1e-100
-                rowwiseSum = np.sum(respPair_t, axis=1)
-                Htable[t] = -1 * (respPair_t * np.log(respPair_t) -
-                                  respPair_t * np.log(rowwiseSum)[:, np.newaxis])
+            #print 'Calling summary'
+            TransStateCount, Htable = \
+                SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs,
+                                  fmsg, bmsg, top_colids)
         else:
+            respPair = calcRespPair_forloop(PiMat, SoftEv, margPrObs,
+                                            fmsg, bmsg, K, T, top_colids)  # (T, L, L)
+
             # reconstruct the dense resp and respPair
             sparse_resp = resp
             resp = np.zeros((T, K))
@@ -274,7 +274,7 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
     #assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
     
     if spOut and nnzPerRow > 1:
-        return resp, respPair, logMargPrSeq, Htable, top_colids
+        return resp, TransStateCount, Htable, logMargPrSeq, top_colids
     else:
         return resp, respPair, logMargPrSeq
 
@@ -643,6 +643,12 @@ def SummaryAlg(*args):
     else:
         return SummaryAlg_py(*args)
 
+def SummaryAlg_sparse(*args):
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return SummaryAlg_sparse_cpp(*args)
+    else:
+        return SummaryAlg_sparse_py(*args)
+
 
 def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
                   mPairIDs=None):
@@ -692,6 +698,38 @@ def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
 
     Htable *= -1
     return TransStateCount, Htable, mHtable
+
+def SummaryAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg,
+                         top_colids):
+    K = PiInit.size
+    T = SoftEv.shape[0]
+    L = top_colids.shape[1]
+
+    respPair_t = np.zeros((L, L))
+    Htable = np.zeros((K, K))
+    TransStateCount = np.zeros((K, K))
+    
+    for t in xrange(1, T):
+        # Pick the subset of active states
+        active_idx = np.ix_(top_colids[t-1], top_colids[t])
+        PiMat_t = PiMat[active_idx] # (L, L)
+        SoftEv_t = SoftEv[t, top_colids[t]] # (L, )
+
+        # Compute respPair_t
+        respPair_t = np.outer(fmsg[t - 1], bmsg[t] * SoftEv_t)
+        respPair_t *= PiMat_t / margPrObs[t]
+
+        # Update TransStateCount
+        TransStateCount[active_idx] += respPair_t
+
+        # Update Htable
+        respPair_t += 1e-100
+        rowwiseSum = np.sum(respPair_t, axis=1)
+        Htable[active_idx] += (respPair_t * np.log(respPair_t) -
+                               respPair_t * np.log(rowwiseSum)[:, np.newaxis])
+    Htable *= -1
+
+    return TransStateCount, Htable
 
 
 def expLogLik(logSoftEv, axis=1):
