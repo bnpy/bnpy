@@ -208,6 +208,9 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
         # Compute margPrObs
         margPrObs = FwdAlg_viterbi_py(PiInit, PiMat, SoftEv, zhat)
 
+        #if spOut:
+        #    resp = np.ones((T, 1))
+
         if True:
             # TODO: return based on spOout
             resp = np.zeros((T, K))

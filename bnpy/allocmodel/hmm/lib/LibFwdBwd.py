@@ -199,9 +199,7 @@ def SummaryAlg_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
     return TransStateCount, Htable, mHtable
 
 def SummaryAlg_sparse_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
-                          top_colids, order='C'):
-    # (initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
-    #  top_colids, TransStateCount, Htable, order='C')
+                          top_colids, TransStateCount, Htable, order='C'):
     if not hasEigenLibReady:
         raise ValueError("Cannot find library %s. Please recompile."
                          % (libfilename))
@@ -217,15 +215,16 @@ def SummaryAlg_sparse_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
     margPrObs = np.asarray(margPrObs, order=order)
     fMsg = np.asarray(fMsg, order=order)
     bMsg = np.asarray(bMsg, order=order)
-    top_colids = np.asarray(top_colids, order=order)
+    top_colids = np.asarray(top_colids, dtype=np.int32, order=order)
 
-    # Allocate outputs
-    TransStateCount = np.zeros((K, K), order=order)
-    Htable = np.zeros((K, K), order=order)
+    # Prep outputs
+    TransStateCount = np.asarray(TransStateCount, order=order)
+    Htable = np.asarray(Htable, order=order)
 
     # Execute C++ code for backward pass (fills in bMsg in-place)
     lib.SummaryAlg_sparse(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
                           top_colids, TransStateCount, Htable, K, T, L)
+    
     return TransStateCount, Htable
 
 ''' This block of code loads the shared library and defines wrapper functions

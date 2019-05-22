@@ -684,7 +684,7 @@ void SummaryAlg_sparse(
     ExtArr2D TransStateCount (TransStateCountOUT, K, K);
     ExtArr2D Htable (HtableOUT, K, K);
 
-    // Temporary KxK array for storing respPair at timestep t
+    // Temporary LxL array for storing respPair at timestep t
     Arr2D respPair_t = ArrayXXd::Zero(L, L);
     Arr1D rowwiseSum = ArrayXd::Zero(L);
     Arr1D logrowwiseSum = ArrayXd::Zero(L);
@@ -708,9 +708,6 @@ void SummaryAlg_sparse(
 
         // Aggregate pairwise transition counts
         TransStateCount(topColIDs.row(t-1), topColIDs.row(t)) += respPair_t;
-        //TransStateCount += respPair_t;
-        cout << "Grr" << endl;
-        cout << TransStateCount << endl;
 
         // Aggregate entropy in a KxK matrix
 
@@ -723,19 +720,17 @@ void SummaryAlg_sparse(
         logrowwiseSum = log(rowwiseSum);
 
         // Increment by rP log rP
-        Htable(topColIDs.row(t-1), topColIDs.row(t)) += respPair_t * respPair_t.log();
-        //Htable += respPair_t * respPair_t.log();
-
+        Htable(topColIDs.row(t-1), topColIDs.row(t)) -= respPair_t * respPair_t.log();
+        
         // Decrement by rP log rP.rowwise().sum()
         // Remember, broadcasting with *= doesnt work
         // https://forum.kde.org/viewtopic.php?f=74&t=95629 
         // so we use a forloop instead
-        for (int k=0; k < K; k++) {
-          respPair_t.col(k) *= logrowwiseSum;
+        for (int ell=0; ell < L; ell++) {
+          respPair_t.col(ell) *= logrowwiseSum;
         }
-        Htable(topColIDs.row(t-1), topColIDs.row(t)) -= respPair_t; 
-        //Htable -= respPair_t; 
-
+        Htable(topColIDs.row(t-1), topColIDs.row(t)) += respPair_t; 
+        
         /*
         printf("----------- t=%d\n", t);
         for (int j = 0; j < K; j++) {
@@ -746,6 +741,4 @@ void SummaryAlg_sparse(
         }
         */
     }
-
-    Htable *= -1.0;
 }

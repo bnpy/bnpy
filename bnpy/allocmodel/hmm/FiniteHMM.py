@@ -157,7 +157,8 @@ class FiniteHMM(AllocModel):
             logMargPr = np.empty(Data.nDoc)
             if spOutLP and nnzPerRowLP > 1:
                 # sparse LP summary
-                spR = csr_matrix((Data.nObs, K))
+                spR_data = np.empty((Data.nObs, nnzPerRowLP))
+                spR_colids = np.empty((Data.nObs, nnzPerRowLP), dtype=np.int32)
                 TransStateCount = np.zeros((K, K))
                 Htable = np.zeros((K, K))
             else:
@@ -189,12 +190,11 @@ class FiniteHMM(AllocModel):
                                                 spOut=spOutLP,
                                                 TransStateCount=TransStateCount,
                                                 Htable=Htable)
-                    # update spR
-                    T_n = stop - start
-                    row_ind = np.repeat(np.arange(T_n), nnzPerRowLP)
-                    col_ind = seqColIDs.flatten()
-                    spR[start:stop] = csr_matrix((seqResp.flatten(), (row_ind, col_ind)),
-                                                 shape=(T_n, K))
+                    
+                    # update spR and spR_colids
+                    spR_data[start:stop] = seqResp
+                    spR_colids[start:stop] = seqColIDs
+
                 else:
                     seqResp, seqRespPair, seqLogMargPr = \
                         HMMUtil.FwdBwdAlg_sparse(initParam, transParam, logSoftEv_n,
@@ -204,6 +204,15 @@ class FiniteHMM(AllocModel):
                     resp[start:stop] = seqResp
                     respPair[start:stop] = seqRespPair
                 logMargPr[n] = seqLogMargPr
+
+            # Assemble spR into common sparse matrix
+            if spOutLP and nnzPerRowLP > 1:
+                spR_indptr = np.arange(0, Data.nObs * nnzPerRowLP + nnzPerRowLP,
+                                       step=nnzPerRowLP, dtype=spR_colids.dtype)
+                spR = csr_matrix(
+                    (spR_data.flatten(), spR_colids.flatten(), spR_indptr),
+                    shape=(Data.nObs, K),
+                )
 
             # print 'Completed all sequences'
             if spOutLP and nnzPerRowLP > 1:
