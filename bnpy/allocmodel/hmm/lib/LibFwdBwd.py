@@ -227,6 +227,31 @@ def SummaryAlg_sparse_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
     
     #return TransStateCount, Htable
 
+def ViterbiAlg_cpp(logSoftEv, logInitPi, logTransPi, return_logProb=False,
+                   order='C'):
+    if not hasEigenLibReady:
+        raise ValueError("Cannot find library %s. Please recompile."
+                         % (libfilename))
+    if order != 'C':
+        raise NotImplementedError("LibFwdBwd only supports row-major order.")
+
+    # Prep inputs
+    T, K = logSoftEv.shape
+    logInitPi = np.asarray(logInitPi, order=order)
+    logTransPi = np.asarray(logTransPi, order=order)
+    logSoftEv = np.asarray(logSoftEv, order=order)
+
+    # Prep output
+    zhat = np.zeros(T, dtype=np.int32, order=order)
+    logProb = np.zeros(T, order=order)
+
+    lib.ViterbiAlg(logInitPi, logTransPi, logSoftEv, logProb, zhat, K, T)
+
+    if return_logProb:
+        return zhat, logProb
+    else:
+        return zhat
+
 ''' This block of code loads the shared library and defines wrapper functions
     that can take numpy array objects.
 '''
@@ -323,6 +348,15 @@ try:
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ctypes.c_int, ctypes.c_int, ctypes.c_int]
+
+    lib.ViterbiAlg.restype = None
+    lib.ViterbiAlg.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int, ctypes.c_int]
 
 
 except OSError:

@@ -101,8 +101,16 @@ extern "C" {
     int K,
     int T,
     int L);
-}
 
+  void ViterbiAlg(
+    double * logInitPiIN,
+    double * logTransPiIN,
+    double * logSoftEvIN,
+    double * margPrObsOUT,
+    int * zhatOUT,
+    int K,
+    int T);
+}
 
 
 // ======================================================== Custom Type Defs
@@ -111,11 +119,13 @@ extern "C" {
 typedef Array<double, Dynamic, Dynamic, RowMajor> Arr2D;
 typedef Array<double, 1, Dynamic, RowMajor> Arr1D;
 typedef Array<int, Dynamic, Dynamic, RowMajor> Arr2D_i;
+typedef Array<int, 1, Dynamic, RowMajor> Arr1D_i;
 
 // Simple names for array types with externally allocated memory
 typedef Map<Arr2D> ExtArr2D;
 typedef Map<Arr1D> ExtArr1D;
 typedef Map<Arr2D_i> ExtArr2D_i;
+typedef Map<Arr1D_i> ExtArr1D_i;
 
 // Exactly the same as in util/lib/sparseResp/SparsifyRespCPPX.cpp - how to reuse?
 struct LessThanFor1DArray {
@@ -740,5 +750,58 @@ void SummaryAlg_sparse(
           printf("\n");
         }
         */
+    }
+}
+
+
+// ======================================================== Viterbi Algorithm
+// ======================================================== 
+void ViterbiAlg(
+    double * logInitPiIN,
+    double * logTransPiIN,
+    double * logSoftEvIN,
+    double * logProbOUT,
+    int * zhatOUT,
+    int K,
+    int T)
+{
+    // Prep input
+    ExtArr1D logInitPi (logInitPiIN, K);
+    ExtArr2D logTransPi (logTransPiIN, K, K);
+    ExtArr2D logSoftEv (logSoftEvIN, T, K);
+
+    // Prep output
+    ExtArr1D logProb (logProbOUT, T);
+    ExtArr1D_i zhat (zhatOUT, T);
+
+    // Temporary arrays
+    Arr2D scoreTable = ArrayXXd::Zero(T, K);
+    Arr2D ptrTable = ArrayXXd::Zero(T, K);
+    Arr1D scoreVec = ArrayXd::Zero(K);
+    MatrixXf::Index topColID;
+
+    scoreTable.row(0) = logSoftEv.row(0) + logInitPi;
+    ptrTable.row(0) = -1;
+
+    for (int t = 1; t < T; t++) {
+        for (int k = 0; k < K; k++) {
+            Arr1D trans_k = logTransPi.col(k);
+            Arr1D score_prev = scoreTable.row(t-1);
+
+            scoreVec = trans_k + score_prev;
+            float max = scoreVec.maxCoeff(&topColID);
+
+            ptrTable(t, k) = topColID;
+            scoreTable(t, k) = logSoftEv(t, k) + scoreVec(topColID);
+        }
+    }
+
+    // Follow backward pointers to construct most likely state sequence
+    logProb.tail(1) = scoreTable(last, all).maxCoeff(&topColID);
+    zhat.tail(1) = topColID;
+    for (int t = T - 2; t >= 0; t--) {
+        zhat(t) = ptrTable(t + 1, zhat(t + 1));
+        logProb(t) = scoreTable(t, zhat(t));
+        logProb(t+1) -= logProb(t);
     }
 }

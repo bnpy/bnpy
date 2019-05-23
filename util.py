@@ -19,13 +19,14 @@ plt.rcParams['font.size'] = 20
 def create_title(plot_title, dataset_title, obs_model, learn_alg='VB'):
     return "%s, %s, %s - %s" % (dataset_title, obs_model, learn_alg, plot_title)
 
-def plot_ax(axes, max_iters, y_vals, L, sparse_opt, summary):
+def plot_ax(axes, max_x, x_vals, y_vals, L, sparse_opt, summary):
     L_vals, zeropass_y, onepass_y, twopass_y = summary
     y_final = y_vals[-1]
 
     # Append y_vals so all lines in one plot have the same lengths
-    tail = np.full(max_iters - len(y_vals), y_vals[-1])
-    y_vals = np.concatenate((y_vals, tail))
+    if x_vals[-1] < max_x:
+        y_vals = np.hstack((y_vals, y_final))
+        x_vals = np.hstack((x_vals, max_x))
 
     # Determine color and label
     colors = ['red', 'green', 'blue', 'orange', 'purple']
@@ -70,19 +71,19 @@ def plot_ax(axes, max_iters, y_vals, L, sparse_opt, summary):
 
     # Plot
     for ax in plot_axes:
-        ax.plot(np.arange(1, max_iters + 1), y_vals,
-                label=label, color=color)
+        ax.plot(x_vals, y_vals, label=label, color=color)
 
-def plot_setup(experiment_out, plot_title, dataset_title, ylab):
+def plot_setup(experiment_out, plot_title, dataset_title, ylab,
+               xvar='lap_history', xlab='iteration', xscale='linear'):
     ax1 = plt.subplot(1, 3, 1)
     ax2 = plt.subplot(1, 3, 2)
     ax3 = plt.subplot(1, 3, 3)
     axes = [ax1, ax2, ax3]
-    max_iters = np.max([len(d['lap_history']) for _, d in experiment_out])
+    max_x = np.max([d[xvar][-1] for _, d in experiment_out])
     obs_model = d['ReqArgs']['obsModelName']
 
     for i, ax in enumerate(axes):
-        ax.set_xlabel('iteration')
+        ax.set_xlabel(xlab)
         ax.set_ylabel(ylab)
         if i == 0:
             ax_title = 'One-pass'
@@ -91,11 +92,12 @@ def plot_setup(experiment_out, plot_title, dataset_title, ylab):
         else:
             ax_title = 'L2'
         ax.set_title(ax_title)
+        ax.set_xscale(xscale)
 
     plt.suptitle(create_title(plot_title, dataset_title, obs_model))
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-    return axes, max_iters, obs_model
+    return axes, max_x, obs_model
 
 def plot_show(axes, ymin=None, ymax=None):
     ax1, ax2, ax3 = axes
@@ -142,8 +144,9 @@ def compute_hamming(model_dict):
         
     return ham_dist_history
 
-def plot_y_vs_iter(experiment_out, plot_title, dataset_title,
-                   get_y_vals, ylab, ymin=None, ymax=None):
+def plot_y_vs_x(experiment_out, plot_title, dataset_title,
+                get_y_vals, ylab, ymin=None, ymax=None,
+                xvar='lap_history', xlab='iteration', xscale='linear'):
     # Summarize info for y vs L plot
     L_vals = []
     zeropass_y = []
@@ -152,14 +155,16 @@ def plot_y_vs_iter(experiment_out, plot_title, dataset_title,
     summary = [L_vals, zeropass_y, onepass_y, twopass_y]
 
     # Plot setup
-    axes, max_iters, obs_model = plot_setup(experiment_out,
-                                            plot_title, dataset_title, ylab)
+    axes, max_x, obs_model = plot_setup(experiment_out,
+                                        plot_title, dataset_title, ylab,
+                                        xvar=xvar, xlab=xlab, xscale=xscale)
 
     # Plot each L
     for _, info_dict in experiment_out:
         L, sparse_opt = unpack_info(info_dict)
         y_vals = get_y_vals(info_dict)
-        plot_ax(axes, max_iters, y_vals, L, sparse_opt, summary)
+        x_vals = info_dict[xvar]
+        plot_ax(axes, max_x, x_vals, y_vals, L, sparse_opt, summary)
     plot_show(axes, ymin, ymax)
 
     # Return summary
@@ -200,13 +205,30 @@ def plot_hamming(experiment_out, dataset_title, ymin=None, ymax=None):
     plot_y_vs_L(summary, 'Hamming distance vs L', dataset_title, ylab)
 
 # Plot loss
-def plot_loss(experiment_out, dataset_title, ymin=None, ymax=None):
+def plot_loss(experiment_out, dataset_title, ymin=None, ymax=None,
+              use_log_scale=False, use_elapsed_time=False):
     ylab = 'loss'
+
+    # Pick x axis
+    if use_elapsed_time:
+        xvar = 'elapsed_time_sec_history'
+        xlab = 'time (sec)'
+    else:
+        xvar = 'lap_history'
+        xlab = 'iteration'
+
+    # Whether to use linear or log scale on the x axis
+    if use_log_scale:
+        xscale = 'log'
+    else:
+        xscale = 'linear'
 
     # Loss vs iteration
     get_y_vals = lambda d: d['loss_history']
-    summary = plot_y_vs_iter(experiment_out, 'Loss vs iteration', dataset_title,
-                             get_y_vals, ylab, ymin=ymin, ymax=ymax)
+    summary = plot_y_vs_x(experiment_out, 'Loss vs iteration',
+                          dataset_title, get_y_vals, ylab,
+                          ymin=ymin, ymax=ymax,
+                          xvar=xvar, xlab=xlab, xscale=xscale)
 
     # Loss vs L
     plot_y_vs_L(summary, 'Loss vs L', dataset_title, ylab)
@@ -249,17 +271,20 @@ def plot_clusters(experiment_out, dataset_title):
 ### Experiment utils ###
 
 def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
-                   min_L=1, max_L=5, n_task=5, tol=1e-4, max_laps=500, save=True,
-                   **kwargs):
+                   min_L=1, max_L=5, n_task=5, tol=1e-4, max_laps=500,
+                   save=True, run_dense=True, **kwargs):
     # Find the best seed for the dense model
-    print 'Training dense model'
-    dense_path = '/'.join((out_path, 'dense'))
-    dense_model, dense_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                       K=K, output_path=dense_path,
-                                       convergeThr=tol, nLap=max_laps,
-                                       printEvery=25, nTask=n_task,
-                                       **kwargs)
-    taskid = dense_dict['taskid']
+    if run_dense:
+        print 'Training dense model'
+        dense_path = '/'.join((out_path, 'dense'))
+        dense_model, dense_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
+                                           K=K, output_path=dense_path,
+                                           convergeThr=tol, nLap=max_laps,
+                                           printEvery=25, nTask=n_task,
+                                           **kwargs)
+        taskid = dense_dict['taskid']
+    else:
+        taskid = 1
 
     # Save trials in a sorted order from lowest to highest (dense) L
     experiment_out = []
@@ -295,50 +320,8 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                                                      **kwargs)
             experiment_out.append((zeropass_model, zeropass_dict))
 
-    experiment_out.append((dense_model, dense_dict))
-
-    # Save experiment_out
-    if save:
-        pickle.dump(experiment_out, open('%s/summary.p' % out_path, 'wb'))
-
-    return experiment_out
-
-def run_experiment_sparse(dataset, alloc_model, obs_model, alg, K, out_path,
-                          min_L=1, max_L=5, taskid=1, tol=1e-4, max_laps=500,
-                          save=True, **kwargs):
-    # Save trials in a sorted order from lowest to highest (dense) L
-    experiment_out = []
-    for L in xrange(min_L, max_L + 1):
-        print 'Training one-pass sparse model L =', L
-        onepass_path = '/'.join((out_path, 'onepass-L=%d' % L))
-        onepass_model, onepass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                               K=K, output_path=onepass_path,
-                                               convergeThr=tol, nLap=max_laps,
-                                               printEvery=25, taskid=taskid,
-                                               nnzPerRowLP=L, sparseOptLP='onepass',
-                                               **kwargs)
-        experiment_out.append((onepass_model, onepass_dict))
-
-        if L > 1:
-            print 'Training two-pass sparse model L =', L
-            twopass_path = '/'.join((out_path, 'twopass-L=%d' % L))
-            twopass_model, twopass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                                   K=K, output_path=twopass_path,
-                                                   convergeThr=tol, nLap=max_laps,
-                                                   printEvery=25, taskid=taskid,
-                                                   nnzPerRowLP=L, sparseOptLP='twopass',
-                                                   **kwargs)
-            experiment_out.append((twopass_model, twopass_dict))
-
-            print 'Training O(L^2) sparse model L =', L
-            zeropass_path = '/'.join((out_path, 'zeropass-L=%d' % L))
-            zeropass_model, zeropass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
-                                                     K=K, output_path=zeropass_path,
-                                                     convergeThr=tol, nLap=max_laps,
-                                                     printEvery=25, taskid=taskid,
-                                                     nnzPerRowLP=L, sparseOptLP='zeropass',
-                                                     **kwargs)
-            experiment_out.append((zeropass_model, zeropass_dict))
+    if run_dense:
+        experiment_out.append((dense_model, dense_dict))
 
     # Save experiment_out
     if save:

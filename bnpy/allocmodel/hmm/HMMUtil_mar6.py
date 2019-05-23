@@ -17,7 +17,7 @@ from bnpy.util import as2D
 
 from lib.LibFwdBwd import cppReady, FwdAlg_cpp, FwdAlg_zeropass_cpp
 from lib.LibFwdBwd import FwdAlg_onepass_cpp, FwdAlg_twopass_cpp
-from lib.LibFwdBwd import BwdAlg_cpp, BwdAlg_sparse_cpp
+from lib.LibFwdBwd import BwdAlg_cpp, BwdAlg_sparse_cpp, ViterbiAlg_cpp
 from lib.LibFwdBwd import SummaryAlg_cpp, SummaryAlg_sparse_cpp
 
 def calcLocalParams(Data, LP,
@@ -201,52 +201,33 @@ def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibriu
 
     SoftEv, lognormC = expLogLik(logSoftEv)
 
-    if nnzPerRow == 1: # Viterbi (L = 1) special case
-        # Use the most likely states as the only active states
-        top_colids = runViterbiAlg(logSoftEv, np.log(PiInit), np.log(PiMat))
+    # Viterbi (L = 1) special case
+    if nnzPerRow == 1:
+        fmsg, margPrObs, top_colids = FwdAlg_viterbi(PiInit, PiMat, logSoftEv, lognormC)
 
-        # Compute margPrObs
-        margPrObs = FwdAlg_viterbi_py(PiInit, PiMat, SoftEv, top_colids)
-
-        resp = np.ones((T, 1))
-        respPair = np.zeros((T, K, K))
-        respPair[np.arange(1, T), top_colids[:-1], top_colids[1:]] = 1
-        top_colids = top_colids.reshape((T, 1))
-
-        # Update TransStateCount
-        TransStateCount += respPair.sum(axis=0)
-
-        # Update Htable
-        respPair += 1e-100
-        rowwiseSum = np.sum(respPair, axis=2) # (T, K)
-        Htable -= np.sum(respPair * np.log(respPair) -
-                         respPair * np.log(rowwiseSum)[:,:, np.newaxis],
-                         axis=0)
-
-    else:
-        # One-pass sparse forward algorithm
-        if sparse_opt == 'onepass':
-            fmsg, margPrObs, top_colids = FwdAlg_onepass(PiInit, PiMat, SoftEv, nnzPerRow)
-        
-        # Two-pass sparse forward algorithm
-        elif sparse_opt == 'twopass':
-            fmsg, margPrObs, top_colids = FwdAlg_twopass(PiInit, PiMat, SoftEv, nnzPerRow)
-        
-        # O(L^2) sparse forward algorithm
-        elif sparse_opt == 'zeropass':
-            fmsg, margPrObs, top_colids = FwdAlg_zeropass(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium)
-        
-        else:
-            raise Exception('Unknown sparse_opt')
+    # One-pass sparse forward algorithm
+    elif sparse_opt == 'onepass':
+        fmsg, margPrObs, top_colids = FwdAlg_onepass(PiInit, PiMat, SoftEv, nnzPerRow)
     
-        if not np.all(np.isfinite(margPrObs)):
-            raise ValueError('NaN values found. Numerical badness!')
+    # Two-pass sparse forward algorithm
+    elif sparse_opt == 'twopass':
+        fmsg, margPrObs, top_colids = FwdAlg_twopass(PiInit, PiMat, SoftEv, nnzPerRow)
+    
+    # O(L^2) sparse forward algorithm
+    elif sparse_opt == 'zeropass':
+        fmsg, margPrObs, top_colids = FwdAlg_zeropass(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium)
+    
+    else:
+        raise Exception('Unknown sparse_opt')
+    
+    if not np.all(np.isfinite(margPrObs)):
+        raise ValueError('NaN values found. Numerical badness!')
 
-        bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
-        resp = fmsg * bmsg  # (T, L)        
+    bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
+    resp = fmsg * bmsg  # (T, L)
 
-        SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg, 
-                          top_colids, TransStateCount, Htable)
+    SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg, 
+                      top_colids, TransStateCount, Htable)
 
     logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
 
@@ -381,6 +362,19 @@ def FwdAlg(PiInit, PiMat, SoftEv):
     else:
         return FwdAlg_py(PiInit, PiMat, SoftEv)
 
+def FwdAlg_viterbi(PiInit, PiMat, logSoftEv, lognormC):
+    T, K = logSoftEv.shape
+    logPiInit = np.log(PiInit)
+    logPiMat = np.log(PiMat)
+
+    zhat, logMargPr = runViterbiAlg(logSoftEv, logPiInit, logPiMat,
+                                    return_logProb=True)
+    fmsg = np.ones((T, 1))
+    margPrObs = np.exp(logMargPr - lognormC)
+    top_colids = zhat.reshape((T, 1))
+
+    return fmsg, margPrObs, top_colids
+
 def FwdAlg_zeropass(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium):
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
         return FwdAlg_zeropass_cpp(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium)
@@ -422,6 +416,11 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None):
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs)
 
 def BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids):
+    # Viterbi (L = 1) special case
+    T, L = top_colids.shape
+    if L == 1:
+        return np.ones((T, 1))
+
     if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
         return BwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, margPrObs, top_colids)
     else:
@@ -752,7 +751,24 @@ def _parseInput_SoftEv(logSoftEv, K):
     return logSoftEv
 
 
-def runViterbiAlg(logSoftEv, logPi0, logPi):
+def runViterbiAlg(logSoftEv, logPi0, logPi, return_logProb=False):
+    ''' Forward algorithm for a single HMM sequence. Wrapper for py/cpp.
+    Related
+    -------
+    FwdAlg_py
+    Returns
+    -------
+    fmsg : 2D array, size T x K
+        fmsg[t,k] = p( z[t,k] = 1 | x[1] ... x[t] )
+    margPrObs : 1D array, size T
+        margPrObs[t] = p( x[t] | x[1], x[2], ... x[t-1] )
+    '''
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return ViterbiAlg_cpp(logSoftEv, logPi0, logPi, return_logProb)
+    else:
+        return runViterbiAlg_py(logSoftEv, logPi0, logPi, return_logProb)
+
+def runViterbiAlg_py(logSoftEv, logPi0, logPi, return_logProb=False):
     ''' Run viterbi algorithm to estimate MAP states for single sequence.
 
     Args
@@ -805,8 +821,13 @@ def runViterbiAlg(logSoftEv, logPi0, logPi):
     z[-1] = np.argmax(ScoreTable[-1])
     for t in reversed(xrange(T - 1)):
         z[t] = PtrTable[t + 1, z[t + 1]]
-    return z
 
+    if return_logProb:
+        logProb = ScoreTable[np.arange(T), z]
+        logProb -= np.hstack((0, logProb[:-1]))
+        return z, logProb
+    else:
+        return z
 
 def runViterbiAlg_forloop(logSoftEv, logPi0, logPi):
     ''' Run viterbi algorithm to estimate MAP states for single sequence.
