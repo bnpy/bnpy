@@ -777,22 +777,18 @@ void ViterbiAlg(
     // Temporary arrays
     Arr2D scoreTable = ArrayXXd::Zero(T, K);
     Arr2D ptrTable = ArrayXXd::Zero(T, K);
-    Arr1D scoreVec = ArrayXd::Zero(K);
+    Arr2D scoreMat_t = ArrayXd::Zero(K, K);
     MatrixXf::Index topColID;
 
     scoreTable.row(0) = logSoftEv.row(0) + logInitPi;
     ptrTable.row(0) = -1;
 
     for (int t = 1; t < T; t++) {
+        scoreMat_t = logTransPi.colwise() + scoreTable.row(t-1).transpose();
         for (int k = 0; k < K; k++) {
-            Arr1D trans_k = logTransPi.col(k);
-            Arr1D score_prev = scoreTable.row(t-1);
-
-            scoreVec = trans_k + score_prev;
-            float max = scoreVec.maxCoeff(&topColID);
-
+            float max = scoreMat_t.col(k).maxCoeff(&topColID);
             ptrTable(t, k) = topColID;
-            scoreTable(t, k) = logSoftEv(t, k) + scoreVec(topColID);
+            scoreTable(t, k) = logSoftEv(t, k) + scoreMat_t(topColID, k);
         }
     }
 

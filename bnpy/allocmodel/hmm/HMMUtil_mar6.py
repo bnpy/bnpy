@@ -367,12 +367,13 @@ def FwdAlg_viterbi(PiInit, PiMat, logSoftEv, lognormC):
     logPiInit = np.log(PiInit)
     logPiMat = np.log(PiMat)
 
-    zhat, logMargPr = runViterbiAlg(logSoftEv, logPiInit, logPiMat,
-                                    return_logProb=True)
-    fmsg = np.ones((T, 1))
-    margPrObs = np.exp(logMargPr - lognormC)
-    top_colids = zhat.reshape((T, 1))
+    zhat, logMargPrObs = runViterbiAlg(logSoftEv, logPiInit, logPiMat,
+                                       return_logProb=True)
 
+    fmsg = np.ones((T, 1))    
+    margPrObs = np.exp(logMargPrObs - lognormC)
+    top_colids = zhat.reshape((T, 1))
+    
     return fmsg, margPrObs, top_colids
 
 def FwdAlg_zeropass(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium):
