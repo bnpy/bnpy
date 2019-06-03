@@ -15,7 +15,10 @@ from bnpy.util.NumericUtil import sumRtimesS
 from bnpy.util.NumericUtil import inplaceLog
 from bnpy.util import as2D
 
-from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from lib.LibFwdBwd import cppReady, FwdAlg_cpp, FwdAlg_zeropass_cpp
+from lib.LibFwdBwd import FwdAlg_onepass_cpp, FwdAlg_twopass_cpp
+from lib.LibFwdBwd import BwdAlg_cpp, BwdAlg_sparse_cpp, ViterbiAlg_cpp
+from lib.LibFwdBwd import SummaryAlg_cpp, SummaryAlg_sparse_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -139,9 +142,8 @@ def calcLocalParams(Data, LP,
     return LP
 
 
-def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
+def FwdBwdAlg(PiInit, PiMat, logSoftEv):
     '''Execute forward-backward algorithm for one sequence.
-
     Args
     -------
     piInit : 1D array, size K
@@ -170,7 +172,6 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
         * step t assigned to state k
         Formally = p( z[t-1,j] = 1, z[t,k] = 1 | x[1], x[2], ... x[T])
         respPair[0,:,:] is undefined, but kept so indexing consistent.
-
      logMargPrSeq : scalar real
             logMargPrSeq = joint log probability of the observed sequence
                         log p( x[1], x[2], ... x[T] )
@@ -186,62 +187,62 @@ def FwdBwdAlg(PiInit, PiMat, logSoftEv, nnzPerRow=2):
         raise ValueError('NaN values found. Numerical badness!')
 
     bmsg = BwdAlg(PiInit, PiMat, SoftEv, margPrObs)
-    resp = fmsg * bmsg # (T, K)
-    np.save('before_resp.npy', resp)
-
-    ### Sparsify attempt ###
-    # resp.shape == (T, K)
-    # resp.sum(axis=1) == 1
-
-    # Rank state posterior probabilities
-    top_colids = np.argpartition(resp, K - nnzPerRow, axis=1)
-    top_colids = top_colids[:, -nnzPerRow:]
-    np.save('top_colds.npy', top_colids)
-    assert top_colids.shape == (T, nnzPerRow)
-
-    ## Renormalize resp probabilities
-    tmp = fmsg * bmsg
-    resp = np.zeros_like(tmp)
-    for t in xrange(T):
-        resp[t, top_colids[t]] = tmp[t, top_colids[t]]
-    resp /= resp.sum(axis=1).reshape((-1, 1))
-    np.save('after_resp.npy', resp)
-    assert np.allclose(1.0, resp.sum(axis=1))
-
-    ## Renormalize
-    tmp = calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T) # (T, K, K)
-    np.save('before_respPair.npy', tmp)
-    respPair = np.zeros_like(tmp)
-    for t in xrange(1, T):
-        from_ids = top_colids[t - 1]
-        to_ids = top_colids[t]
-        respPair[t][np.ix_(from_ids, to_ids)] = tmp[t][np.ix_(from_ids, to_ids)]
-    np.save('before_norm_respPair.npy', respPair)
-    respPair[1:] /= respPair[1:].sum(axis=(1, 2)).reshape((-1, 1, 1))
-    np.save('after_norm_respPair.npy', respPair)
-    assert np.all(respPair[0] == 0)
-    assert np.allclose(1.0, respPair.sum(axis=(1, 2))[1:])
-
-    # Make sure respPair marginalizes into resp
-    print np.argmax(np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:]))
-    print np.max(np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:]))
-    #print 2, np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
-    #print 3, np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
-    #print respPair[1:].sum(axis=1)[:-1]
-    #print respPair[1:].sum(axis=2)[1:]
-    #a = np.abs(respPair[1:].sum(axis=1)[:-1] - respPair[1:].sum(axis=2)[1:])
-    #b = np.abs(respPair[1:].sum(axis=1) - resp[1:])
-    #print a == b
-
-    assert np.allclose(respPair[1:].sum(axis=1)[:-1], respPair[1:].sum(axis=2)[1:])
-    assert np.allclose(respPair[1:].sum(axis=1), resp[1:]), np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
-    assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
-
-    ### end ###
-
+    resp = fmsg * bmsg
+    respPair = calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T)
     logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
     return resp, respPair, logMargPrSeq
 
+
+def FwdBwdAlg_sparse(PiInit, PiMat, logSoftEv, nnzPerRow, sparse_opt, equilibrium,
+                     TransStateCount, Htable):
+    PiInit, PiMat, K = _parseInput_TransParams(PiInit, PiMat)
+    logSoftEv = _parseInput_SoftEv(logSoftEv, K)
+    T = logSoftEv.shape[0]
+
+    SoftEv, lognormC = expLogLik(logSoftEv)
+
+    # Viterbi (L = 1) special case
+    if nnzPerRow == 1:
+        fmsg, margPrObs, top_colids = FwdAlg_viterbi(PiInit, PiMat, logSoftEv, lognormC)
+
+    # One-pass sparse forward algorithm
+    elif sparse_opt == 'onepass':
+        fmsg, margPrObs, top_colids = FwdAlg_onepass(PiInit, PiMat, SoftEv, nnzPerRow)
+    
+    # Two-pass sparse forward algorithm
+    elif sparse_opt == 'twopass':
+        fmsg, margPrObs, top_colids = FwdAlg_twopass(PiInit, PiMat, SoftEv, nnzPerRow)
+    
+    # O(L^2) sparse forward algorithm
+    elif sparse_opt == 'zeropass':
+        fmsg, margPrObs, top_colids = FwdAlg_zeropass(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium)
+    
+    else:
+        raise Exception('Unknown sparse_opt')
+    
+    if not np.all(np.isfinite(margPrObs)):
+        raise ValueError('NaN values found. Numerical badness!')
+
+    bmsg = BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids)
+    resp = fmsg * bmsg  # (T, L)
+
+    SummaryAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg, 
+                      top_colids, TransStateCount, Htable)
+
+    logMargPrSeq = np.log(margPrObs).sum() + lognormC.sum()
+
+    #assert 0 < nnzPerRow < K
+    #assert np.all(np.sum(resp != 0, axis=1) <= nnzPerRow)
+    #assert np.all(np.sum(respPair != 0, axis=1) <= nnzPerRow)
+    #assert np.all(np.sum(respPair != 0, axis=2) <= nnzPerRow)
+    #assert np.allclose(1.0, resp.sum(axis=1))
+    #assert np.all(respPair[0] == 0)
+    #assert np.allclose(1.0, respPair.sum(axis=(1, 2))[1:])
+    #assert np.allclose(respPair[1:].sum(axis=1)[:-1], respPair[1:].sum(axis=2)[1:])
+    #assert np.allclose(respPair[1:].sum(axis=1), resp[1:]), np.max(np.abs(respPair[1:].sum(axis=1) - resp[1:]))
+    #assert np.allclose(respPair[1:].sum(axis=2), resp[:-1]), np.max(np.abs(respPair[1:].sum(axis=2) - resp[:-1]))
+    
+    return resp, top_colids, logMargPrSeq
 
 def FwdBwdAlg_LimitMemory(PiInit, PiMat, logSoftEv, mPairIDs):
     '''Execute forward-backward algorithm using only O(K) memory.
@@ -280,7 +281,8 @@ def FwdBwdAlg_LimitMemory(PiInit, PiMat, logSoftEv, mPairIDs):
     return resp, logMargPrSeq, TransStateCount, Htable, mHtable
 
 
-def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T):
+def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T,
+                         top_colids=None):
     ''' Calculate pair-wise responsibilities for all adjacent timesteps
 
     Uses a simple, for-loop implementation.
@@ -296,10 +298,21 @@ def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T):
         Formally = p( z[t-1,j] = 1, z[t,k] = 1 | x[1], x[2], ... x[T])
         respPair[0,:,:] is undefined, but kept so indexing consistent.
     '''
-    respPair = np.zeros((T, K, K))
-    for t in xrange(1, T):
-        respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv[t])
-        respPair[t] *= PiMat / margPrObs[t]
+    if top_colids is not None:
+        L = top_colids.shape[1]
+        respPair = np.zeros((T, L, L))
+        for t in xrange(1, T):
+            # Sparse assignments
+            PiMat_t = PiMat[np.ix_(top_colids[t-1], top_colids[t])] # (L, L)
+            SoftEv_t = SoftEv[t, top_colids[t]] # (L, )
+    
+            respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv_t)
+            respPair[t] *= PiMat_t / margPrObs[t]
+    else:
+        respPair = np.zeros((T, K, K))
+        for t in xrange(1, T):                
+            respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv[t])
+            respPair[t] *= PiMat / margPrObs[t]
     return respPair
 
 
@@ -334,11 +347,9 @@ def calcRespPair_fast(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T,
 
 def FwdAlg(PiInit, PiMat, SoftEv):
     ''' Forward algorithm for a single HMM sequence. Wrapper for py/cpp.
-
     Related
     -------
     FwdAlg_py
-
     Returns
     -------
     fmsg : 2D array, size T x K
@@ -351,16 +362,48 @@ def FwdAlg(PiInit, PiMat, SoftEv):
     else:
         return FwdAlg_py(PiInit, PiMat, SoftEv)
 
+def FwdAlg_viterbi(PiInit, PiMat, logSoftEv, lognormC):
+    T, K = logSoftEv.shape
+    logPiInit = np.log(PiInit)
+    logPiMat = np.log(PiMat)
 
-def BwdAlg(PiInit, PiMat, SoftEv, margPrObs):
+    zhat, logMargPrObs = runViterbiAlg(logSoftEv, logPiInit, logPiMat,
+                                       return_logProb=True)
+
+    fmsg = np.ones((T, 1))    
+    margPrObs = np.exp(logMargPrObs - lognormC)
+    top_colids = zhat.reshape((T, 1))
+    
+    return fmsg, margPrObs, top_colids
+
+def FwdAlg_zeropass(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium):
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return FwdAlg_zeropass_cpp(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium)
+    else:
+        return FwdAlg_zeropass_py(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium)
+
+def FwdAlg_onepass(PiInit, PiMat, SoftEv, nnzPerRow):
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return FwdAlg_onepass_cpp(PiInit, PiMat, SoftEv, nnzPerRow)
+    else:
+        return FwdAlg_onepass_py(PiInit, PiMat, SoftEv, nnzPerRow)
+
+def FwdAlg_twopass(PiInit, PiMat, SoftEv, nnzPerRow):
+    # Preliminary backward pass
+    bmsg = BwdAlg(PiInit, PiMat, SoftEv)
+
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return FwdAlg_twopass_cpp(PiInit, PiMat, SoftEv, nnzPerRow, bmsg)
+    else:
+        return FwdAlg_twopass_py(PiInit, PiMat, SoftEv, nnzPerRow, bmsg)
+
+
+def BwdAlg(PiInit, PiMat, SoftEv, margPrObs=None):
     ''' Backward algorithm for a single HMM sequence.
-
     Wrapper for BwdAlg_py/BwdAlg_cpp.
-
     Related
     -------
     BwdAlg_py
-
     Returns
     -------
     bmsg : 2D array, size TxK
@@ -373,13 +416,22 @@ def BwdAlg(PiInit, PiMat, SoftEv, margPrObs):
     else:
         return BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs)
 
+def BwdAlg_sparse(PiInit, PiMat, SoftEv, margPrObs, top_colids):
+    # Viterbi (L = 1) special case
+    T, L = top_colids.shape
+    if L == 1:
+        return np.ones((T, 1))
+
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return BwdAlg_sparse_cpp(PiInit, PiMat, SoftEv, margPrObs, top_colids)
+    else:
+        return BwdAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, top_colids)
+
 
 def FwdAlg_py(PiInit, PiMat, SoftEv):
     ''' Forward algorithm for a single HMM sequence. In pure python.
-
     Execute forward message-passing on an observed sequence
     given HMM state transition params and likelihoods of each observation
-
     Args
     -------
     piInit : 1D array, size K
@@ -412,18 +464,104 @@ def FwdAlg_py(PiInit, PiMat, SoftEv):
             fmsg[t] = np.dot(PiTMat, fmsg[t - 1]) * SoftEv[t]
         margPrObs[t] = np.sum(fmsg[t])
         fmsg[t] /= margPrObs[t]
-
-    print 'here'
     return fmsg, margPrObs
 
+def FwdAlg_viterbi_py(PiInit, PiMat, SoftEv, top_colids):
+    T = SoftEv.shape[0]
+    row_idx, col_idx = top_colids[:-1], top_colids[1:]
+    
+    PiMat_t = np.hstack((PiInit[top_colids[0]], PiMat[row_idx, col_idx]))
+    SoftEv_t = SoftEv[np.arange(T), top_colids]
+    margPrObs = PiMat_t * SoftEv_t
+    
+    return margPrObs
 
-def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs):
+def FwdAlg_zeropass_py(PiInit, PiMat, SoftEv, nnzPerRow, equilibrium):
+    T = SoftEv.shape[0]
+    K = PiInit.size
+    PiTMat = PiMat.T
+
+    fmsg = np.empty((T, nnzPerRow))
+    top_colids = np.empty((T, nnzPerRow), dtype=int)
+    margPrObs = np.zeros(T)
+    
+    for t in xrange(T):
+        iid_resp = equilibrium * SoftEv[t]
+        top_colids[t] = np.argpartition(iid_resp, K - nnzPerRow)[-nnzPerRow:]
+        if t == 0:
+            tmp_fmsg = PiInit[top_colids[0]]
+        else:
+            tmp_fmsg = np.dot(PiTMat[top_colids[t]][:, top_colids[t-1]], fmsg[t-1])
+        tmp_fmsg *= SoftEv[t][top_colids[t]]
+        margPrObs[t] = np.sum(tmp_fmsg)
+        fmsg[t] = tmp_fmsg / margPrObs[t]
+
+    assert np.allclose(fmsg.sum(axis=1), 1)
+    return fmsg, margPrObs, top_colids
+
+def FwdAlg_onepass_py(PiInit, PiMat, SoftEv, nnzPerRow):
+    T = SoftEv.shape[0]
+    K = PiInit.size
+    PiTMat = PiMat.T # each col sums to one
+
+    fmsg = np.empty((T, nnzPerRow))
+    top_colids = np.empty((T, nnzPerRow), dtype=int)
+    margPrObs = np.zeros(T)
+
+    for t in xrange(0, T):
+        if t == 0:
+            tmp_fmsg = PiInit * SoftEv[0]
+        else:
+            tmp_PiTMat = PiTMat[:, top_colids[t-1]]
+            tmp_fmsg = np.dot(tmp_PiTMat, fmsg[t - 1]) * SoftEv[t] # (K, )
+
+        # Pick top states
+        tmp_colids = np.argpartition(tmp_fmsg, K - nnzPerRow)
+    
+        # Renormalize
+        top_colids[t] = tmp_colids[-nnzPerRow:]
+        margPrObs[t] = np.sum(tmp_fmsg[top_colids[t]])
+        fmsg[t] = tmp_fmsg[top_colids[t]] / margPrObs[t]
+
+    assert np.allclose(fmsg.sum(axis=1), 1)
+    return fmsg, margPrObs, top_colids
+
+def FwdAlg_twopass_py(PiInit, PiMat, SoftEv, nnzPerRow, bmsg):
+    T = SoftEv.shape[0]
+    K = PiInit.size
+    PiTMat = PiMat.T
+
+    fmsg = np.empty((T, nnzPerRow))
+    top_colids = np.empty((T, nnzPerRow), dtype=int)
+    margPrObs = np.zeros(T)
+
+    for t in xrange(0, T):
+        if t == 0:
+            tmp_fmsg = PiInit * SoftEv[0]
+        else:
+            tmp_PiTMat = PiTMat[:, top_colids[t-1]]
+            tmp_fmsg = np.dot(tmp_PiTMat, fmsg[t - 1]) * SoftEv[t] # (K, )
+
+        # Compute (unnormalized) resp to rank
+        tmp_resp = tmp_fmsg * bmsg[t]
+
+        # Pick top states
+        tmp_colids = np.argpartition(tmp_resp, K - nnzPerRow)
+    
+        # Renormalize
+        top_colids[t] = tmp_colids[-nnzPerRow:]
+        margPrObs[t] = np.sum(tmp_fmsg[top_colids[t]])
+        fmsg[t] = tmp_fmsg[top_colids[t]] / margPrObs[t]
+
+    assert np.allclose(fmsg.sum(axis=1), 1)
+    return fmsg, margPrObs, top_colids
+
+
+def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs=None):
     '''Backward algorithm for a single HMM sequence. In pure python.
-
     Takes as input the HMM state transition params,
     initial probabilities, and likelihoods of each observation.
     Requires running forward filtering first, to obtain correct scaling.
-
     Args
     -------
     piInit : 1D array, size K
@@ -439,7 +577,6 @@ def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs):
     margPrObs : 1D array, size T
         margPrObs[t] := p( x[t] | x[1], x[2], ... x[t-1] )
         this is returned by FwdAlg
-
     Returns
     -------
     bmsg : 2D array, size TxK
@@ -452,7 +589,25 @@ def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs):
     bmsg = np.ones((T, K))
     for t in xrange(T - 2, -1, -1):
         bmsg[t] = np.dot(PiMat, bmsg[t + 1] * SoftEv[t + 1])
-        bmsg[t] /= margPrObs[t + 1]
+        if margPrObs is not None:
+            bmsg[t] /= margPrObs[t + 1]
+        else:
+            # In the preliminary backward pass of the two-pass sparse algorithm,
+            # margPrObs has not been computed
+            bmsg[t] /= np.max(bmsg[t])
+    return bmsg
+
+def BwdAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, top_colids):
+    T = SoftEv.shape[0]
+    K = PiInit.size
+    L = top_colids.shape[1]
+    bmsg = np.ones((T, L))
+    for t in xrange(T - 2, -1, -1):
+        tmp_PiMat = PiMat[np.ix_(top_colids[t], top_colids[t+1])] # (L, L)
+        tmp_SoftEv = SoftEv[t+1, top_colids[t+1]] # (L, )
+        bmsg[t] = np.dot(tmp_PiMat, bmsg[t+1] * tmp_SoftEv)
+        bmsg[t] /= margPrObs[t + 1]        
+
     return bmsg
 
 
@@ -472,6 +627,12 @@ def SummaryAlg(*args):
         return SummaryAlg_cpp(*args)
     else:
         return SummaryAlg_py(*args)
+
+def SummaryAlg_sparse(*args):
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        SummaryAlg_sparse_cpp(*args)
+    else:
+        SummaryAlg_sparse_py(*args)
 
 
 def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
@@ -523,6 +684,33 @@ def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
     Htable *= -1
     return TransStateCount, Htable, mHtable
 
+def SummaryAlg_sparse_py(PiInit, PiMat, SoftEv, margPrObs, fmsg, bmsg,
+                         top_colids, TransStateCount, Htable):
+    K = PiInit.size
+    T = SoftEv.shape[0]
+    L = top_colids.shape[1]
+    
+    for t in xrange(1, T):
+        # Pick the subset of active states
+        active_idx = np.ix_(top_colids[t-1], top_colids[t])
+        PiMat_t = PiMat[active_idx] # (L, L)
+        SoftEv_t = SoftEv[t, top_colids[t]] # (L, )
+
+        # Compute respPair_t
+        respPair_t = np.outer(fmsg[t - 1], bmsg[t] * SoftEv_t)
+        respPair_t *= PiMat_t / margPrObs[t]
+
+        # Update TransStateCount
+        TransStateCount[active_idx] += respPair_t
+
+        # Update Htable
+        respPair_t += 1e-100
+        rowwiseSum = np.sum(respPair_t, axis=1)
+        Htable[active_idx] -= (respPair_t * np.log(respPair_t) -
+                               respPair_t * np.log(rowwiseSum)[:, np.newaxis])
+
+    #return TransStateCount, Htable
+
 
 def expLogLik(logSoftEv, axis=1):
     ''' Return element-wise exp of input log likelihood
@@ -564,7 +752,24 @@ def _parseInput_SoftEv(logSoftEv, K):
     return logSoftEv
 
 
-def runViterbiAlg(logSoftEv, logPi0, logPi):
+def runViterbiAlg(logSoftEv, logPi0, logPi, return_logProb=False):
+    ''' Forward algorithm for a single HMM sequence. Wrapper for py/cpp.
+    Related
+    -------
+    FwdAlg_py
+    Returns
+    -------
+    fmsg : 2D array, size T x K
+        fmsg[t,k] = p( z[t,k] = 1 | x[1] ... x[t] )
+    margPrObs : 1D array, size T
+        margPrObs[t] = p( x[t] | x[1], x[2], ... x[t-1] )
+    '''
+    if cppReady() and PlatformConfig['FwdBwdImpl'] == "cpp":
+        return ViterbiAlg_cpp(logSoftEv, logPi0, logPi, return_logProb)
+    else:
+        return runViterbiAlg_py(logSoftEv, logPi0, logPi, return_logProb)
+
+def runViterbiAlg_py(logSoftEv, logPi0, logPi, return_logProb=False):
     ''' Run viterbi algorithm to estimate MAP states for single sequence.
 
     Args
@@ -617,8 +822,13 @@ def runViterbiAlg(logSoftEv, logPi0, logPi):
     z[-1] = np.argmax(ScoreTable[-1])
     for t in reversed(xrange(T - 1)):
         z[t] = PtrTable[t + 1, z[t + 1]]
-    return z
 
+    if return_logProb:
+        logProb = ScoreTable[np.arange(T), z]
+        logProb -= np.hstack((0, logProb[:-1]))
+        return z, logProb
+    else:
+        return z
 
 def runViterbiAlg_forloop(logSoftEv, logPi0, logPi):
     ''' Run viterbi algorithm to estimate MAP states for single sequence.

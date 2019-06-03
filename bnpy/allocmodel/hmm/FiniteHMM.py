@@ -1,8 +1,7 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 
-import HMMUtil_mar6 as HMMUtil
-#import HMMUtil_feb26 as HMMUtil
+import HMMUtil
 from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
 from bnpy.util import digamma, gammaln, as2D
