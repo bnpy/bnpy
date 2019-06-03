@@ -20,7 +20,7 @@ def create_title(plot_title, dataset_title, obs_model, learn_alg='VB'):
     return "%s, %s, %s - %s" % (dataset_title, obs_model, learn_alg, plot_title)
 
 def plot_ax(axes, max_x, x_vals, y_vals, L, sparse_opt, summary):
-    L_vals, zeropass_y, onepass_y, twopass_y = summary
+    if summary is not None: L_vals, zeropass_y, onepass_y, twopass_y = summary
     y_final = y_vals[-1]
 
     # Append y_vals so all lines in one plot have the same lengths
@@ -28,82 +28,142 @@ def plot_ax(axes, max_x, x_vals, y_vals, L, sparse_opt, summary):
         y_vals = np.hstack((y_vals, y_final))
         x_vals = np.hstack((x_vals, max_x))
 
-    # Determine color and label
-    colors = ['red', 'green', 'blue', 'orange', 'purple']
-    color = colors[L%5] if L > 0 else 'black'
-    label = 'L = %d' % L if L > 0 else 'Dense'
+    if summary is not None:
+        # Determine color and label
+        color = {0: 'black',
+                 1: 'green',
+                 2: 'blue',
+                 3: 'orange',
+                 4: 'purple',
+                 5: 'yellow',
+                 16: 'red'}[L]
+        label = 'L = %d' % L if L > 0 else 'Dense'
 
-    # Determine axes
-    ax1, ax2, ax3 = axes
-    plot_axes = []
+        # Determine axes
+        ax1, ax2, ax3 = axes
+        plot_axes = []
+    
+        if L == 0 or L == 1: # Dense or Viterbi (L = 1) case
+            # Include in all (0-, 1-, and 2-pass) subplots
+            plot_axes.extend([ax1, ax2, ax3])
+    
+            # Summarize info for y vs L plot
+            L_vals.append(L)
+            zeropass_y.append(y_final)
+            onepass_y.append(y_final)
+            twopass_y.append(y_final)
+    
+        elif sparse_opt == 'zeropass':
+            # Zero-pass subplot
+            plot_axes.append(ax3)
+    
+            # Summarize info for y vs L plot
+            zeropass_y.append(y_final)
+    
+        elif sparse_opt == 'onepass':
+            # One-pass subplot
+            plot_axes.append(ax1)
+    
+            # Summarize info for y vs L plot
+            onepass_y.append(y_final)
+    
+        else:
+            # Two-pass subplot
+            plot_axes.append(ax2)
+    
+            # Summarize info for y vs L plot
+            L_vals.append(L)
+            twopass_y.append(y_final)
 
-    if L == 0 or L == 1: # Dense or Viterbi (L = 1) case
-        # Include in all (0-, 1-, and 2-pass) subplots
-        plot_axes.extend([ax1, ax2, ax3])
-
-        # Summarize info for y vs L plot
-        L_vals.append(L)
-        zeropass_y.append(y_final)
-        onepass_y.append(y_final)
-        twopass_y.append(y_final)
-
-    elif sparse_opt == 'zeropass':
-        # Zero-pass subplot
-        plot_axes.append(ax3)
-
-        # Summarize info for y vs L plot
-        zeropass_y.append(y_final)
-
-    elif sparse_opt == 'onepass':
-        # One-pass subplot
-        plot_axes.append(ax1)
-
-        # Summarize info for y vs L plot
-        onepass_y.append(y_final)
+        # Plot
+        for ax in plot_axes:
+            ax.plot(x_vals, y_vals, label=label, color=color)
 
     else:
-        # Two-pass subplot
-        plot_axes.append(ax2)
+        # Determine label
+        if L > 1:
+            alg_text = {'zeropass': 'L2',
+                        'onepass': 'One-pass',
+                        'twopass': 'Two-pass'}[sparse_opt]
+        else:
+            alg_text = {0: 'Dense',
+                        1: 'Viterbi'}[L]
+        L_text = str(L) if L > 0 else 'K'
+        label = '%s L = %s' % (alg_text, L_text)
+        
+        # Determine linestyle
+        #linestyle = {'zeropass': ':',
+        #             'onepass': '-.',
+        #             'twopass': '--'}[sparse_opt] if L > 1 else '-'
+        linestyle = {0: '-',
+                     1: ':',
+                     4: '-.',
+                     16: '--'}[L]
 
-        # Summarize info for y vs L plot
-        L_vals.append(L)
-        twopass_y.append(y_final)
+        # Determine color
+        #color = {0: 'black',
+        #         1: 'green',
+        #         4: 'purple',
+        #         16: 'red'}[L]
+        if L > 1:
+            color = {'zeropass': 'purple',
+                     'onepass': 'red',
+                     'twopass': 'blue'}[sparse_opt]
+        else:
+            color = {0: 'black',
+                     1: 'green'}[L]
 
-    # Plot
-    for ax in plot_axes:
-        ax.plot(x_vals, y_vals, label=label, color=color)
+        # Plot
+        plt.plot(x_vals, y_vals, label=label, color=color, linestyle=linestyle,
+                 linewidth=2.0)
 
-def plot_setup(experiment_out, plot_title, dataset_title, ylab,
-               xvar='lap_history', xlab='iteration', xscale='linear'):
-    ax1 = plt.subplot(1, 3, 1)
-    ax2 = plt.subplot(1, 3, 2)
-    ax3 = plt.subplot(1, 3, 3)
-    axes = [ax1, ax2, ax3]
+def plot_setup(experiment_out, plot_title, dataset_title, ylab, yscale='linear',
+               xvar='lap_history', xlab='iteration', xscale='linear',
+               single_plot=False):
     max_x = np.max([d[xvar][-1] for _, d in experiment_out])
     obs_model = d['ReqArgs']['obsModelName']
 
-    for i, ax in enumerate(axes):
-        ax.set_xlabel(xlab)
-        ax.set_ylabel(ylab)
-        if i == 0:
-            ax_title = 'One-pass'
-        elif i == 1:
-            ax_title = 'Two-pass'
-        else:
-            ax_title = 'L2'
-        ax.set_title(ax_title)
-        ax.set_xscale(xscale)
+    if not single_plot:
+        ax1 = plt.subplot(1, 3, 1)
+        ax2 = plt.subplot(1, 3, 2)
+        ax3 = plt.subplot(1, 3, 3)
+        axes = [ax1, ax2, ax3]
+        for i, ax in enumerate(axes):
+            ax.set_xlabel(xlab)
+            ax.set_ylabel(ylab)
+            if i == 0:
+                ax_title = 'One-pass'
+            elif i == 1:
+                ax_title = 'Two-pass'
+            else:
+                ax_title = 'L2'
+            ax.set_title(ax_title)
+            ax.set_xscale(xscale)
+            ax.set_yscale(yscale)
+    
+        plt.suptitle(create_title(plot_title, dataset_title, obs_model))
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-    plt.suptitle(create_title(plot_title, dataset_title, obs_model))
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    else:
+        plt.title(create_title(plot_title, dataset_title, obs_model))
+        plt.xscale(xscale)
+        plt.yscale(yscale)
+        plt.xlabel(xlab)
+        plt.ylabel(ylab)
+        axes = None 
 
     return axes, max_x, obs_model
 
-def plot_show(axes, ymin=None, ymax=None):
-    ax1, ax2, ax3 = axes
-    ax1.set_ylim(ymin, ymax)
-    ax2.set_ylim(ymin, ymax)
-    ax3.set_ylim(ymin, ymax)
+def plot_show(axes, xmin=None, xmax=None, ymin=None, ymax=None):
+    if axes is not None:
+        ax1, ax2, ax3 = axes
+        ax1.set_ylim(ymin, ymax)
+        ax2.set_ylim(ymin, ymax)
+        ax3.set_ylim(ymin, ymax)
+    else:
+        plt.xlim(xmin, xmax)
+        plt.ylim(ymin, ymax)
+
     plt.legend()
     plt.show()
 
@@ -145,31 +205,37 @@ def compute_hamming(model_dict):
     return ham_dist_history
 
 def plot_y_vs_x(experiment_out, plot_title, dataset_title,
-                get_y_vals, ylab, ymin=None, ymax=None,
-                xvar='lap_history', xlab='iteration', xscale='linear'):
+                get_y_vals, ylab, ymin=None, ymax=None, yscale='linear',
+                xvar='lap_history', xlab='iteration', xscale='linear',
+                single_plot=False, some_L=None, xmin=None, xmax=None):
     # Summarize info for y vs L plot
-    L_vals = []
-    zeropass_y = []
-    onepass_y = []
-    twopass_y = []
-    summary = [L_vals, zeropass_y, onepass_y, twopass_y]
+    if not single_plot:
+        L_vals = []
+        zeropass_y = []
+        onepass_y = []
+        twopass_y = []
+        summary = [L_vals, zeropass_y, onepass_y, twopass_y]
+    else:
+        summary = None
 
     # Plot setup
-    axes, max_x, obs_model = plot_setup(experiment_out,
-                                        plot_title, dataset_title, ylab,
+    axes, max_x, obs_model = plot_setup(experiment_out, plot_title, dataset_title,
+                                        ylab, single_plot=single_plot, yscale=yscale,
                                         xvar=xvar, xlab=xlab, xscale=xscale)
 
     # Plot each L
     for _, info_dict in experiment_out:
         L, sparse_opt = unpack_info(info_dict)
-        y_vals = get_y_vals(info_dict)
-        x_vals = info_dict[xvar]
-        plot_ax(axes, max_x, x_vals, y_vals, L, sparse_opt, summary)
-    plot_show(axes, ymin, ymax)
+        if some_L is None or L in some_L:
+            y_vals = get_y_vals(info_dict)
+            x_vals = info_dict[xvar]
+            plot_ax(axes, max_x, x_vals, y_vals, L, sparse_opt, summary)
+    plot_show(axes, xmin, xmax, ymin, ymax)
 
     # Return summary
-    summary.append(obs_model)
-    return summary
+    if not single_plot:
+        summary.append(obs_model)
+        return summary
 
 def plot_y_vs_L(summary, plot_title, dataset_title, ylab):
     L_vals, zeropass_y, onepass_y, twopass_y, obs_model = summary
@@ -211,9 +277,11 @@ def plot_loss(experiment_out, dataset_title, ymin=None, ymax=None,
 
     # Pick x axis
     if use_elapsed_time:
+        plot_title = 'Loss vs time'
         xvar = 'elapsed_time_sec_history'
         xlab = 'time (sec)'
     else:
+        plot_title = 'Loss vs iteration'
         xvar = 'lap_history'
         xlab = 'iteration'
 
@@ -223,15 +291,45 @@ def plot_loss(experiment_out, dataset_title, ymin=None, ymax=None,
     else:
         xscale = 'linear'
 
-    # Loss vs iteration
+    # Loss vs iteration (diff sparsifying methods in diff plots)
     get_y_vals = lambda d: d['loss_history']
-    summary = plot_y_vs_x(experiment_out, 'Loss vs iteration',
+    summary = plot_y_vs_x(experiment_out, plot_title,
                           dataset_title, get_y_vals, ylab,
                           ymin=ymin, ymax=ymax,
                           xvar=xvar, xlab=xlab, xscale=xscale)
 
+    # Loss vs iteration (all sparsifying methods in a single plot)
+    plot_y_vs_x(experiment_out, plot_title,
+                dataset_title, get_y_vals, ylab,
+                ymin=ymin, ymax=ymax, single_plot=True,
+                xvar=xvar, xlab=xlab, xscale=xscale, some_L=[0, 1, 4, 16])
+
     # Loss vs L
     plot_y_vs_L(summary, 'Loss vs L', dataset_title, ylab)
+
+def plot_iter_v_time(experiment_out, dataset_title, ymin=None, ymax=None,
+                     y_time=True, xmin=None, xmax=None, some_L=[1, 4, 16]):
+    if y_time:
+        get_y_vals = lambda d: d['elapsed_time_sec_history']
+        ylab = 'time (sec)'
+        yscale = 'log'
+        
+        xvar = 'lap_history'
+        xlab = 'iteration'
+        xscale = 'linear'
+    else:
+        xvar = 'elapsed_time_sec_history'
+        xlab = 'time (sec)'
+        xscale = 'log'
+        
+        get_y_vals = lambda d: d['lap_history']
+        ylab = 'iteration'
+        yscale = 'linear'
+    
+    plot_y_vs_x(experiment_out, 'Iteration vs time',
+                dataset_title, get_y_vals, ylab, xmin=xmin, xmax=xmax,
+                ymin=ymin, ymax=ymax, single_plot=True, xscale=xscale,
+                xvar=xvar, xlab=xlab, yscale=yscale, some_L=some_L)
 
 # Plot clusters (ignore time steps)
 def plot_clusters(experiment_out, dataset_title):
@@ -272,7 +370,7 @@ def plot_clusters(experiment_out, dataset_title):
 
 def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
                    min_L=1, max_L=5, n_task=5, tol=1e-4, max_laps=500,
-                   save=True, run_dense=True, **kwargs):
+                   L_vals=None, save=True, run_dense=True, **kwargs):
     # Find the best seed for the dense model
     if run_dense:
         print 'Training dense model'
@@ -288,7 +386,9 @@ def run_experiment(dataset, alloc_model, obs_model, alg, K, out_path,
 
     # Save trials in a sorted order from lowest to highest (dense) L
     experiment_out = []
-    for L in xrange(min_L, max_L + 1):
+    if L_vals is None:
+        L_vals = range(min_L, max_L + 1)
+    for L in L_vals:
         print 'Training one-pass sparse model L =', L
         onepass_path = '/'.join((out_path, 'onepass-L=%d' % L))
         onepass_model, onepass_dict = bnpy.run(dataset, alloc_model, obs_model, alg,
