@@ -20,6 +20,8 @@ SMALL_FIG_SIZE = (2.5, 2.5)
 FIG_SIZE = (5, 5)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
 
+np.set_printoptions(precision=3, suppress=1, linewidth=200)
+
 ###############################################################################
 #
 # Load dataset from file
@@ -177,4 +179,41 @@ pylab.xlim([4, 100]) # avoid early iterations
 pylab.ylim([2.34, 4.0]) # handpicked
 pylab.draw()
 pylab.tight_layout()
+
+###############################################################################
+# 
+# Inspect the learned distribution over appearance probabilities
+# --------------------------------------------------------------
+
+# E_proba_K : 1D array, size n_clusters
+# Each entry gives expected probability of that cluster
+
+E_proba_K = stoch_trained_model.allocModel.get_active_comp_probs()
+
+print("probability of each cluster:")
+print(E_proba_K)
+
+###############################################################################
+# 
+# Inspect the learned means and covariance distributions
+# ------------------------------------------------------
+#
+# Remember that each cluster has the following approximate posterior
+# over its mean vector $\mu$ and covariance matrix $\Sigma$:
+#
+# $$
+# q(\mu, \Sigma) = \Normal(\mu | m, \kappa \Sigma) \Wishart(\Sigma | \nu, S)
+# $$
+# 
+# We show here how to compute the expected mean of $\mu$ and $\Sigma$
+# from a trained model.
+
+for k in range(K):
+    E_mu_k = stoch_trained_model.obsModel.get_mean_for_comp(k)
+    E_Sigma_k = stoch_trained_model.obsModel.get_covar_mat_for_comp(k)
+    print("")
+    print("mean[k=%d]" % k)
+    print(E_mu_k)
+    print("covar[k=%d]" % k)
+    print(E_Sigma_k)
 
