@@ -106,3 +106,35 @@ K10_trained_model, K10_info_dict = bnpy.run(
 
 show_bars_over_time(K10_info_dict['task_output_path'])
 
+
+
+###############################################################################
+# Draw sample documents from learned model
+# ----------------------------------------
+# 
+
+# Create random number generator with fixed seed
+prng = np.random.RandomState(54321)
+
+# Preallocate space for 5 generated docs
+n_docs_to_sample = 5
+V = X_csr_DV.shape[1]
+test_x_DV = np.zeros((n_docs_to_sample, V))
+
+for doc_id in range(n_docs_to_sample):
+    # Step 1: Pick cluster index *k* that current example is assigned to
+    proba_K = K10_trained_model.allocModel.get_active_comp_probs()
+    k = prng.choice(proba_K.size, p=proba_K / np.sum(proba_K))
+
+    # Step 2: Draw probability-over-vocab from cluster *k*'s Dirichlet posterior
+    lam_k_V = K10_trained_model.obsModel.Post.lam[k]
+    phi_k_V = prng.dirichlet(lam_k_V)
+
+    # Step 3: Draw a document with 50 words using phi_k_V
+    x_d_V = prng.multinomial(50, phi_k_V)
+    test_x_DV[doc_id] = x_d_V
+
+bnpy.viz.BarsViz.show_square_images(
+    test_x_DV, vmin=0, vmax=5)
+pylab.tight_layout()
+pylab.show()
