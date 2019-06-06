@@ -187,7 +187,7 @@ class SOVBAlg(LearnAlg):
             ElapsedTimeLogger.startEvent('io', 'loadlocal')
             batchLPpath = os.path.abspath(batchLP)
             assert os.path.exists(batchLPpath)
-            F = np.load(batchLPpath)
+            F = np.load(batchLPpath, allow_pickle=True)
             indptr = np.arange(
                 0, (F['D']+1)*F['nnzPerDoc'],
                 F['nnzPerDoc'])
