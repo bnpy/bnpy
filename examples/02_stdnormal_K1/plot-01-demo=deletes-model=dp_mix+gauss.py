@@ -34,7 +34,7 @@ dataset = bnpy.data.XData(X, name='StandardNormalK1')
 #
 # Make a simple plot of the raw data
 
-pylab.hist(dataset.X[:, 0], 50, normed=1)
+pylab.hist(dataset.X[:, 0], 50, density=True)
 pylab.xlabel('x')
 pylab.ylabel('p(x)')
 pylab.tight_layout()

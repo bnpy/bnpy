@@ -70,7 +70,7 @@ class XData(DataObj):
         if filepath.endswith('.mat'):
             return cls.read_from_mat(filepath, nObsTotal, **kwargs)
         try:
-            X = np.load(filepath)
+            X = np.load(filepath, allow_pickle=True)
         except Exception as e:
             X = np.loadtxt(filepath)
         return cls(X, nObsTotal=nObsTotal, **kwargs)
@@ -134,7 +134,7 @@ class XData(DataObj):
         >>> dataset.dim
         2
         '''
-        npz_dict = dict(**np.load(npzfilepath))
+        npz_dict = dict(**np.load(npzfilepath, allow_pickle=True))
         if 'X' not in npz_dict:
             raise KeyError(
                 '.npz file needs to have data in field named X')

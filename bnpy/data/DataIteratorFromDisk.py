@@ -287,7 +287,7 @@ class DataIteratorFromDisk(object):
             raise ValueError('Unrecognized file type: ' + filepath)
         """
         elif filepath.endswith('.npz'):
-            MDict = np.load(filepath)
+            MDict = np.load(filepath, allow_pickle=True)
             if self.dataset_type == 'XData':
                 return MDict['X'].shape[0]
             else:

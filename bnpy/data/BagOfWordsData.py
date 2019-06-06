@@ -65,7 +65,7 @@ class BagOfWordsData(DataObj):
         -------
         Data : BagOfWordsData object
         '''
-        npz_dict = dict(**np.load(npzfilepath))
+        npz_dict = dict(**np.load(npzfilepath, allow_pickle=True))
         if nDocTotal is not None:
             npz_dict['nDocTotal'] = nDocTotal
         if vocab_size is not None:
