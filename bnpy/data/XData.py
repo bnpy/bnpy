@@ -13,7 +13,8 @@ import os
 from collections import namedtuple
 import pandas as pd
 
-from bnpy.data.DataObj import DataObj
+from DataObj import DataObj
+from bnpy import DATASET_PATH
 from bnpy.util import as1D, as2D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -68,7 +69,7 @@ class XData(DataObj):
         if filepath.endswith('.mat'):
             return cls.read_from_mat(filepath, nObsTotal, **kwargs)
         try:
-            X = np.load(filepath)
+            X = np.load(filepath, allow_pickle=True)
         except Exception as e:
             X = np.loadtxt(filepath)
         return cls(X, nObsTotal=nObsTotal, **kwargs)
@@ -97,9 +98,8 @@ class XData(DataObj):
 
         Examples
         --------
-        >>> dataset_path = os.environ["BNPYDATADIR"]
         >>> dataset = XData.read_mat(
-        ...     os.path.join(dataset_path, 'AsteriskK8', 'x_dataset.mat'))
+        ...     os.path.join(DATASET_PATH, 'AsteriskK8', 'x_dataset.mat'))
         >>> dataset.dim
         2
         '''
@@ -128,13 +128,12 @@ class XData(DataObj):
 
         Examples
         --------
-        >>> dataset_path = os.environ["BNPYDATADIR"]
         >>> dataset = XData.read_npz(
-        ...     os.path.join(dataset_path, 'AsteriskK8', 'x_dataset.npz'))
+        ...     os.path.join(DATASET_PATH, 'AsteriskK8', 'x_dataset.npz'))
         >>> dataset.dim
         2
         '''
-        npz_dict = dict(**np.load(npzfilepath))
+        npz_dict = dict(**np.load(npzfilepath, allow_pickle=True))
         if 'X' not in npz_dict:
             raise KeyError(
                 '.npz file needs to have data in field named X')
@@ -154,9 +153,8 @@ class XData(DataObj):
 
         Examples
         --------
-        >>> dataset_path = os.environ["BNPYDATADIR"]
         >>> dataset = XData.read_csv(
-        ...     os.path.join(dataset_path, 'AsteriskK8', 'x_dataset.csv'))
+        ...     os.path.join(DATASET_PATH, 'AsteriskK8', 'x_dataset.csv'))
         >>> dataset.dim
         2
         >>> dataset.column_names
@@ -463,7 +461,7 @@ class XData(DataObj):
         >>> dataset.to_csv('/tmp/x_dataset.csv')
         '''
         X_df = self.to_dataframe()
-        X_df.to_csv(csv_file_path)
+        X_df.to_csv(csv_file_path, index=False)
 
     def to_dataframe(self):
         ''' Convert this dataset object to a dictionary.

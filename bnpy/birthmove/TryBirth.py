@@ -50,7 +50,7 @@ def tryBirthForTask(
     if lap is not None:
         lapFrac = lap
 
-    curModel, lapFrac = loadModelForLap(taskoutpath, lapFrac)
+    curModel, lapFrac = load_model_at_lap(taskoutpath, lapFrac)
     Data = loadDataFromSavedTask(taskoutpath, batchID=batchID)
 
     LPkwargs = loadLPKwargsFromDisk(taskoutpath)

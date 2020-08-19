@@ -2,7 +2,9 @@ from builtins import *
 import logging
 import os
 import sys
-from collections import defaultdict
+import pandas as pd
+import numpy as np
+from collections import defaultdict, OrderedDict
 import time
 
 # Configure Logger
@@ -42,17 +44,28 @@ def writeToLogOnLapCompleted(lapFrac, level=logging.DEBUG):
         totalstr = ''
         agg_curlap = 0.0
         agg_total = 0.0
+
+        df_dict = OrderedDict()
+        df_dict['lap'] = lapFrac
         for subeventName in sorted(CumulativeTimesDict[eventName]):
-            curlapstr += ' cur_%s %.2f' % (
-                subeventName, CurrentLapTimesDict[eventName][subeventName])
-            totalstr += ' ttl_%s %.2f' % (
-                subeventName, CumulativeTimesDict[eventName][subeventName])
+            df_dict['curlap_%s' % subeventName] = (
+                CurrentLapTimesDict[eventName][subeventName])
+            df_dict['alllaps_%s' % subeventName] = (
+                CumulativeTimesDict[eventName][subeventName])
+
             agg_curlap += CurrentLapTimesDict[eventName][subeventName]
             agg_total += CumulativeTimesDict[eventName][subeventName]
+            # Reset counter
             CurrentLapTimesDict[eventName][subeventName] = 0.0
-        agg_curlapstr = ' cur %.2f' % (agg_curlap)
-        agg_totalstr = ' ttl %.2f' % (agg_total)
-        msg = lapstr + agg_curlapstr + agg_totalstr + curlapstr + totalstr
+
+        df_dict['curlap_total'] = agg_curlap
+        df_dict['alllaps_total'] = agg_total
+        df = pd.DataFrame([df_dict])
+        opts = dict(index=False, float_format='%.3f')
+        if np.allclose(lapFrac, 1.0):
+            msg = df.to_csv(header=True, **opts)
+        else:
+            msg = df.to_csv(header=False, **opts)
         LogDict[eventName].log(level, msg)
 
 def configure(taskoutpath, moveNames, doSaveToDisk=0, doWriteStdOut=0):
@@ -68,7 +81,7 @@ def configure(taskoutpath, moveNames, doSaveToDisk=0, doWriteStdOut=0):
             fh = logging.FileHandler(
                 os.path.join(
                     taskoutpath,
-                    "log-elapsedtime-%s.txt" % (eventName)))
+                    "log-elapsedtime-%s.csv" % (eventName)))
             fh.setLevel(0)
             formatter = logging.Formatter('%(message)s')
             fh.setFormatter(formatter)

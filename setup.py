@@ -1,7 +1,13 @@
 import os
 from setuptools import setup, Extension
-from Cython.Distutils import build_ext
 from distutils.sysconfig import customize_compiler
+
+try:
+    from Cython.Distutils import build_ext
+    HAS_CYTHON = True
+except ImportError:
+    from distutils.command.build_ext import build_ext
+    HAS_CYTHON = False
 
 def get_path_to_eigen():
     try:
@@ -29,6 +35,7 @@ def make_extensions():
     ext_list = [
         make_cython_extension_SparseRespUtilX(),
         make_cython_extension_EntropyUtilX(),
+        make_cython_extension_TextFileReaderX(),
         ]
     if get_path_to_eigen():
         ext_list.append(make_cpp_extension_libfwdbwd())
@@ -95,6 +102,15 @@ def make_cython_extension_SparseRespUtilX():
         sources=["bnpy/util/SparseRespUtilX.pyx"],
         libraries=["m"],
         extra_compile_args = ["-O3", "-ffast-math"],
+        )
+    return add_directives_to_cython_ext(ext)
+
+def make_cython_extension_TextFileReaderX():
+    ext = Extension(
+        "bnpy.util.TextFileReaderX",
+        sources=["bnpy/util/TextFileReaderX.pyx"],
+        libraries=["m"],
+        extra_compile_args = [],
         )
     return add_directives_to_cython_ext(ext)
 
@@ -177,7 +193,7 @@ def make_list_of_datasets_specs():
 # Main function
 setup(
     name="bnpy",
-    version="0.1.5",
+    version="0.1.6",
     author="Michael C. Hughes",
     author_email="mike@michaelchughes.com",
     description=(
@@ -200,22 +216,23 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: BSD License"],
+    setup_requires=["Cython>=0.25"],
     install_requires=[
-        "matplotlib>=1.5",
+        "Cython>=0.25",
+        "scipy>=0.18",
         "numpy>=1.11",
         "pandas>=0.18",
-        "scipy>=0.18",
-        "Cython>=0.25",
         "ipython>=5.1",
+        "scikit_learn>=0.18",
+        "matplotlib>=1.5",
         "joblib>=0.10",
         "memory_profiler>=0.41",
         "munkres>=1.0",
         "numexpr>=2.6",
         "psutil>=5.0",
-        "scikit_learn>=0.18",
         "sphinx_gallery>=0.1",
         ],
     zip_safe=False,
     ext_modules=make_extensions(),
-    cmdclass=dict(build_ext=CustomizedBuildExt),
+    cmdclass={"build_ext":CustomizedBuildExt},
 )

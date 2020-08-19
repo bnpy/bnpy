@@ -70,13 +70,17 @@ class SuffStatBag(object):
 
     def uid2k(self, uid):
         ''' Indentify the position index of provided uid.
+
+        Returns
+        -------
+        k : int
         '''
         k = np.flatnonzero(self.uids == uid)
         if k.size < 1:
             raise ValueError('Cannot find uid %d' % (uid))
         elif k.size > 1:
             raise ValueError('Badness. Multiple copies of uid %d' % (uid))
-        return k[0]
+        return int(k[0])
 
     def getCountVec(self):
         ''' Return vector of counts for each active topic/component
@@ -359,8 +363,10 @@ class SuffStatBag(object):
             raise ValueError('Must have at least 2 components to merge.')
 
         if kA is None or kB is None:
-            kA = np.flatnonzero(self.uids == uidA)
-            kB = np.flatnonzero(self.uids == uidB)
+            kA = self.uid2k(uidA)
+            kB = self.uid2k(uidB)
+            #kA = np.flatnonzero(self.uids == uidA)
+            #kB = np.flatnonzero(self.uids == uidB)
         else:
             uidA = self.uids[kA]
             uidB = self.uids[kB]

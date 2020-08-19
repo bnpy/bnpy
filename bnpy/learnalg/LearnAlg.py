@@ -20,7 +20,10 @@ from bnpy.learnalg import ElapsedTimeLogger
 
 from sklearn.externals import joblib
 from bnpy.ioutil import ModelWriter
-from bnpy.util import isEvenlyDivisibleFloat
+from bnpy.util import (
+    isEvenlyDivisibleFloat,
+    getMemUsageOfCurProcess_MiB,
+    )
 
 Log = logging.getLogger('bnpy')
 Log.setLevel(logging.DEBUG)
@@ -62,6 +65,8 @@ class LearnAlg(object):
         self.BNPYRunKwArgs = BNPYRunKwArgs
         self.lap_list = list()
         self.loss_list = list()
+        self.K_list = list()
+        self.elapsed_time_sec_list = list()
         self.SavedIters = set()
         self.PrintIters = set()
         self.totalDataUnitsProcessed = 0
@@ -126,10 +131,14 @@ class LearnAlg(object):
         # Convert TraceLaps from set to 1D array, sorted in ascending order
         lap_history = np.asarray(self.lap_list)
         loss_history = np.asarray(self.loss_list)
+        K_history = np.asarray(self.K_list)
+        elapsed_time_sec_history = np.asarray(self.elapsed_time_sec_list)
         return dict(status=self.status,
                     task_output_path=self.task_output_path,
                     loss_history=loss_history,
                     lap_history=lap_history,
+                    K_history=K_history,
+                    elapsed_time_sec_history=elapsed_time_sec_history,
                     Data=Data,
                     elapsedTimeInSec=time.time() - self.start_time,
                     **kwargs)
@@ -190,10 +199,11 @@ class LearnAlg(object):
         '''
         if lap in self.lap_list:
             return
-
+        elapsed_time_sec = self.get_elapsed_time()
         self.lap_list.append(lap)
         self.loss_list.append(loss)
-
+        self.K_list.append(SS.K)
+        self.elapsed_time_sec_list.append(elapsed_time_sec)
         # Exit here if we're not saving to disk
         if self.task_output_path is None:
             return
@@ -204,7 +214,7 @@ class LearnAlg(object):
         with open(self.mkfile('trace_loss.txt'), 'a') as f:
             f.write(six.text_type('%.9e\n' % (loss)))
         with open(self.mkfile('trace_elapsed_time_sec.txt'), 'a') as f:
-            f.write(six.text_type('%.3f\n' % (self.get_elapsed_time())))
+            f.write(six.text_type('%.3f\n' % (elapsed_time_sec)))
         with open(self.mkfile('trace_K.txt'), 'a') as f:
             f.write(six.text_type('%d\n' % (SS.K)))
         with open(self.mkfile('trace_n_examples_total.txt'), 'a') as f:
@@ -310,6 +320,7 @@ class LearnAlg(object):
         Returns
         -------
         fpath : str
+<<<<<<< HEAD
 
         Examples
         -------
@@ -317,6 +328,8 @@ class LearnAlg(object):
         >>> my_obj.mkfile(“X.txt”) 
         >>> mkfile("K.txt")
         "/Users/xichen/Documents/bnpy/bnpy/learnalg/K.txt"
+=======
+>>>>>>> master
         """
         return os.path.join(self.task_output_path, fname)
 
@@ -352,7 +365,6 @@ class LearnAlg(object):
                         isFinal=0, rho=None):
         """ Print state of provided model and progress variables to log.
         """
-        from bnpy import getCurMemCost_MiB
         if hasattr(self, 'ConvergeInfo') and 'maxDiff' in self.ConvergeInfo:
             countStr = 'Ndiff%9.3f' % (self.ConvergeInfo['maxDiff'])
         else:
@@ -375,7 +387,7 @@ class LearnAlg(object):
         logmsg = logmsg % (lapStr,
                            maxLapStr,
                            self.get_elapsed_time(),
-                           getCurMemCost_MiB(),
+                           getMemUsageOfCurProcess_MiB(),
                            hmodel.allocModel.K,
                            loss,
                            countStr,

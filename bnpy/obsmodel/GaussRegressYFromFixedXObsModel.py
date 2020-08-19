@@ -353,7 +353,7 @@ def E_mahal_dist_N(Y_N, X_NE,
     try:
         assert E_mahal_dist_N.min() > -1e-9
     except AssertionError:
-        from IPython import embed; embed()
+        raise ValueError("Mahalanobis should not be below zero")
     return E_mahal_dist_N
 
 def calcSummaryStats(Data, SS, LP, **kwargs):

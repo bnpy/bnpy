@@ -5,17 +5,6 @@ import os
 import sys
 import psutil
 
-def getCurMemCost_MiB():
-    # return the memory usage in MB
-    process = psutil.Process(os.getpid())
-    mem_MiB = process.memory_info_ex().rss / float(2 ** 20)
-    return mem_MiB
-
-def pprintCurMemCost(label=''):
-    # return the memory usage in MB
-    mem_MiB = getCurMemCost
-    print("%.3f MiB | %s" % (mem_MiB, label))
-
 # Configure PYTHONPATH before importing any bnpy modules
 ROOT_PATH = os.path.sep.join(
     os.path.abspath(__file__).split(os.path.sep)[:-2])

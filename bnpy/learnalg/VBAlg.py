@@ -1,7 +1,7 @@
 from builtins import *
 import numpy as np
 
-from bnpy.learnalg.LearnAlg import LearnAlg, makeDictOfAllWorkspaceVars
+from bnpy.learnalg.LearnAlg import LearnAlg, ElapsedTimeLogger, makeDictOfAllWorkspaceVars
 
 
 class VBAlg(LearnAlg):
@@ -45,16 +45,17 @@ class VBAlg(LearnAlg):
             # Local/E step
             self.algParamsLP['lapFrac'] = lap  # logging
             self.algParamsLP['batchID'] = 1
-            LP = hmodel.calc_local_params(Data, LP, **self.algParamsLP)
+            LP = hmodel.calc_local_params(
+                Data, LP, doLogElapsedTime=True, **self.algParamsLP)
 
             # Summary step
-            SS = hmodel.get_global_suff_stats(Data, LP)
+            SS = hmodel.get_global_suff_stats(Data, LP, doLogElapsedTime=True)
 
             # Global/M step
-            hmodel.update_global_params(SS)
+            hmodel.update_global_params(SS, doLogElapsedTime=True)
 
             # ELBO calculation
-            cur_loss = -1 * hmodel.calc_evidence(Data, SS, LP)
+            cur_loss = -1 * hmodel.calc_evidence(Data, SS, LP, doLogElapsedTime=True)
             if lap > 1.0:
                 # Report warning if loss function isn't behaving monotonically
                 self.verify_monotonic_decrease(cur_loss, prev_loss)
@@ -78,6 +79,9 @@ class VBAlg(LearnAlg):
 
             # Custom func hook
             self.eval_custom_func(**makeDictOfAllWorkspaceVars(**vars()))
+
+            # Write elapsed times to disk
+            ElapsedTimeLogger.writeToLogOnLapCompleted(lap)
 
             if nLapsCompleted >= self.algParams['minLaps'] and isConverged:
                 break

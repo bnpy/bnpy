@@ -63,7 +63,7 @@ def plotSingleJob(dataName, jobname, taskids='1', lap=None,
     for tt, taskid in enumerate(taskids):
         taskoutpath = os.path.join(jobpath, taskid) + os.path.sep
         # Load the model for the current task at specified lap
-        hmodel, curLap = bnpy.ioutil.ModelReader.loadModelForLap(
+        hmodel, curLap = bnpy.ioutil.ModelReader.load_model_at_lap(
             taskoutpath, lap)
         # Compute expected state-state edge prob matrix Ew
         Ew = hmodel.obsModel.Post.lam1 / \

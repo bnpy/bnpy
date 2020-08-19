@@ -2,8 +2,6 @@
 The :mod:`util` module gathers utility functions
 """
 
-
-from builtins import *
 from bnpy.util import RandUtil
 from bnpy.util import OptimizerForPi
 

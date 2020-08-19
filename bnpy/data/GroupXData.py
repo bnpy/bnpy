@@ -81,7 +81,7 @@ class GroupXData(XData):
     def read_npz(cls, npzfilepath, nDocTotal=None, **kwargs):
         ''' Constructor for building an instance of GroupXData from npz
         '''
-        var_dict = dict(**np.load(npzfilepath))
+        var_dict = dict(**np.load(npzfilepath, allow_pickle=True))
         if 'X' not in var_dict:
             raise KeyError(
                 'Stored npz file needs to have data in field named X')

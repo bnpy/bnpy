@@ -1,20 +1,22 @@
 """
-======================================================================
+=======================================================================
 Variational with birth and merge proposals for DP mixtures of Gaussians
-======================================================================
+=======================================================================
 
 How to train a DP mixture model.
 
 We'll show that despite diverse, poor quality initializations, our proposal moves that insert new clusters (birth) and remove redundant clusters (merge) can consistently recover the same ideal posterior with 8 clusters.
 
 """
+# SPECIFY WHICH PLOT CREATED BY THIS SCRIPT IS THE THUMBNAIL IMAGE
+# sphinx_gallery_thumbnail_number = 2
+
 import bnpy
 import numpy as np
 import os
 
 from matplotlib import pylab
 import seaborn as sns
-# sphinx_gallery_thumbnail_number = 2
 
 FIG_SIZE = (3, 3)
 pylab.rcParams['figure.figsize'] = FIG_SIZE

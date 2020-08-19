@@ -1,11 +1,22 @@
 from builtins import *
 import numpy as np
 import os
-
+import warnings
 from bnpy.data import BagOfWordsData
-from TextFileReaderX import read_from_ldac_file
+
+hasCythonExt = True
+try:
+    from TextFileReaderX import read_from_ldac_file
+except ImportError:
+    hasCythonExt = False
 
 def LoadBagOfWordsDataFromFile_ldac_cython(filepath, nTokensPerByte=0.2, **kwargs):
+    if not hasCythonExt:
+        warnings.warn(
+            "Cython extension TextFileReaderX not found."
+            + " Falling back to pure python.")
+        return  BagOfWordsData.LoadFromFile_ldac_python(
+            filepath, **kwargs)
     filesize_bytes = os.path.getsize(filepath)
     nUniqueTokens = int(nTokensPerByte *  filesize_bytes)
     try:
@@ -24,8 +35,11 @@ def LoadBagOfWordsDataFromFile_ldac_cython(filepath, nTokensPerByte=0.2, **kwarg
 
 if __name__ == '__main__':
     #fpath = '/ltmp/testNYT.ldac'
-    fpath = '/data/liv/textdatasets/nytimes/batches/batch111.ldac'
-    vocab_size=8000
+    #fpath = '/data/liv/textdatasets/nytimes/batches/batch111.ldac'
+    fpath = os.path.join(
+        os.environ['BNPYROOT'],
+        "bnpy/datasets/wiki/train.ldac")
+    vocab_size = 6130
 
     fastD =  LoadBagOfWordsDataFromFile_ldac_cython(fpath, vocab_size=vocab_size)
     slowD = BagOfWordsData.LoadFromFile_ldac_python(fpath, vocab_size=vocab_size)

@@ -31,10 +31,14 @@ from bnpy.ioutil.ModelReader import \
 
 STYLE = """
 <style>
-pre.num {line-height:13px; font-size:10px; display:inline; color:gray;}
-pre.word {line-height:13px; font-size:13px; display:inline; color:black;}
-h2 {line-height:16px; font-size:16px; color:gray;
-    text-align:left; padding:0px; margin:0px;}
+pre.num {line-height:13px; font-size:10px; display:inline; color:lightgray; background-color:transparent; border:0px}
+pre.word {line-height:13px; font-size:13px; display:inline; color:black; background-color:transparent; border:0px}
+h2.uid {line-height:20px; font-size:16px;
+    text-align:left; padding:0px; margin:0px;
+    color:#e2dcdc; display: inline;}
+h2.label {line-height:20px; font-size:20px;
+    text-align:left; padding:0px; margin:0px;
+    color:gray; display:inline;}
 td {padding-top:5px; padding-bottom:5px;}
 table { page-break-inside:auto }
 tr { page-break-inside:avoid; page-break-after:auto }
@@ -72,6 +76,69 @@ def showTopWordsForTask(taskpath, vocabfile, lap=None, doHTML=1,
             return htmlTopWordsFromHModel(hmodel, vocabList, **kwargs)
         else:
             return printTopWordsFromHModel(hmodel, vocabList)
+
+def htmlTopWordsFromTopics(
+        topics_KV, vocabList, order=None, uids_K=None, Ktop=10,
+        ncols=5, maxKToDisplay=100,
+        proba_fmt_str='%.4f',
+        wordSizeLimit=30,
+        show_longer_words_via_tooltip=0,
+        label_per_topic=None,
+        **kwargs):
+    K, W = topics_KV.shape
+    if order is None:
+        order = np.arange(K)
+
+    htmllines = list()
+    htmllines.append(STYLE)
+    htmllines.append('<table>')
+    for posID, k in enumerate(order[:maxKToDisplay]):
+        if posID % ncols == 0:
+            htmllines.append('  <tr>')
+        if True:
+            if uids_K is None:
+                uid = k + 1
+            else:
+                uid = uids_K[k]
+            #k = k[0]
+            if label_per_topic is None:
+                titleline = '<h2>%4d/%d</h2>' % (
+                    uid, K)
+            else:
+                titleline = (
+                    '<h2 class="uid">%4d/%d</h2>' +
+                    '<h2 class="label">%10s</h2><br />') % (
+                    uid, K, label_per_topic[k])
+            htmllines.append('    <td>' + titleline)
+            htmllines.append('    ')
+
+            # want to use fmtr like "%-20s" to force 20 chars of whitespace
+            fixed_width_str__fmtr = "%" + "-" + str(wordSizeLimit) + "s"
+            htmlPattern = \
+                '<pre class="num">' + proba_fmt_str + ' ' + \
+                '</pre><pre class="word">' \
+                + fixed_width_str__fmtr + "</pre>"
+            topIDs = np.argsort(-1 * topics_KV[k])[:Ktop]
+            for topID in topIDs:
+                dataline = htmlPattern % (
+                    topics_KV[k, topID],
+                    vocabList[topID][:wordSizeLimit])
+                if show_longer_words_via_tooltip:
+                    if len(vocabList[topID]) > wordSizeLimit:
+                        dataline = dataline.replace(
+                            '<pre class="word">',
+                            '<pre class="word" title="%s">' % vocabList[topID],                            
+                            )
+                htmllines.append(dataline + "<br />")
+            htmllines.append('    </td>')
+        else:
+            htmllines.append('    <td></td>')
+
+        if posID % ncols == ncols - 1:
+            htmllines.append(' </tr>')
+    htmllines.append('</table>')
+    htmlstr = '\n'.join(htmllines)
+    return htmlstr
 
 
 def htmlTopWordsFromWordCounts(
@@ -232,9 +299,11 @@ def plotCompsFromWordCounts(
         wordSizeLimit=10,
         Ktop=10, Kmax=32,
         H=2.5, W=2.0,
-        figH=None, ncols=10,
+        figH=None,
+        ncols=10,
         ax_list=None,
         fontsize=10,
+        proba_fmt_str="%.4f",
         **kwargs):
     ''' Create subplots of top 10 words from each topic, from word count array.
 
@@ -273,6 +342,8 @@ def plotCompsFromWordCounts(
             figsize=(ncols * W, nrows * H))
     if isinstance(ax_list, np.ndarray):
         ax_list = ax_list.flatten().tolist()
+    elif str(type(ax_list)).count("matplotlib"):
+        ax_list = [ax_list] # degenerate case where subplots returns single ax
     assert isinstance(ax_list, list)
     n_images_viewable = len(ax_list)
     n_images_to_plot = len(compListToPlot)
@@ -291,11 +362,11 @@ def plotCompsFromWordCounts(
                 topicMultilineStr += '%s %s\n' % (
                     wctStr, vocabList[wID][:wordSizeLimit])
             else:
-                topicMultilineStr += "%.4f %s\n" % (
+                topicMultilineStr += (proba_fmt_str + " %s\n") % (
                     topics_KV[compID, wID],
                     vocabList[wID][:wordSizeLimit])
         cur_ax_h.text(
-            0, 0, topicMultilineStr, fontsize=fontsize, family='monospace')
+                0, 0, topicMultilineStr, fontsize=fontsize, family=u'monospace')
         cur_ax_h.set_xlim([0, 1]);
         cur_ax_h.set_ylim([0, 1]);
         cur_ax_h.set_xticks([])

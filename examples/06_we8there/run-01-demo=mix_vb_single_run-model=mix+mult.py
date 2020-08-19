@@ -1,7 +1,7 @@
 """
-=============================================
+=================================================
 VB coordinate descent for Mixture of Multinomials
-=============================================
+=================================================
 
 
 """
@@ -15,6 +15,11 @@ import seaborn as sns
 FIG_SIZE = (3, 3)
 SMALL_FIG_SIZE = (1,1)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
+
+top_word_kws = dict(
+    wordSizeLimit=15,
+    ncols=4,
+    Ktop=10)
 
 ###############################################################################
 # Read text dataset from file
@@ -34,14 +39,14 @@ dataset = dataset.make_subset(docMask=doc_ids, doTrackFullSize=False)
 # Make a simple plot of the raw data
 bnpy.viz.PrintTopics.plotCompsFromWordCounts(
     dataset.getDocTypeCountMatrix()[:10],
-    dataset.vocabList,
+    vocabList=dataset.vocabList,
     prefix='doc',
-    Ktop=10)
+    **top_word_kws)
 
 ###############################################################################
 #
 # Train with K=1 cluster
-# ----------------------------------------
+# ----------------------
 # 
 # This is a simple baseline.
 
@@ -55,13 +60,13 @@ trained_model, info_dict = bnpy.run(
 bnpy.viz.PrintTopics.plotCompsFromHModel(
     trained_model,
     vocabList=dataset.vocabList,
-    Ktop=10)
+    **top_word_kws)
 
 ###############################################################################
 #
 # Train with K=3 clusters
-# ------------------------------------------
-# 
+# -----------------------
+#
 # Take the best of 10 initializations
 
 trained_model, info_dict = bnpy.run(
@@ -74,13 +79,13 @@ trained_model, info_dict = bnpy.run(
 bnpy.viz.PrintTopics.plotCompsFromHModel(
     trained_model,
     vocabList=dataset.vocabList,
-    Ktop=10)
+    **top_word_kws)
 
 
 ###############################################################################
 #
 # Train with K=10 clusters
-# ------------------------------------------
+# ------------------------
 # 
 # Take the best of 10 initializations
 
@@ -94,12 +99,12 @@ trained_model, info_dict = bnpy.run(
 bnpy.viz.PrintTopics.plotCompsFromHModel(
     trained_model,
     vocabList=dataset.vocabList,
-    Ktop=10)
+    **top_word_kws)
 
 ###############################################################################
 #
 # Train with K=30 clusters
-# ------------------------------------------
+# ------------------------
 # 
 # Take the best of 10 initializations
 
@@ -113,4 +118,4 @@ trained_model, info_dict = bnpy.run(
 bnpy.viz.PrintTopics.plotCompsFromHModel(
     trained_model,
     vocabList=dataset.vocabList,
-    Ktop=10)
+    **top_word_kws)

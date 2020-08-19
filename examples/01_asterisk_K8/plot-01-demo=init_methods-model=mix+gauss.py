@@ -14,13 +14,15 @@ Initialization depends on two key user-specified procedures:
 
 2) Specifying how many clusters are created
 """
+# SPECIFY WHICH PLOT CREATED BY THIS SCRIPT IS THE THUMBNAIL IMAGE
+# sphinx_gallery_thumbnail_number = 2
+
 import bnpy
 import numpy as np
 import os
 
 from matplotlib import pylab
 import seaborn as sns
-# sphinx_gallery_thumbnail_number = 2
 
 FIG_SIZE = (3, 3)
 SMALL_FIG_SIZE = (2, 2)

@@ -12,7 +12,7 @@ imshowArgs = dict(interpolation='nearest',
                   cmap='bone_r', # zero is white, large values are black
                   aspect=1.0,
                   vmin=0.0,
-                  vmax=1.0)
+                  vmax=1.0, norm=None)
 
 def show_square_images(
         topics_KV=None,
@@ -48,8 +48,11 @@ def show_square_images(
         fig_h, ax_list = pylab.subplots(
             nrows=nrows, ncols=ncols,
             figsize=(ncols * im_width, nrows * im_height))
+
     if isinstance(ax_list, np.ndarray):
         ax_list = ax_list.flatten().tolist()
+    elif str(type(ax_list)).count("matplotlib"):
+        ax_list = [ax_list] # degenerate case where subplots returns single ax
     assert isinstance(ax_list, list)
     n_images_viewable = len(ax_list)
 

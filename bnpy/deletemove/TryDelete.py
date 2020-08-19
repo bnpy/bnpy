@@ -366,7 +366,7 @@ def tryDeleteProposalForSavedTask(
     if lap is not None:
         lapFrac = lap
 
-    hmodel, lapFrac = loadModelForLap(taskoutpath, lapFrac)
+    hmodel, lapFrac = load_model_at_lap(taskoutpath, lapFrac)
     Data = loadDataFromSavedTask(taskoutpath, batchID=batchID)
     kwargs['LPkwargs'] = loadLPKwargsFromDisk(taskoutpath)
 

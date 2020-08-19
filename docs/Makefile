@@ -55,12 +55,12 @@ clean:
 	rm -rf $(SRCDIR)/api/*
 	
 apidoc:
-	sphinx-apidoc -f -o source/api/ $(BNPYROOT)/bnpy/
+	sphinx-apidoc -f -o $(SRCDIR)/api/ ../bnpy/
 
 localhost:
-	cd $(BUILDDIR)/html/ && python -m SimpleHTTPServer
-	@echo "Local server running. Point browser to localhost:8000"
-
+	(cd $(BUILDDIR)/html/ && python -m SimpleHTTPServer &)
+	@echo "Local server running. Pointing browser to localhost:8000"
+	(open -a firefox http://localhost:8000)
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

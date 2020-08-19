@@ -1,14 +1,13 @@
 """
-=================================================
-04: Training HDP Topic Model with merge proposals
-=================================================
+===================================================
+01: Standard variational training for mixture model
+===================================================
 
-
+How to train a mixture of multinomials.
 """
 import bnpy
 import numpy as np
 import os
-import sys
 
 from matplotlib import pylab
 import seaborn as sns
@@ -18,63 +17,60 @@ SMALL_FIG_SIZE = (1,1)
 pylab.rcParams['figure.figsize'] = FIG_SIZE
 
 ###############################################################################
-# Read dataset from file.
+# Read toy "bars" dataset from file as BINARY
 
 dataset_path = os.path.join(bnpy.DATASET_PATH, 'bars_one_per_doc')
 dataset = bnpy.data.BagOfWordsData.read_npz(
     os.path.join(dataset_path, 'dataset.npz'))
 
-###############################################################################
-#
-# Set the local step algorithmic keyword args
-
-local_step_kwargs = dict(
-    # Perform at most this many iterations at each document
-    nCoordAscentItersLP=100,
-    # Stop local iters early when max change in doc-topic counts < this thr
-    convThrLP=0.001,
-    restartLP=0,
-    doMemoizeLocalParams=0,
-    )
-
-merge_kwargs = dict(
-    m_startLap=5,
-    m_pair_ranking_procedure='total_size',
-    m_pair_ranking_direction='descending',
-    )
+dataset.word_count = np.asarray(
+    dataset.word_count > 0, dtype=dataset.word_count.dtype)
 
 ###############################################################################
 #
-# Run the VB+proposals algorithm
-# with only merges and re-shuffling.
+# Make a simple plot of the raw data
+X_csr_DV = dataset.getSparseDocTypeCountMatrix()
+bnpy.viz.BarsViz.show_square_images(
+    X_csr_DV[:10].toarray(), vmin=0, vmax=5)
+#pylab.colorbar()
+#pylab.clabel('word count')
+pylab.tight_layout()
+
+###############################################################################
+#
+# Let's do one single run of the VB algorithm.
 # 
-# Initialization: 10 topics, using randomlikewang
-
+# Using 10 clusters and the 'randexamples' initialization procedure.
 
 trained_model, info_dict = bnpy.run(
-    dataset, 'HDPTopicModel', 'Mult', 'memoVB',
-    output_path=
-        '/tmp/bars_one_per_doc/' + 
-        'trymoves-model=hdp+mult-K=10-moves=merge,shuffle/',
-    nLap=50, convergeThr=0.001, nBatch=1,
-    K=10, initname='randomlikewang',
-    alpha=0.5, lam=0.1,
-    moves='merge,shuffle',
-    **dict(list(merge_kwargs.items()) + list(local_step_kwargs.items())))
+    dataset, 'FiniteTopicModel', 'Bern', 'VB',
+    output_path='/tmp/bars_one_per_doc/helloworld-lik=bernoulli-K=10/',
+    nLap=1000, convergeThr=0.0005,
+    K=10, initname='randexamples',
+    alpha=0.5, lambda1=0.1, lambda0=0.1)
 
 ###############################################################################
 #
+# First, we can plot the loss function over time
+# We'll skip the first few iterations, since performance is quite bad.
 #
+
+pylab.figure(figsize=FIG_SIZE)
+pylab.plot(info_dict['lap_history'][2:], info_dict['loss_history'][2:], 'k.-')
+pylab.xlabel('num. laps')
+pylab.ylabel('loss')
+pylab.tight_layout()
+
+
+###############################################################################
+#
+# Setup: Useful function to display learned bar structure over time.
 
 def show_bars_over_time(
         task_output_path=None,
         query_laps=[0, 1, 2, 5, None],
         ncols=10):
-    ''' Show square-image visualization of estimated topics over time.
-
-    Post Condition
-    --------------
-    New matplotlib figure with visualization (one row per lap).
+    '''
     '''
     nrows = len(query_laps)
     fig_handle, ax_handles_RC = pylab.subplots(
@@ -82,7 +78,8 @@ def show_bars_over_time(
         nrows=nrows, ncols=ncols, sharex=True, sharey=True)
     for row_id, lap_val in enumerate(query_laps):
         cur_model, lap_val = bnpy.load_model_at_lap(task_output_path, lap_val)
-        cur_topics_KV = cur_model.obsModel.getTopics()
+        cur_topics_KV = cur_model.obsModel.Post.lam1 / (
+            trained_model.obsModel.Post.lam1 + trained_model.obsModel.Post.lam0)
         # Plot the current model
         cur_ax_list = ax_handles_RC[row_id].flatten().tolist()
         bnpy.viz.BarsViz.show_square_images(
@@ -94,6 +91,5 @@ def show_bars_over_time(
 
 ###############################################################################
 #
-# Examine the bars over time
+# Show the clusters over time
 show_bars_over_time(info_dict['task_output_path'])
-

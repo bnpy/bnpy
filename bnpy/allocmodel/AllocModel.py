@@ -128,9 +128,10 @@ class AllocModel(object):
         Keyword Args
         ------------
         todict : boolean
-            If True, return a dict with different ELBO terms
-                under named keys like 'Ldata' and 'Lentropy'
+            If True, return a dict of the terms that comprise the ELBO
+                under named keys like 'Ldata' and 'Lentropy'.
             If False [default], return scalar value equal to sum of terms.
+                This is the default.
 
         Returns
         -------

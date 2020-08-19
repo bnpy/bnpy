@@ -63,7 +63,7 @@ def evalTopicModelOnTestDataFromTaskpath(
             returnTPA=1, normalizeTopics=1, normalizeProbs=1)
         K = probs.size
     else:
-        hmodel, foundLap = loadModelForLap(taskpath, queryLap)
+        hmodel, foundLap = load_model_at_lap(taskpath, queryLap)
         if hasattr(Data, 'word_count'):
             # Convert to topics 2D array (K x V)
             topics = hmodel.obsModel.getTopics()

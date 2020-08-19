@@ -1,5 +1,8 @@
 '''
 LibSparseResp.py
+
+Sets global variable "hasEigenLibReady" with True/False indicator
+for whether the compiled cpp library required has compiled successfully.
 '''
 from builtins import *
 import os

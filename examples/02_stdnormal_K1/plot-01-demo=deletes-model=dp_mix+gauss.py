@@ -9,6 +9,9 @@ In this example, we show how merge moves alone may not be enough
 to reliably escape local optima. Instead, we show that more flexible
 delete moves can escape from situations where merges alone fail.
 """
+# SPECIFY WHICH PLOT CREATED BY THIS SCRIPT IS THE THUMBNAIL IMAGE
+# sphinx_gallery_thumbnail_number = 2
+
 import bnpy
 import numpy as np
 import os
@@ -31,7 +34,7 @@ dataset = bnpy.data.XData(X, name='StandardNormalK1')
 #
 # Make a simple plot of the raw data
 
-pylab.hist(dataset.X[:, 0], 50, normed=1)
+pylab.hist(dataset.X[:, 0], 50, density=True)
 pylab.xlabel('x')
 pylab.ylabel('p(x)')
 pylab.tight_layout()
