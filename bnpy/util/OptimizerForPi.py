@@ -2,7 +2,7 @@ from builtins import *
 import numpy as np
 import scipy.optimize
 import warnings
-from .ShapeUtil import as1D, as2D
+from bnpy.util.ShapeUtil import as1D, as2D
 
 
 def estimatePiForDoc_frankwolfe(

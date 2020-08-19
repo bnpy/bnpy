@@ -9,8 +9,8 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 
-from .AbstractObsModel import AbstractObsModel
-from .GaussObsModel import createECovMatFromUserInput
+from bnpy.obsmodel.AbstractObsModel import AbstractObsModel
+from bnpy.obsmodel.GaussObsModel import createECovMatFromUserInput
 
 
 class AutoRegGaussObsModel(AbstractObsModel):

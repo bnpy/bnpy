@@ -29,9 +29,9 @@ class ParamBag(object):
     >>> PB.setField('Sigma', np.eye(D)[np.newaxis,:], dims=('K','D','D'))
 
     >>> PB.Sigma
-    array([[[ 1.,  0.,  0.],
-            [ 0.,  1.,  0.],
-            [ 0.,  0.,  1.]]])
+    array([[[1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.]]])
 
     Insert an empty component
     >>> PB.insertEmptyComps(1)
@@ -39,8 +39,8 @@ class ParamBag(object):
     >>> PB.K
     2
     >>> PB.Mu
-    array([[ 1.,  1.,  1.],
-           [ 0.,  0.,  0.]])
+    array([[1., 1., 1.],
+           [0., 0., 0.]])
     '''
 
     def __init__(self, K=0, doCollapseK1=False, **kwargs):
@@ -360,9 +360,9 @@ class ParamBag(object):
         --------
         >>> PB = ParamBag() # fixing K,D doesn't matter
         >>> PB._getAllowedShapes(())
-        set([()])
+        {()}
         >>> PB._getAllowedShapes((1,))
-        set([(), (1,)])
+        {(), (1,)}
         >>> aSet = PB._getAllowedShapes((23,))
         >>> sorted(aSet)
         [(23,)]

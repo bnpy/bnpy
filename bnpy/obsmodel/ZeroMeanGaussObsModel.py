@@ -9,8 +9,8 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D, toCArray
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 from bnpy.util.SparseRespStatsUtil import calcSpRXXT
-from .AbstractObsModel import AbstractObsModel
-from .GaussObsModel import createECovMatFromUserInput
+from bnpy.obsmodel.AbstractObsModel import AbstractObsModel
+from bnpy.obsmodel.GaussObsModel import createECovMatFromUserInput
 
 
 class ZeroMeanGaussObsModel(AbstractObsModel):

@@ -25,24 +25,24 @@ ROOT_PATH = os.path.sep.join(
 
 DATASET_PATH = os.path.join(ROOT_PATH, 'bnpy/datasets/')
 
-from . import data
-from . import suffstats
-from . import util
+from bnpy import data
+from bnpy import suffstats
+from bnpy import util
 
-from . import allocmodel
-from . import obsmodel
-from .HModel import HModel
+from bnpy import allocmodel
+from bnpy import obsmodel
+from bnpy.HModel import HModel
 
-from . import ioutil
-from . import init
-from . import learnalg
-from . import birthmove
-from . import mergemove
-from . import deletemove
+from bnpy import ioutil
+from bnpy import init
+from bnpy import learnalg
+from bnpy import birthmove
+from bnpy import mergemove
+from bnpy import deletemove
 
-from . import callbacks
+from bnpy import callbacks
 
-from . import Run
+from bnpy import Run
 
 # Convenient aliases to existing functions
 run = Run.run
@@ -57,7 +57,7 @@ __all__ = ['run', 'Run', 'learnalg', 'allocmodel', 'obsmodel', 'suffstats',
 # Optional viz package for plotting
 try:
     from matplotlib import pylab
-    from . import viz
+    from bnpy import viz
     __all__.append('viz')
 except ImportError:
     print("Error importing matplotlib. Plotting disabled.")

@@ -245,10 +245,10 @@ def find_optimum(
     ...     sumLogPiActiveVec=np.zeros(3),
     ...     sumLogPiRemVec=np.zeros(3),
     ...     alpha=0.5, gamma=1.0)
-    >>> print r_opt
-    [ 0.5  0.5  0.5]
-    >>> print o_opt
-    [ 2.  2.  2.]
+    >>> print (r_opt)
+    [0.5 0.5 0.5]
+    >>> print (o_opt)
+    [2. 2. 2.]
 
     We can optimize for just rho by turning do_grad_omega off.
     This fixes omega at its initial value, but optimizes rho.
@@ -259,8 +259,8 @@ def find_optimum(
     ...     sumLogPiRemVec=np.asarray([0, 0, -20.]),
     ...     alpha=0.5,
     ...     gamma=5.0)
-    >>> print o_opt
-    [ 46.  36.  26.]
+    >>> print (o_opt)
+    [46. 36. 26.]
     >>> np.allclose(o_opt, Info['initomega'])
     True
 
@@ -441,7 +441,7 @@ def c2rhoomega(c, returnSingleVector=False):
 
     OPTIONAL: may return as one concatenated vector (length 2K)
     '''
-    K = c.size / 2
+    K = c.size // 2
     rho = sigmoid(c[:K])
     omega = np.exp(c[K:])
     if returnSingleVector:
@@ -455,7 +455,7 @@ def c2omega(c):
     return np.exp(c)
 
 def rhoomega2c(rhoomega):
-    K = rhoomega.size / 2
+    K = rhoomega.size // 2
     return np.hstack([invsigmoid(rhoomega[:K]), np.log(rhoomega[K:])])
 
 def rho2c(rho):
@@ -465,7 +465,7 @@ def omega2c(omega):
     return np.log(omega)
 
 def _unpack(rhoomega):
-    K = rhoomega.size / 2
+    K = rhoomega.size // 2
     rho = rhoomega[:K]
     omega = rhoomega[-K:]
     return rho, omega, K
@@ -484,8 +484,8 @@ def make_initrho(K, nDoc, gamma):
     Example
     -------
     >>> rho = make_initrho(3, 0, 1.0)
-    >>> print rho
-    [ 0.5  0.5  0.5]
+    >>> print (rho)
+    [0.5 0.5 0.5]
     '''
     eta1 = (nDoc + 1) * np.ones(K)
     eta0 = nDoc * kvec(K) + gamma

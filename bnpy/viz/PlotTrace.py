@@ -17,10 +17,10 @@ import glob
 import os
 import scipy.io
 
-from .PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 from bnpy.ioutil import BNPYArgParser
 from bnpy.ioutil.CountReader import loadKeffForTask
-from .JobFilter import filterJobs
+from bnpy.viz.JobFilter import filterJobs
 
 taskidsHelpMsg = "ids of trials/runs to plot from given job." + \
                  " Example: '4' or '1,2,3' or '2-6'."

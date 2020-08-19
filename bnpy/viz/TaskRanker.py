@@ -3,11 +3,11 @@ import os
 import numpy as np
 import glob
 
-from . import JobFilter
+from bnpy.viz import JobFilter
 
 from bnpy.util import as1D
 from bnpy.ioutil.BNPYArgParser import parse_task_ids, arglist_to_kwargs
-from .JobFilter import filterJobs
+from bnpy.viz.JobFilter import filterJobs
 
 
 def rankTasksForSingleJobOnDisk(joboutpath, **kwargs):

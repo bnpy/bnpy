@@ -10,7 +10,7 @@ from bnpy.util import NumericUtil
 from bnpy.util import logsumexp
 from bnpy.util import gammaln, digamma
 from bnpy.util.SparseRespUtil import sparsifyLogResp
-from .DPMixtureModel import calcSummaryStats, calcHrespFromLP
+from bnpy.allocmodel.mix.DPMixtureModel import calcSummaryStats, calcHrespFromLP
 
 class FiniteMixtureModel(AllocModel):
 

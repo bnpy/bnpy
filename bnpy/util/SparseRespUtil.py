@@ -6,12 +6,13 @@ import timeit
 import time
 import sys
 
-from .SparseRespUtilX import calcSpRData_cython
+
 
 hasCPP = True
 try:
-    from .lib.sparseResp.LibSparseResp import sparsifyResp_cpp
-    from .lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
+    from bnpy.util.lib.sparseResp.LibSparseResp import sparsifyResp_cpp
+    from bnpy.lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
+    hasCPP = bnpy.util.lib.sparseResp.LibSparseResp.hasEigenLibReady
 except ImportError:
     hasCPP = False
 
@@ -116,6 +117,9 @@ def sparsifyResp_numpy_with_cython(resp, nnzPerRow=1):
     -------
     spR : sparse csr matrix, shape N x K
     '''
+
+    from bnpy.util.SparseRespUtilX import calcSpRData_cython
+
     N, K = resp.shape
     if nnzPerRow == 1:
         spR_data = np.ones(N, dtype=np.float64)

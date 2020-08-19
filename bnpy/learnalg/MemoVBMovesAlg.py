@@ -5,7 +5,7 @@ from builtins import *
 import numpy as np
 import multiprocessing
 import os
-from . import ElapsedTimeLogger
+from bnpy.learnalg import ElapsedTimeLogger
 import scipy.sparse
 
 from collections import defaultdict
@@ -23,8 +23,8 @@ from bnpy.mergemove import selectCandidateMergePairs
 from bnpy.deletemove import DLogger, selectCandidateDeleteComps
 from bnpy.util import argsort_bigtosmall_stable
 from bnpy.util.SparseRespUtil import sparsifyResp
-from .LearnAlg import makeDictOfAllWorkspaceVars
-from .LearnAlg import LearnAlg
+from bnpy.learnalg.LearnAlg import makeDictOfAllWorkspaceVars
+from bnpy.learnalg.LearnAlg import LearnAlg
 from bnpy.viz.PrintTopics import count2str
 
 # If abs val of two ELBOs differs by less than this small constant

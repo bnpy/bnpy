@@ -27,7 +27,7 @@ def loadDataFromSavedTask(taskoutpath, dataSplitName='train', **kwargs):
     ...     doWriteStdOut=False)
     >>> outputdir = Info['outputdir']
     >>> Data2 = loadDataFromSavedTask(outputdir)
-    >>> print Data2.nObsTotal
+    >>> print (Data2.nObsTotal)
     144
     >>> np.allclose(Info['Data'].X, Data2.X)
     True
@@ -179,7 +179,7 @@ def getDataNameFromTaskpath(taskoutpath):
     >>> os.environ['BNPYOUTDIR'] = '/tmp/'
     >>> taskoutpath = '/tmp/MyDataName/myjobname/1/'
     >>> dataName = getDataNameFromTaskpath(taskoutpath)
-    >>> print dataName
+    >>> print (dataName)
     MyDataName
     '''
     # Make it a proper absolute path

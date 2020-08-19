@@ -9,7 +9,7 @@ import numpy as np
 import bnpy.data
 
 from bnpy.util import split_str_into_fixed_width_lines
-from .FromTruth import \
+from bnpy.init.FromTruth import \
     convertLPFromHardToSoft, \
     convertLPFromTokensToDocs, \
     convertLPFromDocsToTokens, \

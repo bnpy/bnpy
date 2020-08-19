@@ -11,7 +11,7 @@ import re
 import warnings
 
 from scipy.special import digamma
-from .FromTruth import convertLPFromHardToSoft, convertLPFromDocsToTokens
+from bnpy.init.FromTruth import convertLPFromHardToSoft, convertLPFromDocsToTokens
 
 # Import Kmeans routine
 hasRexAvailable = True

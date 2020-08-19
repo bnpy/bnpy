@@ -30,8 +30,8 @@ import os
 import numpy as np
 import scipy.io
 
-from . import InferHeldoutTopics
-from . import HeldoutMetricsLogger
+from bnpy.callbacks import InferHeldoutTopics
+from bnpy.callbacks import HeldoutMetricsLogger
 SavedLapSet = set()
 
 def onAlgorithmComplete(**kwargs):

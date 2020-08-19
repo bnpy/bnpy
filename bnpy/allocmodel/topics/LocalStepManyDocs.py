@@ -6,10 +6,10 @@ import time
 from scipy.special import digamma, gammaln
 import scipy.sparse
 
-from . import LocalStepLogger
+from bnpy.allocmodel.topics import LocalStepLogger
 from bnpy.util import NumericUtil
-from .LocalStepSingleDoc import calcLocalParams_SingleDoc
-from .LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
+from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
+from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
 
 from bnpy.util.SparseRespUtil \
     import fillInDocTopicCountFromSparseResp, sparsifyResp, sparsifyLogResp

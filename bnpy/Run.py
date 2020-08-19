@@ -30,7 +30,7 @@ import numpy as np
 import bnpy
 import inspect
 import time
-
+from bnpy.datasets import AsteriskK8
 from bnpy.ioutil import BNPYArgParser
 from bnpy.ioutil.BNPYArgParser import FullDataAlgSet, OnlineDataAlgSet
 

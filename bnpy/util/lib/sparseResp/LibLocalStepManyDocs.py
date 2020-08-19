@@ -6,7 +6,7 @@ import time
 
 from scipy.special import digamma
 
-from .CPPLoader import LoadFuncFromCPPLib
+from bnpy.util.lib.sparseResp.CPPLoader import LoadFuncFromCPPLib
 
 curdir = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
 sparseLocalStepManyDocs_cpp = LoadFuncFromCPPLib(

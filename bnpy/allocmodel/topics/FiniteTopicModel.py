@@ -1,7 +1,7 @@
 from builtins import *
 import numpy as np
 
-from . import LocalStepManyDocs
+from bnpy.allocmodel.topics import LocalStepManyDocs
 
 from bnpy.allocmodel.AllocModel import AllocModel
 from bnpy.suffstats import SuffStatBag

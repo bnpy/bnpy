@@ -11,6 +11,7 @@ try:
 except ImportError:
     hasCython = False
 
+
 hasNumexpr = True
 try:
     import numexpr

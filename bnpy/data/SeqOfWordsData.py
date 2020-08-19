@@ -888,12 +888,12 @@ class BagOfWordsData(DataObj):
         >>> Data = BagOfWordsData(word_id, word_ct, doc_range, vocab_size=10)
         >>> weights = np.asarray([0, 1, 1, 0, 1, 1, 0, 0, 0])
         >>> Dtarget, d, a = Data.makeSubsetByThresholdingWeights(weights, 0.1)
-        >>> print a
+        >>> print (a)
         [1 2 4 5]
-        >>> print d
+        >>> print (d)
         [0, 1]
-        >>> print Dtarget.word_count
-        [ 7.  8.  7.  8.]
+        >>> print (Dtarget.word_count)
+        [7. 8. 7. 8.]
         >>> X = Data.getDocTypeCountMatrix()
         >>> Xtarget = Dtarget.getDocTypeCountMatrix()
         >>> np.all(X[d] >= Xtarget)
@@ -904,7 +904,7 @@ class BagOfWordsData(DataObj):
         >>> empty_weights = np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0])
         >>> Dtarget, d, a = Data.makeSubsetByThresholdingWeights(
         ...     empty_weights, 0.1)
-        >>> print d
+        >>> print (d)
         []
         >>> Dtarget == None
         True
@@ -1316,11 +1316,11 @@ def processLine_ldac__splitandzip(line):
     Examples
     --------
     >>> a, b, c = processLine_ldac__splitandzip('5 66:6 77:7 88:8')
-    >>> print a
+    >>> print (a)
     5
-    >>> print b
+    >>> print (b)
     ('66', '77', '88')
-    >>> print c
+    >>> print (c)
     ('6', '7', '8')
     """
     Fields = line.strip().split(' ')
@@ -1335,11 +1335,11 @@ def processLine_ldac__fromstring(line):
     Examples
     --------
     >>> a, b, c = processLine_ldac__fromstring('5 66:6 77:7 88:8')
-    >>> print a
+    >>> print (a)
     5
-    >>> print b
+    >>> print (b)
     [66 77 88]
-    >>> print c
+    >>> print (c)
     [6 7 8]
     """
     line = line.replace(':', ' ')
@@ -1356,12 +1356,12 @@ def processLine_ldac__fromstring_fillexisting(line, word_id, word_ct, start):
     >>> a = processLine_ldac__fromstring_fillexisting(
     ...    '5 66:6 77:7 88:8',
     ...    word_id, word_ct, 0)
-    >>> print a
+    >>> print (a)
     5
-    >>> print word_id
+    >>> print (word_id)
     [66 77 88  0  0]
-    >>> print word_ct
-    [ 6.  7.  8.  0.  0.]
+    >>> print (word_ct)
+    [6. 7. 8. 0. 0.]
     """
     line = line.replace(':', ' ')
     data = np.fromstring(line, sep=' ', dtype=np.int32)

@@ -50,29 +50,29 @@ def sparsifyLogResp_cpp(logResp, nnzPerRow, order='C'):
     -------
     >>> logResp = np.asarray([-1.0, -2, -3, -4, -100, -200])
     >>> spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 2)
-    >>> print spR.data.sum()
+    >>> print (spR.data.sum())
     1.0
-    >>> print spR.indices.min()
+    >>> print (spR.indices.min())
     0
-    >>> print spR.indices.max()
+    >>> print (spR.indices.max())
     1
-    >>> print spR.data
-    [ 0.73105858  0.26894142]
+    >>> print (spR.data)
+    [0.73105858 0.26894142]
 
     >>> # Try duplicates in weights that don't influence top L
     >>> logResp = np.asarray([-500., -500., -500., -4, -1, -2])
     >>> spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 3)
-    >>> print spR.data.sum()
+    >>> print (spR.data.sum())
     1.0
-    >>> print np.unique(spR.indices)
+    >>> print (np.unique(spR.indices))
     [3 4 5]
 
     >>> # Try duplicates in weights that DO influence top L
     >>> logResp = np.asarray([-500., -500., -500., -500., -1, -2])
     >>> spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 4)
-    >>> print spR.data.sum()
+    >>> print (spR.data.sum())
     1.0
-    >>> print np.unique(spR.indices)
+    >>> print (np.unique(spR.indices))
     [2 3 4 5]
 
     >>> # Try big problem

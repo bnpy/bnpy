@@ -321,15 +321,15 @@ def _getTypeFromString(defVal):
     Examples
     ------
     >>> _getTypeFromString('deinonychus')
-    <type 'str'>
+    <class 'str'>
     >>> _getTypeFromString('3.14')
-    <type 'float'>
+    <class 'float'>
     >>> _getTypeFromString('555')
-    <type 'int'>
+    <class 'int'>
     >>> _getTypeFromString('555.0')
-    <type 'float'>
+    <class 'float'>
     >>> _getTypeFromString([1,2,3])
-    <type 'list'>
+    <class 'list'>
     '''
     if not isinstance(defVal, str):
         return type(defVal)

@@ -13,7 +13,7 @@ import os
 from collections import namedtuple
 import pandas as pd
 
-from .DataObj import DataObj
+from bnpy.data.DataObj import DataObj
 from bnpy.util import as1D, as2D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -48,17 +48,17 @@ class XData(DataObj):
     -------
     >>> X = np.zeros((1000, 3)) # Create 1000x3 matrix
     >>> myData = XData(X) # Convert to an XData object
-    >>> print myData.nObs
+    >>> print (myData.nObs)
     1000
-    >>> print myData.dim
+    >>> print (myData.dim)
     3
-    >>> print myData.X.shape
+    >>> print (myData.X.shape)
     (1000, 3)
     >>> mySubset = myData.make_subset([0])
     >>> mySubset.X.shape
     (1, 3)
     >>> mySubset.X[0]
-    array([ 0.,  0.,  0.])
+    array([0., 0., 0.])
     """
 
     @classmethod
@@ -476,7 +476,7 @@ class XData(DataObj):
         --------
         >>> dataset = XData(X=np.zeros((3,2)), column_names=['a', 'b'])
         >>> x_df = dataset.to_dataframe()
-        >>> print x_df
+        >>> print (x_df)
              a    b
         0  0.0  0.0
         1  0.0  0.0

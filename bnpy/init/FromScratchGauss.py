@@ -9,7 +9,7 @@ import numpy as np
 from bnpy.data import XData
 from bnpy.suffstats import SuffStatBag
 from scipy.cluster.vq import kmeans2
-from .FromTruth import convertLPFromHardToSoft
+from bnpy.init.FromTruth import convertLPFromHardToSoft
 
 def init_global_params(obsModel, Data, K=0, seed=0,
                        initname='randexamples',

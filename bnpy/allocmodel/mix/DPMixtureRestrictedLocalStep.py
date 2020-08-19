@@ -367,10 +367,10 @@ def make_xPiVec_and_emptyPi(
     >>> origPiVec = np.asarray([0.5, 0.5])
     >>> xPiVec, emptyPi = make_xPiVec_and_emptyPi(origPiVec=origPiVec,
     ...     ktarget=0, Kfresh=3, emptyPiFrac=0.25)
-    >>> print emptyPi
+    >>> print (emptyPi)
     0.125
-    >>> print xPiVec
-    [ 0.125  0.125  0.125]
+    >>> print (xPiVec)
+    [0.125 0.125 0.125]
     '''
     if b_emptyPiFrac is not None:
         emptyPiFrac = b_emptyPiFrac

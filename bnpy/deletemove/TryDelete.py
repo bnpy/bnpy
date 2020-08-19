@@ -3,10 +3,10 @@ import argparse
 import numpy as np
 import time
 
-import bnpy.deletemove.DLogger as DLogger
+import bnpy.deletemove as DLogger
 from bnpy.ioutil.DataReader import loadDataFromSavedTask, loadLPKwargsFromDisk
 from bnpy.ioutil.DataReader import loadKwargsFromDisk
-from bnpy.ioutil.ModelReader import loadModelForLap
+from bnpy.ioutil.ModelReader import load_model_at_lap
 
 def parse_list_of_absorbing_comps(kabsorbList, ktarget, K):
     if kabsorbList == 'all':

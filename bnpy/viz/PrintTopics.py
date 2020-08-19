@@ -19,7 +19,7 @@ Options
     Ex: "1" or "3" or "1,2,3" or "1-6"
 '''
 from builtins import *
-from .PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 import numpy as np
 import argparse
 import os

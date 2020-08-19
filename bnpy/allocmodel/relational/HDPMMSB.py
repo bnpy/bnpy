@@ -13,7 +13,7 @@ from bnpy.util import StickBreakUtil
 from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir, L_top
 
-from .FiniteMMSB import FiniteMMSB
+from bnpy.allocmodel.relational.FiniteMMSB import FiniteMMSB
 
 class HDPMMSB(FiniteMMSB):
 

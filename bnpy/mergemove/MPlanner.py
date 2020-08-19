@@ -8,7 +8,7 @@ import numpy as np
 import sys
 import os
 import itertools
-from . import MLogger
+from bnpy.mergemove import MLogger
 from collections import defaultdict
 from bnpy.viz.PrintTopics import vec2str, count2str
 

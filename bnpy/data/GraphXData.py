@@ -12,7 +12,7 @@ import scipy.io
 from scipy.sparse import csc_matrix
 
 from bnpy.util import as1D, as2D, as3D, toCArray
-from .XData import XData
+from bnpy.data.XData import XData
 
 class GraphXData(XData):
 
@@ -55,7 +55,7 @@ class GraphXData(XData):
     >>> Data = GraphXData(AdjMat=AdjMat)
     >>> Data.nNodesTotal
     3
-    >>> Data.nodes
+    >>> Data.nodeZ
     array([0, 1, 2])
     '''
 

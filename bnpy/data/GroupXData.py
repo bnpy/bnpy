@@ -9,7 +9,7 @@ from builtins import *
 import numpy as np
 from collections import namedtuple
 
-from .XData import XData
+from bnpy.data.XData import XData
 from bnpy.util import as1D, as2D, as3D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -51,11 +51,11 @@ class GroupXData(XData):
     # Assign items 0-499 to doc 1, 500-1000 to doc 2
     >>> doc_range = [0, 500, 1000]
     >>> myData = GroupXData(X, doc_range)
-    >>> print myData.nObs
+    >>> print (myData.nObs)
     1000
-    >>> print myData.X.shape
+    >>> print (myData.X.shape)
     (1000, 3)
-    >>> print myData.nDoc
+    >>> print (myData.nDoc)
     2
     """
     @classmethod

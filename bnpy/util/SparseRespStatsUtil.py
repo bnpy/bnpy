@@ -6,7 +6,7 @@ import timeit
 import time
 import sys
 
-from .SparseRespUtil import sparsifyResp
+from bnpy.util.SparseRespUtil import sparsifyResp
 from bnpy.util import dotATA
 from bnpy.util.EntropyUtil import calcRlogR
 from bnpy.util.ShapeUtil import as1D, toCArray

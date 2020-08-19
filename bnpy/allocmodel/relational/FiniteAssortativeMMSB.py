@@ -11,7 +11,7 @@ from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
 from bnpy.util import gammaln, digamma, EPS
 from bnpy.util.NumericUtil import calcRlogR
-from .FiniteMMSB import FiniteMMSB
+from bnpy.allocmodel.relational.FiniteMMSB import FiniteMMSB
 
 
 class FiniteAssortativeMMSB(FiniteMMSB):

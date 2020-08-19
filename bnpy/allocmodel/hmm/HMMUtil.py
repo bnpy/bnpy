@@ -16,7 +16,7 @@ from bnpy.util.NumericUtil import sumRtimesS
 from bnpy.util.NumericUtil import inplaceLog
 from bnpy.util import as2D
 
-from .lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from bnpy.allocmodel.hmm.lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,

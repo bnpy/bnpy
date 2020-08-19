@@ -5,7 +5,7 @@ Visualizing learned Gaussian mixture models.
 '''
 from builtins import *
 import numpy as np
-from .PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 
 from bnpy.util import as1D, as2D
 

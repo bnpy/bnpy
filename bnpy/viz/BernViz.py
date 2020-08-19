@@ -5,7 +5,7 @@ Visualization tools for beta-bernoulli observation models.
 '''
 from builtins import *
 import numpy as np
-from .PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 
 imshowArgs = dict(interpolation='nearest',
                   cmap='bone',

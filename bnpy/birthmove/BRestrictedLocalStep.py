@@ -1,6 +1,7 @@
 from builtins import *
+
 import numpy as np
-from . import BLogger
+from bnpy.birthmove import BLogger
 
 from bnpy.allocmodel.mix.DPMixtureRestrictedLocalStep import \
     summarizeRestrictedLocalStep_DPMixtureModel, \

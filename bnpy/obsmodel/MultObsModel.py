@@ -9,7 +9,7 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 from bnpy.util import NumericUtil
-from .AbstractObsModel import AbstractObsModel
+from bnpy.obsmodel.AbstractObsModel import AbstractObsModel
 
 
 class MultObsModel(AbstractObsModel):

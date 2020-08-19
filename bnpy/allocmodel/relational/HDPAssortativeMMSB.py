@@ -15,9 +15,9 @@ from bnpy.util import StickBreakUtil
 from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir, L_top
 
-from .FiniteAssortativeMMSB import FiniteAssortativeMMSB
-from .HDPMMSB import updateRhoOmega, updateThetaAndThetaRem, _beta2rhoomega
-from .HDPMMSB import initRhoOmegaFromScratch, initThetaFromScratch
+from bnpy.allocmodel.relational.FiniteAssortativeMMSB import FiniteAssortativeMMSB
+from bnpy.allocmodel.relational.HDPMMSB import updateRhoOmega, updateThetaAndThetaRem, _beta2rhoomega
+from bnpy.allocmodel.relational.HDPMMSB import initRhoOmegaFromScratch, initThetaFromScratch
 
 class HDPAssortativeMMSB(FiniteAssortativeMMSB):
 

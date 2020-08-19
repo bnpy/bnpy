@@ -115,7 +115,7 @@ def convertToN0(N):
     Example
     -------
     >>> convertToN0([1., 3., 7., 2])
-    array([ 12.,   9.,   2.,   0.])
+    array([12.,  9.,  2.,  0.])
     """
     N = np.asarray(N)
     N0 = np.zeros_like(N)

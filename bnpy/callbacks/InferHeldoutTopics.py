@@ -11,10 +11,10 @@ import warnings
 import logging
 
 from scipy.special import digamma
-from scipy.misc import logsumexp
+from scipy.special import logsumexp
 from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
 from bnpy.ioutil.ModelReader import \
-    getPrefixForLapQuery, loadTopicModel, loadModelForLap
+    getPrefixForLapQuery, loadTopicModel, load_model_at_lap
 from bnpy.ioutil.DataReader import \
     loadDataFromSavedTask, loadLPKwargsFromDisk, loadDataKwargsFromDisk
 from bnpy.ioutil.DataReader import str2numorstr
@@ -292,20 +292,20 @@ def createTrainTestSplitOfVocab(
     >>> seen_wids = np.arange(100)
     >>> swc = np.ones(100)
     >>> Info = createTrainTestSplitOfVocab(seen_wids, swc, 1000, 0.2, 1.0/10.0)
-    >>> print Info['ratio']
+    >>> print (Info['ratio'])
     0.1
-    >>> I213 = createTrainTestSplitOfVocab(seen_wids, 213, 0.2, 1.0/10.0)
-    >>> print I213['ratio']
+    >>> I213 = createTrainTestSplitOfVocab(seen_wids, swc, 213, 0.2, 1.0/10.0)
+    >>> print (I213['ratio'])
     0.1
-    >>> print len(I213['tr_seen_wids'])
+    >>> print (len(I213['tr_seen_wids']))
     80
-    >>> print len(I213['ho_seen_wids'])
+    >>> print (len(I213['ho_seen_wids']))
     11
-    >>> print len(I213['ho_unsn_wids'])
+    >>> print (len(I213['ho_unsn_wids']))
     110
     >>> # Here's an example that fails
-    >>> I111 = createTrainTestSplitOfVocab(seen_wids, 111, 0.2, 1.0/10.0)
-    raises ValueError
+    >>> I111 = createTrainTestSplitOfVocab(seen_wids, swc, 111, 0.2, 1.0/10.0)
+    ValueError: Cannot create heldout set with desired ratio of unseen words
     '''
     seen_wids = np.asarray(seen_wids, dtype=np.int32)
     # Split seen words into train and heldout

@@ -36,7 +36,7 @@ def split_str_into_fixed_width_lines(mstr, linewidth=80, tostr=False):
     Examples
     --------
     >>> s = ' abc def ghi jkl mno pqr'
-    >>> split_across_lines(s, linewidth=5)
+    >>> split_str_into_fixed_width_lines(s, linewidth=5)
     >>> split_across_lines(s, linewidth=7)
     >>> split_across_lines(s, linewidth=10)
     >>> s = '   abc   def   ghi   jkl   mno   pqr'

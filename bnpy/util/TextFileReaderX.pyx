@@ -1,4 +1,4 @@
-from builtins import *
+
 from libc.stdio cimport *
 from libc.string cimport *
 from libc.stdlib cimport atoi, atof, free

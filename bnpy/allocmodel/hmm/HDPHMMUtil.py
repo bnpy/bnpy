@@ -1,6 +1,6 @@
 from builtins import *
 import numpy as np
-from . import HMMUtil
+from bnpy.allocmodel.hmm import HMMUtil
 from bnpy.util import digamma, gammaln
 from bnpy.util.StickBreakUtil import rho2beta
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir

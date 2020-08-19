@@ -3,9 +3,9 @@ import copy
 import numpy as np
 import logging
 
-from . import HMMUtil
-from .HDPHMMUtil import ELBOTermDimMap, calcELBO
-from .HDPHMMUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
+from bnpy.allocmodel.hmm import HMMUtil
+from bnpy.allocmodel.hmm.HDPHMMUtil import ELBOTermDimMap, calcELBO
+from bnpy.allocmodel.hmm.HDPHMMUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
 
 from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag

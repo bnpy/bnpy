@@ -4,8 +4,8 @@ import copy
 import numpy as np
 import logging
 
-from .LearnAlg import LearnAlg
-from .LearnAlg import makeDictOfAllWorkspaceVars
+from bnpy.learnalg.LearnAlg import LearnAlg
+from bnpy.learnalg.LearnAlg import makeDictOfAllWorkspaceVars
 
 Log = logging.getLogger('bnpy')
 

@@ -1,8 +1,7 @@
 from builtins import *
 import numpy as np
 from collections import defaultdict
-
-from . import DLogger
+from bnpy.deletemove import DLogger
 import bnpy.birthmove.BPlanner as BPlanner
 from bnpy.viz.PrintTopics import count2str, vec2str
 

@@ -16,7 +16,7 @@ import logging
 import os
 import sys
 import scipy.io
-from . import ElapsedTimeLogger
+from bnpy.learnalg import ElapsedTimeLogger
 
 from sklearn.externals import joblib
 from bnpy.ioutil import ModelWriter
@@ -313,8 +313,10 @@ class LearnAlg(object):
 
         Examples
         -------
+        >>> my_obj = LearnAlg(…) 
+        >>> my_obj.mkfile(“X.txt”) 
         >>> mkfile("K.txt")
-        "/path/to/output/K.txt"
+        "/Users/xichen/Documents/bnpy/bnpy/learnalg/K.txt"
         """
         return os.path.join(self.task_output_path, fname)
 

@@ -2,9 +2,9 @@ from builtins import *
 import numpy as np
 import os
 
-from . import BLogger
+from bnpy.birthmove import BLogger
 from collections import defaultdict
-from .BCreateOneProposal import makeSummaryForBirthProposal_HTMLWrapper
+from bnpy.birthmove.BCreateOneProposal import makeSummaryForBirthProposal_HTMLWrapper
 
 def makeSummariesForManyBirthProposals(
         Dslice=None,

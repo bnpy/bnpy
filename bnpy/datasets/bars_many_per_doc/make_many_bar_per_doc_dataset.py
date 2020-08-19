@@ -25,22 +25,22 @@ def make_bars_topics(V, K, fracMassOnTopic=0.95, PRNG=np.random):
         positive reals, each row sums to one
     '''
     sqrtV = int(np.sqrt(V))
-    BarWidth = sqrtV / (K / 2)  # number of consecutive words in each bar
-    B = V / (K / 2)  # total number of "on topic" words in each bar
+    BarWidth = sqrtV // (K // 2)  # number of consecutive words in each bar
+    B = V // (K // 2)  # total number of "on topic" words in each bar
 
     topics = np.zeros((K, V))
     # Make horizontal bars
-    for k in range(K / 2):
+    for k in range(K // 2):
         wordIDs = list(range(B * k, B * (k + 1)))
         topics[k, wordIDs] = 1.0
 
     # Make vertical bars
-    for k in range(K / 2):
+    for k in range(K // 2):
         wordIDs = list()
         for b in range(sqrtV):
             start = b * sqrtV + k * BarWidth
             wordIDs.extend(list(range(start, start + BarWidth)))
-        topics[K / 2 + k, wordIDs] = 1.0
+        topics[K // 2 + k, wordIDs] = 1.0
 
     # Add smoothing mass to all entries in "topics"
     #  instead of picking this value out of thin air, instead,

@@ -6,7 +6,7 @@ Visualization tools for toy bars data for topic models.
 from builtins import *
 import numpy as np
 
-from .PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 
 imshowArgs = dict(interpolation='nearest',
                   cmap='bone_r', # zero is white, large values are black

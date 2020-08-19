@@ -1,15 +1,16 @@
 """
 The:mod:`learnalg' module provides learning algorithms.
 """
-from builtins import *
-from .LearnAlg import LearnAlg
-from .VBAlg import VBAlg
-from .MOVBAlg import MOVBAlg
-from .SOVBAlg import SOVBAlg
-from .EMAlg import EMAlg
 
-from .MemoVBMovesAlg import MemoVBMovesAlg
-from . import ElapsedTimeLogger
+from builtins import *
+from bnpy.learnalg.LearnAlg import LearnAlg
+from bnpy.learnalg.VBAlg import VBAlg
+from bnpy.learnalg.MOVBAlg import MOVBAlg
+from bnpy.learnalg.SOVBAlg import SOVBAlg
+from bnpy.learnalg.EMAlg import EMAlg
+
+from bnpy.learnalg.MemoVBMovesAlg import MemoVBMovesAlg
+from bnpy.learnalg import ElapsedTimeLogger
 
 # from ParallelVBAlg import ParallelVBAlg
 # from ParallelMOVBAlg import ParallelMOVBAlg

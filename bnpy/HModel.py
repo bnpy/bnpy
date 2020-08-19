@@ -22,9 +22,9 @@ import numpy as np
 import os
 import copy
 
-from . import init
-from .allocmodel import AllocModelConstructorsByName
-from .obsmodel import ObsModelConstructorsByName
+from bnpy import init
+from bnpy.allocmodel import AllocModelConstructorsByName
+from bnpy.obsmodel import ObsModelConstructorsByName
 from bnpy.learnalg import ElapsedTimeLogger
 
 class HModel(object):

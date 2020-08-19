@@ -1,7 +1,7 @@
 from builtins import *
 import numpy as np
 
-from .OptimizerRhoOmegaBetter import kvec
+from bnpy.allocmodel.topics.OptimizerRhoOmegaBetter import kvec
 from bnpy.util import NumericUtil
 from bnpy.util import digamma, gammaln
 from bnpy.util.StickBreakUtil import rho2beta

@@ -1,5 +1,5 @@
 from builtins import *
-from .PlotTrace import plotJobsThatMatchKeywords, plotJobs, parse_args
+from bnpy.viz.PlotTrace import plotJobsThatMatchKeywords, plotJobs, parse_args
 
 plotJobsThatMatch = plotJobsThatMatchKeywords
 

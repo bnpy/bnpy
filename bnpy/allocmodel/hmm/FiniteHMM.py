@@ -1,7 +1,7 @@
 from builtins import *
 import numpy as np
 
-from . import HMMUtil
+from bnpy.allocmodel.hmm import HMMUtil
 from bnpy.allocmodel import AllocModel
 from bnpy.suffstats import SuffStatBag
 from bnpy.util import digamma, gammaln, as2D

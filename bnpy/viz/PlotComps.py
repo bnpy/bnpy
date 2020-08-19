@@ -14,7 +14,7 @@ import argparse
 import os
 import sys
 
-from .PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 import bnpy.ioutil.BNPYArgParser as BNPYArgParser
 import bnpy.viz
 from bnpy.ioutil import ModelReader

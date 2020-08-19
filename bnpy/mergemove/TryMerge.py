@@ -5,7 +5,7 @@ import argparse
 import bnpy.mergemove.MLogger as MLogger
 from bnpy.ioutil.DataReader import loadDataFromSavedTask, loadLPKwargsFromDisk
 from bnpy.ioutil.DataReader import loadKwargsFromDisk
-from bnpy.ioutil.ModelReader import loadModelForLap
+from bnpy.ioutil.ModelReader import load_model_at_lap
 
 def tryMergeProposalForSpecificTarget(
         Data, hmodel,
