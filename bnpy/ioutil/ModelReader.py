@@ -7,7 +7,6 @@ See Also
 -------
 ModelWriter.py : save bnpy models to disk.
 '''
-from builtins import *
 import numpy as np
 import scipy.io
 import os

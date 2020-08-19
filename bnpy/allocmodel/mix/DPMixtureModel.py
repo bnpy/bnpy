@@ -2,7 +2,6 @@
 Bayesian nonparametric mixture model with Dirichlet process prior.
 '''
 
-from builtins import *
 import numpy as np
 
 from bnpy.allocmodel import AllocModel

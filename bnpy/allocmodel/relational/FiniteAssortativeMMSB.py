@@ -3,7 +3,6 @@ FiniteAssortativeMMSB.py
 
 Assortative mixed membership stochastic blockmodel.
 '''
-from builtins import *
 import numpy as np
 import itertools
 

@@ -1,5 +1,4 @@
 from __future__ import print_function
-from builtins import *
 import numpy as np
 try:
     import munkres
@@ -220,15 +219,15 @@ def calcContigBlocksFromZ(Zvec, returnStates=False):
     Examples
     --------
     >>> calcContigBlocksFromZ([0,0,0,0])
-    (array([ 4.]), array([ 0.]))
+    (array([4.]), array([0.]))
     >>> calcContigBlocksFromZ([0,0,0,1,1])
-    (array([ 3.,  2.]), array([ 0.,  3.]))
+    (array([3., 2.]), array([0., 3.]))
     >>> calcContigBlocksFromZ([0,1,0])
-    (array([ 1.,  1.,  1.]), array([ 0.,  1.,  2.]))
+    (array([1., 1., 1.]), array([0., 1., 2.]))
     >>> calcContigBlocksFromZ([0,1,1])
-    (array([ 1.,  2.]), array([ 0.,  1.]))
+    (array([1., 2.]), array([0., 1.]))
     >>> calcContigBlocksFromZ([6,6,5])
-    (array([ 2.,  1.]), array([ 0.,  2.]))
+    (array([2., 1.]), array([0., 2.]))
 
     Returns
     -------

@@ -10,7 +10,6 @@ Usage (command-line)
 -------
 python -m bnpy.viz.PlotTrace dataName jobpattern [kwargs]
 '''
-from builtins import *
 import numpy as np
 import argparse
 import glob

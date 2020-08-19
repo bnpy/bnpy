@@ -4,7 +4,6 @@ FromScratchBern.py
 Initialize global params of Bernoulli data-generation model,
 from scratch.
 '''
-from builtins import *
 import numpy as np
 from bnpy.data import XData
 from bnpy.suffstats import SuffStatBag

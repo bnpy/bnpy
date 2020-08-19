@@ -9,4 +9,4 @@ numexpr>=2.6.1
 psutil>=5.0.0
 scikit-learn>=0.18.1
 sphinx_gallery>=0.1.13
-munkres>=1.0,<=1.0.12
+munkres<=1.0.12

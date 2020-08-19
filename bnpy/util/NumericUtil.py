@@ -12,12 +12,16 @@ Library of efficient vectorized implementations of
 
 '''
 from __future__ import print_function
-from builtins import *
 import os
-import configparser
+import sys
 import numpy as np
 import scipy.sparse
 import timeit
+
+if sys.version_info.major == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 from bnpy.util.EntropyUtil import calcRlogR, calcRlogRdotv
 
@@ -86,13 +90,13 @@ def inplaceLog(R):
     Example
     -------
     >>> R = np.eye(2) + np.ones(2)
-    >>> print R
-    [[ 2.  1.]
-     [ 1.  2.]]
+    >>> print(R)
+    [[2. 1.]
+     [1. 2.]]
     >>> inplaceLog(R) # Look Mom, no return value!
-    >>> print R
-    [[ 0.69314718  0.        ]
-     [ 0.          0.69314718]]
+    >>> print(R)
+    [[0.69314718 0.        ]
+     [0.         0.69314718]]
     '''
     if Config['inplaceExpAndNormalizeRows'] == "numexpr" and hasNumexpr:
         return inplaceLog_numexpr(R)

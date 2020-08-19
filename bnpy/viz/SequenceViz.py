@@ -22,7 +22,6 @@ Example, showing the 5th lap for two different jobnames:
 python SequenceViz.py --Dataset MoCap6 --jobnames defaultjob,EM --taskids 1
                         --lap 5 --sequences 1,2,4,6
 '''
-from builtins import *
 import scipy.io
 import os
 import matplotlib.pyplot as plt

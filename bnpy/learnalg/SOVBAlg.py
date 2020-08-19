@@ -3,7 +3,6 @@ SOVBAlg.py
 
 Implementation of stochastic online VB (soVB) for bnpy models
 '''
-from builtins import *
 import os
 import numpy as np
 import scipy.sparse

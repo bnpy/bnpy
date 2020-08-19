@@ -5,7 +5,6 @@ BagOfWordsData
     Data object for holding a sparse bag-of-word observations,
     organized as a collection of documents, each containing some words.
 """
-from builtins import *
 import numpy as np
 import scipy.sparse
 import scipy.io

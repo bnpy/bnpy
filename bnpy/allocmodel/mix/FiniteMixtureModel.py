@@ -1,7 +1,6 @@
 '''
 Bayesian parametric mixture model with finite number of components K.
 '''
-from builtins import *
 import numpy as np
 
 from bnpy.allocmodel import AllocModel

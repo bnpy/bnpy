@@ -1,4 +1,3 @@
-from builtins import *
 from scipy.special import digamma, gammaln
 import numpy as np
 import warnings

@@ -8,7 +8,6 @@ Usage (command-line)
 python -m bnpy.viz.PlotComps dataName aModelName obsModelName algName [kwargs]
 
 '''
-from builtins import *
 import numpy as np
 import argparse
 import os

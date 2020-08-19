@@ -1,4 +1,3 @@
-from builtins import *
 import copy
 
 class AbstractObsModel(object):

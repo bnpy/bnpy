@@ -13,7 +13,6 @@ For l,m = 1,...,K:
    w_{lm} ~ Beta(tau_1, tau_0)
 '''
 
-from builtins import *
 import numpy as np
 from bnpy.util import logsumexp
 from bnpy.util import gammaln, digamma, EPS

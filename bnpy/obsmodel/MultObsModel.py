@@ -1,4 +1,3 @@
-from builtins import *
 import numpy as np
 from scipy.special import gammaln, digamma
 import scipy.sparse

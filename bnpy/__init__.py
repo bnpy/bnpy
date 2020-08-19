@@ -1,6 +1,5 @@
 ''' bnpy module __init__ file
 '''
-from builtins import *
 import os
 import sys
 import psutil
@@ -8,9 +7,6 @@ import psutil
 # Configure PYTHONPATH before importing any bnpy modules
 ROOT_PATH = os.path.sep.join(
     os.path.abspath(__file__).split(os.path.sep)[:-2])
-# sys.path.append(os.path.join(BNPYROOTDIR, 'datasets/'))
-# sys.path.append(os.path.join(BNPYROOTDIR, 'third-party/'))
-# sys.path.append(os.path.join(ROOT_PATH, 'third-party/anchorwordtopics/'))
 
 DATASET_PATH = os.path.join(ROOT_PATH, 'bnpy/datasets/')
 

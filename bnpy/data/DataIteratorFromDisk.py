@@ -31,7 +31,6 @@ For example, during the first 3 laps, we may see the following orders
    lap 2 : batches 0, 1, 2
 Set the "dataorderseed" parameter to get repeatable orders.
 '''
-from builtins import *
 import os
 import sys
 import glob
@@ -166,6 +165,9 @@ class DataIteratorFromDisk(object):
 
         self.dataset_type = decideDataTypeFromModel(aModelType, oModelType)
         self.DataInfo = self.loadWholeDatasetInfo()
+        if len(kwargs.keys()) > 0:
+            self.DataInfo.update(kwargs)
+
         if not hasattr(self, 'name') and 'datasetName' in self.DataInfo:
             self.name = self.DataInfo['datasetName']
         # Decide which order the batches will be traversed in the first lap

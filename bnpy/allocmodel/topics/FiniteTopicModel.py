@@ -1,4 +1,3 @@
-from builtins import *
 import numpy as np
 
 from bnpy.allocmodel.topics import LocalStepManyDocs

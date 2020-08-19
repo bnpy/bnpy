@@ -1,4 +1,3 @@
-from builtins import *
 from bnpy.viz.PlotTrace import plotJobsThatMatchKeywords, plotJobs, parse_args
 
 if __name__ == "__main__":

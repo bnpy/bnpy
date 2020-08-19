@@ -7,7 +7,6 @@ See Also
 -------
 ModelReader.py : load bnpy models from disk.
 '''
-from builtins import *
 import numpy as np
 import scipy.io
 import os

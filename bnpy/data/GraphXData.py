@@ -5,7 +5,6 @@ GraphXData
     Data object for holding dense observations about edges of a network/graph.
     Organized as a list of edges, each with associated observations in field X.
 """
-from builtins import *
 import numpy as np
 import scipy.io
 
@@ -55,8 +54,6 @@ class GraphXData(XData):
     >>> Data = GraphXData(AdjMat=AdjMat)
     >>> Data.nNodesTotal
     3
-    >>> Data.nodeZ
-    array([0, 1, 2])
     '''
 
     def __init__(self, edges=None, X=None,

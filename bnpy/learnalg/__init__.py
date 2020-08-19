@@ -2,7 +2,6 @@
 The:mod:`learnalg' module provides learning algorithms.
 """
 
-from builtins import *
 from bnpy.learnalg.LearnAlg import LearnAlg
 from bnpy.learnalg.VBAlg import VBAlg
 from bnpy.learnalg.MOVBAlg import MOVBAlg

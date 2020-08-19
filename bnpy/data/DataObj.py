@@ -1,4 +1,3 @@
-from builtins import *
 from bnpy.data.DataIterator import DataIterator
 
 class DataObj(object):

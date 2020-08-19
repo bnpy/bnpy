@@ -1,6 +1,5 @@
 ''' AllocModel.py
 '''
-from builtins import *
 
 
 class AllocModel(object):

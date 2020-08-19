@@ -1,9 +1,12 @@
-from builtins import *
 import argparse
-import configparser
 import os
 import sys
 import numpy as np
+
+if sys.version_info.major == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 from bnpy.allocmodel import AllocModelNameSet
 from bnpy.obsmodel import ObsModelNameSet
@@ -321,15 +324,15 @@ def _getTypeFromString(defVal):
     Examples
     ------
     >>> _getTypeFromString('deinonychus')
-    <class 'str'>
+    <type 'str'>
     >>> _getTypeFromString('3.14')
-    <class 'float'>
+    <type 'float'>
     >>> _getTypeFromString('555')
-    <class 'int'>
+    <type 'int'>
     >>> _getTypeFromString('555.0')
-    <class 'float'>
+    <type 'float'>
     >>> _getTypeFromString([1,2,3])
-    <class 'list'>
+    <type 'list'>
     '''
     if not isinstance(defVal, str):
         return type(defVal)

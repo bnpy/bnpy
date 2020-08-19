@@ -3,7 +3,6 @@ FromLP.py
 
 Initialize global params of a bnpy model using a set of local parameters
 '''
-from builtins import *
 import numpy as np
 
 from bnpy.init.FromTruth import convertLPFromHardToSoft

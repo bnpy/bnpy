@@ -38,7 +38,6 @@ For example, during the first 3 laps, we may see the following orders
 Set the "dataorderseed" parameter to get repeatable orders.
 
 '''
-from builtins import *
 import numpy as np
 MAXSEED = 1000000
 

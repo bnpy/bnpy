@@ -1,4 +1,3 @@
-from builtins import *
 import argparse
 import time
 import os
@@ -12,12 +11,13 @@ import logging
 
 from scipy.special import digamma
 from scipy.special import logsumexp
+
 from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
-from bnpy.ioutil.ModelReader import \
-    getPrefixForLapQuery, loadTopicModel, load_model_at_lap
-from bnpy.ioutil.DataReader import \
-    loadDataFromSavedTask, loadLPKwargsFromDisk, loadDataKwargsFromDisk
-from bnpy.ioutil.DataReader import str2numorstr
+from bnpy.ioutil.ModelReader import (
+    getPrefixForLapQuery, loadTopicModel, load_model_at_lap)
+from bnpy.ioutil.DataReader import (
+    str2numorstr,
+    loadDataFromSavedTask, loadLPKwargsFromDisk, loadDataKwargsFromDisk)
 
 VERSION = 0.1
 
@@ -303,8 +303,11 @@ def createTrainTestSplitOfVocab(
     11
     >>> print (len(I213['ho_unsn_wids']))
     110
+
     >>> # Here's an example that fails
     >>> I111 = createTrainTestSplitOfVocab(seen_wids, swc, 111, 0.2, 1.0/10.0)
+    Traceback (most recent call last):
+    ...
     ValueError: Cannot create heldout set with desired ratio of unseen words
     '''
     seen_wids = np.asarray(seen_wids, dtype=np.int32)

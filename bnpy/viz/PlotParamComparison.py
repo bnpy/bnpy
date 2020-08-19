@@ -22,7 +22,6 @@ Loop over panels
         Plot line
 
 '''
-from builtins import *
 import numpy as np
 import argparse
 import glob

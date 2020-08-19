@@ -1,4 +1,3 @@
-from builtins import *
 import numpy as np
 from bnpy.util import split_str_into_fixed_width_lines
 

@@ -3,7 +3,6 @@ BirthProposalError.py
 
 Simple wrapper around ValueError for birth-related exceptions
 '''
-from builtins import *
 
 
 class BirthProposalError(ValueError):

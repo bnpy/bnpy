@@ -5,7 +5,6 @@ XData : dataset_object
     Holds a 2D array X of exchangable observations
     Each observation is a dense row vector inside the array X
 '''
-from builtins import *
 import numpy as np
 import scipy.io
 import inspect

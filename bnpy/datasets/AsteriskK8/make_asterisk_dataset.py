@@ -6,7 +6,6 @@ Simple toy dataset of 8 Gaussian components with full covariance.
 Generated data form well-separated blobs arranged in "asterisk" shape
 when plotted in 2D.
 '''
-from builtins import *
 import scipy.linalg
 import numpy as np
 import pandas as pd

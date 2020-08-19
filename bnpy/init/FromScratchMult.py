@@ -3,7 +3,6 @@ FromScratchMult.py
 
 Initialize params of an HModel with multinomial observations from scratch.
 '''
-from builtins import *
 import numpy as np
 import time
 import os

@@ -1,4 +1,3 @@
-from builtins import *
 import os
 import numpy as np
 import bnpy.data
@@ -20,19 +19,20 @@ def loadDataFromSavedTask(taskoutpath, dataSplitName='train', **kwargs):
     Example
     -------
     >>> import bnpy
-    >>> os.environ['BNPYOUTDIR'] = '/tmp/'
+    >>> import tempfile
+    >>> output_dir = tempfile.mkdtemp(prefix='bnpy_tmp_results')
     >>> hmodel, Info = bnpy.run(
-    ...     'AsteriskK8', 'FiniteMixtureModel', 'Gauss', 'VB',
-    ...     nLap=1, nObsTotal=144, K=10,
+    ...     'AsteriskK8/x_dataset.csv', 'FiniteMixtureModel', 'Gauss', 'VB',
+    ...     nLap=1, nObsTotal=5000, K=10, output_path=output_dir,
     ...     doWriteStdOut=False)
-    >>> outputdir = Info['outputdir']
+
+    >>> outputdir = Info['task_output_path']
     >>> Data2 = loadDataFromSavedTask(outputdir)
     >>> print (Data2.nObsTotal)
-    144
+    5000
     >>> np.allclose(Info['Data'].X, Data2.X)
     True
     '''
-    dataName = getDataNameFromTaskpath(taskoutpath)
     dataKwargs = loadDataKwargsFromDisk(taskoutpath)
     try:
         onlineKwargs = loadKwargsFromDisk(
@@ -44,6 +44,7 @@ def loadDataFromSavedTask(taskoutpath, dataSplitName='train', **kwargs):
         # Occurs if does not exist.
         pass
 
+    dataName = dataKwargs['dataName']
     try:
         datamod = __import__(dataName, fromlist=[])
         if dataSplitName.count('test'):

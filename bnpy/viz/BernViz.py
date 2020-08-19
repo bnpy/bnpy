@@ -3,7 +3,6 @@ BernViz.py
 
 Visualization tools for beta-bernoulli observation models.
 '''
-from builtins import *
 import numpy as np
 from bnpy.viz.PlotUtil import pylab
 

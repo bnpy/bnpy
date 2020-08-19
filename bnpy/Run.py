@@ -1,36 +1,41 @@
 '''
-User-facing executable script for running experiments that
-train bnpy models using a variety of possible inference algorithms
+User-facing executable script for running experiments that train BNPy models
+using a variety of possible inference algorithms, including:
+
 ** Expectation Maximization (EM)
 ** Variational Bayesian Inference (VB)
 ** Stochastic Online Variational Bayesian Inference (soVB)
 ** Memoized Online Variational Bayesian Inference (moVB)
 
-Quickstart (Command Line)
--------
-To run EM for a 3-component GMM on easy, predefined toy data, do
-$ python -m bnpy.Run AsteriskK8 MixModel Gauss EM --K=3
+Quickstart
+----------
 
-Quickstart (within python script)
---------
+# From the terminal
+
+To run EM for a 3-component GMM on easy, predefined toy data, do
+
+$ python -m bnpy.Run AsteriskK8/x_dataset.csv MixModel Gauss EM --K=3
+
+# Within python script
+
 To do the same as above, just call the run method:
->> hmodel = run('AsteriskK8', 'MixModel', 'Gauss', 'EM', K=3)
+
+>> hmodel = run('AsteriskK8/x_dataset.csv', 'MixModel', 'Gauss', 'EM', K=3)
 
 Usage
 -------
 TODO: write better doc
 '''
 from __future__ import print_function
-from builtins import *
 import six
 import os
 import sys
 import logging
 import numpy as np
-import bnpy
 import inspect
 import time
-from bnpy.datasets import AsteriskK8
+
+import bnpy
 from bnpy.ioutil import BNPYArgParser
 from bnpy.ioutil.BNPYArgParser import FullDataAlgSet, OnlineDataAlgSet
 
@@ -46,8 +51,8 @@ def run(dataName=None, allocModelName=None, obsModelName=None, algName=None,
         Args
         -------
         dataName : either one of
-                    * bnpy Data object,
-                    * string name of python file within BNPYDATADIR
+                    * bnpy Data object, representing a dataset
+                    * string path to a CSV file or other file containing dataset
         allocModelName : string name of allocation (latent structure) model
         obsModelName : string name of observation (likelihood) model
         **kwargs : keyword args defining properties of the model or alg
@@ -130,23 +135,42 @@ def _run_task_internal(jobname, taskid, nTask,
     if algName in OnlineDataAlgSet:
         KwArgs[algName]['nLap'] = KwArgs['OnlineDataPrefs']['nLap']
 
+    data_path = None
     if isinstance(dataName, str):
-        if os.path.exists(dataName):
-            # dataName is a path to many data files on disk
+        # First, attempt to treat dataName as a path on filesystem
+        # Try to be friendly to user by 
+        # * (1) expanding env vars, or
+        # * (2) looking in bnpy's default dataset dir
+        looks_like_path = (dataName.count(os.path.sep)
+            or dataName.count("/") or dataName.count("\\"))
+        if looks_like_path:
+            data_path = os.path.expandvars(dataName)
+            if not os.path.exists(data_path):
+                default_dir_plus_data_path = os.path.join(
+                    bnpy.DATASET_PATH, data_path)
+                if not os.path.exists(default_dir_plus_data_path):
+                    raise ValueError(
+                        "Unable to load data from provided path: %s" % data_path)
+                data_path = default_dir_plus_data_path
+
+            # Load from path to one or more data files on disk
             Data, InitData = loadDataIteratorFromDisk(
-                dataName, ReqArgs, KwArgs, dataorderseed)
+                data_path, ReqArgs, KwArgs, dataorderseed)
             DataArgs = UnkArgs
+
             # Set the short name for this dataset,
-            # so that the filepath for results is informative.
+            # Useful for referring quickly to it
             if not hasattr(Data, 'name'):
                 try:
                     Data.name = KwArgs['OnlineDataPrefs']['datasetName']
                 except KeyError:
-                    Data.name = 'UnknownDatasetName'
+                    Data.name = '+'.join(data_path.split(os.path.sep)[-2:])
         else:
             DataArgs = getKwArgsForLoadData(ReqArgs, UnkArgs, KwArgs)
             Data, InitData = loadData(ReqArgs, KwArgs, DataArgs, dataorderseed)
     else:
+        # Otherwise, treat 'dataName' as a python module name
+        # And try to import that
         Data = dataName
         InitData = dataName
         DataArgs = dict()
@@ -154,12 +178,15 @@ def _run_task_internal(jobname, taskid, nTask,
         if algName in OnlineDataAlgSet:
             OnlineDataArgs = KwArgs['OnlineDataPrefs']
             OnlineDataArgs['dataorderseed'] = dataorderseed
-
             DataArgs = getKwArgsForLoadData(Data, UnkArgs)
             OnlineDataArgs.update(DataArgs)  # add custom args
             Data = Data.to_iterator(**OnlineDataArgs)
+
+    if data_path:
+        ReqArgs['dataPath'] = data_path
     if hasattr(Data, 'name'):
-        ReqArgs['dataName'] = Data.name
+        ReqArgs['data_nick_name'] = Data.name
+
     if doSaveToDisk:
         task_output_path = make_task_output_path(
             ReqArgs, KwArgs, taskID=taskid)
@@ -302,9 +329,9 @@ def loadData(ReqArgs, KwArgs, DataArgs, dataorderseed):
 def getKwArgsForLoadData(ReqArgs, UnkArgs, KwArgs=dict()):
     ''' Determine which keyword arguments can be passed to Data module
 
-        Returns
-        --------
-        DataArgs : dict passed as kwargs into DataModule's get_data method
+    Returns
+    --------
+    DataArgs : dict passed as kwargs into DataModule's get_data method
     '''
     if isinstance(ReqArgs, bnpy.data.DataObj):
         datamod = ReqArgs
@@ -456,7 +483,7 @@ def createLearnAlg(
 def writeArgsToFile(ReqArgs, KwArgs, task_output_path, UnkArgs):
     ''' Save arguments as key/val pairs to a plain text file
     '''
-    ArgDict = ReqArgs
+    ArgDict = dict(**ReqArgs)
     ArgDict.update(KwArgs)
     for key in ArgDict:
         if key.count('Name') > 0 or not isinstance(ArgDict[key], dict):
@@ -471,6 +498,9 @@ def writeArgsToFile(ReqArgs, KwArgs, task_output_path, UnkArgs):
 
     unkfile = os.path.join(task_output_path, 'args-DatasetPrefs.txt')
     with open(unkfile, 'w') as fout:
+        for key in ['dataName', 'data_nick_name', 'dataPath']:
+            if key in ReqArgs:
+                fout.write('%s %s\n' % (key, ReqArgs[key]))
         for key, val in UnkArgs.items():
             try:
                 fout.write('%s %s\n' % (key, val))
@@ -492,8 +522,8 @@ def createUniqueRandomSeed(jobname, taskID=0):
         jobname = jobname.split('-')[0]
     if len(jobname) > 5:
         jobname = jobname[:5]
-
-    seed = int(hashlib.md5(str(jobname + str(taskID)).encode('utf-8')).hexdigest(), 16) % 1e7
+    seed_str = str(jobname + str(taskID)).encode('utf-8')
+    seed = int(hashlib.md5(seed_str).hexdigest(), 16) % 1e7
     return int(seed)
 
 
@@ -573,7 +603,8 @@ def configLoggingToConsoleAndFile(
     formatter = logging.Formatter('%(message)s')
     # Config logger to save transcript of log messages to plain-text file
     if doSaveToDisk:
-        fh = logging.FileHandler(os.path.join(task_output_path, "transcript.txt"))
+        fh = logging.FileHandler(os.path.join(
+            task_output_path, "transcript.txt"))
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         Log.addHandler(fh)

@@ -8,7 +8,6 @@ LearnAlg
         * printing progress updates to stdout
         * recording run-time
 '''
-from builtins import *
 import six
 import numpy as np
 import time
@@ -320,16 +319,12 @@ class LearnAlg(object):
         Returns
         -------
         fpath : str
-<<<<<<< HEAD
 
         Examples
         -------
-        >>> my_obj = LearnAlg(…) 
-        >>> my_obj.mkfile(“X.txt”) 
-        >>> mkfile("K.txt")
-        "/Users/xichen/Documents/bnpy/bnpy/learnalg/K.txt"
-=======
->>>>>>> master
+        >>> my_obj = LearnAlg(task_output_path=os.path.join('tmp', 'a', 'b'))
+        >>> my_obj.mkfile("K.txt").replace(os.path.sep, '/')
+        "/tmp/a/b/c/K.txt"
         """
         return os.path.join(self.task_output_path, fname)
 

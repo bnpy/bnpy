@@ -1,4 +1,3 @@
-from builtins import *
 from matplotlib import pylab
 import matplotlib.axis, matplotlib.scale
 from matplotlib.ticker import \

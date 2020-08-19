@@ -1,4 +1,3 @@
-from builtins import *
 import argparse
 import numpy as np
 import scipy.sparse
@@ -13,20 +12,19 @@ from bnpy.util.ShapeUtil import as1D, toCArray
 
 hasCPPLib = True
 try:
-    from .lib.sparseResp.LibSparseResp \
-        import calcRlogRdotv_withSparseRespCSR_cpp
-    from .lib.sparseResp.LibSparseResp import calcRlogR_withSparseRespCSR_cpp
-    from .lib.sparseResp.LibSparseResp import calcRXXT_withSparseRespCSR_cpp
-    from .lib.sparseResp.LibSparseResp import calcRXX_withSparseRespCSR_cpp
-    from .lib.sparseResp.LibSparseResp import calcRXX_withSparseRespCSC_cpp
-
-    from .lib.sparseResp.LibSparseResp \
+    from bnpy.util.lib.sparseResp.LibSparseResp import (
+        calcRlogRdotv_withSparseRespCSR_cpp,
+        calcRlogR_withSparseRespCSR_cpp,
+        calcRXXT_withSparseRespCSR_cpp,
+        calcRXX_withSparseRespCSR_cpp,
+        calcRXX_withSparseRespCSC_cpp)
+    from bnpy.util.lib.sparseResp.LibSparseResp \
         import calcMergeRlogR_withSparseRespCSR_cpp as calcSparseMergeRlogR
-    from .lib.sparseResp.LibSparseResp \
+    from bnpy.util.lib.sparseResp.LibSparseResp \
         import calcMergeRlogRdotv_withSparseRespCSR_cpp as calcSparseMergeRlogRdotv
 except ImportError:
     hasCPPLib = False
-    # Sketchy avoid import errors
+    # Avoid import errors
     calcSparseMergeRlogR = None
     calcSparseMergeRlogRdotv = None
 

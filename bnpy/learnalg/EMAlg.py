@@ -1,4 +1,3 @@
-from builtins import *
 import numpy as np
 
 from bnpy.learnalg.LearnAlg import LearnAlg, makeDictOfAllWorkspaceVars

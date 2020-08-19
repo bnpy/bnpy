@@ -3,7 +3,6 @@ MPlanner.py
 
 Functions for deciding which merge pairs to track.
 '''
-from builtins import *
 import numpy as np
 import sys
 import os

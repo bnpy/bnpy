@@ -5,7 +5,6 @@ GroupXData
     Data object for holding a dense matrix X of real 64-bit floats,
     organized contiguously based on provided group structure.
 '''
-from builtins import *
 import numpy as np
 from collections import namedtuple
 

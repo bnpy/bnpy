@@ -3,7 +3,6 @@ FromScratchBregman.py
 
 Initialize suff stats for observation models via Bregman clustering.
 '''
-from builtins import *
 import re
 import numpy as np
 import bnpy.data

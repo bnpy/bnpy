@@ -1,7 +1,6 @@
 '''
 Implementation of parallel memoized variational algorithm for bnpy models.
 '''
-from builtins import *
 import numpy as np
 import multiprocessing
 import os

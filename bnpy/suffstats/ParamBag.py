@@ -1,4 +1,3 @@
-from builtins import *
 import numpy as np
 import copy
 
@@ -360,9 +359,9 @@ class ParamBag(object):
         --------
         >>> PB = ParamBag() # fixing K,D doesn't matter
         >>> PB._getAllowedShapes(())
-        {()}
+        set([()])
         >>> PB._getAllowedShapes((1,))
-        {(), (1,)}
+        set([(), (1,)])
         >>> aSet = PB._getAllowedShapes((23,))
         >>> sorted(aSet)
         [(23,)]

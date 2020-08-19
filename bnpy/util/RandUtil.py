@@ -3,7 +3,6 @@ RandUtil.py
 
 Utilities for sampling (pseudo) random numbers
 '''
-from builtins import *
 import numpy as np
 
 

@@ -2,7 +2,6 @@
 The :mod:`viz` module provides visualization capability
 """
 
-from builtins import *
 from bnpy.viz import BarsViz
 from bnpy.viz import BernViz
 from bnpy.viz import GaussViz

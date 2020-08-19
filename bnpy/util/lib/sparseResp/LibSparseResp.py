@@ -2,15 +2,202 @@
 LibSparseResp.py
 
 Sets global variable "hasEigenLibReady" with True/False indicator
-for whether the compiled cpp library required has compiled successfully.
+for whether the compiled cpp library required has compiled and is loadable successfully.
 '''
-from builtins import *
 import os
 import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
 import scipy.sparse
 from scipy.special import digamma
+
+''' This block of code loads the shared library and defines wrapper functions
+    that can take numpy array objects.
+'''
+libpath = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
+libfilename = 'libsparsemix.so'
+libfilename2 = 'libsparsetopics.so'
+hasEigenLibReady = True
+
+try:
+    # Load the compiled C++ library from disk
+    lib = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename))
+
+    # Now specify each function's signature
+    lib.sparsifyResp.restype = None
+    lib.sparsifyResp.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ]
+
+    lib.sparsifyLogResp.restype = None
+    lib.sparsifyLogResp.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ]
+
+    lib.calcRlogR_withSparseRespCSR.restype = None
+    lib.calcRlogR_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ]
+
+    lib.calcRlogRdotv_withSparseRespCSR.restype = None
+    lib.calcRlogRdotv_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ]
+
+    lib.calcMergeRlogR_withSparseRespCSR.restype = ctypes.c_double
+    lib.calcMergeRlogR_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ]
+
+    lib.calcMergeRlogRdotv_withSparseRespCSR.restype = ctypes.c_double
+    lib.calcMergeRlogRdotv_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ]
+
+    lib.calcRXXT_withSparseRespCSR.restype = None
+    lib.calcRXXT_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ]
+
+    lib.calcRXX_withSparseRespCSR.restype = None
+    lib.calcRXX_withSparseRespCSR.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ]
+
+    lib.calcRXX_withSparseRespCSC.restype = None
+    lib.calcRXX_withSparseRespCSC.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ]
+
+    libTopics = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename2))
+    libTopics.sparseLocalStepSingleDoc.restype = None
+    libTopics.sparseLocalStepSingleDoc.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_double,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_double),
+         ]
+
+    libTopics.sparseLocalStepSingleDoc_ActiveOnly.restype = None
+    libTopics.sparseLocalStepSingleDoc_ActiveOnly.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_double,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ndpointer(ctypes.c_int),
+         ndpointer(ctypes.c_int),
+         ctypes.c_int,
+         ]
+
+    libTopics.sparseLocalStepSingleDocWithWordCounts.restype = None
+    libTopics.sparseLocalStepSingleDocWithWordCounts.argtypes = \
+        [ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_int,
+         ctypes.c_double,
+         ctypes.c_int,
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_double),
+         ndpointer(ctypes.c_int),
+         ]
+except OSError as e:
+    # No compiled C++ library exists
+    hasEigenLibReady = False
+
 
 def sparsifyResp_cpp(Resp, nnzPerRow, order='C'):
     '''
@@ -51,39 +238,46 @@ def sparsifyLogResp_cpp(logResp, nnzPerRow, order='C'):
 
     Example
     -------
+    >>> from bnpy.util.SparseRespUtil import sparsifyLogResp
+    >>> from bnpy.util.SparseRespUtil import sparsifyLogResp_numpy_vectorized
+
     >>> logResp = np.asarray([-1.0, -2, -3, -4, -100, -200])
-    >>> spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 2)
-    >>> print (spR.data.sum())
+    >>> if hasEigenLibReady: spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 2)
+    >>> if not hasEigenLibReady: spR = sparsifyLogResp(logResp[np.newaxis,:], 2)
+    >>> print(spR.data.sum())
     1.0
-    >>> print (spR.indices.min())
+    >>> print(spR.indices.min())
     0
-    >>> print (spR.indices.max())
+    >>> print(spR.indices.max())
     1
-    >>> print (spR.data)
-    [0.73105858 0.26894142]
+    >>> print(spR.toarray())
+    [[0.73105858 0.26894142 0.         0.         0.         0.        ]]
 
     >>> # Try duplicates in weights that don't influence top L
     >>> logResp = np.asarray([-500., -500., -500., -4, -1, -2])
-    >>> spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 3)
-    >>> print (spR.data.sum())
+    >>> if hasEigenLibReady: spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 3)
+    >>> if not hasEigenLibReady: spR = sparsifyLogResp(logResp[np.newaxis,:], 3)
+
+    >>> print(spR.data.sum())
     1.0
-    >>> print (np.unique(spR.indices))
+    >>> print(np.unique(spR.indices))
     [3 4 5]
 
     >>> # Try duplicates in weights that DO influence top L
     >>> logResp = np.asarray([-500., -500., -500., -500., -1, -2])
-    >>> spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 4)
-    >>> print (spR.data.sum())
+    >>> if hasEigenLibReady: spR = sparsifyLogResp_cpp(logResp[np.newaxis,:], 4)
+    >>> if not hasEigenLibReady: spR = sparsifyLogResp(logResp[np.newaxis,:], 4)
+    >>> print(spR.data.sum())
     1.0
-    >>> print (np.unique(spR.indices))
+    >>> print(np.unique(spR.indices))
     [2 3 4 5]
 
     >>> # Try big problem
-    >>> from bnpy.util.SparseRespUtil import sparsifyLogResp_numpy_vectorized
     >>> logResp = np.log(np.random.rand(100, 10))
-    >>> spR = sparsifyLogResp_cpp(logResp, 7)
-    >>> spR2 = sparsifyLogResp_numpy_vectorized(logResp, 7)
-    >>> np.allclose(spR.toarray(), spR2.toarray())
+    >>> if hasEigenLibReady: spR_cpp = sparsifyLogResp_cpp(logResp, 7)
+    >>> if not hasEigenLibReady: spR_cpp = sparsifyLogResp(logResp, 7)
+    >>> spR_np = sparsifyLogResp_numpy_vectorized(logResp, 7)
+    >>> np.allclose(spR_cpp.toarray(), spR_np.toarray())
     True
 
     Returns
@@ -400,194 +594,6 @@ def calcSparseLocalParams_SingleDoc(
             spResp_colids_OUT,
             d, D, numIterVec, maxDiffVec,
             )
-
-
-''' This block of code loads the shared library and defines wrapper functions
-    that can take numpy array objects.
-'''
-libpath = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
-libfilename = 'libsparsemix.so'
-libfilename2 = 'libsparsetopics.so'
-hasEigenLibReady = True
-
-try:
-    # Load the compiled C++ library from disk
-    lib = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename))
-
-    # Now specify each function's signature
-    lib.sparsifyResp.restype = None
-    lib.sparsifyResp.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ]
-
-    lib.sparsifyLogResp.restype = None
-    lib.sparsifyLogResp.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ]
-
-    lib.calcRlogR_withSparseRespCSR.restype = None
-    lib.calcRlogR_withSparseRespCSR.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ]
-
-    lib.calcRlogRdotv_withSparseRespCSR.restype = None
-    lib.calcRlogRdotv_withSparseRespCSR.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ]
-
-    lib.calcMergeRlogR_withSparseRespCSR.restype = ctypes.c_double
-    lib.calcMergeRlogR_withSparseRespCSR.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ]
-
-    lib.calcMergeRlogRdotv_withSparseRespCSR.restype = ctypes.c_double
-    lib.calcMergeRlogRdotv_withSparseRespCSR.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ]
-
-    lib.calcRXXT_withSparseRespCSR.restype = None
-    lib.calcRXXT_withSparseRespCSR.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ]
-
-    lib.calcRXX_withSparseRespCSR.restype = None
-    lib.calcRXX_withSparseRespCSR.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ]
-
-    lib.calcRXX_withSparseRespCSC.restype = None
-    lib.calcRXX_withSparseRespCSC.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ]
-
-    libTopics = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename2))
-    libTopics.sparseLocalStepSingleDoc.restype = None
-    libTopics.sparseLocalStepSingleDoc.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_double,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_double),
-         ]
-
-    libTopics.sparseLocalStepSingleDoc_ActiveOnly.restype = None
-    libTopics.sparseLocalStepSingleDoc_ActiveOnly.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_double,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ndpointer(ctypes.c_int),
-         ndpointer(ctypes.c_int),
-         ctypes.c_int,
-         ]
-
-    libTopics.sparseLocalStepSingleDocWithWordCounts.restype = None
-    libTopics.sparseLocalStepSingleDocWithWordCounts.argtypes = \
-        [ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_int,
-         ctypes.c_double,
-         ctypes.c_int,
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_double),
-         ndpointer(ctypes.c_int),
-         ]
-except OSError as e:
-    # No compiled C++ library exists
-    hasEigenLibReady = False
 
 
 if __name__ == "__main__":

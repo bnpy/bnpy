@@ -1,4 +1,3 @@
-from builtins import *
 import numpy as np
 from collections import defaultdict
 from bnpy.deletemove import DLogger

@@ -3,7 +3,6 @@ BarsViz.py
 
 Visualization tools for toy bars data for topic models.
 '''
-from builtins import *
 import numpy as np
 
 from bnpy.viz.PlotUtil import pylab

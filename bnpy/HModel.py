@@ -17,7 +17,6 @@ Key functions
 * get_global_suff_stats
 * update_global_params
 '''
-from builtins import *
 import numpy as np
 import os
 import copy

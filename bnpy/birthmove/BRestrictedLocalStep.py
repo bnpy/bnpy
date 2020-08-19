@@ -1,4 +1,3 @@
-from builtins import *
 
 import numpy as np
 from bnpy.birthmove import BLogger

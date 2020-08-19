@@ -18,7 +18,6 @@ Options
     ids of the tasks (individual runs) of the given job to plot.
     Ex: "1" or "3" or "1,2,3" or "1-6"
 '''
-from builtins import *
 from bnpy.viz.PlotUtil import pylab
 import numpy as np
 import argparse
