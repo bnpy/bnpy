@@ -321,10 +321,10 @@ class LearnAlg(object):
         fpath : str
 
         Examples
-        -------
-        >>> my_obj = LearnAlg(task_output_path=os.path.join('tmp', 'a', 'b'))
-        >>> my_obj.mkfile("K.txt").replace(os.path.sep, '/')
-        "/tmp/a/b/c/K.txt"
+        --------
+        >>> my_obj = LearnAlg(task_output_path=os.path.join('tmp', 'a', 'b', 'c'))
+        >>> my_obj.mkfile("K.txt").split(os.path.sep)
+        ['tmp', 'a', 'b', 'c', 'K.txt']
         """
         return os.path.join(self.task_output_path, fname)
 

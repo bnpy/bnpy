@@ -89,7 +89,7 @@ def buildCostMatrix(zHat, zTrue):
     return CostMatrix
 
 
-def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
+def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False, standardize_order_of_extras=True):
     ''' Relabel the states in zHat to minimize the hamming-distance to zTrue
 
     Args
@@ -128,6 +128,32 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
                 AlignedRowColPairs.append((ktrue, kest))
                 OrigToAlignedMap[kest] = ktrue
                 AlignedToOrigMap[ktrue] = kest
+
+        if Ktrue < Kest and standardize_order_of_extras:
+            # All extra states will have ids in Ktrue, Ktrue+1, Ktrue+2, ....
+            # Break ties by assigning these in ascending order by first appearance
+            extra_states = []
+            for (kt, ke) in AlignedRowColPairs:
+                if kt >= Ktrue and ke in zHat:
+                    extra_states.append(ke)
+            rank = dict()
+            for x in extra_states:
+                match_ids = np.flatnonzero(zHat == x)
+                if match_ids.size == 0:
+                    continue
+                rank[x] = match_ids[0]
+            ## Renumber by rank from smallest to largest
+            old_ids = np.asarray(rank.keys())
+            new_ids = Ktrue + np.argsort(rank.values())
+            old2new = dict(zip(old_ids, new_ids))
+            OrigToAlignedMap = dict()
+            AlignedToOrigMap = dict()
+            for a, b in AlignedRowColPairs:
+                newa = old2new.get(b, a)
+                OrigToAlignedMap[b] = newa
+                AlignedToOrigMap[newa] = b
+            AlignedRowColPairs = list(AlignedToOrigMap.items())
+
     else:
         # Unpack existing alignment info
         AlignedRowColPairs = useInfo['AlignedRowColPairs']
@@ -137,7 +163,8 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
         Ktrue = useInfo['Ktrue']
         Kest = useInfo['Kest']
 
-        assert np.allclose(Ktrue, zTrue.max() + 1)
+        assert Ktrue >= zTrue.max() + 1
+        
         Khat = zHat.max() + 1
 
         # Account for extra states present in zHat
