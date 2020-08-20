@@ -147,6 +147,7 @@ class TestStateSeqUtil(unittest.TestCase):
         zTru = [0, 0, 0, 0, 0, 0, 0, 0]
         zExp = [0, 0, 0, 1, 2, 3, 0, 0]
         zA = SSU.alignEstimatedStateSeqToTruth(zEst, zTru)
+
         assert np.allclose(zA, zExp)
         hdist = SSU.calcHammingDistance(zA, zTru)
         assert hdist == 3  / float(len(zTru))
@@ -155,6 +156,7 @@ class TestStateSeqUtil(unittest.TestCase):
         zTru = [1, 1, 0, 0, 0, 0, 0, 0]
         zExp = [0, 0, 0, 2, 3, 4, 0, 0]
         zA = SSU.alignEstimatedStateSeqToTruth(zEst, zTru)
+
         assert np.allclose(zA, zExp)
         hdist = SSU.calcHammingDistance(zA, zTru)
         assert hdist == 5  / float(len(zTru))

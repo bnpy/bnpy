@@ -15,9 +15,10 @@ import logging
 import os
 import sys
 import scipy.io
+import joblib
+
 from bnpy.learnalg import ElapsedTimeLogger
 
-from sklearn.externals import joblib
 from bnpy.ioutil import ModelWriter
 from bnpy.util import (
     isEvenlyDivisibleFloat,

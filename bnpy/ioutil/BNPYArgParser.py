@@ -323,16 +323,19 @@ def _getTypeFromString(defVal):
 
     Examples
     ------
-    >>> _getTypeFromString('deinonychus')
-    <type 'str'>
-    >>> _getTypeFromString('3.14')
-    <type 'float'>
-    >>> _getTypeFromString('555')
-    <type 'int'>
-    >>> _getTypeFromString('555.0')
-    <type 'float'>
-    >>> _getTypeFromString([1,2,3])
-    <type 'list'>
+    # Added extra 'replace' to accomodate py2 vs py3 difference
+    # * py2 reports "<type 'NAME'>"
+    # * py3 reports "<class 'NAME'>"
+    >>> str(_getTypeFromString('deinonychus')).replace('type', 'class')
+    "<class 'str'>"
+    >>> str(_getTypeFromString('3.14')).replace('type', 'class')
+    "<class 'float'>"
+    >>> str(_getTypeFromString('555')).replace('type', 'class')
+    "<class 'int'>"
+    >>> str(_getTypeFromString('555.0')).replace('type', 'class')
+    "<class 'float'>"
+    >>> str(_getTypeFromString([1,2,3])).replace('type', 'class')
+    "<class 'list'>"
     '''
     if not isinstance(defVal, str):
         return type(defVal)

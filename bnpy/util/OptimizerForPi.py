@@ -293,13 +293,14 @@ def pi2eta(pi_K):
 
     Examples
     --------
-    >>> print float(pi2eta(eta2pi(0.42)))
-    0.42
+    # py2 vs py3 round error without format str
+    >>> print("%.5f" % float(pi2eta(eta2pi(0.42))))
+    0.42000
 
-    >>> print float(pi2eta(eta2pi(-1.337)))
+    >>> print(float(pi2eta(eta2pi(-1.337))))
     -1.337
 
-    >>> print pi2eta(eta2pi([-1, 0, 1]))
+    >>> print(pi2eta(eta2pi([-1, 0, 1])))
     [-1.  0.  1.]
     '''
     pi_K = as1D(np.asarray(pi_K))

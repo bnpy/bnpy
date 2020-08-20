@@ -358,10 +358,10 @@ class ParamBag(object):
         Examples
         --------
         >>> PB = ParamBag() # fixing K,D doesn't matter
-        >>> PB._getAllowedShapes(())
-        set([()])
-        >>> PB._getAllowedShapes((1,))
-        set([(), (1,)])
+        >>> list(PB._getAllowedShapes(()))
+        [()]
+        >>> list(PB._getAllowedShapes((1,)))
+        [(), (1,)]
         >>> aSet = PB._getAllowedShapes((23,))
         >>> sorted(aSet)
         [(23,)]

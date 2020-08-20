@@ -129,7 +129,7 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False, s
                 OrigToAlignedMap[kest] = ktrue
                 AlignedToOrigMap[ktrue] = kest
 
-        if Ktrue < Kest and standardize_order_of_extras:
+        if Ktrue < Kest and np.unique(zTrue).size < np.unique(zHat).size and standardize_order_of_extras:
             # All extra states will have ids in Ktrue, Ktrue+1, Ktrue+2, ....
             # Break ties by assigning these in ascending order by first appearance
             extra_states = []
@@ -137,14 +137,16 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False, s
                 if kt >= Ktrue and ke in zHat:
                     extra_states.append(ke)
             rank = dict()
-            for x in extra_states:
+            for x in sorted(extra_states):
                 match_ids = np.flatnonzero(zHat == x)
                 if match_ids.size == 0:
                     continue
                 rank[x] = match_ids[0]
+
             ## Renumber by rank from smallest to largest
-            old_ids = np.asarray(rank.keys())
-            new_ids = Ktrue + np.argsort(rank.values())
+            old_ids, rank_vals = zip(*list(rank.items()))
+            old_ids = np.asarray(old_ids)
+            new_ids = Ktrue + np.argsort(np.asarray(rank_vals))
             old2new = dict(zip(old_ids, new_ids))
             OrigToAlignedMap = dict()
             AlignedToOrigMap = dict()

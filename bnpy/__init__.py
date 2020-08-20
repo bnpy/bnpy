@@ -27,16 +27,16 @@ from bnpy import deletemove
 
 from bnpy import callbacks
 
-from bnpy import Run
+from bnpy import Runner
 
 # Convenient aliases to existing functions
-run = Run.run
+run = Runner.run
 load_model_at_lap = ioutil.ModelReader.load_model_at_lap
 save_model = ioutil.ModelWriter.save_model
-make_initialized_model = Run.make_initialized_model
+make_initialized_model = Runner.make_initialized_model
 
 
-__all__ = ['run', 'Run', 'learnalg', 'allocmodel', 'obsmodel', 'suffstats',
+__all__ = ['run', 'learnalg', 'allocmodel', 'obsmodel', 'suffstats',
            'HModel', 'init', 'util', 'ioutil']
 
 # Optional viz package for plotting

@@ -1,7 +1,7 @@
 import os
 import numpy as np
 try:
-    from sklearn.externals import joblib
+    import joblib
     hasJoblibModule = True
 except ImportError:
     hasJoblibModule = False
