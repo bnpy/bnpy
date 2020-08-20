@@ -322,6 +322,7 @@ class LearnAlg(object):
 
         Examples
         --------
+        # Platform-independent and user independent
         >>> my_obj = LearnAlg(task_output_path=os.path.join('tmp', 'a', 'b', 'c'))
         >>> my_obj.mkfile("K.txt").split(os.path.sep)
         ['tmp', 'a', 'b', 'c', 'K.txt']
