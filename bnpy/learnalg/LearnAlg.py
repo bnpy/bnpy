@@ -313,10 +313,9 @@ class LearnAlg(object):
 
         Examples
         -------
-        >>> my_obj = LearnAlg(…) 
-        >>> my_obj.mkfile(“X.txt”) 
-        >>> mkfile("K.txt")
-        "/Users/xichen/Documents/bnpy/bnpy/learnalg/K.txt"
+        >>> my_obj = LearnAlg(task_output_path= "/Users/xichen/Documents/bnpy/bnpy/learnalg", seed=0, algParams=dict(), outputParams=dict(), BNPYRunKwArgs=dict())
+        >>> my_obj.mkfile("K.txt")
+        '/Users/xichen/Documents/bnpy/bnpy/learnalg/K.txt'
         """
         return os.path.join(self.task_output_path, fname)
 
