@@ -32,6 +32,14 @@ class TestEndToEnd(AbstractEndToEndTest):
             DPMixtureModel=["VB", "soVB", "moVB"],
         )
 
+    def nextAllocKwArgsForEM(self):
+        for aName in ["FiniteMixtureModel"]:
+            for gamma in [10.01]: # gamma > K required for EM
+                kwargs = OrderedDict()
+                kwargs['name'] = aName
+                kwargs['gamma'] = gamma
+                yield kwargs
+
     def nextObsKwArgsForVB(self, aName):
         for oName in self.possibleObsModelNames:
             for sF in [0.5, 1.0, 5.0]:

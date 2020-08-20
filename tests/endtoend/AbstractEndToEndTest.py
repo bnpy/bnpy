@@ -40,8 +40,11 @@ class AbstractEndToEndTest(unittest.TestCase):
     def shortDescription(self):
         return None
 
-    def makeAllocKwArgs(self, aName, algName):
-        return dict()
+    def makeAllocKwArgs(self, aArg, algName, extra_kwargs):
+        a_kwargs = dict()
+        if isinstance(aArg, dict):
+            a_kwargs.update(aArg)
+        return a_kwargs
 
     def makeObsKwArgs(self, oName, algName):
         return dict()
@@ -54,6 +57,10 @@ class AbstractEndToEndTest(unittest.TestCase):
         for name in self.possibleAllocModelNames:
             yield dict(name=name)
 
+    def nextAllocKwArgsForEM(self):
+        for name in self.possibleAllocModelNames:
+            yield dict(name=name)
+
     def nextObsKwArgsForVB(self, aName):
         for name in self.possibleObsModelNames:
             yield dict(name=name)
@@ -62,7 +69,7 @@ class AbstractEndToEndTest(unittest.TestCase):
         for name in self.possibleInitNames:
             yield dict(initname=name)
 
-    def makeAllKwArgs(self, aName, obsArg, algName, iArg):
+    def makeAllKwArgs(self, aArg, obsArg, algName, iArg):
         kwargs = dict(
             doSaveToDisk=False,
             doWriteStdOut=False,
@@ -72,17 +79,22 @@ class AbstractEndToEndTest(unittest.TestCase):
             convergeThr=0.0001,
             nLap=300,
         )
-        kwargs.update(self.makeAllocKwArgs(aName, algName))
+        
+        # Add init args
+        if isinstance(iArg, str):
+            kwargs.update(self.makeInitKwArgs(iArg))
+        elif isinstance(iArg, dict):
+            kwargs.update(iArg)
 
+        # Allocation kwargs
+        kwargs.update(self.makeAllocKwArgs(aArg, algName, kwargs))
+
+        # Observation model kwargs
         if isinstance(obsArg, str):
             kwargs.update(self.makeObsKwArgs(obsArg, algName))
         elif isinstance(obsArg, dict):
             kwargs.update(obsArg)
 
-        if isinstance(iArg, str):
-            kwargs.update(self.makeInitKwArgs(iArg))
-        elif isinstance(iArg, dict):
-            kwargs.update(iArg)
         return kwargs
 
     def single_run_repeatable_and_monotonic(self, aArg, oArg, algName, iArg):
@@ -95,16 +107,19 @@ class AbstractEndToEndTest(unittest.TestCase):
                                  algName, **kwargs)
         self.pprintResult(model1, Info1)
 
-        evTrace = Info1['evTrace']
+        loss_history = Info1['loss_history']
         if algName.count('moVB'):
-            evTrace = evTrace[Info1['lapTrace'] >= 1.0]
-        isMonotonic = self.isMonotonic(evTrace)
-        assert isMonotonic
-
+            loss_history = loss_history[Info1['lap_history'] >= 1.0]
+        isMonotonic = self.isMonotonicallyIncreasing(-1 * loss_history)
+        try:
+            assert isMonotonic
+        except AssertionError:
+            from IPython import embed; embed()
+        
         model2, Info2 = bnpy.run(self.Data, arg2name(aArg), arg2name(oArg),
                                  algName, **kwargs)
         self.pprintResult(model2, Info2)
-        isRepeatable = np.allclose(Info1['evTrace'], Info2['evTrace'])
+        isRepeatable = np.allclose(Info1['loss_history'], Info2['loss_history'])
         assert isRepeatable
 
     def single_run_monotonic(self, aArg, oArg, algName, iArg):
@@ -116,7 +131,7 @@ class AbstractEndToEndTest(unittest.TestCase):
         model1, Info1 = bnpy.run(self.Data, arg2name(aArg), arg2name(oArg),
                                  algName, **kwargs)
         self.pprintResult(model1, Info1)
-        isMonotonic = self.isMonotonic(Info1['evTrace'])
+        isMonotonic = self.isMonotonicallyIncreasing(-1 * Info1['loss_history'])
         assert isMonotonic
 
     @attr('slow')
@@ -141,24 +156,31 @@ class AbstractEndToEndTest(unittest.TestCase):
     @attr('fast')
     def test_EM__repeatable_and_monotonic(self):
         print('')
-        for aName in self.possibleAllocModelNames:
+        for aKwArgs in self.nextAllocKwArgsForEM():
+            aName = arg2name(aKwArgs)
             if 'EM' not in self.possibleLearnAlgsForAllocModel[aName]:
                 continue
             for oName in self.possibleObsModelNames:
                 for iName in self.possibleInitNames:
-                    self.single_run_repeatable_and_monotonic(aName, oName,
+                    self.single_run_repeatable_and_monotonic(aKwArgs, oName,
                                                              'EM', iName)
 
     @attr('fast')
     def test_moVB__repeatable_and_monotonic(self):
         print('')
         for aName in self.possibleAllocModelNames:
+            if 'memoVB'in self.possibleLearnAlgsForAllocModel[aName]:
+                algName = 'memoVB'
+            elif 'moVB' in self.possibleLearnAlgsForAllocModel[aName]:
+                algName = 'moVB'
+            else:
+                continue
             for oName in self.possibleObsModelNames:
                 for iName in self.possibleInitNames:
                     self.single_run_repeatable_and_monotonic(aName, oName,
-                                                             'moVB', iName)
+                                                             algName, iName)
 
-    def isMonotonic(self, ELBOvec, atol=1e-6, verbose=True):
+    def isMonotonicallyIncreasing(self, ELBOvec, atol=1e-6, verbose=True):
         ''' Returns True if monotonically increasing, False otherwise.
 
         Returns
@@ -181,20 +203,20 @@ class AbstractEndToEndTest(unittest.TestCase):
     def test__isMonotonic(self):
         """ Verify that the isMonotonic boolean function has correct output.
         """
-        assert self.isMonotonic([502.3, 503.1, 504.01, 504.00999999])
-        assert not self.isMonotonic([502.3, 503.1, 504.01, 504.00989999],
+        assert self.isMonotonicallyIncreasing([502.3, 503.1, 504.01, 504.00999999])
+        assert not self.isMonotonicallyIncreasing([502.3, 503.1, 504.01, 504.00989999],
                                     verbose=False)
-        assert not self.isMonotonic([401.3, 400.99, 405.12],
+        assert not self.isMonotonicallyIncreasing([401.3, 400.99, 405.12],
                                     verbose=False)
 
     def pprintResult(self, model, Info):
         """ Pretty print the result of a learning algorithm.
         """
-        print(" %25s after %4.1f sec  ELBO=% 7.3f  nLap=%5d  K=%d" % (
+        print(" %25s after %4.1f sec  loss=% 7.3f  nLap=%5d  K=%d" % (
             Info['status'][:25],
             Info['elapsedTimeInSec'],
-            Info['evBound'],
-            Info['lapTrace'][-1],
+            Info['loss_history'][-1],
+            Info['lap_history'][-1],
             model.allocModel.K,
         ))
 

@@ -22,6 +22,7 @@ import sys
 import logging
 import numpy as np
 import inspect
+import warnings
 import time
 
 import bnpy.data
@@ -328,24 +329,28 @@ def getKwArgsForLoadData(ReqArgs, UnkArgs, KwArgs=dict()):
         datamod = __import__(ReqArgs['dataName'], fromlist=[])
 
     # Find subset of args that can provided to the Data module
-    dataArgNames = set()
-    if hasattr(datamod, 'get_data'):
-        names, varargs, varkw, defaults = inspect.getargspec(datamod.get_data)
-        for name in names:
-            dataArgNames.add(name)
-    if hasattr(datamod, 'get_iterator'):
-        names, varargs, varkw, defaults = inspect.getargspec(
-            datamod.get_iterator)
-        for name in names:
-            dataArgNames.add(name)
-    if hasattr(datamod, 'to_iterator'):
-        names, varargs, varkw, defaults = inspect.getargspec(
-            datamod.to_iterator)
-        for name in names:
-            dataArgNames.add(name)
-    if hasattr(datamod, 'Defaults'):
-        for name in datamod.Defaults.keys():
-            dataArgNames.add(name)
+    with warnings.catch_warnings():
+        # 2020/08/20: inspect.getargspec throws DeprecationWarnings
+        warnings.filterwarnings("ignore",category=DeprecationWarning)
+
+        dataArgNames = set()
+        if hasattr(datamod, 'get_data'):
+            names, varargs, varkw, defaults = inspect.getargspec(datamod.get_data)
+            for name in names:
+                dataArgNames.add(name)
+        if hasattr(datamod, 'get_iterator'):
+            names, varargs, varkw, defaults = inspect.getargspec(
+                datamod.get_iterator)
+            for name in names:
+                dataArgNames.add(name)
+        if hasattr(datamod, 'to_iterator'):
+            names, varargs, varkw, defaults = inspect.getargspec(
+                datamod.to_iterator)
+            for name in names:
+                dataArgNames.add(name)
+        if hasattr(datamod, 'Defaults'):
+            for name in datamod.Defaults.keys():
+                dataArgNames.add(name)
     DataArgs = dict([(k, v) for k, v in UnkArgs.items() if k in dataArgNames])
 
     if 'seqcreate' in KwArgs and 'doVizSeqCreate' in KwArgs['seqcreate']:

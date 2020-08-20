@@ -92,7 +92,7 @@ class FiniteMixtureModel(AllocModel):
         K = lpr.shape[1]
         if self.inferType.count('EM') > 0:
             # Using point estimates, for EM algorithm
-            lpr += np.log(self.w)
+            lpr += np.log(self.w + 1e-100)
             if nnzPerRowLP and (nnzPerRowLP > 0 and nnzPerRowLP < K):
                 # SPARSE Assignments
                 LP['nnzPerRow'] = nnzPerRowLP
@@ -169,8 +169,12 @@ class FiniteMixtureModel(AllocModel):
         -------
         w set to valid vector of size SS.K.
         """
-        w = SS.N + (self.gamma / SS.K) - 1.0  # MAP estimate. Requires gamma>1
+        w = SS.N + (self.gamma / SS.K) - 1.0  # MAP estimate. Requires gamma/K > 1.0
         self.w = w / w.sum()
+        meets_constraints = np.allclose(self.w.sum(), 1.0) and np.all(self.w >= 0.0)
+        if not meets_constraints and self.gamma <= SS.K:
+            raise ValueError("MAP estimate not valid unless gamma/K > 1")
+
         self.K = SS.K
 
     def update_global_params_VB(self, SS, **kwargs):
@@ -378,7 +382,7 @@ class FiniteMixtureModel(AllocModel):
         if avec is None:
             avec = (self.gamma / self.K) * np.ones(self.K)
         logC = gammaln(np.sum(avec)) - np.sum(gammaln(avec))
-        return logC + np.sum((avec - 1.0) * np.log(wvec))
+        return logC + np.sum((avec - 1.0) * np.log(wvec + 1e-100))
 
     def get_info_string(self):
         ''' Returns one-line human-readable terse description of this object

@@ -139,7 +139,7 @@ class FiniteHMM(AllocModel):
             ELogPi0 = (digamma(self.startTheta) -
                        digamma(np.sum(self.startTheta)))
             transParam = expELogTrans
-        elif self.inferType == 'EM' > 0:
+        elif self.inferType.count('EM') > 0:
             ELogPi0 = np.log(self.startPi + 1e-40)
             transParam = self.transPi
         else:

@@ -128,7 +128,7 @@ class LearnAlg(object):
         Info : dict
             contains information about completed run.
         '''
-        # Convert TraceLaps from set to 1D array, sorted in ascending order
+        # Convert recorded trace laps from set to 1D array, sorted in ascending order
         lap_history = np.asarray(self.lap_list)
         loss_history = np.asarray(self.loss_list)
         K_history = np.asarray(self.K_list)

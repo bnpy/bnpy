@@ -17,7 +17,7 @@ class TestEndToEnd(AbstractEndToEndTest):
         doc_range = [0, 20, 40, 50, 100]
         self.Data = bnpy.data.GroupXData(X=X, doc_range=doc_range)
 
-        self.possibleAllocModelNames = ["FiniteMixtureModel",
+        self.possibleAllocModelNames = [#"FiniteMixtureModel",
                                         "FiniteTopicModel",
                                         "HDPTopicModel",
                                         ]
@@ -30,10 +30,28 @@ class TestEndToEnd(AbstractEndToEndTest):
                                   ]
 
         self.possibleLearnAlgsForAllocModel = dict(
-            FiniteMixtureModel=["EM", "VB", "soVB", "moVB"],
-            FiniteTopicModel=["VB", "soVB", "moVB"],
-            HDPTopicModel=["VB", "soVB", "moVB"],
+            FiniteMixtureModel=["EM", "VB", "soVB", "memoVB"],
+            FiniteTopicModel=["VB", "soVB", "memoVB"],
+            HDPTopicModel=["VB", "soVB", "memoVB"],
         )
+
+    def nextAllocKwArgsForEM(self):
+        for aName in ['FiniteMixtureModel']:
+            for gamma in [10.1]: # gamma > K required for EM
+                kwargs = OrderedDict()
+                kwargs['name'] = aName
+                kwargs['gamma'] = gamma
+                yield kwargs
+
+    def nextAllocKwArgsForVB(self):
+        for aName in self.possibleAllocModelNames:
+            for gamma in [1.1]: # gamma > K required for EM
+                kwargs = OrderedDict()
+                kwargs['name'] = aName
+                kwargs['gamma0'] = gamma
+                kwargs['initDocTopicCountLP'] = 'memo'
+                yield kwargs
+
 
     def nextAllocKwArgsForVB(self):
         for aName in self.possibleAllocModelNames:

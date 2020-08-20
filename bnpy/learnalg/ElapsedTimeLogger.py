@@ -72,17 +72,23 @@ def configure(taskoutpath, moveNames, doSaveToDisk=0, doWriteStdOut=0):
     global EVENTNAMES
     EVENTNAMES += moveNames
     # Config logger to save transcript of log messages to plain-text file
-    if doSaveToDisk:
-        for eventName in EVENTNAMES:
-            Log = logging.getLogger('elapsedtime.' + eventName)
-            Log.setLevel(logging.DEBUG)
-            Log.handlers = []  # remove pre-existing handlers!
+    for eventName in EVENTNAMES:
+        Log = logging.getLogger('elapsedtime.' + eventName)
+        Log.setLevel(logging.DEBUG)
+        Log.handlers = []  # remove pre-existing handlers!
+        formatter = logging.Formatter('%(message)s')
+
+        if doSaveToDisk:
+            assert os.path.exists(taskoutpath)
             fh = logging.FileHandler(
                 os.path.join(
                     taskoutpath,
                     "log-elapsedtime-%s.csv" % (eventName)))
             fh.setLevel(0)
-            formatter = logging.Formatter('%(message)s')
             fh.setFormatter(formatter)
             Log.addHandler(fh)
-            LogDict[eventName] = Log
+
+        else:
+            Log.addHandler(logging.NullHandler())
+
+        LogDict[eventName] = Log

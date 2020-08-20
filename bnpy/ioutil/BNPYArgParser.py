@@ -306,7 +306,7 @@ def fillParserWithDefaultsFromConfigFile(parser, confFile,
 def _readConfigFile(filepath):
     ''' Read entire configuration from a .conf file
     '''
-    config = configparser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.optionxform = str
     config.read(filepath)
     return config
