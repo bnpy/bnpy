@@ -64,6 +64,7 @@ class BagOfWordsData(DataObj):
         -------
         Data : BagOfWordsData object
         '''
+
         npz_dict = dict(**np.load(npzfilepath, allow_pickle=True, encoding="latin1"))
         if nDocTotal is not None:
             npz_dict['nDocTotal'] = nDocTotal
@@ -72,6 +73,7 @@ class BagOfWordsData(DataObj):
         # Magically initialize via call to __init__
         npz_dict.update(kwargs)
         return cls(**npz_dict)
+
 
     @classmethod
     def LoadFromFile_tokenlist(cls, filepath, vocab_size=0, nDocTotal=None,
