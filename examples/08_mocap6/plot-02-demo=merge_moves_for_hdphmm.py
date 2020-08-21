@@ -92,9 +92,7 @@ allpairs_merge_kwargs = dict(
     # Or when it's size changes by 400%
     m_nLapToReactivate = 10,
     m_minPercChangeInNumAtomsToReactivate = 400 * 0.01,
-    # Specify how to rank pairs (determines order in which
-    #
-    # merges are tried)
+    # Specify how to rank pairs (determines order in which merges are tried)
     # 'total_size' and 'descending' means try largest combined clusters first
     m_pair_ranking_procedure = 'total_size',
     m_pair_ranking_direction = 'descending',
