@@ -97,7 +97,7 @@ allpairs_merge_kwargs = dict(
     m_pair_ranking_procedure = 'total_size',
     m_pair_ranking_direction = 'descending',
     )
-print(alg_kwargs.items())
+
 allpairs_trained_model, allpairs_info_dict = bnpy.run(
     dataset, 'HDPHMM', 'DiagGauss', 'memoVB',
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=all_pairs/',
