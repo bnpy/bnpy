@@ -50,7 +50,7 @@ def plotGauss1DFromHModel(hmodel,
 
     if dataset is not None:
         if hasattr(dataset, 'X'):
-            pylab.hist(dataset.X[:, 0], 50, normed=1)
+            pylab.hist(dataset.X[:, 0], 50, density=1)
             #Xtile = np.tile(Data.X[:, 0], (2, 1))
             #ys = 0.1 * np.arange(2)
             #pylab.plot(Xtile, ys, 'k-')
