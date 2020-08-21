@@ -85,7 +85,7 @@ class GaussObsModel(AbstractObsModel):
                 m = np.zeros(D)
         elif m.ndim < 1:
             m = np.asarray([m], dtype=np.float)
-        kappa = np.maximum(kappa, 1e-8)
+        kappa = np.maximum(kappa, 1e-8) if kappa else 1e-8
         self.Prior = ParamBag(K=0, D=D)
         self.Prior.setField('nu', nu, dims=None)
         self.Prior.setField('kappa', kappa, dims=None)

@@ -92,22 +92,25 @@ allpairs_merge_kwargs = dict(
     # Or when it's size changes by 400%
     m_nLapToReactivate = 10,
     m_minPercChangeInNumAtomsToReactivate = 400 * 0.01,
-    # Specify how to rank pairs (determines order in which merges are tried)
+    # Specify how to rank pairs (determines order in which
+    #
+    # merges are tried)
     # 'total_size' and 'descending' means try largest combined clusters first
     m_pair_ranking_procedure = 'total_size',
     m_pair_ranking_direction = 'descending',
     )
-
+print(alg_kwargs.items())
 allpairs_trained_model, allpairs_info_dict = bnpy.run(
     dataset, 'HDPHMM', 'DiagGauss', 'memoVB',
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=all_pairs/',
     moves='merge,shuffle',
     **dict(
-        alg_kwargs.items()
-        + init_kwargs.items()
-        + hdphmm_kwargs.items()
-        + gauss_kwargs.items()
-        + allpairs_merge_kwargs.items()))
+        sum(map(list,   [alg_kwargs.items(),
+                        init_kwargs.items(),
+                        hdphmm_kwargs.items(),
+                        gauss_kwargs.items(),
+                        allpairs_merge_kwargs.items()]),[]))
+)
 
 ###############################################################################
 #
@@ -138,11 +141,11 @@ largepairs_trained_model, largepairs_info_dict = bnpy.run(
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=large_pairs/',
     moves='merge,shuffle',
     **dict(
-        alg_kwargs.items()
-        + init_kwargs.items()
-        + hdphmm_kwargs.items()
-        + gauss_kwargs.items()
-        + largepairs_merge_kwargs.items()))
+        sum(map(list,   [alg_kwargs.items(),
+                        init_kwargs.items(),
+                        hdphmm_kwargs.items(),
+                        gauss_kwargs.items(),
+                        largepairs_merge_kwargs.items()]),[])))
 
 ###############################################################################
 #
@@ -174,11 +177,12 @@ goodelbopairs_trained_model, goodelbopairs_info_dict = bnpy.run(
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=good_elbo_pairs/',
     moves='merge,shuffle',
     **dict(
-        alg_kwargs.items()
-        + init_kwargs.items()
-        + hdphmm_kwargs.items()
-        + gauss_kwargs.items()
-        + goodelbopairs_merge_kwargs.items()))
+        sum(map(list,   [alg_kwargs.items(),
+                        init_kwargs.items(),
+                        hdphmm_kwargs.items(),
+                        gauss_kwargs.items(),
+                        goodelbopairs_merge_kwargs.items()]),[])))
+
 
 
 ###############################################################################

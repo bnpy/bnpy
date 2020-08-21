@@ -74,7 +74,6 @@ class BagOfWordsData(DataObj):
         npz_dict.update(kwargs)
         return cls(**npz_dict)
 
-
     @classmethod
     def LoadFromFile_tokenlist(cls, filepath, vocab_size=0, nDocTotal=None,
                                min_word_index=1, **kwargs):
