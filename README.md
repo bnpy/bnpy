@@ -119,15 +119,19 @@ To use **bnpy** for the first time, follow the documentation's [Installation Ins
 
 Mike Hughes  
 Assistant Professor (Aug. 2018 - present)  
-Tufts University, Dept. of Computer Science
-Website: <www.michaelchughes.com>
+Tufts University, Dept. of Computer Science  
+Website: <www.michaelchughes.com>  
 
 Erik Sudderth  
 Professor  
-University of California, Irvine
-Website: <https://www.ics.uci.edu/~sudderth/>
+University of California, Irvine  
+Website: <https://www.ics.uci.edu/~sudderth/>  
 
-### Contributors 
+### Active Contributors (2018 - )
+
+* Xi Chen (2020 - )
+
+### Contributors (prior to 2018)
 
 * Soumya Ghosh
 * Dae Il Kim
