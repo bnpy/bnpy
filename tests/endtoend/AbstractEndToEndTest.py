@@ -53,11 +53,12 @@ class AbstractEndToEndTest(unittest.TestCase):
         kwargs = dict(initname=iName)
         return kwargs
 
-    def nextAllocKwArgsForVB(self):
+
+    def nextAllocKwArgsForEM(self):
         for name in self.possibleAllocModelNames:
             yield dict(name=name)
 
-    def nextAllocKwArgsForEM(self):
+    def nextAllocKwArgsForVB(self):
         for name in self.possibleAllocModelNames:
             yield dict(name=name)
 
@@ -69,15 +70,16 @@ class AbstractEndToEndTest(unittest.TestCase):
         for name in self.possibleInitNames:
             yield dict(initname=name)
 
-    def makeAllKwArgs(self, aArg, obsArg, algName, iArg):
+    def makeAllKwArgs(self, aArg, obsArg, algName, iArg, nBatch=1):
         kwargs = dict(
             doSaveToDisk=False,
             doWriteStdOut=False,
             saveEvery=-1,
             printEvery=-1,
             traceEvery=1,
-            convergeThr=0.0001,
-            nLap=300,
+            convergeThr=0.00001,
+            nLap=15, # TODO 2020-10-15 try for longer
+            nBatch=int(nBatch),
         )
         
         # Add init args
@@ -97,12 +99,13 @@ class AbstractEndToEndTest(unittest.TestCase):
 
         return kwargs
 
-    def single_run_repeatable_and_monotonic(self, aArg, oArg, algName, iArg):
+    def single_run_repeatable_and_monotonic(self, aArg, oArg, algName, iArg,
+            nBatch=1):
         """ Test a single call to bnpy.run, verify repeatability and monotonic.
         """
-        self.pprintSingleRun(aArg, oArg, algName, iArg)
+        self.pprintSingleRun(aArg, oArg, algName, iArg, nBatch)
 
-        kwargs = self.makeAllKwArgs(aArg, oArg, algName, iArg)
+        kwargs = self.makeAllKwArgs(aArg, oArg, algName, iArg, nBatch)
         model1, Info1 = bnpy.run(self.Data, arg2name(aArg), arg2name(oArg),
                                  algName, **kwargs)
         self.pprintResult(model1, Info1)
@@ -134,51 +137,47 @@ class AbstractEndToEndTest(unittest.TestCase):
         isMonotonic = self.isMonotonicallyIncreasing(-1 * Info1['loss_history'])
         assert isMonotonic
 
-    @attr('slow')
-    def test_VB_long__monotonic(self):
-        print('')
-        for aKwArgs in self.nextAllocKwArgsForVB():
-            aName = arg2name(aKwArgs)
-            for oKwArgs in self.nextObsKwArgsForVB(aName):
-                for iKwArgs in self.nextInitKwArgs(aName, oKwArgs['name']):
-                    self.single_run_monotonic(aKwArgs, oKwArgs,
-                                              'VB', iKwArgs)
 
-    @attr('fast')
-    def test_VB__repeatable_and_monotonic(self):
-        print('')
-        for aName in self.possibleAllocModelNames:
-            for oName in self.possibleObsModelNames:
-                for iName in self.possibleInitNames:
-                    self.single_run_repeatable_and_monotonic(aName, oName,
-                                                             'VB', iName)
 
     @attr('fast')
     def test_EM__repeatable_and_monotonic(self):
         print('')
         for aKwArgs in self.nextAllocKwArgsForEM():
             aName = arg2name(aKwArgs)
-            if 'EM' not in self.possibleLearnAlgsForAllocModel[aName]:
+            if 'EM' not in self.possibleLearnAlgsForAllocModel.get(aName, []):
                 continue
             for oName in self.possibleObsModelNames:
                 for iName in self.possibleInitNames:
                     self.single_run_repeatable_and_monotonic(aKwArgs, oName,
                                                              'EM', iName)
-
     @attr('fast')
-    def test_moVB__repeatable_and_monotonic(self):
+    def test_VB__repeatable_and_monotonic(self):
         print('')
-        for aName in self.possibleAllocModelNames:
-            if 'memoVB'in self.possibleLearnAlgsForAllocModel[aName]:
-                algName = 'memoVB'
-            elif 'moVB' in self.possibleLearnAlgsForAllocModel[aName]:
-                algName = 'moVB'
-            else:
+        for aKwArgs in self.nextAllocKwArgsForVB():
+            aName = arg2name(aKwArgs)
+            if 'VB' not in self.possibleLearnAlgsForAllocModel.get(aName, []):
                 continue
             for oName in self.possibleObsModelNames:
                 for iName in self.possibleInitNames:
-                    self.single_run_repeatable_and_monotonic(aName, oName,
-                                                             algName, iName)
+                    self.single_run_repeatable_and_monotonic(aKwArgs, oName,
+                                                             'VB', iName)
+
+    @attr('fast')
+    def test_memoVB__repeatable_and_monotonic(self):
+        print('')
+        for aKwArgs in self.nextAllocKwArgsForVB():
+            aName = arg2name(aKwArgs)
+            if 'memoVB' in self.possibleLearnAlgsForAllocModel.get(aName, []):
+                algName = 'memoVB'
+            elif 'moVB' in self.possibleLearnAlgsForAllocModel.get(aName, []):
+                algName = 'moVB'
+            else:
+                continue
+            for nBatch in [1, 4]:
+                for oName in self.possibleObsModelNames:
+                    for iName in self.possibleInitNames:
+                        self.single_run_repeatable_and_monotonic(
+                            aKwArgs, oName, algName, iName, nBatch=nBatch)
 
     def isMonotonicallyIncreasing(self, ELBOvec, atol=1e-6, verbose=True):
         ''' Returns True if monotonically increasing, False otherwise.
@@ -220,10 +219,10 @@ class AbstractEndToEndTest(unittest.TestCase):
             model.allocModel.K,
         ))
 
-    def pprintSingleRun(self, aArg, oArg, algName, iArg):
+    def pprintSingleRun(self, aArg, oArg, algName, iArg, nBatch=1):
         """ Pretty print information about current call to bnpy.run
         """
-        print(">>> Run: %s" % (algName))
+        print(">>> Run: %s nBatch=%d" % (algName, nBatch))
         self.pprint(aArg)
         self.pprint(oArg)
         self.pprint(iArg)
@@ -242,3 +241,15 @@ class AbstractEndToEndTest(unittest.TestCase):
                 else:
                     msg += " %s=%s" % (k, str(v))
             print('  ' + firstMsg + ' ' + msg)
+
+    '''
+    @attr('slow')
+    def test_VB_long__monotonic(self):
+        print('')
+        for aKwArgs in self.nextAllocKwArgsForVB():
+            aName = arg2name(aKwArgs)
+            for oKwArgs in self.nextObsKwArgsForVB(aName):
+                for iKwArgs in self.nextInitKwArgs(aName, oKwArgs['name']):
+                    self.single_run_monotonic(aKwArgs, oKwArgs,
+                                              'VB', iKwArgs)
+    '''
