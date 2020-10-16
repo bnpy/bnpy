@@ -1,5 +1,5 @@
 from matplotlib import pylab
-import matplotlib.axis, matplotlib.scale 
+import matplotlib.axis, matplotlib.scale
 from matplotlib.ticker import \
     MaxNLocator, ScalarFormatter, NullLocator, NullFormatter
 
@@ -44,4 +44,3 @@ def set_my_locators_and_formatters(self, axis):
 MaxNLocator.default_params['nbins']=5
 matplotlib.scale.LinearScale.set_default_locators_and_formatters = \
     set_my_locators_and_formatters
-

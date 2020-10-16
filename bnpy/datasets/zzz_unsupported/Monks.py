@@ -142,8 +142,8 @@ if __name__ == '__main__':
     parser.add_argument('--phase', default='3', type=str)
     args = parser.parse_args()
 
-    print "Loading Sampson Monks dataset with relationName=%s  at phase=%s" % (
-        args.relationName, args.phase)
+    print("Loading Sampson Monks dataset with relationName=%s  at phase=%s" % (
+        args.relationName, args.phase))
     # Fetch data and plot the adjacency matrix
     Data = get_data(relationName=args.relationName, phase=args.phase)
     Xdisp = np.squeeze(Data.toAdjacencyMatrix())

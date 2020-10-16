@@ -27,7 +27,7 @@ def pprintResult(model, Info, Ktrue=0):
         if os.path.exists(hdistfile):
             hdist_str = 'hdist=' + '%.3f' % (float(np.loadtxt(hdistfile)[-1]))
 
-    print " %25s after %4.1f sec and %4d laps.  ELBO=% 7.5f %s K=%d  Ktrue=%d"\
+    print(" %25s after %4.1f sec and %4d laps.  ELBO=% 7.5f %s K=%d  Ktrue=%d"\
         % (Info['status'][:25],
            Info['elapsedTimeInSec'],
            Info['lapTrace'][-1],
@@ -35,27 +35,27 @@ def pprintResult(model, Info, Ktrue=0):
            hdist_str,
            model.allocModel.K,
            Ktrue,
-           )
+           ))
 
 
 def pprint(val):
     """ Pretty print the provided value.
     """
     if isinstance(val, str):
-        print '  %s' % (val[:40])
+        print('  %s' % (val[:40]))
     elif hasattr(val, 'items'):
         firstMsg = ''
         msg = ''
-        for (k, v) in val.items():
+        for (k, v) in list(val.items()):
             if k.count('name'):
                 firstMsg = str(v)
             else:
                 msg += " %s=%s" % (k, str(v))
-        print '  ' + firstMsg + ' ' + msg
+        print('  ' + firstMsg + ' ' + msg)
 
 
 def pprintCommandToReproduceError(dataArg, aArg, oArg, algName, **kwargs):
-    for key, val in dataArg.items():
+    for key, val in list(dataArg.items()):
         if key == 'name':
             continue
         kwargs[key] = val
@@ -63,13 +63,13 @@ def pprintCommandToReproduceError(dataArg, aArg, oArg, algName, **kwargs):
     del kwargs['doSaveToDisk']
     kwargs['printEvery'] = 1
     kwstr = ' '.join(['--%s %s' % (key, kwargs[key]) for key in kwargs])
-    print "python -m bnpy.Run %s %s %s %s %s" % (
+    print("python -m bnpy.Run %s %s %s %s %s" % (
         dataArg['name'],
         aArg['name'],
         oArg['name'],
         algName,
         kwstr,
-    )
+    ))
 
 
 def is_monotonic(ELBOvec, aArg=None, atol=1e-5, verbose=True):
@@ -93,9 +93,9 @@ def is_monotonic(ELBOvec, aArg=None, atol=1e-5, verbose=True):
     maskOK = np.logical_or(maskIncrease, maskWithinTol)
     isMonotonic = np.all(maskOK)
     if not isMonotonic and verbose:
-        print "NOT MONOTONIC!"
-        print '  %d violations in vector of size %d. Biggest drop %.8f' \
-            % (np.sum(1 - maskOK), ELBOvec.size, diff[diff < 0].max())
+        print("NOT MONOTONIC!")
+        print('  %d violations in vector of size %d. Biggest drop %.8f' \
+            % (np.sum(1 - maskOK), ELBOvec.size, diff[diff < 0].max()))
     return isMonotonic
 
 
@@ -193,7 +193,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
             assert isMonotonic
             assert model.allocModel.K == model.obsModel.K
             if not model.allocModel.K == Ktrue:
-                print '>>>>>> WHOA! Kfinal != Ktrue <<<<<<'
+                print('>>>>>> WHOA! Kfinal != Ktrue <<<<<<')
         return Info
 
     def run_MOVBWithMoves_SegmentManySeq(
@@ -240,8 +240,8 @@ class MergeMoveEndToEndTest(unittest.TestCase):
                 self.datasetArg, aArg, oArg, algName, **kwargs)
             assert model.allocModel.K == model.obsModel.K
             if not model.allocModel.K == Ktrue:
-                print '>>>>>> WHOA! Kfinal != Ktrue <<<<<<'
-        print ''
+                print('>>>>>> WHOA! Kfinal != Ktrue <<<<<<')
+        print('')
         return Info
 
     def run_MOVBWithMoves_SegmentSingleSeq(
@@ -325,8 +325,8 @@ class MergeMoveEndToEndTest(unittest.TestCase):
                     self.datasetArg, aArg, oArg, algName, **kwargs)
                 assert model.allocModel.K == model.obsModel.K
                 if not model.allocModel.K == Ktrue:
-                    print '>>>>>> WHOA! Kfinal != Ktrue <<<<<<'
-        print ''
+                    print('>>>>>> WHOA! Kfinal != Ktrue <<<<<<')
+        print('')
 
         '''
         from bnpy.viz import SequenceViz
@@ -352,7 +352,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
                               algName='moVB',
                               nWorkers=0,
                               moves='merge,delete,shuffle'):
-        print ''
+        print('')
         for aKwArgs in self.nextAllocKwArgsForVB():
             for oKwArgs in self.nextObsKwArgsForVB():
                 Info = dict()
@@ -390,7 +390,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
                                    nWorkers=2)
 
     def test_MOVBCreateDestroy_SingleSeq(self):
-        print ''
+        print('')
         argDict = parseCmdLineArgs()
         for aKwArgs in self.nextAllocKwArgsForVB():
             for oKwArgs in self.nextObsKwArgsForVB():
@@ -410,14 +410,14 @@ class MergeMoveEndToEndTest(unittest.TestCase):
                         aKwArgs, oKwArgs,
                         moves='merge,delete,shuffle,seqcreate',
                         **initargs)
-                    print ''
-                    print ''
-                print ''
-                print ''
+                    print('')
+                    print('')
+                print('')
+                print('')
                 return
 
     def test_MOVBCreateDestroy_ManySeq(self):
-        print ''
+        print('')
         argDict = parseCmdLineArgs()
         for aKwArgs in self.nextAllocKwArgsForVB():
             for oKwArgs in self.nextObsKwArgsForVB():
@@ -437,10 +437,10 @@ class MergeMoveEndToEndTest(unittest.TestCase):
                         aKwArgs, oKwArgs,
                         moves='merge,delete,shuffle,seqcreate',
                         **initargs)
-                    print ''
-                    print ''
-                print ''
-                print ''
+                    print('')
+                    print('')
+                print('')
+                print('')
                 return
 
     def interactivetest_findBestCut_SingleSeq(self, n=0, **kwargs):
@@ -450,7 +450,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
         --------------
         Will raise AssertionError if any bad results detected.
         """
-        print ''
+        print('')
         argDict = parseCmdLineArgs()
         for aArg in self.nextAllocKwArgsForVB():
             for oArg in self.nextObsKwArgsForVB():
@@ -500,7 +500,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
         # Create and initialize model
         hmodel = bnpy.HModel.CreateEntireModel(
             'VB', aArg['name'], oArg['name'], aArg, oArg, Data_n)
-        print argDict
+        print(argDict)
         hmodel.init_global_params(Data_n, **argDict)
 
         # Run initial segmentation
@@ -513,7 +513,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
         from matplotlib import pylab
         from bnpy.init.SeqCreateProposals import findBestCutForBlock
         while True:
-            keypress = raw_input("Enter start stop stride >>> ")
+            keypress = input("Enter start stop stride >>> ")
             fields = keypress.split(" ")
             if len(fields) < 2:
                 break
@@ -524,7 +524,7 @@ class MergeMoveEndToEndTest(unittest.TestCase):
             else:
                 stride = 3
             m = findBestCutForBlock(Data_n, hmodel, a=a, b=b, stride=stride)
-            print "Best Cut: [a=%d, m=%d, b=%d]" % (a, m, b)
+            print("Best Cut: [a=%d, m=%d, b=%d]" % (a, m, b))
 
             Kcur = LP_n['resp'].shape[1]
             Kmax_cur = np.maximum(Kcur, Ktrue)

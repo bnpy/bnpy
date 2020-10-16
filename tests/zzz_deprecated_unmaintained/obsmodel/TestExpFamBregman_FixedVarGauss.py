@@ -76,12 +76,12 @@ def checkFacts_pdf_Phi(
     mode_phi_numeric = phi_grid[np.argmax(pdf_grid)]
     mode_phi_formula = mu2phi(tau/nu, **kwargs)
 
-    print "nu=%7.3f tau=%7.3f" % (nu, tau)
-    print "     Integral=% 7.3f   should be % 7.3f" % (IntegralVal, 1.0)
-    print "        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula)
-    print "       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula)
-    print "    mode[phi]=% 7.3f   should be % 7.3f" % (
-        mode_phi_numeric, mode_phi_formula)
+    print("nu=%7.3f tau=%7.3f" % (nu, tau))
+    print("     Integral=% 7.3f   should be % 7.3f" % (IntegralVal, 1.0))
+    print("        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula))
+    print("       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula))
+    print("    mode[phi]=% 7.3f   should be % 7.3f" % (
+        mode_phi_numeric, mode_phi_formula))
 
 def makePlot_pdf_Phi(
         nu=0, tau=0, phi_grid=None, **kwargs):
@@ -126,10 +126,10 @@ def checkFacts_pdf_Mu(nu=0, tau=0, mu_grid=None, **kwargs):
     E_mu_formula = tau/nu
     E_phi_numeric = np.trapz(pdf_grid * phi_grid, mu_grid)
     E_phi_formula = E_phi(nu, tau, **kwargs)
-    print "nu=%7.3f tau=%7.3f" % (nu, tau)
-    print "     Integral=% 7.3f   should be % 7.3f" % (Integral, 1.0)
-    print "        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula)
-    print "       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula)
+    print("nu=%7.3f tau=%7.3f" % (nu, tau))
+    print("     Integral=% 7.3f   should be % 7.3f" % (Integral, 1.0))
+    print("        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula))
+    print("       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula))
 
 def makePlot_cumulant_Phi(
         phi_grid=None, **kwargs):
@@ -166,8 +166,8 @@ if __name__ == '__main__':
     nuRange = [0.5, 1, 2.0, 8, 32, 128]
     mu_chosen = 1.00
 
-    print 'Mu Density'
-    print '----------'
+    print('Mu Density')
+    print('----------')
     pylab.figure()
     for nu in nuRange[::-1]:
         tau = mu_chosen * nu
@@ -191,8 +191,8 @@ if __name__ == '__main__':
     pylab.savefig('FVG_densityMu.eps')
     
 
-    print 'Phi Density'
-    print '-----------'
+    print('Phi Density')
+    print('-----------')
     pylab.figure()
     for nu in nuRange[::-1]:
         tau = mu_chosen * nu

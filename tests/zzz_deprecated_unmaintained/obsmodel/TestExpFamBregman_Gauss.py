@@ -96,13 +96,13 @@ def checkFacts_pdf_Phi(
     E_c_numeric = np.trapz(pdf_grid * c_Phi(phi_grid), phi_grid)
     E_c_formula = - 0.5 * digamma(0.5 * nu + 1) + 0.5 * np.log(tau)
 
-    print "nu=%7.3f tau=%7.3f" % (nu, tau)
-    print "     Integral=% 7.3f   should be % 7.3f" % (IntegralVal, 1.0)
-    print "        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula)
-    print "       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula)
-    print "    E[c(phi)]=% 7.3f   should be % 7.3f" % (E_c_numeric, E_c_formula)
-    print "    mode[phi]=% 7.3f   should be % 7.3f" % (
-        mode_phi_numeric, mode_phi_formula)
+    print("nu=%7.3f tau=%7.3f" % (nu, tau))
+    print("     Integral=% 7.3f   should be % 7.3f" % (IntegralVal, 1.0))
+    print("        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula))
+    print("       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula))
+    print("    E[c(phi)]=% 7.3f   should be % 7.3f" % (E_c_numeric, E_c_formula))
+    print("    mode[phi]=% 7.3f   should be % 7.3f" % (
+        mode_phi_numeric, mode_phi_formula))
 
 def makePlot_pdf_Phi(
         nu=0, tau=0, phi_grid=None, **kwargs):
@@ -143,10 +143,10 @@ def checkFacts_pdf_Mu(nu=0, tau=0, mu_grid=None, **kwargs):
     E_mu_formula = tau/nu
     E_phi_numeric = np.trapz(pdf_grid * phi_grid, mu_grid)
     E_phi_formula = E_phi(nu,tau)
-    print "nu=%7.3f tau=%7.3f" % (nu, tau)
-    print "     Integral=% 7.3f   should be % 7.3f" % (Integral, 1.0)
-    print "        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula)
-    print "       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula)
+    print("nu=%7.3f tau=%7.3f" % (nu, tau))
+    print("     Integral=% 7.3f   should be % 7.3f" % (Integral, 1.0))
+    print("        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula))
+    print("       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula))
 
 def makePlot_cumulant_Phi(
         phi1=None, phi2=None, **kwargs):
@@ -237,18 +237,18 @@ def Mstep(X=None, nu=2.0, priorVar=1.0, kappa=5.0, priorMean=0.5):
     muMean_grid = np.linspace(min_muMean, max_muMean, 100000)
 
 
-    print 'ZeroMeanGauss'
-    print '============='
+    print('ZeroMeanGauss')
+    print('=============')
     DistMat_ZMG = bregman_ZMG(np.square(X), muVar_grid[:,np.newaxis])
     Ldist_ZMG = DistMat_ZMG.sum(axis=1) \
         + nu * bregman_ZMG(priorVar, muVar_grid)
-    print "mode[muVar]:  numeric % .3f  formula % .3f" % (
-        muVar_grid[Ldist_ZMG.argmin()], muVar_opt_ZMG)
+    print("mode[muVar]:  numeric % .3f  formula % .3f" % (
+        muVar_grid[Ldist_ZMG.argmin()], muVar_opt_ZMG))
 
 
-    print ''
-    print 'FixedVarGauss'
-    print '============='
+    print('')
+    print('FixedVarGauss')
+    print('=============')
     for muVar in [1.0, 2.3, 5.7]:
         DistMat_FVG = bregman_FVG(X, muMean_grid[:,np.newaxis], 
                                   muVar=muVar)
@@ -257,17 +257,17 @@ def Mstep(X=None, nu=2.0, priorVar=1.0, kappa=5.0, priorMean=0.5):
                                   muMean_grid, 
                                   muVar=muVar)
         if Ldist_FVG.argmin() == 0:
-            print 'WARNING: hit lower boundary in numeric search for max'
+            print('WARNING: hit lower boundary in numeric search for max')
         if Ldist_FVG.argmin() == Ldist_FVG.size - 1:
-            print 'WARNING: hit upper boundary in numeric search for max'
-        print "muVar %.3f" % (muVar),
-        print "mode[muMean]:  numeric % .3f  formula % .3f" % (
-            muMean_grid[Ldist_FVG.argmin()], muMean_opt_FVG)
+            print('WARNING: hit upper boundary in numeric search for max')
+        print("muVar %.3f" % (muVar), end=' ')
+        print("mode[muMean]:  numeric % .3f  formula % .3f" % (
+            muMean_grid[Ldist_FVG.argmin()], muMean_opt_FVG))
 
 
-    print ''
-    print 'Unk Mean and Variance'
-    print '====================='
+    print('')
+    print('Unk Mean and Variance')
+    print('=====================')
     DistMat_FVG = bregman_FVG(X, 
                               muMean_opt_FVG,
                               muVar=muVar_grid[:,np.newaxis])
@@ -278,23 +278,23 @@ def Mstep(X=None, nu=2.0, priorVar=1.0, kappa=5.0, priorMean=0.5):
         + nu * bregman_ZMG(priorVar, muVar_grid) \
         + kappa * bregman_FVG(priorMean, muMean_opt_FVG, muVar=muVar_grid)
 
-    print "mode[muVar]:  numeric % .3f  formula % .3f" % (
-        muVar_grid[Ldist_G.argmin()], muVar_opt_G)
+    print("mode[muVar]:  numeric % .3f  formula % .3f" % (
+        muVar_grid[Ldist_G.argmin()], muVar_opt_G))
 
-    print ''
-    print 'Unk Mean and Variance (prior only)'
-    print '====================='
+    print('')
+    print('Unk Mean and Variance (prior only)')
+    print('=====================')
     muVar_opt_prioronly = priorVar
     Ldist_prioronly = \
         + nu * bregman_ZMG(priorVar, muVar_grid) \
         + kappa * bregman_FVG(priorMean, priorMean, muVar=muVar_grid)
-    print "mode[muVar]:  numeric % .3f formula % .3f" % (
+    print("mode[muVar]:  numeric % .3f formula % .3f" % (
         muVar_grid[Ldist_prioronly.argmin()],
-        muVar_opt_prioronly)
+        muVar_opt_prioronly))
 
-    print ''
-    print 'Unk Mean and Variance (optimize muMean)'
-    print '====================='
+    print('')
+    print('Unk Mean and Variance (optimize muMean)')
+    print('=====================')
     DistMat_FVG = bregman_FVG(X, 
                               muMean_grid[:,np.newaxis],
                               muVar=muVar_opt_G)
@@ -306,9 +306,9 @@ def Mstep(X=None, nu=2.0, priorVar=1.0, kappa=5.0, priorMean=0.5):
         + nu * bregman_ZMG(priorVar, muVar_opt_G) \
         + kappa * bregman_FVG(priorMean, muMean_grid, muVar=muVar_opt_G)
 
-    print "mode[muVar]:  numeric % .3f formula % .3f" % (
+    print("mode[muVar]:  numeric % .3f formula % .3f" % (
         muMean_grid[Ldist_G_bymuMean.argmin()],
-        muMean_opt_FVG)
+        muMean_opt_FVG))
 
     '''
 

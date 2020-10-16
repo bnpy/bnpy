@@ -1,8 +1,12 @@
 import argparse
-import ConfigParser
 import os
 import sys
 import numpy as np
+
+if sys.version_info.major == 3:
+    import configparser
+else:
+    import ConfigParser as configparser
 
 from bnpy.allocmodel import AllocModelNameSet
 from bnpy.obsmodel import ObsModelNameSet
@@ -126,7 +130,7 @@ def applyParserToStdInOrKwargs(parser, **kwargs):
     UnkDict : dict
         Key/value pairs for any keys unknown by the parser.
     '''
-    if len(kwargs.keys()) > 0:
+    if len(list(kwargs.keys())) > 0:
         kwlist, ComplexTypeDict = kwargs_to_arglist(**kwargs)
         args, unkList = parser.parse_known_args(kwlist)
         ArgDict = args.__dict__
@@ -188,7 +192,7 @@ def kwargs_to_arglist(**kwargs):
     >>> kwlist[0:2]
     ['--a', '5']
     '''
-    keys = kwargs.keys()
+    keys = list(kwargs.keys())
     keys.sort(key=len)  # sorty by length, smallest to largest
     arglist = list()
     SafeDict = dict()
@@ -215,7 +219,7 @@ def makeParserWithDefaultsFromConfigFiles(ReqArgs, Moves):
     '''
     parser = argparse.ArgumentParser()
     configFiles = _getConfigFileDict(ReqArgs)
-    for fpath, secName in configFiles.items():
+    for fpath, secName in list(configFiles.items()):
         if secName is not None:
             secName = ReqArgs[secName]
         if fpath.count('moves') > 0:
@@ -279,11 +283,11 @@ def fillParserWithDefaultsFromConfigFile(parser, confFile,
         DefDict = dict(config.items(curSecName))
         try:
             HelpDict = dict(config.items(curSecName + "Help"))
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             HelpDict = dict()
 
         group = parser.add_argument_group(curSecName)
-        for argName, defVal in DefDict.items():
+        for argName, defVal in list(DefDict.items()):
             defType = _getTypeFromString(defVal)
             if argName in HelpDict:
                 helpMsg = '[%s] %s' % (defVal, HelpDict[argName])
@@ -302,7 +306,7 @@ def fillParserWithDefaultsFromConfigFile(parser, confFile,
 def _readConfigFile(filepath):
     ''' Read entire configuration from a .conf file
     '''
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.optionxform = str
     config.read(filepath)
     return config
@@ -319,16 +323,19 @@ def _getTypeFromString(defVal):
 
     Examples
     ------
-    >>> _getTypeFromString('deinonychus')
-    <type 'str'>
-    >>> _getTypeFromString('3.14')
-    <type 'float'>
-    >>> _getTypeFromString('555')
-    <type 'int'>
-    >>> _getTypeFromString('555.0')
-    <type 'float'>
-    >>> _getTypeFromString([1,2,3])
-    <type 'list'>
+    # Added extra 'replace' to accomodate py2 vs py3 difference
+    # * py2 reports "<type 'NAME'>"
+    # * py3 reports "<class 'NAME'>"
+    >>> str(_getTypeFromString('deinonychus')).replace('type', 'class')
+    "<class 'str'>"
+    >>> str(_getTypeFromString('3.14')).replace('type', 'class')
+    "<class 'float'>"
+    >>> str(_getTypeFromString('555')).replace('type', 'class')
+    "<class 'int'>"
+    >>> str(_getTypeFromString('555.0')).replace('type', 'class')
+    "<class 'float'>"
+    >>> str(_getTypeFromString([1,2,3])).replace('type', 'class')
+    "<class 'list'>"
     '''
     if not isinstance(defVal, str):
         return type(defVal)
@@ -355,7 +362,7 @@ def organizeParsedArgDictIntoSections(ReqArgs, Moves, kwargs):
     '''
     outDict = dict()
     configFileDict = _getConfigFileDict(ReqArgs)
-    for fpath, secName in configFileDict.items():
+    for fpath, secName in list(configFileDict.items()):
         if secName is not None:
             secName = ReqArgs[secName]
         if fpath.count('moves') > 0:
@@ -379,7 +386,7 @@ def addArgsFromSectionToDict(inDict, confFile, targetSecName, outDict):
                 continue
         BigSecDict = dict(config.items(secName))
         secDict = dict([(k, v)
-                        for (k, v) in inDict.items() if k in BigSecDict])
+                        for (k, v) in list(inDict.items()) if k in BigSecDict])
         outDict[secName] = secDict
     return outDict
 

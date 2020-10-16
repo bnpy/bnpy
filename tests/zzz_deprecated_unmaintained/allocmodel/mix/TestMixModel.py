@@ -30,8 +30,8 @@ class TestMixModelEMUnifGamma(object):
         wTrue = (self.N + self.gamma / float(K)  - 1.0)
         wTrue = wTrue / np.sum(wTrue)
         wEst = self.allocM.w
-        print wTrue
-        print wEst
+        print(wTrue)
+        print(wEst)
         assert np.allclose(wTrue, wEst)
 
     def test_get_global_suff_stats(self):
@@ -39,8 +39,8 @@ class TestMixModelEMUnifGamma(object):
         SS = self.allocM.get_global_suff_stats(
             Data, dict(resp=self.resp),
             doPrecompEntropy=True)
-        print self.precompEntropy
-        print SS.getELBOTerm('Hresp')
+        print(self.precompEntropy)
+        print(SS.getELBOTerm('Hresp'))
         assert np.allclose(self.precompEntropy, SS.getELBOTerm('Hresp'))
         assert np.allclose(np.sum(self.resp, axis=0), SS.N)
 

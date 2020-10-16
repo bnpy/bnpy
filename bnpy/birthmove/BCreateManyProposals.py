@@ -1,9 +1,9 @@
 import numpy as np
 import os
 
-import BLogger
+from bnpy.birthmove import BLogger
 from collections import defaultdict
-from BCreateOneProposal import makeSummaryForBirthProposal_HTMLWrapper
+from bnpy.birthmove.BCreateOneProposal import makeSummaryForBirthProposal_HTMLWrapper
 
 def makeSummariesForManyBirthProposals(
         Dslice=None,
@@ -87,7 +87,7 @@ def makeSummariesForManyBirthProposals(
             uidRec['b_latestCount'] = curSSwhole.getCountVec()[ktarget]
             # Update batch-specific records for this uid
             uidRec_b = uidRec['byBatch'][uidRec['b_proposalBatchID']]
-            uidRec_b['nFail'] += 1            
+            uidRec_b['nFail'] += 1
 
     for failUID in failedUIDs:
         b_targetUIDs.remove(failUID)

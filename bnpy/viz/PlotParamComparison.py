@@ -29,14 +29,14 @@ import os
 import scipy.io
 import copy
 
-from PlotUtil import pylab
-import TaskRanker
+from bnpy.viz.PlotUtil import pylab
+from bnpy.viz import TaskRanker
 
 from bnpy.ioutil import BNPYArgParser
-from JobFilter import makeListOfJPatternsWithSpecificVals
-from JobFilter import makePPListMapFromJPattern
-from JobFilter import makeJPatternWithSpecificVals
-from TaskRanker import rankTasksForSingleJobOnDisk
+from bnpy.viz.JobFilter import makeListOfJPatternsWithSpecificVals
+from bnpy.viz.JobFilter import makePPListMapFromJPattern
+from bnpy.viz.JobFilter import makeJPatternWithSpecificVals
+from bnpy.viz.TaskRanker import rankTasksForSingleJobOnDisk
 
 
 taskidsHelpMsg = "ids of trials/runs to plot from given job." + \
@@ -257,7 +257,7 @@ def plotSingleLineAcrossJobsByXVar(jpathPattern,
         for tid in alltaskids:
             y = loadYValFromDisk(jobpath, tid, yvar=yvar)
             pylab.plot(x, y, '.', **plotargs)
-        
+
 
     # Plot top-ranked tasks as solid points connected by line
     for i, jobpath in enumerate(jpathList):
@@ -302,7 +302,7 @@ def parse_args(**kwargs):
     parser.add_argument('--xvar', type=str, default=None,
                         help="name of x axis variable to plot.")
     parser.add_argument('--yvar', type=str, default='evidence',
-                        choices=LabelMap.keys(),
+                        choices=list(LabelMap.keys()),
                         help="name of y axis variable to plot.")
     parser.add_argument('--lvar', type=str, default=None,
                         help="quantity that varies across lines")

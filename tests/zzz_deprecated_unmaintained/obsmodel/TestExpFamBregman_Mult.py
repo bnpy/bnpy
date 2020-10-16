@@ -134,8 +134,8 @@ def makePlot_pdf_Phi(
     mu_grid = phi2mu(phi_grid)
     ExpectedPhiVal = np.trapz(pdf_grid * phi_grid, phi_grid)
     ExpectedMuVal = np.trapz(pdf_grid * mu_grid, phi_grid)
-    print '%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
-        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal)
+    print('%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
+        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal))
     pylab.plot(phi_grid, pdf_grid, '-', label=label)
     pylab.xlabel('phi (log odds ratio)')
     pylab.ylabel('density p(phi)')
@@ -154,8 +154,8 @@ def makePlot_pdf_Mu(
     IntegralVal = np.trapz(pdf_grid, mu_grid)
     ExpectedMuVal = np.trapz(pdf_grid * mu_grid, mu_grid)
     ExpectedPhiVal = np.trapz(pdf_grid * phi_grid, mu_grid)
-    print '%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
-        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal)
+    print('%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
+        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal))
     pylab.plot(mu_grid, pdf_grid, '-', label=label)
     pylab.xlabel('mu')
     pylab.ylabel('density p(mu)')
@@ -247,33 +247,33 @@ if __name__ == '__main__':
     N = 7
     muG = np.asarray([0.02, 0.1, 0.5, 0.9, 0.98])
     muG = N * np.vstack([muG, 1.0-muG]).T.copy()
-    print muG
+    print(muG)
 
     phiG = mu2phi(muG, N)
-    print phiG
-    print phi2mu(mu2phi(muG, N), N)
+    print(phiG)
+    print(phi2mu(mu2phi(muG, N), N))
 
-    print 'BREGMAN Dist Mat:'
-    print bregmanDiv(muG, muG, N)
+    print('BREGMAN Dist Mat:')
+    print(bregmanDiv(muG, muG, N))
 
-    for row in xrange(phiG.shape[0]):
+    for row in range(phiG.shape[0]):
         phi = as1D(phiG[row])
         mu = phi2mu(phi,N)
 
-        print 'phi = %.3f' % (phi)
-        print 'mu = ', mu
-        print '----------'
+        print('phi = %.3f' % (phi))
+        print('mu = ', mu)
+        print('----------')
         cdf = 0.0
         for xVec in generateAllXForFixedN(N):
             pdf = pdf_Phi(xVec, phi, N)
             cdf += pdf
-            print '%.3f %.3f %.3f %s' % (
+            print('%.3f %.3f %.3f %s' % (
                 cdf,
                 pdf,
                 pdf_Mu(xVec, mu, N),
-                xVec)
+                xVec))
             #print pdf_Phi(xVec, mu2phi(mu,N), N),
-        print ''
+        print('')
 
     '''
     makePlot_pdf_Mu_range(nuRange)

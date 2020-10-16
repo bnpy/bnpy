@@ -46,18 +46,18 @@ def tryMergeProposalForSpecificTarget(
 
     def makeListOfBestPairsForCompByObsGap(k):
         pairList = makePairsForComp(k)
-        gapVec = curModel.obsModel.calcHardMergeGap_SpecificPairs(curSS, 
+        gapVec = curModel.obsModel.calcHardMergeGap_SpecificPairs(curSS,
             makePairsForComp(k))
         gapVec /= scaleF
         bestLocs = np.argsort(-1 * gapVec)
-        print "Best pairs for cluster %d" % (k)
+        print("Best pairs for cluster %d" % (k))
         for ii in bestLocs[:5]:
             a, b = pairList[ii]
             if k == a:
                 kpartner = b
             else:
                 kpartner = a
-            print "   kpartner %3d:  % .3e" % (kpartner, gapVec[ii])
+            print("   kpartner %3d:  % .3e" % (kpartner, gapVec[ii]))
 
     makeListOfBestPairsForCompByObsGap(kA)
     makeListOfBestPairsForCompByObsGap(kB)
@@ -66,9 +66,9 @@ def tryMergeProposalForSpecificTarget(
     aGap, propRho, propOmega = curModel.allocModel.calcHardMergeGap(curSS, kA=kA, kB=kB, returnRhoOmega=1)
     aGap /= scaleF
 
-    print "% .3e   obsModel estimated-gain" % (oGap)
-    print "% .3e allocModel estimated-gain" % (aGap)
-    print "% .3e      total estimated-gain" % (aGap + oGap)
+    print("% .3e   obsModel estimated-gain" % (oGap))
+    print("% .3e allocModel estimated-gain" % (aGap))
+    print("% .3e      total estimated-gain" % (aGap + oGap))
 
     # Update proposal
     if curModel.getAllocModelName().count('DPMixture'):
@@ -83,7 +83,7 @@ def tryMergeProposalForSpecificTarget(
             Data, dict(resp=propResp))
     else:
         raise ValueError("Unrecognized getAllocModelName")
-    
+
     propSS = propModel.get_global_suff_stats(Data, propLP, doPrecompEntropy=1)
 
     propModel.obsModel.update_global_params(propSS)
@@ -93,27 +93,27 @@ def tryMergeProposalForSpecificTarget(
         propModel.allocModel.K = propSS.K
     else:
         propModel.allocModel.update_global_params(propSS)
-    print "propOmega:"
-    print ' '.join(['%.1f' % (x) for x in propModel.allocModel.omega[:5]])
+    print("propOmega:")
+    print(' '.join(['%.1f' % (x) for x in propModel.allocModel.omega[:5]]))
 
     propLdict = propModel.calc_evidence(SS=propSS, todict=1)
     propLscore = propLdict['Ltotal']
 
     if verbose:
-        print "Merging cluster %d and %d ..." % (kA, kB)
+        print("Merging cluster %d and %d ..." % (kA, kB))
         if propLscore - curLscore > 0:
-            print "  ACCEPTED"
+            print("  ACCEPTED")
         else:
-            print "  REJECTED"
-        print "% .4e  cur ELBO score" % (curLscore)
-        print "% .4e prop ELBO score" % (propLscore)
-        print "Change in ELBO score: %.4e" % (propLscore - curLscore)
-        print ""
+            print("  REJECTED")
+        print("% .4e  cur ELBO score" % (curLscore))
+        print("% .4e prop ELBO score" % (propLscore))
+        print("Change in ELBO score: %.4e" % (propLscore - curLscore))
+        print("")
         for key in sorted(curLdict.keys()):
             if key.count('_') or key.count('total'):
                 continue
-            print "  gain %8s % .3e" % (
-                key, propLdict[key] - curLdict[key])
+            print("  gain %8s % .3e" % (
+                key, propLdict[key] - curLdict[key]))
 
     return (
         propModel,
@@ -163,5 +163,5 @@ if __name__ == '__main__':
 
     MLogger.configure(args.outputdir,
         doSaveToDisk=0,
-        doWriteStdOut=1) 
+        doWriteStdOut=1)
     tryMergeProposalForSavedTask(**args.__dict__)

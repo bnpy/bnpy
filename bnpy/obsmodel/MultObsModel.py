@@ -8,7 +8,7 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 from bnpy.util import NumericUtil
-from AbstractObsModel import AbstractObsModel
+from bnpy.obsmodel.AbstractObsModel import AbstractObsModel
 
 
 class MultObsModel(AbstractObsModel):
@@ -64,7 +64,7 @@ class MultObsModel(AbstractObsModel):
 
     def setupWithAllocModel(self, allocModel):
         ''' Using the allocation model, determine the modeling scenario.
-              
+
         doc  : multinomial : each atom is vector of empirical counts in doc
         word : categorical : each atom is single word token (one of vocab_size)
         '''
@@ -365,7 +365,7 @@ class MultObsModel(AbstractObsModel):
                 ElogphiT=ElogphiT, **kwargs)
             return dict(E_log_soft_ev=E_log_soft_ev, ElogphiT=ElogphiT)
 
-    def calcELBO_Memoized(self, SS, 
+    def calcELBO_Memoized(self, SS,
             returnVec=0, afterGlobalStep=False, **kwargs):
         """ Calculate obsModel's objective using suff stats SS and Post.
 
@@ -385,7 +385,7 @@ class MultObsModel(AbstractObsModel):
         Prior = self.Prior
         if not afterGlobalStep:
             Elogphi = self.GetCached('E_logphi', 'all')  # K x V
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             elbo[k] = self.prior_cFunc - self.GetCached('cFunc', k)
             #elbo[k] = c_Diff(Prior.lam, Post.lam[k])
             if not afterGlobalStep:
@@ -465,13 +465,13 @@ class MultObsModel(AbstractObsModel):
 
         Post = self.Post
         c = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             c[k] = c_Func(Post.lam[k])
 
         tmpvec = np.zeros(Post.D)
         Gap = np.zeros((SS.K, SS.K))
-        for j in xrange(SS.K):
-            for k in xrange(j + 1, SS.K):
+        for j in range(SS.K):
+            for k in range(j + 1, SS.K):
                 cjk = self.calcCFuncForMergeComp(SS, j, k, tmpvec=tmpvec)
                 #lam = self.calcPostParamsForComp(SS, j, k)
                 #oldcjk = c_Func(lam)
@@ -522,7 +522,7 @@ class MultObsModel(AbstractObsModel):
     def calcMargLik_CFuncForLoop(self, SS):
         Prior = self.Prior
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             lam = self.calcPostParamsForComp(SS, k)
             logp[k] = c_Diff(Prior.lam, lam)
         return np.sum(logp)
@@ -668,7 +668,7 @@ class MultObsModel(AbstractObsModel):
             if False, includes all terms in divergence calculation.
                 Returns Div[n,:] guaranteed to be non-negative.
             if True, includes only terms that vary with cluster index k
-                Returns Div[n,:] equal to divergence up to additive constant 
+                Returns Div[n,:] equal to divergence up to additive constant
 
         Returns
         -------
@@ -684,13 +684,13 @@ class MultObsModel(AbstractObsModel):
         K = len(Mu)
         # Compute Div array up to a per-row additive constant indep. of k
         Div = np.zeros((N, K))
-        for k in xrange(K):
+        for k in range(K):
             Div[:,k] = -1 * np.dot(X, np.log(Mu[k]))
 
         # Compute contribution of prior smoothing
         if smoothFrac > 0:
             smoothVec = smoothFrac * self.Prior.lam
-            for k in xrange(K):
+            for k in range(K):
                 Div[:,k] -= np.sum(smoothVec * np.log(Mu[k]))
             # Equivalent to -1 * np.dot(MuX, np.log(Mu[k])),
             # but without allocating a new matrix MuX
@@ -698,7 +698,7 @@ class MultObsModel(AbstractObsModel):
         if not includeOnlyFastTerms:
             if DivDataVec is None:
                 # Compute DivDataVec : 1D array of size N
-                # This is the per-row additive constant indep. of k. 
+                # This is the per-row additive constant indep. of k.
                 # We do lots of steps in-place, to save memory.
                 if smoothFrac > 0:
                     MuX = X + smoothVec
@@ -720,7 +720,7 @@ class MultObsModel(AbstractObsModel):
                     DivDataVec += np.dot(logMuX, smoothVec)
                 logMuX *= X
                 XlogMuX = logMuX
-                DivDataVec += np.sum(XlogMuX, axis=1)             
+                DivDataVec += np.sum(XlogMuX, axis=1)
 
             Div += DivDataVec[:,np.newaxis]
 
@@ -729,7 +729,7 @@ class MultObsModel(AbstractObsModel):
             assert W.ndim == 1
             assert W.size == N
             Div *= W[:,np.newaxis]
-        # Verify divergences are strictly non-negative 
+        # Verify divergences are strictly non-negative
         if not includeOnlyFastTerms:
             minDiv = Div.min()
             if minDiv < 0:
@@ -763,7 +763,7 @@ class MultObsModel(AbstractObsModel):
         priorN = (1-smoothFrac) * (self.Prior.lam[0] / priorMu[0])
 
         Div = np.zeros(K)
-        for k in xrange(K):
+        for k in range(K):
             Div[k] = np.sum(priorMu * np.log(priorMu / Mu[k]))
         return priorN * Div
 

@@ -76,7 +76,6 @@ def show_many_random_initial_models(
     pylab.tight_layout()
 
 
-
 ###############################################################################
 # initname: 'randexamples'
 # ------------------------

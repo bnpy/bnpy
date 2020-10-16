@@ -65,7 +65,7 @@ def show_single_sequence(
     # Extract current sequence
     # as a 2D array : T x D (n_timesteps x n_dims)
     curX_TD = dataset.X[start:stop]
-    for dim in xrange(12):
+    for dim in range(12):
         ax_handles[0].plot(curX_TD[:, dim], '.-')
     ax_handles[0].set_ylabel('angle')
     ax_handles[0].set_ylim(ylim)
@@ -265,4 +265,4 @@ pylab.draw()
 pylab.tight_layout()
 
 
-pylab.show()
+pylab.show(block=False)

@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import numpy as np
 import Symbols as S
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     print("Each plot shows 25 samples of image patches from that cluster")
 
     PRNG = np.random.RandomState(0)
-    for k in xrange(trainSS.K):
+    for k in range(trainSS.K):
         Sigma_k = combinedModel.obsModel.get_covar_mat_for_comp(k)
         X_k = PRNG.multivariate_normal(
             np.zeros(64),

@@ -4,7 +4,7 @@ GaussViz.py
 Visualizing learned Gaussian mixture models.
 '''
 import numpy as np
-from PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 
 from bnpy.util import as1D, as2D
 
@@ -50,7 +50,7 @@ def plotGauss1DFromHModel(hmodel,
 
     if dataset is not None:
         if hasattr(dataset, 'X'):
-            pylab.hist(dataset.X[:, 0], 50, normed=1)
+            pylab.hist(dataset.X[:, 0], 50, density=1)
             #Xtile = np.tile(Data.X[:, 0], (2, 1))
             #ys = 0.1 * np.arange(2)
             #pylab.plot(Xtile, ys, 'k-')
@@ -80,11 +80,11 @@ def plotGauss1DFromHModel(hmodel,
 
         nGood += 1
         if nGood >= MaxKToDisplay:
-            print 'DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
-                % (nGood, len(activeCompIDs))
+            print('DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
+                % (nGood, len(activeCompIDs)))
             break
     if nSkip > 0:
-        print 'SKIPPED %d comps with size below %.2f' % (nSkip, proba_thr)
+        print('SKIPPED %d comps with size below %.2f' % (nSkip, proba_thr))
 
 
 def plotGauss1D(mu, sigma2, color='b', ax_handle=None, **kwargs):
@@ -151,7 +151,7 @@ def plotGauss2DFromHModel(
 
     if dataset is not None and hasattr(dataset, 'X'):
         pylab.plot(
-            dataset.X[:, 0], dataset.X[:, 1], '.', 
+            dataset.X[:, 0], dataset.X[:, 1], '.',
             color=(.3,.3,.3),
             alpha=0.5)
 
@@ -180,11 +180,11 @@ def plotGauss2DFromHModel(
 
         nGood += 1
         if nGood >= MaxKToDisplay:
-            print 'DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
-                % (nGood, len(activeCompIDs))
+            print('DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
+                % (nGood, len(activeCompIDs)))
             break
     if nSkip > 0:
-        print 'SKIPPED %d comps with size below %.2f' % (nSkip, proba_thr)
+        print('SKIPPED %d comps with size below %.2f' % (nSkip, proba_thr))
 
     # pylab.gca().set_aspect('equal', 'datalim')
     # pylab.axis('image')
@@ -296,7 +296,7 @@ def plotCovMatFromHModel(hmodel,
         if kk in compsToHighlight:
             pylab.xlabel('***')
 
-    for emptyID in xrange(plotID + 1, nRow * nCol):
+    for emptyID in range(plotID + 1, nRow * nCol):
         aH = pylab.subplot(nRow, nCol, emptyID + 1)
         aH.axis('off')
 

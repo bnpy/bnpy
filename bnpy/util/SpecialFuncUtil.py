@@ -3,7 +3,6 @@ SpecialFuncUtil.py
 
 Special mathematical functions, like multivariate gammaln.
 '''
-
 from collections import defaultdict
 import numpy as np
 from scipy.special import gammaln, digamma

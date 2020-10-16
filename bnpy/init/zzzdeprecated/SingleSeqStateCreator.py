@@ -83,13 +83,13 @@ def createSingleSeqLPWithNewStates_ManyProposals(Data_n, LP_n, model,
                 tempSS -= SS_n
 
             if kwargs['verbose']:
-                print '======== lapFrac %.3f seqName %s | proposal %d/%d' % (
+                print('======== lapFrac %.3f seqName %s | proposal %d/%d' % (
                     lapFrac, kwargs['seqName'],
-                    propID + 1, creationNumProposal)
+                    propID + 1, creationNumProposal))
                 if propID == 0:
-                    print '   BEFORE tempSS.nDoc %d' % (tempSS.nDoc)
-                    print 'N ', ' '.join(
-                        ['%5.1f' % (x) for x in tempSS.N[:20]])
+                    print('   BEFORE tempSS.nDoc %d' % (tempSS.nDoc))
+                    print('N ', ' '.join(
+                        ['%5.1f' % (x) for x in tempSS.N[:20]]))
 
             if lapFrac > 1:
                 assert tempSS.nDoc == Data_n.nDocTotal + nDocSeenForProposal
@@ -108,9 +108,9 @@ def createSingleSeqLPWithNewStates_ManyProposals(Data_n, LP_n, model,
             propID += 1
 
             if kwargs['verbose']:
-                print '--- AFTER tempSS.nDoc %d' % (tempSS.nDoc)
-                print 'N ', ' '.join(
-                    ['%5.1f' % (x) for x in tempSS.N[:20]])
+                print('--- AFTER tempSS.nDoc %d' % (tempSS.nDoc))
+                print('N ', ' '.join(
+                    ['%5.1f' % (x) for x in tempSS.N[:20]]))
 
             if lapFrac > 1:
                 assert tempSS.nDoc == nDocSeenForProposal + 1 + \
@@ -199,7 +199,7 @@ def createSingleSeqLPWithNewStates(Data_n, LP_n, hmodel,
     N, origK = resp_n.shape
     if origK >= Kmax:
         if kwargs['doVizSeqCreate']:
-            print 'skipped. at max capacity for states.'
+            print('skipped. at max capacity for states.')
         SS_n = hmodel.get_global_suff_stats(Data_n, LP_n)
         if SS is None:
             SS = SS_n.copy()
@@ -263,7 +263,7 @@ def createSingleSeqLPWithNewStates(Data_n, LP_n, hmodel,
 
     if propK == origK and np.allclose(Z_n, propResp.argmax(axis=1)):
         if kwargs['doVizSeqCreate']:
-            print 'rejected. proposal is no change from original.'
+            print('rejected. proposal is no change from original.')
         SS_n = hmodel.get_global_suff_stats(Data_n, LP_n)
         if SS is None:
             SS = SS_n.copy()
@@ -287,7 +287,7 @@ def createSingleSeqLPWithNewStates(Data_n, LP_n, hmodel,
 
     if origK == tempSS.K and np.allclose(Z_n, propLP_n['resp'].argmax(axis=1)):
         if kwargs['doVizSeqCreate']:
-            print 'rejected. proposal is no change from original.'
+            print('rejected. proposal is no change from original.')
         SS_n = hmodel.get_global_suff_stats(Data_n, LP_n)
         if SS is None:
             SS = SS_n.copy()
@@ -307,18 +307,18 @@ def createSingleSeqLPWithNewStates(Data_n, LP_n, hmodel,
     doAccept = propScore > curScore + 1e-6
 
     if kwargs['doVizSeqCreate']:
-        print seqName
-        print 'propLP K %3d evidence %.3f  score %.6f' % (
-            propLP_n['resp'].shape[1], propLP_n['evidence'], propScore)
-        print ' curLP K %3d evidence %.3f  score %.6f' % (
-            LP_n['resp'].shape[1], LP_n['evidence'], curScore)
+        print(seqName)
+        print('propLP K %3d evidence %.3f  score %.6f' % (
+            propLP_n['resp'].shape[1], propLP_n['evidence'], propScore))
+        print(' curLP K %3d evidence %.3f  score %.6f' % (
+            LP_n['resp'].shape[1], LP_n['evidence'], curScore))
 
         if doAccept:
             Nnew = propLP_n['resp'][:, origK:].sum(axis=0)
             massNew_str = ' '.join(['%.2f' % (x) for x in Nnew])
-            print 'ACCEPTED! Mass of new states: [%s]' % (massNew_str)
+            print('ACCEPTED! Mass of new states: [%s]' % (massNew_str))
         else:
-            print 'rejected'
+            print('rejected')
 
         kwargs.update(Info)
 
@@ -333,9 +333,9 @@ def createSingleSeqLPWithNewStates(Data_n, LP_n, hmodel,
                          seqName=seqName,
                          curModel=hmodel,
                          **kwargs)
-            print ''
-            print ''
-            print ''
+            print('')
+            print('')
+            print('')
 
     if doAccept:
         assert tempSS.N.sum() >= Z_n.size - 1e-5
@@ -461,7 +461,7 @@ def showProposal(Data_n, LP_n, propResp, propLP_n,
         warnings.simplefilter('ignore', UserWarning)
         pylab.tight_layout()
     pylab.show(block=False)
-    keypress = raw_input("Press any key to continue>>>")
+    keypress = input("Press any key to continue>>>")
     if keypress.count('embed'):
         from IPython import embed
         embed()
@@ -484,7 +484,7 @@ def initSingleSeq_SeqAllocContigBlocks(n, Data, hmodel,
         represents whole dataset
     '''
     if verbose:
-        print '<<<<<<<<<<<<<<<< Creating states for seq. %d' % (n)
+        print('<<<<<<<<<<<<<<<< Creating states for seq. %d' % (n))
 
     assert hasattr(Data, 'nDoc')
     Data_n = Data.select_subset_by_mask([n], doTrackTruth=1)
@@ -517,8 +517,8 @@ def initSingleSeq_SeqAllocContigBlocks(n, Data, hmodel,
             SSprevComp = SSab
             resp_n[a:b, K - 1] = 1
             if verbose >= 2:
-                print "block %d/%d: %d-%d" % (blockID, len(blockTuples), a, b),
-                print 'assigned to first state %d' % (K - 1), trueStateIDstr
+                print("block %d/%d: %d-%d" % (blockID, len(blockTuples), a, b), end=' ')
+                print('assigned to first state %d' % (K - 1), trueStateIDstr)
             continue
 
         # Should we merge current interval [a,b] with previous state?
@@ -529,8 +529,8 @@ def initSingleSeq_SeqAllocContigBlocks(n, Data, hmodel,
             SSprevComp += SSab
             resp_n[a:b, K - 1] = 1
             if verbose >= 2:
-                print "block %d/%d: %d-%d" % (blockID, len(blockTuples), a, b),
-                print 'building on existing state %d' % (K - 1), trueStateIDstr
+                print("block %d/%d: %d-%d" % (blockID, len(blockTuples), a, b), end=' ')
+                print('building on existing state %d' % (K - 1), trueStateIDstr)
 
         else:
             # Insert finished block as a new component
@@ -538,7 +538,7 @@ def initSingleSeq_SeqAllocContigBlocks(n, Data, hmodel,
                 SSobsonly = SSprevComp
             else:
                 # Remove any keys associated with alloc model
-                for key in SSobsonly._FieldDims.keys():
+                for key in list(SSobsonly._FieldDims.keys()):
                     if key not in SSprevComp._FieldDims:
                         del SSobsonly._FieldDims[key]
                 SSobsonly.insertComps(SSprevComp)
@@ -552,13 +552,13 @@ def initSingleSeq_SeqAllocContigBlocks(n, Data, hmodel,
             resp_n[a:b, K - 1] = 1
             SSprevComp = SSab
             if verbose >= 2:
-                print "block %d/%d: %d-%d" % (blockID, len(blockTuples), a, b),
-                print 'building on existing state %d' % (K - 1), trueStateIDstr
+                print("block %d/%d: %d-%d" % (blockID, len(blockTuples), a, b), end=' ')
+                print('building on existing state %d' % (K - 1), trueStateIDstr)
 
     # Deal with final block
     if SSobsonly is not None:
         # Remove any keys associated with alloc model
-        for key in SSobsonly._FieldDims.keys():
+        for key in list(SSobsonly._FieldDims.keys()):
             if key not in SSprevComp._FieldDims:
                 del SSobsonly._FieldDims[key]
         SSobsonly.insertComps(SSprevComp)
@@ -664,16 +664,16 @@ def removeSmallUniqueCompsViaDelete(
             SSmemory=None,
         )
         if verbose >= 2:
-            print 'Cleanup deletes: %d/%d accepted' % (
-                DResult['nAccept'], DResult['nTotal'])
+            print('Cleanup deletes: %d/%d accepted' % (
+                DResult['nAccept'], DResult['nTotal']))
         delattr(SS, 'uIDs')
         delattr(SS_n, 'uIDs')
         K_n -= DResult['nAccept']
     if verbose:
         K_true = len(np.unique(Data_n.TrueParams['Z']))
-        print 'Total states: %d' % (SS.K)
-        print 'Total states in cur seq: %d' % (K_n)
-        print 'Total true states in cur seq: %d' % (K_true)
+        print('Total states: %d' % (SS.K))
+        print('Total states in cur seq: %d' % (K_n))
+        print('Total true states in cur seq: %d' % (K_true))
     return hmodel, SS
 
 
@@ -693,13 +693,13 @@ def mergeDownLastStateIfPossible(resp_n, K_n, SS, SSprevComp, obsModel,
 
     kB = K_n - 1
     gaps = np.zeros(K_n - 1)
-    for kA in xrange(K_n - 1):
+    for kA in range(K_n - 1):
         SS_kA = SS.getComp(kA, doCollapseK1=0)
         gaps[kA] = obsModel.calcHardMergeGap_SpecificPairSS(SS_kA, SSprevComp)
     kA = np.argmax(gaps)
     if gaps[kA] > -0.00001:
         if verbose >= 2:
-            print "merging this block into state %d" % (kA)
+            print("merging this block into state %d" % (kA))
         SS.mergeComps(kA, kB)
         mask = resp_n[:, kB] > 0
         resp_n[mask, kA] = 1

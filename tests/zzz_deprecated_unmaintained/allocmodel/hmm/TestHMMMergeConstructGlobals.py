@@ -14,7 +14,7 @@ Nfirst_K4 = np.asarray([1., 1., 1., 1.])
 
 
 def pprintVec(xvec, fmt='%.3f'):
-    print ' '.join([fmt % (x) for x in xvec])
+    print(' '.join([fmt % (x) for x in xvec]))
 
 
 class TestHMMMergeConstructGlobals(unittest.TestCase):
@@ -49,25 +49,25 @@ class TestHMMMergeConstructGlobals(unittest.TestCase):
         assert np.all(self.propK3_aModel.rho <= 1)
 
     def test_aaa_show_original_rho_beta(self):
-        print ''
-        print 'rho'
+        print('')
+        print('rho')
         pprintVec(self.origK4_aModel.rho)
-        print ''
-        print 'beta'
+        print('')
+        print('beta')
         pprintVec(rho2beta_active(self.origK4_aModel.rho))
-        print ''
-        print 'omega'
+        print('')
+        print('omega')
         pprintVec(self.origK4_aModel.omega)
 
     def test_aaa_show_proposed_rho_beta(self):
-        print ''
-        print 'rho'
+        print('')
+        print('rho')
         pprintVec(self.propK3_aModel.rho)
-        print ''
-        print 'beta'
+        print('')
+        print('beta')
         pprintVec(rho2beta_active(self.propK3_aModel.rho))
-        print ''
-        print 'omega'
+        print('')
+        print('omega')
         pprintVec(self.propK3_aModel.omega)
 
     def test_show__convergence_rho(self):
@@ -76,34 +76,34 @@ class TestHMMMergeConstructGlobals(unittest.TestCase):
             Seems that in general, rho/omega/theta require many iters to be
             absolutely sure of convergence.
         '''
-        print ''
+        print('')
 
-        for iter in xrange(10):
-            print '                         rho after %d global updates' % (iter)
+        for iter in range(10):
+            print('                         rho after %d global updates' % (iter))
             pprintVec(self.propK3_aModel.rho)
 
             self.propK3_aModel.update_global_params(self.propK3_SS)
-            print (
-                ' ' * 10) + '%.3f' % (self.propK3_aModel.OptimizerInfo['fval'])
+            print((
+                ' ' * 10) + '%.3f' % (self.propK3_aModel.OptimizerInfo['fval']))
 
     def test_show__convergence_rho_update_rho_only(self):
         ''' Observe what happens if we run several consecutive optimizer updates
 
             Seems that the optimizer does consistently find a fixed point
         '''
-        print ''
+        print('')
 
         fval_orig = self.propK3_aModel.OptimizerInfo['fval']
-        print (' ' * 10) + '%.3f' % (fval_orig)
+        print((' ' * 10) + '%.3f' % (fval_orig))
 
         fvals = np.zeros(10)
-        for iter in xrange(10):
-            print '                         rho after %d optimizer updates' % (iter)
+        for iter in range(10):
+            print('                         rho after %d optimizer updates' % (iter))
             pprintVec(self.propK3_aModel.rho)
 
             self.propK3_aModel.find_optimum_rhoOmega()
             fval = self.propK3_aModel.OptimizerInfo['fval']
-            print (' ' * 10) + '%.3f' % (fval)
+            print((' ' * 10) + '%.3f' % (fval))
             fvals[iter] = fval
 
         # Verify that subsequent updates only improve on original fval

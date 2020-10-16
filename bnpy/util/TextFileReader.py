@@ -42,8 +42,8 @@ if __name__ == '__main__':
 
     fastD =  LoadBagOfWordsDataFromFile_ldac_cython(fpath, vocab_size=vocab_size)
     slowD = BagOfWordsData.LoadFromFile_ldac_python(fpath, vocab_size=vocab_size)
-    print fastD.word_id[:10]
-    print slowD.word_id[:10]
+    print(fastD.word_id[:10])
+    print(slowD.word_id[:10])
     assert np.allclose(fastD.word_id, slowD.word_id)
     assert np.allclose(fastD.word_count, slowD.word_count)
     assert np.allclose(fastD.doc_range, slowD.doc_range)

@@ -1,3 +1,4 @@
+
 from libc.stdio cimport *
 from libc.string cimport *
 from libc.stdlib cimport atoi, atof, free
@@ -16,11 +17,11 @@ def read_from_ldac_file(
     cfile = fopen(fname, "r")
     if cfile == NULL:
         raise IOError("No such file or directory: '%s'" % filename)
- 
+
     cdef char* line = NULL
     cdef size_t l = 0
     cdef ssize_t read
-    cdef int n = 0 
+    cdef int n = 0
     cdef int d = 1
     cdef int N_d = 0
     while True:
@@ -66,4 +67,3 @@ def read_from_ldac_file(
     free(line);
     fclose(cfile)
     return n, d
-

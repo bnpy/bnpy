@@ -14,9 +14,9 @@ from bnpy.util import StickBreakUtil
 from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir, L_top
 
-from FiniteAssortativeMMSB import FiniteAssortativeMMSB
-from HDPMMSB import updateRhoOmega, updateThetaAndThetaRem, _beta2rhoomega
-from HDPMMSB import initRhoOmegaFromScratch, initThetaFromScratch
+from bnpy.allocmodel.relational.FiniteAssortativeMMSB import FiniteAssortativeMMSB
+from bnpy.allocmodel.relational.HDPMMSB import updateRhoOmega, updateThetaAndThetaRem, _beta2rhoomega
+from bnpy.allocmodel.relational.HDPMMSB import initRhoOmegaFromScratch, initThetaFromScratch
 
 class HDPAssortativeMMSB(FiniteAssortativeMMSB):
 
@@ -74,7 +74,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
 
     # calc_local_params inherited from FiniteAssortativeMMSB
     # get_global_suff_stats inherited from FiniteAssortativeMMSB
- 
+
     def update_global_params_VB(self, SS, **kwargs):
         ''' Update global parameter theta to optimize VB objective.
 
@@ -94,14 +94,14 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
         self.theta, self.thetaRem = updateThetaAndThetaRem(
             SS, rho=self.rho, alpha=self.alpha, gamma=self.gamma)
         # Now, alternatively update rho and theta...
-        for giter in xrange(nGlobalIters):
+        for giter in range(nGlobalIters):
             self.rho, self.omega = updateRhoOmega(
                 theta=self.theta, thetaRem=self.thetaRem,
-                initrho=self.rho, omega=self.omega, 
+                initrho=self.rho, omega=self.omega,
                 alpha=self.alpha, gamma=self.gamma)
             self.theta, self.thetaRem = updateThetaAndThetaRem(
                 SS, rho=self.rho, alpha=self.alpha, gamma=self.gamma)
-        
+
     def set_global_params(self, hmodel=None,
                           rho=None, omega=None, theta=None, thetaRem=None,
                           **kwargs):
@@ -127,7 +127,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
             self.theta = theta
             self.thetaRem = thetaRem
         else:
-            self.rho, self.omega = initRhoOmegaFromScratch(**kwargs)            
+            self.rho, self.omega = initRhoOmegaFromScratch(**kwargs)
             self.theta, self.thetaRem = initThetaFromScratch(rho=rho, **kwargs)
         self.K = self.rho.size
         assert self.K == self.omega.size
@@ -145,7 +145,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
         initbeta = (1.0 - 0.01)/K * np.ones(K)
         assert np.sum(initbeta) < 1.0
         self.rho, self.omega = _beta2rhoomega(
-            beta=initbeta, K=K, 
+            beta=initbeta, K=K,
             nDoc=Data.nNodes, gamma=self.gamma)
 
         if initLP is not None:
@@ -158,7 +158,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
             # Create theta from scratch
             self.theta, self.thetaRem = initThetaFromScratch(
                 Data=Data, rho=rho, alpha=self.alpha, gamma=self.gamma)
-        
+
     def calc_evidence(self, Data, SS, LP, todict=0, **kwargs):
         ''' Compute training objective function on provided input.
 
@@ -180,7 +180,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
         else:
             Lbgdata = LP['Ldata_bg']
         if todict:
-            return dict(Lentropy=Lentropy, 
+            return dict(Lentropy=Lentropy,
                 Lalloc=Lalloc, Lslack=Lslack,
                 Lbgdata=Lbgdata)
         return Lalloc + Lentropy + Lslack + Lbgdata
@@ -193,7 +193,7 @@ class HDPAssortativeMMSB(FiniteAssortativeMMSB):
         -------
         L : scalar float
         '''
-        prior_cDir = L_top(nDoc=self.theta.shape[0], 
+        prior_cDir = L_top(nDoc=self.theta.shape[0],
             alpha=self.alpha, gamma=self.gamma,
             rho=self.rho, omega=self.omega)
         post_cDir = c_Dir(self.theta, self.thetaRem)

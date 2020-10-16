@@ -5,27 +5,26 @@ import timeit
 import time
 import sys
 
-from SparseRespUtil import sparsifyResp
+from bnpy.util.SparseRespUtil import sparsifyResp
 from bnpy.util import dotATA
 from bnpy.util.EntropyUtil import calcRlogR
 from bnpy.util.ShapeUtil import as1D, toCArray
 
 hasCPPLib = True
 try:
-    from lib.sparseResp.LibSparseResp \
-        import calcRlogRdotv_withSparseRespCSR_cpp
-    from lib.sparseResp.LibSparseResp import calcRlogR_withSparseRespCSR_cpp
-    from lib.sparseResp.LibSparseResp import calcRXXT_withSparseRespCSR_cpp
-    from lib.sparseResp.LibSparseResp import calcRXX_withSparseRespCSR_cpp
-    from lib.sparseResp.LibSparseResp import calcRXX_withSparseRespCSC_cpp
-
-    from lib.sparseResp.LibSparseResp \
+    from bnpy.util.lib.sparseResp.LibSparseResp import (
+        calcRlogRdotv_withSparseRespCSR_cpp,
+        calcRlogR_withSparseRespCSR_cpp,
+        calcRXXT_withSparseRespCSR_cpp,
+        calcRXX_withSparseRespCSR_cpp,
+        calcRXX_withSparseRespCSC_cpp)
+    from bnpy.util.lib.sparseResp.LibSparseResp \
         import calcMergeRlogR_withSparseRespCSR_cpp as calcSparseMergeRlogR
-    from lib.sparseResp.LibSparseResp \
+    from bnpy.util.lib.sparseResp.LibSparseResp \
         import calcMergeRlogRdotv_withSparseRespCSR_cpp as calcSparseMergeRlogRdotv
 except ImportError:
     hasCPPLib = False
-    # Sketchy avoid import errors
+    # Avoid import errors
     calcSparseMergeRlogR = None
     calcSparseMergeRlogRdotv = None
 
@@ -85,7 +84,7 @@ def calcRXX_withSparseResp_numpy_forloop(spR_csc=None, X=None, **kwargs):
     assert N == NX
 
     stat_XX = np.zeros((K,D))
-    for k in xrange(K):
+    for k in range(K):
         start_k = spR_csc.indptr[k]
         stop_k = spR_csc.indptr[k+1]
         rowids_k = spR_csc.indices[start_k:stop_k]
@@ -115,7 +114,7 @@ def calcRXXT_withDenseResp(R=None, X=None, **kwargs):
     NX, D = X.shape
     assert N == NX
     stat_XXT = np.zeros((K, D, D))
-    for k in xrange(K):
+    for k in range(K):
         sqrtRX_k = np.sqrt(R[:,k])[:,np.newaxis] * X
         stat_XXT[k] = dotATA(sqrtRX_k)
         #RX_k = R[:, k][:,np.newaxis] * X
@@ -125,7 +124,7 @@ def calcRXXT_withDenseResp(R=None, X=None, **kwargs):
 
 def make_funcList(prefix='calcRXX_'):
     funcList = []
-    for key, val in globals().items():
+    for key, val in list(globals().items()):
         if key.startswith(prefix):
             funcList.append(val)
     return [f for f in sorted(funcList)]
@@ -145,13 +144,13 @@ def test_speed(X=None, R=None, nnzPerRow=2,
 
 def do_timing_test_for_func(func, args, kwargs, nRep=1):
     times = list()
-    for trial in xrange(nRep):
+    for trial in range(nRep):
         tstart = time.time()
         func(*args, **kwargs)
         tstop = time.time()
         times.append(tstop - tstart)
-    print " AVG %.4f sec  MEDIAN %.4f sec | %s" % (
-        np.mean(times), np.median(times), func.__name__)
+    print(" AVG %.4f sec  MEDIAN %.4f sec | %s" % (
+        np.mean(times), np.median(times), func.__name__))
 
 
 def test_correctness(X=None, R=None, nnzPerRow=2,
@@ -179,7 +178,7 @@ def test_correctness(X=None, R=None, nnzPerRow=2,
                 elif ans_j.size < K:
                     ans_i = np.sum(ans_i)
             assert np.allclose(ans_i, ans_j)
-    print '  all pairs of funcs give same answer'
+    print('  all pairs of funcs give same answer')
 
 def _make_kwarg_dict(
                 X=None, R=None, nnzPerRow=2,
@@ -208,9 +207,9 @@ if __name__ == '__main__':
     parser.add_argument('--prefix', type=str, default='calcRXX_')
     args = parser.parse_args()
 
-    print 'TESTING FUNCTIONS NAMED ', args.prefix
+    print('TESTING FUNCTIONS NAMED ', args.prefix)
     for nnzPerRow in [1, 2, 4]:
-        print 'nnzPerRow=%d' % (nnzPerRow)
+        print('nnzPerRow=%d' % (nnzPerRow))
         test_correctness(N=1, K=10, D=2,
                 nnzPerRow=nnzPerRow, prefix=args.prefix)
         test_correctness(N=33, K=10, D=2,

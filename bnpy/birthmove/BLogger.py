@@ -27,7 +27,7 @@ def pprint(msg, level=None, prefix='', linewidth=80):
             pprint(prefixes[ii] + msgs[ii], level=level)
         return
     if DEFAULTLEVEL == 'print':
-        print msg
+        print(msg)
     if Log is None:
         return
     if level is None:
@@ -52,7 +52,7 @@ def startUIDSpecificLog(uid=0):
 
     Post condition
     --------------
-    Creates a log file specific to the given uid, 
+    Creates a log file specific to the given uid,
     which will capture all subsequent log output.
     '''
     global Log
@@ -97,10 +97,10 @@ def stopUIDSpecificLog(uid=0):
     global RecentMessages
     RecentMessages = None
 
-def configure(taskoutpathIN, 
+def configure(taskoutpathIN,
         doSaveToDisk=0, doWriteStdOut=0,
         verboseLevel=0,
-        summaryLevel=logging.DEBUG+1,        
+        summaryLevel=logging.DEBUG+1,
         stdoutLevel=logging.DEBUG+1):
     ''' Configure this singleton Logger to write logs to disk or stdout.
 
@@ -149,9 +149,9 @@ def configure(taskoutpathIN,
 
 def makeFunctionToPrettyPrintCounts(initSS):
     from bnpy.viz.PrintTopics import count2str
-    def pprintCountVec(SS, uids=initSS.uids, 
-                       cleanupMassRemoved=None, 
-                       cleanupSizeThr=None, 
+    def pprintCountVec(SS, uids=initSS.uids,
+                       cleanupMassRemoved=None,
+                       cleanupSizeThr=None,
                        uidpairsToAccept=None):
         s = ''
         emptyVal = '     '

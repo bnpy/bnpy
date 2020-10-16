@@ -51,7 +51,7 @@ class Worker(multiprocessing.Process):
     def printMsg(self, msg):
         if self.verbose:
             for line in msg.split("\n"):
-                print "#%d: %s" % (self.uid, line)
+                print("#%d: %s" % (self.uid, line))
 
     def run(self):
         #self.printMsg("process SetUp! pid=%d" % (os.getpid()))
@@ -174,7 +174,7 @@ class Test(unittest.TestCase):
         Just verifying that we can split computation up into >1 slice,
         add up results from all slices and still get the same answer.
         '''
-        print ''
+        print('')
 
         # Version A: summarize entire dataset
         SSall = calcLocalParamsAndSummarize(self.X, self.Mu)
@@ -201,14 +201,14 @@ class Test(unittest.TestCase):
         * performs computations on this chunk
         * load the resulting suff statistics object into resultsQueue
         """
-        print ''
+        print('')
         SS = self.run_parallel()
 
         # Baseline: compute desired answer in master process.
         SSall = calcLocalParamsAndSummarize(self.X, self.Mu)
 
-        print "Parallel Answer: CountVec = ", SS.CountVec[:3]
-        print "   Naive Answer: CountVec = ", SSall.CountVec[:3]
+        print("Parallel Answer: CountVec = ", SS.CountVec[:3])
+        print("   Naive Answer: CountVec = ", SSall.CountVec[:3])
         assert np.allclose(SSall.CountVec, SS.CountVec)
         assert np.allclose(SSall.DataStatVec, SS.DataStatVec)
 
@@ -228,18 +228,18 @@ class Test(unittest.TestCase):
                     speedupmsg = "| %8.3f speedup" % (speedupval)
                 except KeyError:
                     speedupmsg = ""
-                print "%18s | %8.3f sec %s" % (
+                print("%18s | %8.3f sec %s" % (
                     key,
                     Results[key],
                     speedupmsg
-                )
+                ))
         return Results
 
     def run_with_timer(self, funcToCall, nRepeat=3):
         """ Timing experiment specified by funcToCall.
         """
         starttime = time.time()
-        for r in xrange(nRepeat):
+        for r in range(nRepeat):
             getattr(self, funcToCall)()
         return (time.time() - starttime) / nRepeat
 

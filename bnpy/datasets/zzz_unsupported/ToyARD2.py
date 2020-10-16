@@ -52,7 +52,7 @@ Sigma[0] = np.diag([s1, s2])
 Sigma[1] = np.diag([s2, s1])
 
 cholSigma = np.zeros_like(Sigma)
-for k in xrange(K):
+for k in range(K):
     cholSigma[k] = scipy.linalg.cholesky(Sigma[k])
 
 
@@ -72,7 +72,7 @@ def genToyData(seed=0, nObsTotal=25000):
     PRNG = np.random.RandomState(seed + 2)
     rs = PRNG.rand(nObsTotal)
     Z = np.ones(nObsTotal)
-    for n in xrange(nObsTotal):
+    for n in range(nObsTotal):
         if Z[n] == 1:
             X[n] = np.dot(A[1], Xprev[n]) + XX1[n]
         elif Z[n] == -1:

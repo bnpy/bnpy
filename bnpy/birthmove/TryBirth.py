@@ -60,25 +60,25 @@ def tryBirthForTask(
 
     BirthArgs = dict(**DefaultBirthArgs)
     BirthArgs.update(SavedBirthKwargs)
-    for key, val in kwargs.items():
+    for key, val in list(kwargs.items()):
         if val is not None:
             BirthArgs[key] = val
-            print '%s: %s' % (key, str(val))
+            print('%s: %s' % (key, str(val)))
 
     curLP = curModel.calc_local_params(Data, **LPkwargs)
     curSS = curModel.get_global_suff_stats(
         Data, curLP,
         trackDocUsage=1, doPrecompEntropy=1, trackTruncationGrowth=1)
     curLscore = curModel.calc_evidence(SS=curSS)
-    
-    print "Target UID: %d" % (targetUID)
-    print "Current count: %.2f" % (curSS.getCountForUID(targetUID))
+
+    print("Target UID: %d" % (targetUID))
+    print("Current count: %.2f" % (curSS.getCountForUID(targetUID)))
 
     xSS = makeSummaryForBirthProposal_HTMLWrapper(
         Data, curModel, curLP,
         curSSwhole=curSS,
         targetUID=int(targetUID),
-        newUIDs=range(curSS.K, curSS.K + int(BirthArgs['b_Kfresh'])),
+        newUIDs=list(range(curSS.K, curSS.K + int(BirthArgs['b_Kfresh']))),
         LPkwargs=LPkwargs,
         lapFrac=lapFrac,
         dataName=Data.name,
@@ -110,20 +110,20 @@ def findCompInModelWithLargestMisalignment(model, Data, Zref=None):
         nDisagree = np.sum(Zref[mask] != k)
         nTotal = mask.sum()
         dist[k] = float(nDisagree) / (float(nTotal) + 1e-10)
-        print k, dist[k]
+        print(k, dist[k])
     ktarget = np.argmax(dist)
     korig = AlignInfo['AlignedToOrigMap'][ktarget]
-    print 'ktarget %d: %s' % (ktarget, chr(65+ktarget))
-    print 'korig %d' % (korig)
+    print('ktarget %d: %s' % (ktarget, chr(65+ktarget)))
+    print('korig %d' % (korig))
     # Determine what is hiding inside of it that shouldnt be
     mask = AZ == ktarget
     nTarget = np.sum(mask)
-    print '%d total atoms assigned to ktarget...' % (nTarget)
+    print('%d total atoms assigned to ktarget...' % (nTarget))
     trueLabels = np.asarray(np.unique(Zref[mask]), np.int32)
     for ll in trueLabels:
         nTrue = np.sum(Zref[mask] == ll)
-        print '%d/%d should have true label %d: %s' % (
-            nTrue, nTarget, ll, chr(65+ll))
+        print('%d/%d should have true label %d: %s' % (
+            nTrue, nTarget, ll, chr(65+ll)))
     return korig
 
 if __name__ == '__main__':
@@ -134,12 +134,12 @@ if __name__ == '__main__':
     parser.add_argument('--outputdir', type=str, default='/tmp/')
     parser.add_argument('--targetUID', type=int, default=0)
     parser.add_argument('--batchID', type=int, default=None)
-    for key, val in DefaultBirthArgs.items():
+    for key, val in list(DefaultBirthArgs.items()):
         parser.add_argument('--' + key, type=type(val), default=None)
     args = parser.parse_args()
 
     BLogger.configure(args.outputdir,
         doSaveToDisk=0,
         doWriteStdOut=1,
-        stdoutLevel=0) 
+        stdoutLevel=0)
     tryBirthForTask(**args.__dict__)

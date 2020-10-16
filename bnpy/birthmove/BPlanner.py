@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 
-import BLogger
+from bnpy.birthmove import BLogger
 from bnpy.viz.PrintTopics import vec2str
 from bnpy.util import argsort_bigtosmall_stable, argsortBigToSmallByTiers
 
@@ -219,7 +219,7 @@ def selectCompsForBirthAtCurrentBatch(
     if nDQ_toosmall > 0 and doPrintLotsOfDetails:
         lineUID = vec2str([u[0] for u in uidsTooSmall])
         lineSize = vec2str([u[1] for u in uidsTooSmall])
-        BLogger.pprint([lineUID, lineSize], 
+        BLogger.pprint([lineUID, lineSize],
             prefix=['%7s' % 'uids',
                     '%7s' % labelstr],
             )
@@ -280,7 +280,7 @@ def selectCompsForBirthAtCurrentBatch(
     sortedCumulNewK = np.cumsum(totalnewK_perEligibleComp[sortorder])
     nToKeep = np.searchsorted(sortedCumulNewK, maxnewK + 0.0042)
     if nToKeep == 0:
-        nToKeep = 1        
+        nToKeep = 1
     keepEligibleIDs = sortorder[:nToKeep]
     newK = np.minimum(sortedCumulNewK[nToKeep-1], maxnewK)
     chosenUIDs = [eligibleUIDs[s] for s in keepEligibleIDs]
@@ -338,7 +338,7 @@ def selectShortListForBirthAtLapStart(
 
     Shortlist uids are guaranteed to never be involved in a merge/delete.
     They are kept aside especially for a birth move, at least in this lap.
-    
+
     Returns
     -------
     MovePlans : dict with updated fields
@@ -401,7 +401,7 @@ def selectShortListForBirthAtLapStart(
         if uid not in MoveRecordsByUID:
             MoveRecordsByUID[uid] = defaultdict(int)
         tooSmall = CountVec[k] <= b_minNumAtomsForTargetComp
-        hasFailRecord = MoveRecordsByUID[uid]['b_nFailRecent'] > 0        
+        hasFailRecord = MoveRecordsByUID[uid]['b_nFailRecent'] > 0
         if MoveRecordsByUID[uid]['b_tryAgainFutureLap'] > 0:
             eligible_mask[k] = 1
             MovePlans['b_shortlistUIDs'].append(uid)
@@ -433,7 +433,7 @@ def selectShortListForBirthAtLapStart(
     if nShortList > 0:
         lineUID = vec2str(MovePlans['b_shortlistUIDs'])
         lineSize = vec2str(shortlistCountVec)
-        BLogger.pprint([lineUID, lineSize], 
+        BLogger.pprint([lineUID, lineSize],
             prefix=['%7s' % 'uids',
                     '%7s' % 'size'],
             )
@@ -468,7 +468,7 @@ def canBirthHappenAtLap(lapFrac, b_startLap=-1, b_stopLap=-1, **kwargs):
     if b_startLap < 0:
         return False
     elif b_startLap >= 0 and np.ceil(lapFrac) < b_startLap:
-        return False 
+        return False
     elif b_stopLap >= 0 and np.ceil(lapFrac) >= b_stopLap:
         return False
     else:

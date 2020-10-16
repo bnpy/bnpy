@@ -3,8 +3,8 @@ import copy
 import numpy as np
 import logging
 
-from LearnAlg import LearnAlg
-from LearnAlg import makeDictOfAllWorkspaceVars
+from bnpy.learnalg.LearnAlg import LearnAlg
+from bnpy.learnalg.LearnAlg import makeDictOfAllWorkspaceVars
 
 Log = logging.getLogger('bnpy')
 
@@ -187,11 +187,11 @@ class MOVBAlg(LearnAlg):
             Fields to save determined by the memoLPkeys attribute of this alg.
         '''
         LPchunk = dict(**LPchunk)  # make a copy
-        allkeys = LPchunk.keys()
+        allkeys = list(LPchunk.keys())
         for key in allkeys:
             if key not in self.memoLPkeys:
                 del LPchunk[key]
-        if len(LPchunk.keys()) > 0:
+        if len(list(LPchunk.keys())) > 0:
             self.LPmemory[batchID] = LPchunk
         else:
             self.LPmemory[batchID] = None
@@ -297,7 +297,7 @@ class MOVBAlg(LearnAlg):
         if loss is None:
             loss = hmodel.calc_evidence(SS=SS)
 
-        for batchID in range(len(self.SSmemory.keys())):
+        for batchID in range(len(list(self.SSmemory.keys()))):
             SSchunk = self.load_batch_suff_stat_from_memory(batchID, doCopy=1)
             if batchID == 0:
                 SS2 = SSchunk.copy()
@@ -306,8 +306,8 @@ class MOVBAlg(LearnAlg):
         evCheck = hmodel.calc_evidence(SS=SS2)
 
         if self.algParams['debug'].count('quiet') == 0:
-            print '% 14.8f loss from agg SS' % (loss)
-            print '% 14.8f loss from sum over SSmemory' % (evCheck)
+            print('% 14.8f loss from agg SS' % (loss))
+            print('% 14.8f loss from sum over SSmemory' % (evCheck))
         if self.algParams['debug'].count('interactive'):
             isCorrect = np.allclose(SS.getCountVec(), SS2.getCountVec()) \
                 and np.allclose(loss, evCheck)

@@ -87,9 +87,9 @@ def get_X(seed, seqLens):
     seqLens = list(seqLens)
 
     if len(np.shape(seqLens)) == 0:
-        rang = xrange(1)
+        rang = range(1)
     else:
-        rang = xrange(len(seqLens))
+        rang = range(len(seqLens))
 
     # Each iteration generates one sequence
     for i in rang:
@@ -99,7 +99,7 @@ def get_X(seed, seqLens):
                                          sigmas[initState, :, :])
         Z.append(initState)
         X.append(initX)
-        for j in xrange(seqLens[i] - 1):
+        for j in range(seqLens[i] - 1):
             trans = prng.multinomial(1, transPi[Z[j]])
             nextState = np.nonzero(trans)[0][0]
             nextX = prng.multivariate_normal(mus[nextState, :],
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     W = 10
     H = 15
     pylab.subplots(nrows=Data.nDoc, ncols=1, figsize=(W, H))
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         pylab.subplot(Data.nDoc, 1, n + 1)
         plot_sequence(n, Data)
     pylab.show(block=True)

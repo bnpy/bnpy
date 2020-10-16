@@ -1,6 +1,6 @@
 import numpy as np
 
-from LearnAlg import LearnAlg, ElapsedTimeLogger, makeDictOfAllWorkspaceVars
+from bnpy.learnalg.LearnAlg import LearnAlg, ElapsedTimeLogger, makeDictOfAllWorkspaceVars
 
 
 class VBAlg(LearnAlg):
@@ -36,7 +36,7 @@ class VBAlg(LearnAlg):
         # Custom func hook
         self.eval_custom_func(
             isInitial=1, **makeDictOfAllWorkspaceVars(**vars()))
-        for iterid in xrange(1, self.algParams['nLap'] + 1):
+        for iterid in range(1, self.algParams['nLap'] + 1):
             lap = self.algParams['startLap'] + iterid
             nLapsCompleted = lap - self.algParams['startLap']
             self.set_random_seed_at_lap(lap)

@@ -39,25 +39,25 @@ def calcLocalParamsWithELBOTraceForSingleDoc(
         np.exp(DocTopicProb_K, out=DocTopicProb_K)
     elif initDocTopicProb_K is not None:
         DocTopicCount_K = np.zeros(K)
-        DocTopicProb_K = initDocTopicProb_K.copy()        
+        DocTopicProb_K = initDocTopicProb_K.copy()
     else:
         # Default initialization!
         DocTopicCount_K = np.zeros(K)
         DocTopicProb_K = alphaEbeta_K.copy()
 
     # Initialize sumResp
-    sumResp_U = np.zeros(U)      
+    sumResp_U = np.zeros(U)
     np.dot(explogLik_UK, DocTopicProb_K, out=sumResp_U)
 
     Ltrace = np.zeros(nCoordAscentItersLP)
     prevDocTopicCount_K = DocTopicCount_K.copy()
-    for riter in xrange(nCoordAscentItersLP):
+    for riter in range(nCoordAscentItersLP):
         # # Update DocTopicCount
-        np.dot(cts_U / sumResp_U, explogLik_UK, 
+        np.dot(cts_U / sumResp_U, explogLik_UK,
                out=DocTopicCount_K)
         DocTopicCount_K *= DocTopicProb_K
         # # Update DocTopicProb
-        np.add(DocTopicCount_K, alphaEbeta_K, 
+        np.add(DocTopicCount_K, alphaEbeta_K,
             out=DocTopicProb_K)
         digamma(DocTopicProb_K, out=DocTopicProb_K)
         np.exp(DocTopicProb_K, out=DocTopicProb_K)
@@ -106,8 +106,8 @@ def calcLocalParamsWithELBOTraceForSingleDoc(
                 else:
                     Ltrace = np.append(Ltrace, curLval)
 
-        nAccept = nOrigActive - nActive 
-        print "%d/%d restarts accepted" % (nAccept, nOrigActive)
+        nAccept = nOrigActive - nActive
+        print("%d/%d restarts accepted" % (nAccept, nOrigActive))
 
     # Correct ELBO trace for missing additive constant, indep. of topic cts
     Ltrace[riter+1:] = Ltrace[riter]
@@ -115,7 +115,7 @@ def calcLocalParamsWithELBOTraceForSingleDoc(
     return DocTopicCount_K, Ltrace
 
 def calcELBOForSingleDocFromCountVec(
-        DocTopicCount_K=None, 
+        DocTopicCount_K=None,
         cts_U=None,
         sumResp_U=None,
         alphaEbeta_K=None,
@@ -168,7 +168,7 @@ def restartProposalForSingleDoc(
     # Init sumResp
     propsumResp_U = np.dot(explogLik_UK, propDocTopicProb_K)
     # Go go gadget for loop!
-    for riter in xrange(restartNumItersLP):
+    for riter in range(restartNumItersLP):
         # Update DocTopicCount
         np.dot(cts_U / propsumResp_U, explogLik_UK, out=propDocTopicCount_K)
         propDocTopicCount_K *= propDocTopicProb_K
@@ -188,10 +188,10 @@ def restartProposalForSingleDoc(
     return propDocTopicCount_K, propLval
 
 def calcELBOForInterpolatedDocTopicCounts(
-        DTCA_K, DTCB_K, cts_U, 
+        DTCA_K, DTCB_K, cts_U,
         logLik_UK=None,
         alphaEbeta_K=None,
-        nGrid=100):        
+        nGrid=100):
     wgrid_G = np.linspace(0, 1.0, nGrid)
     fgrid_G = np.zeros(nGrid)
     for ii in range(nGrid):
@@ -244,7 +244,7 @@ if __name__ == '__main__':
     topics_KV = hmodel.obsModel.getTopics()
 
     pylab.figure(figsize=(12,6));
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
         start = Data.doc_range[d]
         stop = Data.doc_range[d+1]
         logLik_UK = LP['E_log_soft_ev'][start:stop].copy()
@@ -255,7 +255,7 @@ if __name__ == '__main__':
         ax = pylab.subplot(1, 2, 1);
 
         bestL = -np.inf
-        worstL = +np.inf 
+        worstL = +np.inf
         PRNG = np.random.RandomState(101 * d + 1)
         for randiter in range(50):
             randlabel = 'rand + 1'
@@ -281,10 +281,10 @@ if __name__ == '__main__':
                 worstDTC_K = randDTC_K
             assert isMonotonicIncreasing(randLtrace)
 
-        print "BEST of ", randlabel
-        print ' '.join(['%6.1f' % (x) for x in bestDTC_K])
-        print "WORST of ", randlabel
-        print ' '.join(['%6.1f' % (x) for x in worstDTC_K])
+        print("BEST of ", randlabel)
+        print(' '.join(['%6.1f' % (x) for x in bestDTC_K]))
+        print("WORST of ", randlabel)
+        print(' '.join(['%6.1f' % (x) for x in worstDTC_K]))
 
         PRNG = np.random.RandomState(701 * d + 7)
         for randiter in range(50):
@@ -311,10 +311,10 @@ if __name__ == '__main__':
                 worstDTC_K = randDTC_K
             assert isMonotonicIncreasing(randLtrace)
 
-        print "BEST of ", randlabel
-        print ' '.join(['%6.1f' % (x) for x in bestDTC_K])
-        print "WORST of ", randlabel
-        print ' '.join(['%6.1f' % (x) for x in worstDTC_K])
+        print("BEST of ", randlabel)
+        print(' '.join(['%6.1f' % (x) for x in bestDTC_K]))
+        print("WORST of ", randlabel)
+        print(' '.join(['%6.1f' % (x) for x in worstDTC_K]))
 
         fwpi_K, _, _ = estimatePiForDoc_frankwolfe(
             ids_U=ids_U,
@@ -379,12 +379,12 @@ if __name__ == '__main__':
         pylab.legend(loc='lower right')
         pylab.show(block=False)
 
-        print "init = prior"
-        print ' '.join(['%6.1f' % (x) for x in priorDTC_K])
-        print "init = frankwolfeMAP"
-        print ' '.join(['%6.1f' % (x) for x in fwDTC_K])
-        print "init = naturalMAP"
-        print ' '.join(['%6.1f' % (x) for x in natDTC_K])
+        print("init = prior")
+        print(' '.join(['%6.1f' % (x) for x in priorDTC_K]))
+        print("init = frankwolfeMAP")
+        print(' '.join(['%6.1f' % (x) for x in fwDTC_K]))
+        print("init = naturalMAP")
+        print(' '.join(['%6.1f' % (x) for x in natDTC_K]))
 
         if priorLtrace[-1] > bestL:
             bestL = priorLtrace[-1]
@@ -427,11 +427,11 @@ if __name__ == '__main__':
         pylab.tight_layout();
         pylab.show(block=False)
 
-        keypress = raw_input("Press any key for next plot >>>")
+        keypress = input("Press any key for next plot >>>")
         if keypress.count("embed"):
             from IPython import embed;
             embed()
         elif keypress.count("exit"):
             break
         if (d + 1) % 25 == 0:
-            print "%3d/%d docs done" % (d+1, Data.nDoc)
+            print("%3d/%d docs done" % (d+1, Data.nDoc))

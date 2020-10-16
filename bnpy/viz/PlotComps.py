@@ -13,7 +13,7 @@ import argparse
 import os
 import sys
 
-from PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 import bnpy.ioutil.BNPYArgParser as BNPYArgParser
 import bnpy.viz
 from bnpy.ioutil import ModelReader
@@ -74,8 +74,8 @@ def plotCompsForTask(task_output_path, lap=None,
     queryLap = lap
     hmodel, lap = bnpy.load_model_at_lap(task_output_path, queryLap)
     if queryLap is not None and not np.allclose(lap, queryLap):
-        print 'Query lap %.2f unavailable. Using %.2f instead.' \
-            % (queryLap, lap)
+        print('Query lap %.2f unavailable. Using %.2f instead.' \
+            % (queryLap, lap))
     plotCompsFromHModel(hmodel, **kwargs)
 
 
@@ -113,14 +113,14 @@ def plotCompsFromSS(hmodel, SS, outfilepath=None, **kwargs):
     '''
     if 'xlabels' not in kwargs:
         xlabels = uidsAndCounts2strlist(SS)
-        kwargs['xlabels'] = xlabels    
+        kwargs['xlabels'] = xlabels
     tmpModel = hmodel.copy()
     tmpModel.obsModel.update_global_params(SS)
     plotCompsFromHModel(tmpModel, **kwargs)
     if outfilepath is not None:
         pylab.savefig(outfilepath)
         pylab.close('all')
-        print 'Wrote: %s' % (outfilepath)
+        print('Wrote: %s' % (outfilepath))
 
 def parseArgs(**kwargs):
     ''' Read args from stdin into defined dict fields
@@ -137,7 +137,7 @@ def parseArgs(**kwargs):
     arg_dict = vars(args)
     if args.vocabfile is not None:
         with open(args.vocabfile, 'r') as f:
-            arg_dict['vocabList'] = map(str.strip, f.readlines())
+            arg_dict['vocabList'] = list(map(str.strip, f.readlines()))
     return arg_dict
 
 if __name__ == "__main__":

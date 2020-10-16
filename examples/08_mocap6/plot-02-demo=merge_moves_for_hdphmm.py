@@ -103,11 +103,12 @@ allpairs_trained_model, allpairs_info_dict = bnpy.run(
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=all_pairs/',
     moves='merge,shuffle',
     **dict(
-        alg_kwargs.items()
-        + init_kwargs.items()
-        + hdphmm_kwargs.items()
-        + gauss_kwargs.items()
-        + allpairs_merge_kwargs.items()))
+        sum(map(list,   [alg_kwargs.items(),
+                        init_kwargs.items(),
+                        hdphmm_kwargs.items(),
+                        gauss_kwargs.items(),
+                        allpairs_merge_kwargs.items()]),[]))
+)
 
 ###############################################################################
 #
@@ -138,11 +139,11 @@ largepairs_trained_model, largepairs_info_dict = bnpy.run(
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=large_pairs/',
     moves='merge,shuffle',
     **dict(
-        alg_kwargs.items()
-        + init_kwargs.items()
-        + hdphmm_kwargs.items()
-        + gauss_kwargs.items()
-        + largepairs_merge_kwargs.items()))
+        sum(map(list,   [alg_kwargs.items(),
+                        init_kwargs.items(),
+                        hdphmm_kwargs.items(),
+                        gauss_kwargs.items(),
+                        largepairs_merge_kwargs.items()]),[])))
 
 ###############################################################################
 #
@@ -174,11 +175,12 @@ goodelbopairs_trained_model, goodelbopairs_info_dict = bnpy.run(
     output_path='/tmp/mocap6/trymerge-K=20-model=HDPHMM+DiagGauss-ECovMat=1*eye-merge_strategy=good_elbo_pairs/',
     moves='merge,shuffle',
     **dict(
-        alg_kwargs.items()
-        + init_kwargs.items()
-        + hdphmm_kwargs.items()
-        + gauss_kwargs.items()
-        + goodelbopairs_merge_kwargs.items()))
+        sum(map(list,   [alg_kwargs.items(),
+                        init_kwargs.items(),
+                        hdphmm_kwargs.items(),
+                        gauss_kwargs.items(),
+                        goodelbopairs_merge_kwargs.items()]),[])))
+
 
 
 ###############################################################################
@@ -222,4 +224,4 @@ pylab.legend(loc='upper right')
 pylab.xlabel('elapsed time (sec)')
 pylab.ylabel('num. clusters (K)')
 
-pylab.show()
+pylab.show(block=False)

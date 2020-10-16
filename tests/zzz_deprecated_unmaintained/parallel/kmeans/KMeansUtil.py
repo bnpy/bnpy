@@ -70,52 +70,52 @@ def calcLocalParamsAndSummarize(X, Mu,
     elif sleepPerUnit == -1:
         # CPU-bound stuff
         s = 0
-        for i in xrange(20*(stop - start)):
+        for i in range(20*(stop - start)):
              s += 1
         telapsed = time.time() - tstart
-        print "BIG SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("BIG SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed))
         return 0
     elif sleepPerUnit == -1.5:
         s = 0
-        for i in xrange(50):
+        for i in range(50):
             s += Xcur.sum()
         telapsed = time.time() - tstart
-        print "SHARED MEM SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("SHARED MEM SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed))
         return 0
 
     elif sleepPerUnit == -1.6:
         s = 0
-        for i in xrange(50):
+        for i in range(50):
             s += np.sum(Xcur)
         telapsed = time.time() - tstart
-        print "LOCAL COPY SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("LOCAL COPY SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed))
         return 0
     elif sleepPerUnit == -1.7:
         s = 0
-        for i in xrange(0, 5*(stop-start)):
+        for i in range(0, 5*(stop-start)):
             s += Xcur[0,0]
         telapsed = time.time() - tstart
-        print "FIRST ENTRY SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("FIRST ENTRY SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed))
         return 0 
 
     elif sleepPerUnit == -1.8:
         s = 0
         N = stop - start
-        for i in xrange(0, 5*N):
+        for i in range(0, 5*N):
             s += Xcur[i % N,0]
         telapsed = time.time() - tstart
-        print "COL 1 SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("COL 1 SUM on slice %d-%d took %.2f sec" % (start, stop, telapsed))
         return 0
     elif sleepPerUnit == -2:
         Dist = np.dot(Xcur, Mu.T)
         telapsed = time.time() - tstart
-        print "MAT PROD on slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("MAT PROD on slice %d-%d took %.2f sec" % (start, stop, telapsed))
         return 0
     elif sleepPerUnit == -1.9:
-        for i in xrange(75):
+        for i in range(75):
             s = Xcur[:, 0].sum()
         telapsed = time.time() - tstart
-        print "COL 1 SUM VEC, slice %d-%d took %.2f sec" % (start, stop, telapsed)
+        print("COL 1 SUM VEC, slice %d-%d took %.2f sec" % (start, stop, telapsed))
 
     # Dist : 2D array, size N x K
     #     squared euclidean distance from X[n] to Mu[k]
@@ -128,7 +128,7 @@ def calcLocalParamsAndSummarize(X, Mu,
 
     CountVec = np.zeros(K)
     DataStatVec = np.zeros((K, D))
-    for k in xrange(K):
+    for k in range(K):
         mask_k = Z == k
         CountVec[k] = np.sum(mask_k)
         DataStatVec[k] = np.sum(Xcur[mask_k], axis=0)
@@ -193,8 +193,8 @@ def runBenchmarkAcrossProblemSizes(TestClass):
     kwargs = dict(**args.__dict__)
 
     for (N, K, D) in NKDiterator:
-        print '=============================== N=%d K=%d D=%d' % (
-            N, K, D)
+        print('=============================== N=%d K=%d D=%d' % (
+            N, K, D))
         kwargs['N'] = N
         kwargs['K'] = K
         kwargs['D'] = D
@@ -253,4 +253,4 @@ def rangeFromHyphen(hyphenString):
     myList : list of integers
     """
     x = [int(x) for x in hyphenString.split('-')]
-    return range(x[0], x[-1] + 1)
+    return list(range(x[0], x[-1] + 1))

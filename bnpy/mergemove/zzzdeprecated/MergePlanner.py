@@ -145,11 +145,11 @@ def selectPairsUsingAtMostNOfEachComp(AdjMat, extraFixedEdges=None,
     cond1 = np.allclose(degree, xdegree)
     cond2 = np.max(newdegree) <= N + Nextra
     if not cond1:
-        print 'WARNING: BAD DEGREE CALCULATION'
+        print('WARNING: BAD DEGREE CALCULATION')
     if not cond2:
-        print 'WARNING: BAD NEWDEGREE CALCULATION'
-        print 'max(newdegree)=%d' % (np.max(newdegree))
-        print 'N + Nextra: %d' % (N + Nextra)
+        print('WARNING: BAD NEWDEGREE CALCULATION')
+        print('max(newdegree)=%d' % (np.max(newdegree)))
+        print('N + Nextra: %d' % (N + Nextra))
     return pairIDs
 
 
@@ -190,7 +190,7 @@ def updateScoreMat_wholeELBO(ScoreMat, curModel, SS, doAllPairs=0):
         aList, bList = np.unravel_index(np.flatnonzero(redoMask), (SS.K, SS.K))
 
         if len(aList) > 0:
-            mPairIDs = zip(aList, bList)
+            mPairIDs = list(zip(aList, bList))
             AGap = curModel.allocModel.calcHardMergeGap_SpecificPairs(
                 SS, mPairIDs)
             OGap = curModel.obsModel.calcHardMergeGap_SpecificPairs(
@@ -268,7 +268,7 @@ def preselect_candidate_pairs(curModel, SS,
     # Only upper-triangular indices are allowed.
     M[np.tril_indices(K)] = 0
     # Excluded pairs are not allowed.
-    M[zip(*excludePairs)] = 0
+    M[list(zip(*excludePairs))] = 0
 
     # Select candidates
     aList, bList = _scorematrix2rankedlist_greedy(M, nMergeTrials)
@@ -281,10 +281,10 @@ def preselect_candidate_pairs(curModel, SS,
 
     if 'returnScoreMatrix' in kwargs and kwargs['returnScoreMatrix']:
         if Mraw is None:
-            return zip(aList, bList), M
+            return list(zip(aList, bList)), M
         else:
-            return zip(aList, bList), Mraw
-    return zip(aList, bList)
+            return list(zip(aList, bList)), Mraw
+    return list(zip(aList, bList))
 
 
 def _scorematrix2rankedlist_greedy(M, nPairs, doKeepZeros=False):
@@ -342,7 +342,7 @@ def calcScoreMatrix_wholeELBO(curModel, SS, excludePairs=list(), M=None):
         assert nZeroEntry >= 0
         aList, bList = _scorematrix2rankedlist_greedy(M, SS.K + nZeroEntry,
                                                       doKeepZeros=True)
-        pairList = zip(aList, bList)
+        pairList = list(zip(aList, bList))
         AGap = curModel.allocModel.calcHardMergeGap_SpecificPairs(SS, pairList)
         OGap = curModel.obsModel.calcHardMergeGap_SpecificPairs(SS, pairList)
         M[aList, bList] = AGap + OGap
@@ -416,7 +416,7 @@ def calcScoreMatrix_corrLimitDegree(SS, MINCORR=0.05, N=3):
     Mlimit = np.zeros_like(M)
     if len(fixedPairIDs) == 0:
         return Mlimit
-    x, y = zip(*fixedPairIDs)
+    x, y = list(zip(*fixedPairIDs))
     Mlimit[x, y] = M[x, y]
     return Mlimit
 
@@ -443,7 +443,7 @@ def calcScoreMatrix_corrOrEmpty(SS, EMPTYTHR=100):
     assert Nvec is not None
     sortIDs = np.argsort(Nvec)
     emptyScores = np.zeros(SS.K)
-    for ii in xrange(SS.K / 2):
+    for ii in range(SS.K / 2):
         worstID = sortIDs[ii]
         bestID = sortIDs[-(ii + 1)]
         if Nvec[worstID] < EMPTYTHR and Nvec[bestID] > EMPTYTHR:
@@ -458,8 +458,8 @@ def calcScoreMatrix_corrOrEmpty(SS, EMPTYTHR=100):
     # 3) Add in pairs of (small mass, small mass)
     emptyIDs = np.flatnonzero(emptyScores)
     nEmpty = emptyIDs.size
-    for jID in xrange(nEmpty - 1):
-        for kID in xrange(jID + 1, nEmpty):
+    for jID in range(nEmpty - 1):
+        for kID in range(jID + 1, nEmpty):
             j = emptyIDs[jID]
             k = emptyIDs[kID]
             M[j, k] = 0.4 + 0.1 * (emptyScores[j] + emptyScores[k])
@@ -471,8 +471,8 @@ def calcScoreMatrix_marglik(curModel, SS, excludePairs):
     M = np.zeros((K, K))
     excludeSet = set(excludePairs)
     myCalculator = MargLikScoreCalculator()
-    for kA in xrange(K):
-        for kB in xrange(kA + 1, K):
+    for kA in range(K):
+        for kB in range(kA + 1, K):
             if (kA, kB) not in excludeSet:
                 M[kA, kB] = myCalculator._calcMScoreForCandidatePair(
                     curModel, SS, kA, kB)

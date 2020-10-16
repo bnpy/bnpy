@@ -60,7 +60,7 @@ class SharedMemWorker(multiprocessing.Process):
     def printMsg(self, msg):
         if self.verbose:
             for line in msg.split("\n"):
-                print "#%d: %s" % (self.uid, line)
+                print("#%d: %s" % (self.uid, line))
 
     def run(self):
         # self.printMsg("process SetUp! pid=%d" % (os.getpid()))
@@ -212,7 +212,7 @@ class Test(unittest.TestCase):
         Just verifying that we can split computation up into >1 slice,
         add up results from all slices and still get the same answer.
         '''
-        print ''
+        print('')
         SS1 = self.run_baseline()
         SS2 = self.run_serial()
         assert_SS_allclose(SS1, SS2)
@@ -225,7 +225,7 @@ class Test(unittest.TestCase):
         * performs computations on this chunk
         * load the resulting suff statistics object into resultsQueue
         """
-        print ''
+        print('')
         SS1 = self.run_parallel()
         SS2 = self.run_baseline()
         assert_SS_allclose(SS1, SS2)
@@ -246,32 +246,32 @@ class Test(unittest.TestCase):
                     speedupmsg = "| %8.3f speedup" % (speedupval)
                 except KeyError:
                     speedupmsg = ""
-                print "%18s | %8.3f sec %s" % (
+                print("%18s | %8.3f sec %s" % (
                     key,
                     Results[key],
                     speedupmsg
-                )
+                ))
         return Results
 
     def run_with_timer(self, funcToCall, nRepeat=3):
         """ Timing experiment specified by funcToCall.
         """
         starttime = time.time()
-        for r in xrange(nRepeat):
+        for r in range(nRepeat):
             getattr(self, funcToCall)()
         return (time.time() - starttime) / nRepeat
 
     def run_all_with_timer(self, nRepeat=3):
         """ Timing experiments with baseline, serial, and parallel versions.
         """
-        print 'BASE----------------'
+        print('BASE----------------')
         base_time = self.run_with_timer('run_baseline', nRepeat)
         time.sleep(0.3)
-        print '\nSERIAL--------------'
+        print('\nSERIAL--------------')
         serial_time = self.run_with_timer('run_serial', nRepeat)
         time.sleep(0.3)
         
-        print '\nPARALLEL------------'
+        print('\nPARALLEL------------')
         parallel_time = self.run_with_timer('run_parallel', nRepeat)
 
         return dict(
@@ -299,8 +299,8 @@ def toSharedMemArray(X):
 
 def assert_SS_allclose(SS1, SS2):
     if hasattr(SS1, 'CountVec'):
-        print "  SS1.CountVec = ", SS1.CountVec[:3]
-        print "  SS2.CountVec = ", SS2.CountVec[:3]
+        print("  SS1.CountVec = ", SS1.CountVec[:3])
+        print("  SS2.CountVec = ", SS2.CountVec[:3])
         assert np.allclose(SS1.CountVec, SS2.CountVec)
         assert np.allclose(SS1.DataStatVec, SS2.DataStatVec)
     else:

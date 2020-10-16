@@ -20,8 +20,8 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 bnpy_root_path = os.path.abspath('../../')
 sys.path.append(bnpy_root_path)
-print '>>> sys.path[-1]'
-print sys.path[-1]
+print('>>> sys.path[-1]')
+print(sys.path[-1])
 print ">>> os.path.exists(os.path.join(sys.path[-1], 'bnpy'))"
 print os.path.exists(os.path.join(sys.path[-1], 'bnpy'))
 print ">>> os.path.exists(os.path.join(sys.path[-1], 'docs'))"
@@ -398,10 +398,11 @@ napoleon_use_param = True
 napoleon_use_rtype = False
 
 
+
 # -- Examples gallery settings ----------------------------------
 from sphinx_gallery.sorting import FileNameSortKey
 
-sphinx_gallery_conf = {    
+sphinx_gallery_conf = {
     'plot_gallery' : 'True', # dont worry, this string will cast to bool
 
     # path to examples scripts

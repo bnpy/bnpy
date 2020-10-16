@@ -12,7 +12,7 @@ import scipy.io
 import os
 import glob
 
-from ModelWriter import makePrefixForLap
+from bnpy.ioutil.ModelWriter import makePrefixForLap
 from bnpy.allocmodel import AllocModelConstructorsByName
 from bnpy.obsmodel import ObsModelConstructorsByName
 from bnpy.util import toCArray, as1D, as2D
@@ -85,7 +85,7 @@ def load_model_at_prefix(matfilepath, prefix='Best', lap=None):
         allocModel = load_alloc_model(matfilepath, prefix)
         model = HModel(allocModel, obsModel)
     except IOError as e:
-        print str(e)
+        print(str(e))
         '''
         if prefix == 'Best':
             matList = glob.glob(os.path.join(matfilepath, '*TopicModel.mat'))
@@ -198,14 +198,14 @@ def loadDictFromMatfile(matfilepath):
     >>> scipy.io.savemat('Dorig.mat', Dorig, oned_as='row')
     >>> D = loadDictFromMatfile('Dorig.mat')
     >>> D['scalar']
-    array(5)
+    array(5, dtype=int32)
     >>> D['scalar1DN1']
     array(3.14)
     >>> D['arr1DN3']
-    array([1, 2, 3])
+    array([1, 2, 3], dtype=int32)
     '''
     Dtmp = scipy.io.loadmat(matfilepath)
-    D = dict([x for x in Dtmp.items() if not x[0].startswith('__')])
+    D = dict([x for x in list(Dtmp.items()) if not x[0].startswith('__')])
     for key in D:
         if not isinstance(D[key], np.ndarray):
             continue
@@ -276,11 +276,11 @@ def loadTopicModelFromMEDLDA(filepath,
 
 
 def loadTopicModel(
-        matfilepath, 
+        matfilepath,
         queryLap=None,
         prefix=None,
         returnWordCounts=0,
-        returnTPA=0, 
+        returnTPA=0,
         normalizeTopics=0,
         normalizeProbs=0,
         **kwargs):

@@ -78,7 +78,7 @@ def run_birth_move(bigModel, bigSS, freshData, Q=None, Plan=None, **kwargsIN):
         if 'doVizBirth' in kwargs and kwargs['doVizBirth']:
             VizBirth.viz_birth_proposal(bigModel, freshModel, Plan,
                                         curELBO=None, propELBO=None, **kwargs)
-            raw_input('>>>')
+            input('>>>')
             from matplotlib import pylab
             pylab.close('all')
 
@@ -110,7 +110,7 @@ def run_birth_move(bigModel, bigSS, freshData, Q=None, Plan=None, **kwargsIN):
 
         Kcur = bigSS.K
         Ktotal = xbigSS.K
-        birthCompIDs = range(Kcur, Ktotal)
+        birthCompIDs = list(range(Kcur, Ktotal))
 
         # Reject. Abandon the move.
         if not didPass:
@@ -136,7 +136,7 @@ def run_birth_move(bigModel, bigSS, freshData, Q=None, Plan=None, **kwargsIN):
         xfreshSS.removeELBOTerms()
         if kwargs['birthRetainExtraMass']:
             MoveInfo['extraSS'] = xfreshSS
-            MoveInfo['modifiedCompIDs'] = range(Ktotal)
+            MoveInfo['modifiedCompIDs'] = list(range(Ktotal))
         else:
             # Restore xbigSS to same scale as original "big" dataset
             xbigSS -= xfreshSS

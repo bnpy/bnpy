@@ -25,7 +25,7 @@ def nonNegativeRecoverTopics(Q, anchors, divergence,
     XXT = dot(X, X.transpose())
 
     A = zeros((K, V))
-    for w in xrange(V):
+    for w in range(V):
         y = Q[w, :]
         alpha = fastRecover(y, X, w, anchors, divergence,
                             XXT, initial_stepsize, eps)
@@ -57,14 +57,14 @@ def fastRecover(y, x, v, anchors, divergence, XXT, initial_stepsize, epsilon):
                     y, x, epsilon, None, XXT)
 
             else:
-                print "invalid divergence!"
+                print("invalid divergence!")
                 assert(0)
             if isnan(alpha).any():
                 alpha = ones(K) / K
 
         except Exception as inst:
-            print type(inst)     # the exception instance
-            print inst.args      # arguments stored in .args
+            print(type(inst))     # the exception instance
+            print(inst.args)      # arguments stored in .args
             alpha = ones(K) / K
             it = -1
             dist = -1
@@ -77,7 +77,7 @@ def quadSolveExpGrad(y, x, eps, alpha=None, XX=None):
     c1 = 10**(-4)
     c2 = 0.75
     if XX is None:
-        print 'making XXT'
+        print('making XXT')
         XX = dot(x, x.transpose())
 
     XY = dot(x, y)

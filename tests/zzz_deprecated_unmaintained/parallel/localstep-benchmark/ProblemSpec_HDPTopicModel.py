@@ -32,6 +32,6 @@ def pprintProblemSpecStr(K=10, vocab_size=5000, nDocTotal=10,
              nWordsPerDoc=200, LPkwargs=dict(), **kwargs):
     s = 'vocab_size=%d\nnDocTotal=%d\nnWordsPerDoc=%d\nK=%d\n' % (
         vocab_size, nDocTotal, nWordsPerDoc, K)
-    for k,v in LPkwargs.items():
+    for k,v in list(LPkwargs.items()):
         s += '%s=%f\n' % (k,v)
     return s

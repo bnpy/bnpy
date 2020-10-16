@@ -54,7 +54,7 @@ def makePi(stickyProb=0.95, extraStickyProb=0.9999,
     '''
     pi = np.zeros((K, K))
     # Horizontal bars
-    for k in xrange(9):
+    for k in range(9):
         pi[k, k] = stickyProb
         if k == 8:
             pi[k, bgStateID] = 1 - stickyProb
@@ -62,7 +62,7 @@ def makePi(stickyProb=0.95, extraStickyProb=0.9999,
             pi[k, (k + 1) % 9] = 1 - stickyProb
 
     # Vertical bars
-    for k in xrange(9, 18):
+    for k in range(9, 18):
         pi[k, k] = stickyProb
         if k == 17:
             pi[k, bgStateID] = 1 - stickyProb
@@ -87,7 +87,7 @@ def makePhi(fgProb=0.75, bgProb=0.05, **kwargs):
     ''' Make phi matrix that defines probability of each pixel.
     '''
     phi = bgProb * np.ones((K, np.sqrt(D), np.sqrt(D)))
-    for k in xrange(18):
+    for k in range(18):
         if k < 9:
             rowID = k
             # Horizontal bars
@@ -133,7 +133,7 @@ def generateDataset(**kwargs):
     states0toKm1 = np.arange(K)
     # Each iteration generates one time-series/sequence
     # with starting state deterministically rotating among all states
-    for i in xrange(nSeq):
+    for i in range(nSeq):
         start = doc_range[i]
         stop = doc_range[i + 1]
 
@@ -144,7 +144,7 @@ def generateDataset(**kwargs):
 
         Z[0] = startStates[i % len(startStates)]
         X[0] = PRNG.rand(D) < phi[Z[0]]
-        for t in xrange(1, T):
+        for t in range(1, T):
             if nConsec > kwargs['maxTConsec']:
                 # Force transition if we've gone on too long
                 transPi_t = transPi[Z[t - 1]].copy()
@@ -176,14 +176,14 @@ def saveDatasetToDisk(outputdir=DefaultOutputDir):
     ''' Save dataset to disk for scalable experiments.
     '''
     Data = get_data()
-    for k in xrange(K):
-        print 'N[%d] = %d' % (k, np.sum(Data.TrueParams['Z'] == k))
+    for k in range(K):
+        print('N[%d] = %d' % (k, np.sum(Data.TrueParams['Z'] == k)))
 
     # Save it as batches
     nDocPerBatch = 2
     nBatch = Data.nDocTotal // nDocPerBatch
 
-    for batchID in xrange(nBatch):
+    for batchID in range(nBatch):
         mask = np.arange(batchID * nDocPerBatch, (batchID + 1) * nDocPerBatch)
         Dbatch = Data.select_subset_by_mask(mask, doTrackTruth=1)
 
@@ -211,7 +211,7 @@ if __name__ == '__main__':
 
     pylab = BernViz.pylab
     pylab.subplots(nrows=1, ncols=Data.nDoc)
-    for d in xrange(2):
+    for d in range(2):
         start = Data.doc_range[d]
         stop = Data.doc_range[d + 1]
         pylab.subplot(1, Data.nDoc, d + 1)

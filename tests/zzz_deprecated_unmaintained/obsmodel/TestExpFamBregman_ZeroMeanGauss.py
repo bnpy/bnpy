@@ -80,13 +80,13 @@ def checkFacts_pdf_Phi(
     E_c_numeric = np.trapz(pdf_grid * c_Phi(phi_grid), phi_grid)
     E_c_formula = - 0.5 * digamma(0.5 * nu + 1) + 0.5 * np.log(tau)
 
-    print "nu=%7.3f tau=%7.3f" % (nu, tau)
-    print "     Integral=% 7.3f   should be % 7.3f" % (IntegralVal, 1.0)
-    print "        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula)
-    print "       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula)
-    print "    E[c(phi)]=% 7.3f   should be % 7.3f" % (E_c_numeric, E_c_formula)
-    print "    mode[phi]=% 7.3f   should be % 7.3f" % (
-        mode_phi_numeric, mode_phi_formula)
+    print("nu=%7.3f tau=%7.3f" % (nu, tau))
+    print("     Integral=% 7.3f   should be % 7.3f" % (IntegralVal, 1.0))
+    print("        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula))
+    print("       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula))
+    print("    E[c(phi)]=% 7.3f   should be % 7.3f" % (E_c_numeric, E_c_formula))
+    print("    mode[phi]=% 7.3f   should be % 7.3f" % (
+        mode_phi_numeric, mode_phi_formula))
 
 def makePlot_pdf_Phi(
         nu=0, tau=0, phi_grid=None, **kwargs):
@@ -127,10 +127,10 @@ def checkFacts_pdf_Mu(nu=0, tau=0, mu_grid=None, **kwargs):
     E_mu_formula = tau/nu
     E_phi_numeric = np.trapz(pdf_grid * phi_grid, mu_grid)
     E_phi_formula = E_phi(nu,tau)
-    print "nu=%7.3f tau=%7.3f" % (nu, tau)
-    print "     Integral=% 7.3f   should be % 7.3f" % (Integral, 1.0)
-    print "        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula)
-    print "       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula)
+    print("nu=%7.3f tau=%7.3f" % (nu, tau))
+    print("     Integral=% 7.3f   should be % 7.3f" % (Integral, 1.0))
+    print("        E[mu]=% 7.3f   should be % 7.3f" % (E_mu_numeric, E_mu_formula))
+    print("       E[phi]=% 7.3f   should be % 7.3f" % (E_phi_numeric, E_phi_formula))
 
 def makePlot_cumulant_Phi(
         phi_grid=None, **kwargs):
@@ -172,8 +172,8 @@ def makePlot_bregmanDiv_Mu(
 if __name__ == '__main__':
     nuRange = [0.5, 1, 2.0, 8, 32, 128]
     mu_Phi = 0.5 * 1.0/3.0
-    print "mu(Mode[phi]): ", mu_Phi
-    print "Mode[phi]: ", mu2phi(mu_Phi)
+    print("mu(Mode[phi]): ", mu_Phi)
+    print("Mode[phi]: ", mu2phi(mu_Phi))
 
 
     pylab.figure()

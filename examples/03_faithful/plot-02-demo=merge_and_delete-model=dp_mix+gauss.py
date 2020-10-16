@@ -126,7 +126,7 @@ diag_trained_model, diag_info_dict = bnpy.run(
     gamma0=gamma, sF=sF, ECovMat='eye',
     K=K, initname='randexamplesbydist',
     moves='merge,delete,shuffle',
-    **dict(delete_kwargs.items() + merge_kwargs.items()))
+    **dict(list(delete_kwargs.items()) + list(merge_kwargs.items())))
 
 show_clusters_over_time(diag_info_dict['task_output_path'])
 
@@ -147,7 +147,7 @@ full_trained_model, full_info_dict = bnpy.run(
     gamma0=gamma, sF=sF, ECovMat='eye',
     K=K, initname='randexamplesbydist',
     moves='merge,delete,shuffle',
-    **dict(delete_kwargs.items() + merge_kwargs.items()))
+    **dict(list(delete_kwargs.items()) + list(merge_kwargs.items())))
 
 show_clusters_over_time(full_info_dict['task_output_path'])
 

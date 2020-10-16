@@ -57,7 +57,7 @@ def cleanupMergeClusters(
     reqFields = set()
     for key in obsSSkeys:
         reqFields.add(key)
-    for key in xSSslice._Fields._FieldDims.keys():
+    for key in list(xSSslice._Fields._FieldDims.keys()):
         if key not in reqFields:
             xSSslice.removeField(key)
 

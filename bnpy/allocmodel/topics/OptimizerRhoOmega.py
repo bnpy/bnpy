@@ -15,7 +15,6 @@ Constraints:
 * rho satisfies: 0 < rho[k] < 1
 * omega satisfies: 0 < omega[k]
 '''
-
 import warnings
 import numpy as np
 import scipy.optimize
@@ -151,7 +150,7 @@ def find_optimum(sumLogPi=0, sumLogPiActiveVec=0, sumLogPiRemVec=0,
 
     # Define objective function (unconstrained!)
     objArgs = dict(
-        sumLogPi=sumLogPi, 
+        sumLogPi=sumLogPi,
         sumLogPiActiveVec=sumLogPiActiveVec,
         sumLogPiRemVec=sumLogPiRemVec,
         startAlphaLogPi=startAlphaLogPi,
@@ -209,7 +208,7 @@ def c2rhoomega(c, scaleVector=None, returnSingleVector=False):
 
     OPTIONAL: may return as one concatenated vector (length 2K)
     '''
-    K = c.size / 2
+    K = int(c.size / 2)
     rho = sigmoid(c[:K])
     omega = np.exp(c[K:])
     if scaleVector is not None:
@@ -221,14 +220,14 @@ def c2rhoomega(c, scaleVector=None, returnSingleVector=False):
 
 
 def rhoomega2c(rhoomega, scaleVector=None):
-    K = rhoomega.size / 2
+    K = int(rhoomega.size / 2)
     if scaleVector is not None:
         rhoomega = rhoomega / scaleVector
     return np.hstack([invsigmoid(rhoomega[:K]), np.log(rhoomega[K:])])
 
 
 def objFunc_constrained(rhoomega,
-                        sumLogPi=0, 
+                        sumLogPi=0,
                         sumLogPiActiveVec=None, sumLogPiRemVec=None,
                         nDoc=0, gamma=1.0, alpha=1.0, kappa=0.0,
                         startAlphaLogPi=0.0,
@@ -339,7 +338,7 @@ def objFunc_constrained(rhoomega,
 
 
 def _unpack(rhoomega):
-    K = rhoomega.size / 2
+    K = int(rhoomega.size / 2)
     rho = rhoomega[:K]
     omega = rhoomega[-K:]
     return rho, omega, K
@@ -442,7 +441,7 @@ def _get_flatLowTriIDs_KxK(K):
     return flatIDs
 
 
-def calc_fgrid(o_grid=None, o_pos=None, 
+def calc_fgrid(o_grid=None, o_pos=None,
                r_grid=None, r_pos=None,
                omega=None, rho=None, **kwargs):
     ''' Evaluate the objective across range of values for one entry
@@ -455,7 +454,7 @@ def calc_fgrid(o_grid=None, o_pos=None,
         for n in xrange(o_grid.size):
             omega_n[o_pos] = o_grid[n]
             f_grid[n] = objFunc_constrained(
-                np.hstack([rho, omega_n]), 
+                np.hstack([rho, omega_n]),
                 **kwargs)
     elif r_grid is not None:
         assert r_pos >= 0 and r_pos < K
@@ -464,7 +463,7 @@ def calc_fgrid(o_grid=None, o_pos=None,
         for n in xrange(r_grid.size):
             rho_n[o_pos] = r_grid[n]
             f_grid[n] = objFunc_constrained(
-                np.hstack([rho_n, omega]), 
+                np.hstack([rho_n, omega]),
                 **kwargs)
     else:
         raise ValueError("Must specify either o_grid or r_grid")

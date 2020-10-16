@@ -453,11 +453,11 @@ class MOVBBirthMergeAlg(MOVBAlg):
                     for uID in self.SeqCreatePastAttemptLog['nTryByStateUID']:
                         if uID not in self.ActiveIDVec:
                             continue
-                        print ' uid %d: nTry %d' % (
+                        print(' uid %d: nTry %d' % (
                             uID,
                             self.SeqCreatePastAttemptLog['nTryByStateUID'][uID]
-                            )
-                    print '^^^^^^^^^^^^^^^^^^^^^^^^^^'
+                            ))
+                    print('^^^^^^^^^^^^^^^^^^^^^^^^^^')
                 self.SeqCreatePastAttemptLog['maxUID'] = 1 * self.maxUID
                 self.SeqCreatePastAttemptLog['uIDs'] = self.ActiveIDVec.copy()
 
@@ -540,13 +540,13 @@ class MOVBBirthMergeAlg(MOVBAlg):
             curELBO = evBound * 1.0
             assert np.isfinite(curELBO)
 
-            print '<<<<<<<<<<<<<<<<<<<<< lap %.2f batch %d' % (
-                lapFrac, batchID)
-            print '------- BEFORE K=%d' % (SS.K)
-            print 'Whole N ', ' '.join(
-                ['%5.1f' % (x) for x in SS.N[:20]])
-            print 'Batch N ', ' '.join(
-                ['%5.1f' % (x) for x in self.SSmemory[batchID].N[:20]])
+            print('<<<<<<<<<<<<<<<<<<<<< lap %.2f batch %d' % (
+                lapFrac, batchID))
+            print('------- BEFORE K=%d' % (SS.K))
+            print('Whole N ', ' '.join(
+                ['%5.1f' % (x) for x in SS.N[:20]]))
+            print('Batch N ', ' '.join(
+                ['%5.1f' % (x) for x in self.SSmemory[batchID].N[:20]]))
 
             # Compute whole-dataset ELBO on proposed model
             # Adjusting suff stats to exactly represent whole dataset
@@ -572,18 +572,18 @@ class MOVBBirthMergeAlg(MOVBAlg):
             propELBO = tempModel.calc_evidence(SS=tempSS)
             assert np.isfinite(propELBO)
 
-            print '------- AFTER K=%d' % (tempSS.K)
-            print 'Whole N ', ' '.join(
-                ['%5.1f' % (x) for x in tempSS.N[:20]])
-            print 'Batch N ', ' '.join(
-                ['%5.1f' % (x) for x in SSchunk.N[:20]])
+            print('------- AFTER K=%d' % (tempSS.K))
+            print('Whole N ', ' '.join(
+                ['%5.1f' % (x) for x in tempSS.N[:20]]))
+            print('Batch N ', ' '.join(
+                ['%5.1f' % (x) for x in SSchunk.N[:20]]))
 
-            print 'curELBO  % .7f' % (curELBO)
-            print 'propELBO % .7f' % (propELBO)
+            print('curELBO  % .7f' % (curELBO))
+            print('propELBO % .7f' % (propELBO))
             if propELBO > curELBO:
-                print 'ACCEPTED!'
+                print('ACCEPTED!')
             else:
-                print 'rejected'
+                print('rejected')
                 LPchunk = hmodel.calc_local_params(Dchunk, **LPandMergeKwargs)
 
         Kresult = LPchunk['resp'].shape[1]
@@ -674,14 +674,14 @@ class MOVBBirthMergeAlg(MOVBAlg):
         None. self.LPmemory updated in-place.
         '''
         keepLPchunk = dict()
-        for key in LPchunk.keys():
+        for key in list(LPchunk.keys()):
             if key in self.memoLPkeys:
                 if doCopy:
                     keepLPchunk[key] = copy.deepcopy(LPchunk[key])
                 else:
                     keepLPchunk[key] = LPchunk[key]
 
-        if len(keepLPchunk.keys()) > 0:
+        if len(list(keepLPchunk.keys())) > 0:
             self.LPmemory[batchID] = keepLPchunk
         else:
             self.LPmemory[batchID] = None
@@ -1256,9 +1256,9 @@ class MOVBBirthMergeAlg(MOVBAlg):
             if order is not None:
                 Ktmp = len(order)
                 Mnew = np.zeros_like(MM)
-                for kA in xrange(Ktmp):
+                for kA in range(Ktmp):
                     nA = np.flatnonzero(order == kA)
-                    for kB in xrange(kA + 1, Ktmp):
+                    for kB in range(kA + 1, Ktmp):
                         nB = np.flatnonzero(order == kB)
                         mA = np.minimum(nA, nB)
                         mB = np.maximum(nA, nB)
@@ -1389,7 +1389,7 @@ class MOVBBirthMergeAlg(MOVBAlg):
         ---------
         None. Updates to self.LapsSinceLastBirth happen in-place.
         '''
-        compList = self.LapsSinceLastBirth.keys()
+        compList = list(self.LapsSinceLastBirth.keys())
         newDict = defaultdict(int)
         for kk in compList:
             if kk == kA:
@@ -1425,7 +1425,7 @@ class MOVBBirthMergeAlg(MOVBAlg):
                 isFirstBatch=self.isFirstBatch(self.lapFrac),
                 isLastBatch=self.isLastBatch(self.lapFrac),
                 **self.algParams['delete'])
-            if len(Plan.keys()) == 0:
+            if len(list(Plan.keys())) == 0:
                 # Empty Plan dict means it went over budget
                 # So, we should remove this Plan from consideration
                 DeletePlans.pop(planID)
@@ -1557,12 +1557,12 @@ class MOVBBirthMergeAlg(MOVBAlg):
             assert np.allclose(newSS.uIDs, self.SSmemory[batchID].uIDs)
 
             if newSS.K < SS.K:
-                for key in self.SSmemory[batchID]._ELBOTerms._FieldDims.keys():
+                for key in list(self.SSmemory[batchID]._ELBOTerms._FieldDims.keys()):
                     arr = self.SSmemory[batchID].getELBOTerm(key)
                     assert np.allclose(0, arr)
         if newSS.K < SS.K:
             assert self.ELBOReady is False
-            for key in newSS._ELBOTerms._FieldDims.keys():
+            for key in list(newSS._ELBOTerms._FieldDims.keys()):
                 arr = newSS.getELBOTerm(key)
                 assert np.allclose(0, arr)
         else:
@@ -1587,7 +1587,7 @@ class MOVBBirthMergeAlg(MOVBAlg):
         tmpLog = self.MergeLog
         self.MergeLog = []
         # Reconstruct aggregate SS explicitly by sum over all stored batches
-        for batchID in range(len(self.SSmemory.keys())):
+        for batchID in range(len(list(self.SSmemory.keys()))):
             SSchunk = self.load_batch_suff_stat_from_memory(
                 batchID, doCopy=1, order=None, Kfinal=SS.K)
             if batchID == 0:

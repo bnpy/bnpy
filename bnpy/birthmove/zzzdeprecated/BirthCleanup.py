@@ -28,7 +28,7 @@ def delete_comps_to_improve_ELBO(Data, model,
     if K == 1:
         return model, SS, ELBO
 
-    for k in reversed(range(0, K)):
+    for k in reversed(list(range(0, K))):
         rmodel, rSS, rLP = _make_del_candidate__viaLP(Data, model, LP, k)
         assert rSS.hasELBOTerms()
         rELBO = rmodel.calc_evidence(SS=rSS)
@@ -92,12 +92,12 @@ def delete_comps_from_expanded_model_to_improve_ELBO(Data,
     assert xbigSS.K == xfreshSS.K
     assert xbigModel.obsModel.K == K
 
-    origIDs = range(0, K)
+    origIDs = list(range(0, K))
     if K == 1:
         return xbigModel, xbigSS, xfreshSS, origIDs
 
     xfreshELBO = xbigModel.calc_evidence(SS=xfreshSS)
-    for k in reversed(range(Korig, K)):
+    for k in reversed(list(range(Korig, K))):
         if kwargs['cleanupDeleteViaLP']:
             rbigModel, rbigSS, rfreshSS, rfreshELBO, rfreshLP = \
                 _make_xcandidate_LP(
@@ -177,7 +177,7 @@ def _make_xcandidate_LP(xbigModel, Data, xbigSS, xfreshSS, xfreshLP, k,
 
     if 'cleanupDeleteNumIters' in kwargs and kwargs['cleanupDeleteNumIters']:
         nIters = kwargs['cleanupDeleteNumIters']
-        for trial in xrange(nIters):
+        for trial in range(nIters):
             rfreshLP = rbigModel.calc_local_params(
                 Data, rfreshLP, methodLP='memo',
                 nCoordAscentItersLP=10)
@@ -213,7 +213,7 @@ def delete_empty_comps(Data, model, SS=None,
         SS = model.get_global_suff_stats(Data, LP)
 
     K = SS.K
-    for k in reversed(range(Korig, K)):
+    for k in reversed(list(range(Korig, K))):
         if SS.N[k] < kwargs['cleanupMinSize']:
             if SS.K > 1:
                 SS.removeComp(k)

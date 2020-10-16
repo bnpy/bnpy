@@ -59,8 +59,8 @@ def makePlot_pdf_Phi(
     mu_grid = phi2mu(phi_grid)
     ExpectedPhiVal = np.trapz(pdf_grid * phi_grid, phi_grid)
     ExpectedMuVal = np.trapz(pdf_grid * mu_grid, phi_grid)
-    print '%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
-        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal)
+    print('%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
+        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal))
     pylab.plot(phi_grid, pdf_grid, '-', label=label)
     pylab.xlabel('phi (log odds ratio)')
     pylab.ylabel('density p(phi)')
@@ -79,8 +79,8 @@ def makePlot_pdf_Mu(
     IntegralVal = np.trapz(pdf_grid, mu_grid)
     ExpectedMuVal = np.trapz(pdf_grid * mu_grid, mu_grid)
     ExpectedPhiVal = np.trapz(pdf_grid * phi_grid, mu_grid)
-    print '%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
-        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal)
+    print('%s Integral=%.4f E[phi]=%6.3f E[mu]=%.4f' % (
+        label, IntegralVal, ExpectedPhiVal, ExpectedMuVal))
     pylab.plot(mu_grid, pdf_grid, '-', label=label)
     pylab.xlabel('mu')
     pylab.ylabel('density p(mu)')
@@ -153,8 +153,8 @@ if __name__ == '__main__':
     muRange = [0.02, 0.1, 0.5, 0.9, 0.98]
     nuRange = [1/2.0, 1, 2.0, 8, 32, 128]
     mu_Phi = 0.7
-    print "mu(Mode[phi]): ", mu_Phi
-    print "Mode[phi]: ", mu2phi(mu_Phi)
+    print("mu(Mode[phi]): ", mu_Phi)
+    print("Mode[phi]: ", mu2phi(mu_Phi))
 
     makePlot_bregmanDiv_Mu(mu=muRange, ngrid=10000)
     

@@ -15,7 +15,7 @@ from bnpy.util.NumericUtil import sumRtimesS
 from bnpy.util.NumericUtil import inplaceLog
 from bnpy.util import as2D
 
-from lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
+from bnpy.allocmodel.hmm.lib.LibFwdBwd import cppReady, FwdAlg_cpp, BwdAlg_cpp, SummaryAlg_cpp
 
 def calcLocalParams(Data, LP,
                     transTheta=None, startTheta=None,
@@ -68,7 +68,7 @@ def calcLocalParams(Data, LP,
     if hmm_feature_method_LP == 'forward':
         fmsg = np.zeros_like(LP['E_log_soft_ev'])
         # Run forward backward algorithm on each sequence n
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             logLik_n = logLik[start:stop]
@@ -92,7 +92,7 @@ def calcLocalParams(Data, LP,
         mHtable = np.zeros((2 * M, K))
 
         # Run forward backward algorithm on each sequence n
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             logLik_n = logLik[start:stop]
@@ -118,7 +118,7 @@ def calcLocalParams(Data, LP,
         respPair = np.empty((nAtom, K, K))
 
         # Run the forward backward algorithm on each sequence
-        for n in xrange(Data.nDoc):
+        for n in range(Data.nDoc):
             start = Data.doc_range[n]
             stop = Data.doc_range[n + 1]
             logLik_n = logLik[start:stop]
@@ -246,7 +246,7 @@ def calcRespPair_forloop(PiMat, SoftEv, margPrObs, fmsg, bmsg, K, T):
         respPair[0,:,:] is undefined, but kept so indexing consistent.
     '''
     respPair = np.zeros((T, K, K))
-    for t in xrange(1, T):
+    for t in range(1, T):
         respPair[t] = np.outer(fmsg[t - 1], bmsg[t] * SoftEv[t])
         respPair[t] *= PiMat / margPrObs[t]
     return respPair
@@ -354,7 +354,7 @@ def FwdAlg_py(PiInit, PiMat, SoftEv):
 
     fmsg = np.empty((T, K))
     margPrObs = np.zeros(T)
-    for t in xrange(0, T):
+    for t in range(0, T):
         if t == 0:
             fmsg[t] = PiInit * SoftEv[0]
         else:
@@ -397,7 +397,7 @@ def BwdAlg_py(PiInit, PiMat, SoftEv, margPrObs):
     T = SoftEv.shape[0]
     K = PiInit.size
     bmsg = np.ones((T, K))
-    for t in xrange(T - 2, -1, -1):
+    for t in range(T - 2, -1, -1):
         bmsg[t] = np.dot(PiMat, bmsg[t + 1] * SoftEv[t + 1])
         bmsg[t] /= margPrObs[t + 1]
     return bmsg
@@ -441,7 +441,7 @@ def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
     respPair_t = np.zeros((K, K))
     Htable = np.zeros((K, K))
     TransStateCount = np.zeros((K, K))
-    for t in xrange(1, T):
+    for t in range(1, T):
         respPair_t = np.outer(fMsg[t - 1], bMsg[t] * SoftEv[t])
         respPair_t *= PiMat / margPrObs[t]
         TransStateCount += respPair_t
@@ -455,7 +455,7 @@ def SummaryAlg_py(PiInit, PiMat, SoftEv, margPrObs, fMsg, bMsg,
         respPair = calcRespPair_fast(PiMat, SoftEv,
                                      margPrObs, fMsg, bMsg,
                                      K, T, doCopy=1)
-        for m in xrange(M):
+        for m in range(M):
             kA = mPairIDs[m, 0]
             kB = mPairIDs[m, 1]
             mHtable[
@@ -550,8 +550,8 @@ def runViterbiAlg(logSoftEv, logPi0, logPi):
     ScoreTable[0, :] = logSoftEv[0] + logPi0
     PtrTable[0, :] = -1
 
-    ids0toK = range(K)
-    for t in xrange(1, T):
+    ids0toK = list(range(K))
+    for t in range(1, T):
         ScoreMat_t = logPi + ScoreTable[t - 1, :][:, np.newaxis]
         bestIDvec = np.argmax(ScoreMat_t, axis=0)
 
@@ -562,8 +562,8 @@ def runViterbiAlg(logSoftEv, logPi0, logPi):
     # Follow backward pointers to construct most likely state sequence
     z = np.zeros(T, dtype=np.int32)
     z[-1] = np.argmax(ScoreTable[-1])
-    for t in reversed(xrange(T - 1)):
-        z[t] = PtrTable[t + 1, z[t + 1]]
+    for t in reversed(range(T - 1)):
+        z[t] = PtrTable[t + 1, int(z[t + 1])]
     return z
 
 
@@ -593,8 +593,8 @@ def runViterbiAlg_forloop(logSoftEv, logPi0, logPi):
     ScoreTable[0, :] = logSoftEv[0] + logPi0
     PtrTable[0, :] = -1
 
-    for t in xrange(1, T):
-        for k in xrange(K):
+    for t in range(1, T):
+        for k in range(K):
             ScoreVec = logPi[:, k] + ScoreTable[t - 1, :]
             bestID = np.argmax(ScoreVec)
 
@@ -604,7 +604,7 @@ def runViterbiAlg_forloop(logSoftEv, logPi0, logPi):
     # Follow backward pointers to construct most likely state sequence
     z = np.zeros(T)
     z[-1] = np.argmax(ScoreTable[-1])
-    for t in reversed(xrange(T - 1)):
+    for t in reversed(range(T - 1)):
         z[t] = PtrTable[t + 1, z[t + 1]]
     return z
 
@@ -659,7 +659,7 @@ def calcEntropyFromResp_forloop(resp, respPair, Data, eps=1e-100):
     easier to read implementation. Useful for verifying correctness.
     '''
     totalH = 0
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
         resp_n = resp[start:stop]
@@ -884,17 +884,17 @@ def construct_LP_forMergePair(Data, LP, kA, kB):
 
     m_resp = np.zeros((Tall, K - 1))
     m_respPair = np.zeros((Tall, K - 1, K - 1))
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
 
         # Make respPair for candidate
         assert np.allclose(LP['respPair'][start].sum(), 0.0)
-        for t in xrange(start + 1, stop):
+        for t in range(start + 1, stop):
             m_respPair[t] = mergeKxK_forSinglePair(LP['respPair'][t], kA, kB)
 
         # Make resp for candidate
-        for k in xrange(K):
+        for k in range(K):
             if k == kA:
                 m_resp[start:stop, k] = LP['resp'][start:stop, kA] \
                     + LP['resp'][start:stop, kB]

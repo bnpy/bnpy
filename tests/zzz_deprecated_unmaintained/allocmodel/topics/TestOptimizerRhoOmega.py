@@ -32,7 +32,7 @@ class TestObjFunc(unittest.TestCase):
         return None
 
     def test_objFunc_equals_HDPTopicModelELBO(self):
-        print ''
+        print('')
         # First, define some helper functions
         # with common interface to compute objective wrt rho/omega
         from bnpy.allocmodel.topics.HDPTopicUtil import \
@@ -82,10 +82,10 @@ class TestObjFunc(unittest.TestCase):
                 valB1 = f_HDPTopicUtil(rho1, omega1, **f_kwargs)
                 valB2 = f_HDPTopicUtil(rho2, omega2, **f_kwargs)
 
-                print 'rho1:', rho1
-                print 'rho2:', rho2
-                print 'fdiff_objFunc      :', valA1 - valA2
-                print 'fdiff_HDPTopicUtil :', valB1 - valB2
+                print('rho1:', rho1)
+                print('rho2:', rho2)
+                print('fdiff_objFunc      :', valA1 - valA2)
+                print('fdiff_HDPTopicUtil :', valB1 - valB2)
 
                 assert np.allclose(valA1 - valA2, valB1 - valB2, 
                     rtol=0, atol=1e-6)
@@ -175,14 +175,14 @@ class Test0Docs(unittest.TestCase):
                                       sumLogPi=np.zeros(K + 1))
                         f, g = OptimizerRhoOmega.objFunc_constrained(
                             rhoomega, approx_grad=0, **kwargs)
-                        print '       rho  ', np2flatstr(rho[:K])
-                        print '  grad rho  ', np2flatstr(g[:K])
+                        print('       rho  ', np2flatstr(rho[:K]))
+                        print('  grad rho  ', np2flatstr(g[:K]))
                         assert np.allclose(g, np.zeros(2 * K))
 
     def testGradientZeroAtOptimum__objFunc_unconstrained(self):
         ''' Verify computed gradient at optimum is indistinguishable from zero
         '''
-        print ''
+        print('')
         for K in [1, 10, 107]:
             for alpha in [0.1, 0.95]:
                 for gamma in [1., 3.14, 9.45]:
@@ -201,14 +201,14 @@ class Test0Docs(unittest.TestCase):
                         scaleVector=kwargs['scaleVector'])
                     f, g = OptimizerRhoOmega.objFunc_unconstrained(
                         c, approx_grad=0, **kwargs)
-                    print '       rho  ', np2flatstr(rho[:K])
-                    print '  grad rho  ', np2flatstr(g[:K])
+                    print('       rho  ', np2flatstr(rho[:K]))
+                    print('  grad rho  ', np2flatstr(g[:K]))
                     assert np.allclose(g, np.zeros(2 * K))
 
     def testGradientExactAndApproxAgree__objFunc_constrained(self):
         ''' Verify computed gradient similar for exact and approx methods
         '''
-        print ''
+        print('')
         for K in [1, 10, 107]:
             for alpha in [0.1, 0.95]:
                 for gamma in [1., 3.14, 9.45]:
@@ -233,23 +233,23 @@ class Test0Docs(unittest.TestCase):
                             [1e-8 * np.ones(K), 1e-8 * np.ones(K)])
                         gapprox = approx_fprime(rhoomega, objFunc, epsvec)
 
-                        print '      rho 1:10 ', np2flatstr(rho)
-                        print '     grad 1:10 ', np2flatstr(g[:K], fmt='% .6e')
-                        print '     grad 1:10 ', np2flatstr(
-                            gapprox[:K], fmt='% .6e')
+                        print('      rho 1:10 ', np2flatstr(rho))
+                        print('     grad 1:10 ', np2flatstr(g[:K], fmt='% .6e'))
+                        print('     grad 1:10 ', np2flatstr(
+                            gapprox[:K], fmt='% .6e'))
                         if K > 10:
-                            print '    rho K-10:K ', np2flatstr(rho[-10:])
-                            print '   grad K-10:K ', np2flatstr(
-                                g[K - 10:K], fmt='% .6e')
-                            print 'gapprox K-10:K ', np2flatstr(
-                                gapprox[K - 10:K], fmt='% .6e')
+                            print('    rho K-10:K ', np2flatstr(rho[-10:]))
+                            print('   grad K-10:K ', np2flatstr(
+                                g[K - 10:K], fmt='% .6e'))
+                            print('gapprox K-10:K ', np2flatstr(
+                                gapprox[K - 10:K], fmt='% .6e'))
                         assert np.allclose(g[:K],
                                            gapprox[:K],
                                            atol=1e-6,
                                            rtol=0.01)
 
-                        print np2flatstr(g[K:])
-                        print np2flatstr(gapprox[K:])
+                        print(np2flatstr(g[K:]))
+                        print(np2flatstr(gapprox[K:]))
                         assert np.allclose(g[K:],
                                            gapprox[K:],
                                            atol=1e-4,
@@ -262,7 +262,7 @@ class Test0Docs(unittest.TestCase):
             for alpha in [0.1, 0.95]:
                 for gamma in [1.1, 3.141, 9.45, 21.1337]:
                     for kappa in [0, 100]:
-                        print '============== K %d | gamma %.2f' % (K, gamma)
+                        print('============== K %d | gamma %.2f' % (K, gamma))
                         for seed in [111, 222, 333]:
                             PRNG = np.random.RandomState(seed)
                             initrho = PRNG.rand(K)
@@ -283,27 +283,27 @@ class Test0Docs(unittest.TestCase):
                             assert np.all(np.isfinite(rho_est))
                             assert np.all(np.isfinite(omega_est))
                             assert np.isfinite(f)
-                            print Info['task']
+                            print(Info['task'])
 
                             rho_opt = 1.0 / (1. + gamma) * np.ones(K)
                             omega_opt = (1. + gamma) * np.ones(K)
 
-                            print '  rho_est', np2flatstr(rho_est, fmt='%9.6f')
-                            print '  rho_opt', np2flatstr(rho_opt, fmt='%9.6f')
+                            print('  rho_est', np2flatstr(rho_est, fmt='%9.6f'))
+                            print('  rho_opt', np2flatstr(rho_opt, fmt='%9.6f'))
 
-                            print '  omega_est', np2flatstr(
-                                omega_est, fmt='%9.6f')
-                            print '  omega_opt', np2flatstr(
-                                omega_opt, fmt='%9.6f')
+                            print('  omega_est', np2flatstr(
+                                omega_est, fmt='%9.6f'))
+                            print('  omega_opt', np2flatstr(
+                                omega_opt, fmt='%9.6f'))
 
                             beta_est = OptimizerRhoOmega.rho2beta_active(
                                 rho_est)
                             beta_opt = OptimizerRhoOmega.rho2beta_active(
                                 rho_opt)
-                            print '  beta_est', np2flatstr(
-                                beta_est, fmt='%9.6f')
-                            print '  beta_opt', np2flatstr(
-                                beta_opt, fmt='%9.6f')
+                            print('  beta_est', np2flatstr(
+                                beta_est, fmt='%9.6f'))
+                            print('  beta_opt', np2flatstr(
+                                beta_opt, fmt='%9.6f'))
 
                             assert np.allclose(beta_est, beta_opt, atol=1e-4)
 
@@ -353,21 +353,21 @@ class TestManyDocs(unittest.TestCase):
                             assert g.size == 2 * K
                             assert np.isfinite(f)
                             assert np.all(np.isfinite(g))
-                        print fexact
-                        print fapprox
-                        print ''
+                        print(fexact)
+                        print(fapprox)
+                        print('')
 
     def testGradientExactAndApproxAgree__objFunc_constrained(self):
         ''' Verify computed gradient similar for exact and approx methods
         '''
-        print ''
+        print('')
         for K in [1, 10, 107]:
             for alpha in [0.1, 0.95]:
                 for gamma in [1., 9.45]:
                     for nDoc in [1, 100, 1000]:
 
-                        print '============= K %d | nDoc %d | alpha %.2f' \
-                              % (K, nDoc, alpha)
+                        print('============= K %d | nDoc %d | alpha %.2f' \
+                              % (K, nDoc, alpha))
 
                         for seed in [111, 222, 333]:
                             PRNG = np.random.RandomState(seed)
@@ -395,17 +395,17 @@ class TestManyDocs(unittest.TestCase):
                                 [1e-8 * np.ones(K), 1e-8 * np.ones(K)])
                             gapprox = approx_fprime(rhoomega, objFunc, epsvec)
 
-                            print '      rho 1:10 ', np2flatstr(rho)
-                            print '     grad 1:10 ', np2flatstr(
-                                g[:K], fmt='% .6e')
-                            print '     grad 1:10 ', np2flatstr(
-                                gapprox[:K], fmt='% .6e')
+                            print('      rho 1:10 ', np2flatstr(rho))
+                            print('     grad 1:10 ', np2flatstr(
+                                g[:K], fmt='% .6e'))
+                            print('     grad 1:10 ', np2flatstr(
+                                gapprox[:K], fmt='% .6e'))
                             if K > 10:
-                                print '    rho K-10:K ', np2flatstr(rho[-10:])
-                                print '   grad K-10:K ', np2flatstr(
-                                    g[K - 10:K], fmt='% .6e')
-                                print 'gapprox K-10:K ', np2flatstr(
-                                    gapprox[K - 10:K], fmt='% .6e')
+                                print('    rho K-10:K ', np2flatstr(rho[-10:]))
+                                print('   grad K-10:K ', np2flatstr(
+                                    g[K - 10:K], fmt='% .6e'))
+                                print('gapprox K-10:K ', np2flatstr(
+                                    gapprox[K - 10:K], fmt='% .6e'))
                             rtol_rho = 0.01
                             atol_rho = 1e-6
                             rtol_omega = 0.05
@@ -419,19 +419,19 @@ class TestManyDocs(unittest.TestCase):
                                                   atol=atol_omega,
                                                   rtol=rtol_omega)
                             if not oGradOK:
-                                print 'VIOLATION DETECTED!'
-                                print 'grad_approx DOES NOT EQUAL grad_exact'
+                                print('VIOLATION DETECTED!')
+                                print('grad_approx DOES NOT EQUAL grad_exact')
 
                                 absDiff = np.abs(g[K:] - gapprox[K:])
                                 tolDiff = (atol_omega
                                            + rtol_omega * np.abs(gapprox[K:])
                                            - absDiff)
                                 worstIDs = np.argsort(tolDiff)
-                                print 'Top 5 worst mismatches'
-                                print np2flatstr(
-                                    g[K + worstIDs[:5]], fmt='% .6f')
-                                print np2flatstr(
-                                    gapprox[K + worstIDs[:5]], fmt='% .6f')
+                                print('Top 5 worst mismatches')
+                                print(np2flatstr(
+                                    g[K + worstIDs[:5]], fmt='% .6f'))
+                                print(np2flatstr(
+                                    gapprox[K + worstIDs[:5]], fmt='% .6f'))
                             assert oGradOK
 
 
@@ -439,14 +439,14 @@ class TestManyDocs(unittest.TestCase):
     def testGradientExactAndApproxAgree__sumLogPiRemVec(self):
         ''' Verify computed gradient similar for exact and approx methods
         '''
-        print ''
+        print('')
         for K in [1, 2, 10, 54]:
             for alpha in [0.1, 0.95]:
                 for gamma in [1., 9.45]:
                     for nDoc in [1, 100, 1000]:
 
-                        print '============= K %d | nDoc %d | alpha %.2f' \
-                              % (K, nDoc, alpha)
+                        print('============= K %d | nDoc %d | alpha %.2f' \
+                              % (K, nDoc, alpha))
 
                         for seed in [111, 222, 333]:
                             PRNG = np.random.RandomState(seed)
@@ -479,17 +479,17 @@ class TestManyDocs(unittest.TestCase):
                                 [1e-8 * np.ones(K), 1e-8 * np.ones(K)])
                             gapprox = approx_fprime(rhoomega, objFunc, epsvec)
 
-                            print '      rho 1:10 ', np2flatstr(rho)
-                            print '     grad 1:10 ', np2flatstr(
-                                g[:K], fmt='% .6e')
-                            print ' autograd 1:10 ', np2flatstr(
-                                gapprox[:K], fmt='% .6e')
+                            print('      rho 1:10 ', np2flatstr(rho))
+                            print('     grad 1:10 ', np2flatstr(
+                                g[:K], fmt='% .6e'))
+                            print(' autograd 1:10 ', np2flatstr(
+                                gapprox[:K], fmt='% .6e'))
                             if K > 10:
-                                print '     rho K-10:K ', np2flatstr(rho[-10:])
-                                print '    grad K-10:K ', np2flatstr(
-                                    g[K - 10:K], fmt='% .6e')
-                                print 'autograd K-10:K ', np2flatstr(
-                                    gapprox[K - 10:K], fmt='% .6e')
+                                print('     rho K-10:K ', np2flatstr(rho[-10:]))
+                                print('    grad K-10:K ', np2flatstr(
+                                    g[K - 10:K], fmt='% .6e'))
+                                print('autograd K-10:K ', np2flatstr(
+                                    gapprox[K - 10:K], fmt='% .6e'))
                             rtol_rho = 0.01
                             atol_rho = 1e-6
                             rtol_omega = 0.05
@@ -503,32 +503,32 @@ class TestManyDocs(unittest.TestCase):
                                                   atol=atol_omega,
                                                   rtol=rtol_omega)
                             if not oGradOK:
-                                print 'VIOLATION DETECTED!'
-                                print 'grad_approx DOES NOT EQUAL grad_exact'
+                                print('VIOLATION DETECTED!')
+                                print('grad_approx DOES NOT EQUAL grad_exact')
 
                                 absDiff = np.abs(g[K:] - gapprox[K:])
                                 tolDiff = (atol_omega
                                            + rtol_omega * np.abs(gapprox[K:])
                                            - absDiff)
                                 worstIDs = np.argsort(tolDiff)
-                                print 'Top 5 worst mismatches'
-                                print np2flatstr(
-                                    g[K + worstIDs[:5]], fmt='% .6f')
-                                print np2flatstr(
-                                    gapprox[K + worstIDs[:5]], fmt='% .6f')
+                                print('Top 5 worst mismatches')
+                                print(np2flatstr(
+                                    g[K + worstIDs[:5]], fmt='% .6f'))
+                                print(np2flatstr(
+                                    gapprox[K + worstIDs[:5]], fmt='% .6f'))
                             assert oGradOK
 
 
     def testRecoverGlobalSticksFromGeneratedData(self):
         ''' Verify that mean of V_d matrix is equal to original vector u
         '''
-        print ''
+        print('')
         gamma = 1.0
         for K in [1, 10, 107]:
             for alpha in [0.95, 0.5]:
                 for nDoc in [10000]:
-                    print '================== K %d | alpha %.2f | nDoc %d' \
-                          % (K, alpha, nDoc)
+                    print('================== K %d | alpha %.2f | nDoc %d' \
+                          % (K, alpha, nDoc))
 
                     for seed in [111, 222, 333]:
 
@@ -540,23 +540,23 @@ class TestManyDocs(unittest.TestCase):
                         assert Vd.shape[1] == K
                         assert Vd.ndim == 2
                         meanVd = np.mean(Vd, axis=0)
-                        print '    u   1:10 ', np2flatstr(u_true)
-                        print ' E[v_d] 1:10 ', np2flatstr(meanVd)
+                        print('    u   1:10 ', np2flatstr(u_true))
+                        print(' E[v_d] 1:10 ', np2flatstr(meanVd))
                         if K > 10:
-                            print '    u   -10: ', np2flatstr(u_true[-10:])
-                            print ' E[v_d] -10: ', np2flatstr(meanVd[-10:])
+                            print('    u   -10: ', np2flatstr(u_true[-10:]))
+                            print(' E[v_d] -10: ', np2flatstr(meanVd[-10:]))
                         assert np.allclose(u_true, meanVd, atol=0.02)
 
     def testRecoverRhoThatGeneratedData__find_optimum(self):
         ''' Verify find_optimum's result is indistiguishable from analytic opt
         '''
-        print ''
+        print('')
         gamma = 1.0
         for K in [93, 107, 85]:  # , 10, 107]:
             for alpha in [0.9999]:
                 for nDoc in [10000]:
-                    print '============== K %d | alpha %.2f | nDoc %d' \
-                          % (K, alpha, nDoc)
+                    print('============== K %d | alpha %.2f | nDoc %d' \
+                          % (K, alpha, nDoc))
 
                     for seed in [111, 222, 333]:
 
@@ -584,7 +584,7 @@ class TestManyDocs(unittest.TestCase):
                         assert np.all(np.isfinite(rho_est))
                         assert np.all(np.isfinite(omega_est))
                         assert np.isfinite(f_est)
-                        print Info['msg']
+                        print(Info['msg'])
 
                         rho_orig = u_true
                         omega_orig = (1 + gamma) * np.ones(K)
@@ -597,13 +597,13 @@ class TestManyDocs(unittest.TestCase):
 
                         f_orig, _ = OptimizerRhoOmega.objFunc_constrained(
                             ro_orig, **kwargs)
-                        print '  f_orig %.7f' % (f_orig)
-                        print '  f_hot  %.7f' % (f_hot)
-                        print '  f_est  %.7f' % (f_est)
+                        print('  f_orig %.7f' % (f_orig))
+                        print('  f_hot  %.7f' % (f_hot))
+                        print('  f_est  %.7f' % (f_est))
 
-                        print '  rho_orig', np2flatstr(rho_orig, fmt='%9.6f')
-                        print '  rho_hot ', np2flatstr(rho_hot, fmt='%9.6f')
-                        print '  rho_est ', np2flatstr(rho_est, fmt='%9.6f')
+                        print('  rho_orig', np2flatstr(rho_orig, fmt='%9.6f'))
+                        print('  rho_hot ', np2flatstr(rho_hot, fmt='%9.6f'))
+                        print('  rho_est ', np2flatstr(rho_est, fmt='%9.6f'))
 
                         assert f_hot <= f_orig
                         assert np.allclose(f_est, f_hot, rtol=0.01)
@@ -662,16 +662,16 @@ class TestSticky(unittest.TestCase):
                             assert g.size == 2 * K
                             assert np.all(np.isfinite(g))
 
-                    print fexact
-                    print fapprox
-                    print ''
+                    print(fexact)
+                    print(fapprox)
+                    print('')
                     assert np.allclose(fexact, fapprox)
 
     def testGradientExactAndApproxAgree__objFunc_constrained(self,
                                                              hmmKappa=100):
         ''' Verify computed gradient similar for exact and approx methods
         '''
-        print ''
+        print('')
         for K in [1, 2, 10]:
             for gamma in [1.0, 2.0, 6.28]:
                 for alpha in [0.1, 0.9, 1.5]:
@@ -706,7 +706,7 @@ class TestSticky(unittest.TestCase):
                             [1e-8 * np.ones(K), 1e-8 * np.ones(K)])
                         gapprox = approx_fprime(rhoomega, objFunc, epsvec)
 
-                        print np2flatstr(g)
-                        print np2flatstr(gapprox)
-                        print ''
+                        print(np2flatstr(g))
+                        print(np2flatstr(gapprox))
+                        print('')
                         assert np.allclose(g, gapprox, atol=0, rtol=0.001)

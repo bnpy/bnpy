@@ -4,7 +4,6 @@ FromScratchBern.py
 Initialize global params of Bernoulli data-generation model,
 from scratch.
 '''
-
 import numpy as np
 from bnpy.data import XData
 from bnpy.suffstats import SuffStatBag
@@ -54,7 +53,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         # and set all edges belonging to that node to one cluster.
         nNodes = AdjMat.shape[0]
         chosenNodes = PRNG.choice(nNodes, size=K, replace=False)
-    
+
     elif initname == 'randexamplesbydist':
         # Choose K items from the Data,
         #  selecting the first at random,
@@ -161,7 +160,7 @@ def chosenNodes_to_LP(chosenNodes, CompDims, Data, K=0, PRNG=np.random):
     return LP
 
 """
-        # Build resp from chosenNodes 
+        # Build resp from chosenNodes
         resp = np.zeros((Data.nEdges,) + CompDims)
         for k in xrange(K):
             src_mask = np.flatnonzero(
@@ -175,10 +174,10 @@ def chosenNodes_to_LP(chosenNodes, CompDims, Data, K=0, PRNG=np.random):
             if len(CompDims) == 2:
                 resp[src_mask[src_on], k, k] = 1.0
                 resp[src_mask[src_off], k, :] = 1.0 / (K-1)
-                resp[src_mask[src_off], k, k] = 0.0                
+                resp[src_mask[src_off], k, k] = 0.0
                 resp[rcv_mask[rcv_on], k, k] = 1.0
                 resp[rcv_mask[rcv_off], :, k] = 1.0 / (K-1)
-                resp[rcv_mask[rcv_off], k, k] = 0.0                
+                resp[rcv_mask[rcv_off], k, k] = 0.0
             else:
                 resp[src_mask[src_on], k] = 1.0
                 resp[rcv_mask[rcv_on], k] = 1.0

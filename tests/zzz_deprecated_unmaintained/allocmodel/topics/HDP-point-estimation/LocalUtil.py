@@ -197,7 +197,7 @@ def removeJunkTopicsFromAllDocs(aModel, Data, LP,
 
 def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde):
   LP['resp'] = Lik.copy()
-  for d in xrange(Data.nDoc):
+  for d in range(Data.nDoc):
     start = Data.doc_range[d]
     stop  = Data.doc_range[d+1]
     LP['resp'][start:stop] *= Prior[d]
@@ -259,7 +259,7 @@ def calcDocTopicCountForData_Simple(Data, aModel, Lik,
   AggInfo = dict()
   AggInfo['maxDiff'] = np.zeros(Data.nDoc)
   AggInfo['iter'] = np.zeros(Data.nDoc, dtype=np.int32)
-  for d in xrange(Data.nDoc):
+  for d in range(Data.nDoc):
     start = Data.doc_range[d]
     stop  = Data.doc_range[d+1]
     Lik_d = Lik[start:stop].copy() # Local copy
@@ -326,7 +326,7 @@ def calcDocTopicCountForDoc(d, aModel,
       doLogELBO = True
       ELBOtrace = list()
       
-  for iter in xrange(nCoordAscentItersLP):
+  for iter in range(nCoordAscentItersLP):
     ## Update Prob of Active Topics
     if iter > 0:
       aFunc(DocTopicCount_d, Prior_d) # Prior_d = E[ log pi_dk ]
@@ -391,7 +391,7 @@ def removeJunkTopicsFromDoc(wc_d, DocTopicCount_d, Prior_d, sumR_d,
     pDocTopicCount_d[kID] = 0
     pPrior_d[:] = Prior_d
     
-    for iter in xrange(restartNumItersLP):
+    for iter in range(restartNumItersLP):
       ## Update Prob of Active Topics
       aFunc(pDocTopicCount_d, pPrior_d) # Prior_d = E[ log pi_dk ]
       pPrior_d -= pPrior_d.max()
@@ -472,7 +472,7 @@ def calcDocTopicCountForData_Fast_wordcount(Data, aModel, Lik,
   activeDocs = np.arange(Data.nDoc, dtype=np.int32)
   prev_DocTopicCount = DocTopicCount.copy()
 
-  for ii in xrange(nCoordAscentItersLP):
+  for ii in range(nCoordAscentItersLP):
     ## Update Prior for active documents
     if ii > 0:
       aModel.calcLogPrActiveComps_Fast(DocTopicCount, activeDocs, tmpLP,
@@ -554,7 +554,7 @@ def calcDocTopicCountForData_Fast_nowordcount(Data, aModel, Lik,
   activeDocs = np.arange(Data.nDoc, dtype=np.int32)
   prev_DocTopicCount = DocTopicCount.copy()
 
-  for ii in xrange(nCoordAscentItersLP):
+  for ii in range(nCoordAscentItersLP):
     ## Update Prior for active documents
     if ii > 0:
       aModel.calcLogPrActiveComps_Fast(DocTopicCount, activeDocs, tmpLP,
@@ -592,13 +592,13 @@ def calcDocTopicCountForData_Fast_nowordcount(Data, aModel, Lik,
 
 def printVectors(aname, a, fmt='%9.6f', Kmax=10):
   if len(a) > Kmax:
-    print 'FIRST %d' % (Kmax)
+    print('FIRST %d' % (Kmax))
     printVectors(aname, a[:Kmax], fmt, Kmax)
-    print 'LAST %d' % (Kmax)
+    print('LAST %d' % (Kmax))
     printVectors(aname, a[-Kmax:], fmt, Kmax)
 
   else:
-    print ' %10s %s' % (aname, np2flatstr(a, fmt, Kmax))
+    print(' %10s %s' % (aname, np2flatstr(a, fmt, Kmax)))
 
 def np2flatstr(xvec, fmt='%9.3f', Kmax=10):
   return ' '.join( [fmt % (x) for x in xvec[:Kmax]])

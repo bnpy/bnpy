@@ -1,10 +1,10 @@
-from __future__ import division
+
 import itertools
 import numpy as np
 
 def warn(condition, string):
     if condition == False:
-        print "WARNING: "+string
+        print("WARNING: "+string)
 
 def logsum_exp(y):
     m = y.max()
@@ -35,7 +35,7 @@ def L1_diff(A,B):
 def min_error(A, B):
     K = A[0,:].size
     if K != B[0, :].size:
-        print "Matrices have different numbers of columns"
+        print("Matrices have different numbers of columns")
     total_err = 0
     for colA in range(K):
         min_err = float("inf")
@@ -50,9 +50,9 @@ def min_error(A, B):
 def greedy_error(A, B):
     K = A[0,:].size
     if K != B[0, :].size:
-        print "Matrices have different numbers of columns"
+        print("Matrices have different numbers of columns")
     total_err = 0
-    columns_B = range(K)
+    columns_B = list(range(K))
     for colA in range(K):
         min_err = float("inf")
         col_index = -1

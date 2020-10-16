@@ -5,14 +5,13 @@ GraphXData
     Data object for holding dense observations about edges of a network/graph.
     Organized as a list of edges, each with associated observations in field X.
 """
-
 import numpy as np
 import scipy.io
 
 from scipy.sparse import csc_matrix
 
 from bnpy.util import as1D, as2D, as3D, toCArray
-from XData import XData
+from bnpy.data.XData import XData
 
 class GraphXData(XData):
 
@@ -33,12 +32,12 @@ class GraphXData(XData):
     nNodesTotal : int
         Total number of nodes in the dataset.
     nodeNames : (optional) list of size nNodes
-        Human-readable names for each node. 
+        Human-readable names for each node.
     nodeZ : (optional) 1D array, size nNodes
         int cluster assignment for each node in "ground-truth" labeling.
-        
+
     Optional Attributes
-    ------------------- 
+    -------------------
     TrueParams : dict
         Holds dataset's true parameters, including fields
         * Z :
@@ -55,8 +54,6 @@ class GraphXData(XData):
     >>> Data = GraphXData(AdjMat=AdjMat)
     >>> Data.nNodesTotal
     3
-    >>> Data.nodes
-    array([0, 1, 2])
     '''
 
     def __init__(self, edges=None, X=None,
@@ -68,7 +65,7 @@ class GraphXData(XData):
                  **kwargs):
         ''' Construct a GraphXData object.
 
-        Pass either a full adjacency matrix (nNodes x nNodes x D), 
+        Pass either a full adjacency matrix (nNodes x nNodes x D),
         or a list of edges and associated observations.
 
         Args
@@ -98,7 +95,7 @@ class GraphXData(XData):
 
         if AdjMat is None and (X is None or edges is None):
             raise ValueError(
-                'Must specify adjacency matrix AdjMat, or ' + 
+                'Must specify adjacency matrix AdjMat, or ' +
                 'a list of edges and corresponding dense observations X')
 
         # Create core attributes
@@ -118,7 +115,7 @@ class GraphXData(XData):
             self.edges = self.edges[nonselfloopmask].copy()
             self.X = self.X[nonselfloopmask].copy()
 
-        self._set_size_attributes(nNodesTotal=nNodesTotal, 
+        self._set_size_attributes(nNodesTotal=nNodesTotal,
                                   nEdgesTotal=nEdgesTotal)
         self._verify_attributes()
 
@@ -201,8 +198,8 @@ class GraphXData(XData):
         else:
             nEdgesTotal = None
             nNodesTotal = None
-        return GraphXData(edges=edges, X=X, 
-                          nNodesTotal=nNodesTotal, 
+        return GraphXData(edges=edges, X=X,
+                          nNodesTotal=nNodesTotal,
                           nEdgesTotal=nEdgesTotal,
                           )
 
@@ -241,7 +238,7 @@ class GraphXData(XData):
             return self.SrcNodeMat
         except AttributeError:
             self.SrcNodeMat = csc_matrix(
-                (np.ones(self.nEdges), 
+                (np.ones(self.nEdges),
                  self.edges[:,0],
                  np.arange(self.nEdges+1)),
                 shape=(self.nNodes, self.nEdges))
@@ -261,7 +258,7 @@ class GraphXData(XData):
             return self.RcvNodeMat
         except AttributeError:
             self.RcvNodeMat = csc_matrix(
-                (np.ones(self.nEdges), 
+                (np.ones(self.nEdges),
                  self.edges[:,1],
                  np.arange(self.nEdges+1)),
                 shape=(self.nNodes, self.nEdges))
@@ -278,9 +275,9 @@ class GraphXData(XData):
         raise NotImplemented('File extension not supported')
 
     @classmethod
-    def read_from_graphtxtfile(cls, filepath, 
+    def read_from_graphtxtfile(cls, filepath,
                       nEdgesTotal=None, nNodesTotal=None,
-                      settingspath=None, 
+                      settingspath=None,
                       **kwargs):
         ''' Static constructor loading .graph file into GraphXData instance.
         '''
@@ -305,7 +302,7 @@ class GraphXData(XData):
         return cls(nNodesTotal=nNodesTotal, nEdgesTotal=nEdgesTotal,
                    edges=edges, X=X)
     @classmethod
-    def read_from_txt(cls, filepath, 
+    def read_from_txt(cls, filepath,
                       nEdgesTotal=None, nNodesTotal=None, **kwargs):
         ''' Static constructor loading .txt file into GraphXData instance.
         '''
@@ -333,16 +330,16 @@ class GraphXData(XData):
 
 def makeEdgesForDenseGraphWithNNodes(N):
     ''' Make edges array for a directed graph with N nodes.
-      
+
     Returns
     --------
     edges : 2D array, shape nEdges x 2
         contains all non-self-loop edges
     '''
     edges = list()
-    for s in xrange(N):
-        for t in xrange(N):
+    for s in range(N):
+        for t in range(N):
             if s == t:
-                continue 
+                continue
             edges.append((s,t))
     return np.asarray(edges, dtype=np.int32)

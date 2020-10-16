@@ -14,7 +14,7 @@ def sharedMemDictToNumpy(ShMem):
     if ShMem is None:
         return ArrDict
 
-    for key, ShArr in ShMem.items():
+    for key, ShArr in list(ShMem.items()):
         ArrDict[key] = sharedMemToNumpyArray(ShArr)
     return ArrDict
 

@@ -19,26 +19,38 @@ class TestEndToEnd(AbstractEndToEndTest):
 
         self.possibleAllocModelNames = ["FiniteMixtureModel",
                                         "FiniteTopicModel",
-                                        "HDPTopicModel",
+                                        #"HDPTopicModel",
                                         ]
         self.possibleObsModelNames = ["Gauss",
                                       "DiagGauss",
                                       "ZeroMeanGauss",
                                       ]
-        self.possibleInitNames = ["randexamples",
+        self.possibleInitNames = [#"randexamples",
                                   "randexamplesbydist",
                                   ]
 
         self.possibleLearnAlgsForAllocModel = dict(
-            FiniteMixtureModel=["EM", "VB", "soVB", "moVB"],
-            FiniteTopicModel=["VB", "soVB", "moVB"],
-            HDPTopicModel=["VB", "soVB", "moVB"],
+            FiniteMixtureModel=["EM", "VB", "soVB", "memoVB"],
+            FiniteTopicModel=["VB", "soVB", "memoVB"],
+            #HDPTopicModel=["VB", "soVB", "memoVB"],
         )
+
+    def nextAllocKwArgsForEM(self):
+        for aName in ['FiniteMixtureModel']:
+            for gamma in [10.1]: # gamma > K required for EM
+                kwargs = OrderedDict()
+                kwargs['name'] = aName
+                kwargs['gamma'] = gamma
+                yield kwargs
 
     def nextAllocKwArgsForVB(self):
         for aName in self.possibleAllocModelNames:
             kwargs = OrderedDict()
             kwargs['name'] = aName
+            # Two CRUCIAL settings needed for monotonicity guarantee
+            kwargs['initDocTopicCountLP'] = 'useDocTopicCountIfProvided'
+            kwargs['doMemoizeLocalParams'] = 1
+            #kwargs['debug'] = 'off' # use for debugging
             if aName == 'FiniteMixtureModel':
                 for gamma in [0.1, 1.0, 9.9]:
                     kwargs['gamma'] = gamma

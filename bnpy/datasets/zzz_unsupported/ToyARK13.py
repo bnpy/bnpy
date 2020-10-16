@@ -79,21 +79,21 @@ Sigma = np.zeros((K, D, D))
 
 # 3 states with clockwise rotation, around x axis
 stationaryDim = 0
-for kk in xrange(3):
+for kk in range(3):
     A[kk] = makeA_3DRotationMatrix(degPerSteps[kk], stationaryDim)
     Sigma[kk] = sigma2s[kk] * np.eye(D)
 # 3 states with counter-clockwise rotation
-for kk in xrange(3):
+for kk in range(3):
     A[5 - kk] = makeA_3DRotationMatrix(-1 * degPerSteps[kk], stationaryDim)
     Sigma[5 - kk] = sigma2s[kk] * np.eye(D)
 
 # 3 states with clockwise rotation, around y axis
 stationaryDim = 1
-for kk in xrange(3):
+for kk in range(3):
     A[6 + kk] = makeA_3DRotationMatrix(degPerSteps[kk], stationaryDim)
     Sigma[6 + kk] = sigma2s[kk] * np.eye(D)
 # 3 states with counter-clockwise rotation
-for kk in xrange(3):
+for kk in range(3):
     A[11 - kk] = makeA_3DRotationMatrix(-1 * degPerSteps[kk], stationaryDim)
     Sigma[11 - kk] = sigma2s[kk] * np.eye(D)
 
@@ -118,7 +118,7 @@ transPi = np.asarray([
 startStates = [0, 5, 6, 11]
 
 cholSigma = np.zeros_like(Sigma)
-for k in xrange(K):
+for k in range(K):
     cholSigma[k] = scipy.linalg.cholesky(Sigma[k])
 
 
@@ -132,7 +132,7 @@ def genToyData(seed=1234, nDocTotal=52, T=800):
     states0toKm1 = np.arange(K)
 
     doc_range = np.zeros(nDocTotal + 1, dtype=np.int32)
-    for i in xrange(1, nDocTotal + 1):
+    for i in range(1, nDocTotal + 1):
         doc_range[i] = doc_range[i - 1] + T
 
     N = doc_range[-1]
@@ -142,7 +142,7 @@ def genToyData(seed=1234, nDocTotal=52, T=800):
 
     # Each iteration generates one time-series/sequence
     # with starting state deterministically rotating among all states
-    for i in xrange(nDocTotal):
+    for i in range(nDocTotal):
         start = doc_range[i]
         stop = doc_range[i + 1]
 
@@ -152,7 +152,7 @@ def genToyData(seed=1234, nDocTotal=52, T=800):
         Z[0] = startStates[i % len(startStates)]
         X[0] = np.ones(D)
         nConsec = 0
-        for t in xrange(1, T + 1):
+        for t in range(1, T + 1):
             transPi_t = transPi[Z[t - 1]].copy()
             if nConsec > 120:
                 transPi_t[Z[t - 1]] = 0
@@ -187,7 +187,7 @@ def plotSequenceForRotatingState(degPerStep, Sigma, T=1000):
 
     X = np.zeros((T, 2))
     X[0, :] = [1, 0]
-    for t in xrange(1, T):
+    for t in range(1, T):
         X[t] = np.random.multivariate_normal(np.dot(A, X[t - 1]), Sigma)
 
     pylab.plot(X[:, 0], X[:, 1], '.')
@@ -202,7 +202,7 @@ def plotSequenceForRotatingState3D(degPerStep, Sigma, stationaryDim=0, T=1000):
 
     X = np.zeros((T, 3))
     X[0, :] = [1, 1, 1]
-    for t in xrange(1, T):
+    for t in range(1, T):
         X[t] = np.random.multivariate_normal(np.dot(A, X[t - 1]), Sigma)
 
     ax = Axes3D(pylab.figure())
@@ -219,7 +219,7 @@ def showEachSetOfStatesIn3D():
     from matplotlib import pylab
     from mpl_toolkits.mplot3d import Axes3D
     L = len(degPerSteps)
-    for ii in xrange(L):
+    for ii in range(L):
         plotSequenceForRotatingState3D(-1 * degPerSteps[ii], sigma2s[ii], 2)
 
 
@@ -259,7 +259,7 @@ if __name__ == '__main__':
     ylabels = ['x', 'y', 'z']
     for dim in [0, 1, 2]:
         pylab.subplots(nrows=N, ncols=1, figsize=(6, 4))
-        for n in xrange(N):
+        for n in range(N):
             start = doc_range[n]
             stop = doc_range[n + 1]
             X_n = X[start:stop]
@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
             pylab.subplot(N, 1, n + 1)
             pylab.hold('on')
-            for k in xrange(K):
+            for k in range(K):
                 Z_n_eq_k = np.flatnonzero(Z_n == k)
                 pylab.plot(Z_n_eq_k, X_n[Z_n_eq_k, dim], '.', color=Colors[k])
             pylab.ylim([-2, 2])
@@ -283,7 +283,7 @@ if __name__ == '__main__':
                       bbox_inches='tight', pad_inches=0)
 
     N = np.zeros(K)
-    for k in xrange(K):
+    for k in range(K):
         N[k] = np.sum(Z == k)
     # print ['%4d ' % (N[k]) for k in xrange(K)]
     pylab.show(block=True)

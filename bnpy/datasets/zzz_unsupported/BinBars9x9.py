@@ -38,7 +38,7 @@ def makePhi(fgProb=0.75, bgProb=0.05, **kwargs):
     ''' Make phi matrix that defines probability of each pixel.
     '''
     phi = bgProb * np.ones((K, np.sqrt(D), np.sqrt(D)))
-    for k in xrange(K):
+    for k in range(K):
         if k < K / 2:
             rowID = k
             # Horizontal bars
@@ -72,7 +72,7 @@ def generateRandomBinaryDataFromMixture(**kwargs):
     X = np.zeros((nObsTotal, D))
     Z = np.zeros(nObsTotal, dtype=np.int32)
     start = 0
-    for k in xrange(K):
+    for k in range(K):
         stop = start + nPerCluster[k]
         X[start:stop] = np.float64(
             PRNG.rand(nPerCluster[k], D) < phi[k, :][np.newaxis, :])

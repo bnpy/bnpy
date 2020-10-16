@@ -15,11 +15,11 @@ class TestEndToEnd(AbstractEndToEndTest):
         rng = np.random.RandomState(0)
         vocab_size = 25
         nDoc = 10
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             NU_d = rng.choice(vocab_size)
             NU_d = np.maximum(1, NU_d)
             word_id_d = rng.choice(vocab_size, size=NU_d, replace=False)
-            word_ct_d = rng.choice(range(1, 10), size=NU_d, replace=True)
+            word_ct_d = rng.choice(list(range(1, 10)), size=NU_d, replace=True)
             if d == 0:
                 word_id = word_id_d
                 word_ct = word_ct_d
@@ -53,6 +53,14 @@ class TestEndToEnd(AbstractEndToEndTest):
             HDPTopicModel=["VB", "soVB", "moVB"],
         )
 
+    def nextAllocKwArgsForEM(self):
+        for aName in ["FiniteMixtureModel"]:
+            for gamma in [10.01]: # gamma > K required for EM
+                kwargs = OrderedDict()
+                kwargs['name'] = aName
+                kwargs['gamma'] = gamma
+                yield kwargs
+    
     def nextObsKwArgsForVB(self, aName):
         for oName in self.possibleObsModelNames:
             for lam in [0.01, 1.0, 10.0]:

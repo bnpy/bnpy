@@ -4,7 +4,7 @@ BernViz.py
 Visualization tools for beta-bernoulli observation models.
 '''
 import numpy as np
-from PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 
 imshowArgs = dict(interpolation='nearest',
                   cmap='bone',
@@ -92,8 +92,8 @@ def plotCompsAsSquareImages(phi,
 
     for plotID, compID in enumerate(compListToPlot):
         if plotID >= Kmax:
-            print 'DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
-                % (plotID, len(activeCompIDs))
+            print('DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
+                % (plotID, len(activeCompIDs)))
             break
 
         if compID not in activeCompIDs:
@@ -111,15 +111,15 @@ def plotCompsAsSquareImages(phi,
 
         # Draw colored border around highlighted topics
         if compID in compsToHighlight:
-            [i.set_color('green') for i in ax.spines.itervalues()]
-            [i.set_linewidth(3) for i in ax.spines.itervalues()]
+            [i.set_color('green') for i in ax.spines.values()]
+            [i.set_linewidth(3) for i in ax.spines.values()]
 
         if xlabels is not None:
             if len(xlabels) > 0:
                 pylab.xlabel(xlabels[plotID], fontsize=15)
 
     # Disable empty plots!
-    for kdel in xrange(plotID + 2, nrows * ncols + 1):
+    for kdel in range(plotID + 2, nrows * ncols + 1):
         aH = pylab.subplot(nrows, ncols, kdel)
         aH.axis('off')
 

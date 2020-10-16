@@ -59,7 +59,7 @@ def show_single_sequence(
     # Extract current sequence
     # as a 2D array : T x D (n_timesteps x n_dims)
     curX_TD = dataset.X[start:stop]
-    for dim in xrange(12):
+    for dim in range(12):
         ax_handles[0].plot(curX_TD[:, dim], '.-')
     ax_handles[0].set_ylabel('angle')
     ax_handles[0].set_ylim(ylim)
@@ -223,4 +223,4 @@ zhat_seq1_T = bnpy.allocmodel.hmm.HMMUtil.runViterbiAlg(
 show_single_sequence(1, zhat_T=zhat_seq1_T, K=K)
 
 
-pylab.show()
+pylab.show(block=False)

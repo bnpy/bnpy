@@ -13,7 +13,6 @@ For l,m = 1,...,K:
    w_{lm} ~ Beta(tau_1, tau_0)
 '''
 
-
 import numpy as np
 from bnpy.util import logsumexp
 from bnpy.util import gammaln, digamma, EPS
@@ -99,8 +98,8 @@ class FiniteSMSB(FiniteMixtureModel):
         Elogpi = digamma(self.theta) - digamma(np.sum(self.theta))  # Size K
 
         respTerm = np.zeros(K)
-        for lap in xrange(self.EStepLaps):
-            for i in xrange(Data.nNodes):
+        for lap in range(self.EStepLaps):
+            for i in range(Data.nNodes):
                 respTerm = np.einsum(
                     'jlm,jm->l', logSoftEv[i, :, :, :], resp) + \
                     np.einsum('jlm,jl->m', logSoftEv[:, i, :, :], resp)

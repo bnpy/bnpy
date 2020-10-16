@@ -5,7 +5,7 @@ Initialize global params of a bnpy model using a set of local parameters
 '''
 import numpy as np
 
-from FromTruth import convertLPFromHardToSoft
+from bnpy.init.FromTruth import convertLPFromHardToSoft
 
 import logging
 Log = logging.getLogger('bnpy')
@@ -87,7 +87,7 @@ def makeLP_ContigBlocks(Data, K=0, KperSeq=None, initNumSeq=None, **kwargs):
         assert K > 0
         KperSeq = int(np.ceil(K / float(initNumSeq)))
         if KperSeq * initNumSeq > K:
-            print 'WARNING: using initial K larger than suggested.'
+            print('WARNING: using initial K larger than suggested.')
         K = KperSeq * initNumSeq
     assert KperSeq > 0
 
@@ -106,7 +106,7 @@ def makeLP_ContigBlocks(Data, K=0, KperSeq=None, initNumSeq=None, **kwargs):
 
         # Determine how long each block is for blocks 0, 1, ... KperSeq-1
         cumsumBlockSizes = calcBlockSizesForCurSeq(KperSeq, curT)
-        for j in xrange(KperSeq):
+        for j in range(KperSeq):
             Tstart = start + cumsumBlockSizes[j]
             Tend = start + cumsumBlockSizes[j + 1]
             resp[Tstart:Tend, jstart + j] = 1.0
@@ -144,7 +144,7 @@ def initSS_SeqAllocContigBlocks(Data, hmodel, **kwargs):
     # Traverse sequences in a random order
     PRNG = np.random.RandomState(seed)
     assert hasattr(Data, 'nDoc')
-    randOrderIDs = range(Data.nDoc)
+    randOrderIDs = list(range(Data.nDoc))
     PRNG.shuffle(randOrderIDs)
 
     SS = None

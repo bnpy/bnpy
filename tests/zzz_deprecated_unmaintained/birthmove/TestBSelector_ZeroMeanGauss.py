@@ -23,7 +23,7 @@ def makeDataset(K=5, Nk=100, Nvec=None,
     # Create several Sigmas by rotating this basic covariance matrix
     Z = [None for k in range(K)]
     X = [None for k in range(K)]
-    for k in xrange(K):
+    for k in range(K):
         PRNG = np.random.RandomState(k)
         Sigma_k = rotateCovMat(SigmaBase, k * np.pi / K)
         Z[k] = k * np.ones(Nvec[k])

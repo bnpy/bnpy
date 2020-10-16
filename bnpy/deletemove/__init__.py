@@ -1,4 +1,5 @@
 ''' deletemove module
 '''
 
-from DPlanner import selectCandidateDeleteComps
+
+from bnpy.deletemove.DPlanner import selectCandidateDeleteComps

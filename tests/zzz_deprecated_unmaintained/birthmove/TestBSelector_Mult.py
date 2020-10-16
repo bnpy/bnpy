@@ -21,7 +21,7 @@ def makeDataset(K=5, Nk=100, Nvec=None, Nd=100, **kwargs):
     doc_range = np.zeros(1)
     
     D = 25
-    for k in xrange(K):
+    for k in range(K):
         PRNG = np.random.RandomState(k)
         thr = PRNG.rand()
         mu_k = PRNG.gamma(0.5, size=D)

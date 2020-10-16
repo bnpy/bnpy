@@ -4,12 +4,11 @@ FromScratchGauss.py
 Initialize global params of a Gaussian-family data-generation model,
 from scratch.
 '''
-
 import numpy as np
 from bnpy.data import XData
 from bnpy.suffstats import SuffStatBag
 from scipy.cluster.vq import kmeans2
-from FromTruth import convertLPFromHardToSoft
+from bnpy.init.FromTruth import convertLPFromHardToSoft
 
 def init_global_params(obsModel, Data, K=0, seed=0,
                        initname='randexamples',
@@ -43,7 +42,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         #    then component params by M-step given those single items
         resp = np.zeros((Data.nObs, K))
         permIDs = PRNG.permutation(Data.nObs).tolist()
-        for k in xrange(K):
+        for k in range(K):
             resp[permIDs[k], k] = 1.0
 
     elif initname == 'randexamplesbydist':
@@ -60,7 +59,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
             objID = PRNG.choice(Data.nObs, p=minDistVec / minDistVec.sum())
             chosenObjIDs.append(objID)
         resp = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             resp[chosenObjIDs[k], k] = 1.0
 
     elif initname == 'randcontigblocks':
@@ -74,7 +73,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         docIDs = np.arange(nDoc)
         PRNG.shuffle(docIDs)
         resp = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             n = docIDs[k % nDoc]
             start = doc_range[n]
             stop = doc_range[n + 1]
@@ -107,7 +106,7 @@ def init_global_params(obsModel, Data, K=0, seed=0,
         np.random.seed(seed)
         centroids, labels = kmeans2(data=Data.X, k=K, minit='points')
         resp = np.zeros((Data.nObs, K))
-        for t in xrange(Data.nObs):
+        for t in range(Data.nObs):
             resp[t, labels[t]] = 1
 
     else:
@@ -120,11 +119,11 @@ def init_global_params(obsModel, Data, K=0, seed=0,
 
 
 def initSSByBregDiv_ZeroMeanGauss(
-        Dslice=None, 
-        curModel=None, 
+        Dslice=None,
+        curModel=None,
         curLPslice=None,
-        K=5, ktarget=None, 
-        b_minRespToIncludeInInit=None, 
+        K=5, ktarget=None,
+        b_minRespToIncludeInInit=None,
         b_includeRemainderTopic=0,
         b_initHardCluster=0,
         seed=0, doSample=True,
@@ -135,7 +134,7 @@ def initSSByBregDiv_ZeroMeanGauss(
     -------
     xSS : SuffStatBag
     Info : dict
-        contains info about which docs were used to inspire this init. 
+        contains info about which docs were used to inspire this init.
     '''
     PRNG = np.random.RandomState(seed)
     if curLPslice is None:
@@ -156,7 +155,7 @@ def initSSByBregDiv_ZeroMeanGauss(
     K = Keff
     WholeDataMean = calcClusterMean_ZeroMeanGauss(
         targetX, hmodel=curModel)
-    Mu = np.zeros((K, Dslice.dim, Dslice.dim))    
+    Mu = np.zeros((K, Dslice.dim, Dslice.dim))
     minDiv = np.inf * np.ones((targetX.shape[0],1))
     lamVals = np.zeros(K)
     chosenAtomIDs = np.zeros(K, dtype=np.int32)
@@ -181,7 +180,7 @@ def initSSByBregDiv_ZeroMeanGauss(
         minDiv[n] = 1e-10
         minDiv = np.maximum(minDiv, 1e-10)
         assert minDiv.min() > -1e-10
-    
+
     Z = -1 * np.ones(Dslice.nObs, dtype=np.int32)
     if b_initHardCluster:
         DivMat = calcBregDiv_ZeroMeanGauss(targetX, Mu)
@@ -192,7 +191,7 @@ def initSSByBregDiv_ZeroMeanGauss(
     xLP = convertLPFromHardToSoft(
         dict(Z=Z), Dslice, initGarbageState=0)
     if curLPslice is not None:
-        xLP['resp'] *= curLPslice['resp'][:, ktarget][:,np.newaxis]    
+        xLP['resp'] *= curLPslice['resp'][:, ktarget][:,np.newaxis]
 
         # Verify that initial xLP resp is a subset of curLP's resp,
         # leaving out only the docs that didnt have enough tokens.
@@ -205,8 +204,8 @@ def initSSByBregDiv_ZeroMeanGauss(
     xSS.reorderComps(bigtosmall)
     Info = dict(
         Z=Z,
-        Mu=Mu, 
-        lamVals=lamVals, 
+        Mu=Mu,
+        lamVals=lamVals,
         chosenAtomIDs=chosenAtomIDs)
     return xSS, Info
 
@@ -247,7 +246,7 @@ def calcBregDiv_ZeroMeanGauss(X, Mu):
     K = Mu.shape[0]
     Div = np.zeros((N, K))
     logdetX = np.log(np.square(X) + 1e-100).sum(axis=1)
-    for k in xrange(K):
+    for k in range(K):
         # cholMu_k is a lower-triangular matrix
         cholMu_k = np.linalg.cholesky(Mu[k])
         logdetMu_k = 2 * np.sum(np.log(np.diag(cholMu_k)))

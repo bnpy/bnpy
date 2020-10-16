@@ -33,7 +33,7 @@ def calcDocTopicCountCorrelationFromTargetToAbsorbingSet(
 
 
 def summarizeRestrictedLocalStep_HDPTopicModel(
-        Dslice=None, 
+        Dslice=None,
         curModel=None,
         curLPslice=None,
         curSSwhole=None,
@@ -210,9 +210,9 @@ def restrictedLocalStep_HDPTopicModel(
     if kabsorbList is None:
         xLPslice['DocTopicCount'] = np.zeros((Dslice.nDoc, Kfresh))
         xLPslice['resp'] = np.zeros((
-            curLPslice['resp'].shape[0], Kfresh))   
+            curLPslice['resp'].shape[0], Kfresh))
     else:
-        # Initialize DocTopicCounts by copying those from absorbing states    
+        # Initialize DocTopicCounts by copying those from absorbing states
         xLPslice['DocTopicCount'] = \
             curLPslice['DocTopicCount'][:, kabsorbList].copy()
         # Initialize resp by copying existing resp for absorbing state
@@ -234,7 +234,7 @@ def restrictedLocalStep_HDPTopicModel(
         assert 'obsModelName' in xLPslice
 
         # Fill in these fields, one doc at a time
-        for d in xrange(Dslice.nDoc):
+        for d in range(Dslice.nDoc):
             xLPslice = restrictedLocalStepForSingleDoc_HDPTopicModel(
                 d=d,
                 Dslice=Dslice,
@@ -337,7 +337,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
     start = Dslice.doc_range[d]
     stop = Dslice.doc_range[d+1]
 
-    if kabsorbList is None: 
+    if kabsorbList is None:
         constrained_sumTheta_d = curLPslice['theta'][d,ktarget]
         # Establish the total mass we must reallocate
         constrained_sumResp_d = curLPslice['resp'][start:stop,ktarget]
@@ -391,18 +391,18 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
         xDocTopicProb_d = xalphaPi.copy()
 
     # Initialize xsumResp_d
-    xsumResp_d = np.zeros(xCLik_d.shape[0])      
+    xsumResp_d = np.zeros(xCLik_d.shape[0])
     np.dot(xCLik_d, xDocTopicProb_d, out=xsumResp_d)
 
     maxDiff_d = -1
     for riter in range(LPkwargs['nCoordAscentItersLP']):
         # Update DocTopicCount_d
-        np.dot(wc_d / xsumResp_d, xCLik_d, 
+        np.dot(wc_d / xsumResp_d, xCLik_d,
                out=xDocTopicCount_d)
         xDocTopicCount_d *= xDocTopicProb_d
 
         # Update xDocTopicProb_d
-        np.add(xDocTopicCount_d, xalphaPi, 
+        np.add(xDocTopicCount_d, xalphaPi,
             out=xDocTopicProb_d)
         digamma(xDocTopicProb_d, out=xDocTopicProb_d)
         # Protect against underflow
@@ -432,7 +432,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
     xResp_d *= constrained_sumResp_d[mask_d,np.newaxis]
     np.maximum(xResp_d, 1e-100, out=xResp_d)
 
-    # Right here, xResp_d and xDocTopicProb_d 
+    # Right here, xResp_d and xDocTopicProb_d
     # are exactly equal to one fwd step from the current xDocTopicCount_d
     # So, we can use our short-cut ELBO calculation.
     if False:
@@ -452,7 +452,7 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
         xDocTopicCount_d = np.dot(Dslice.word_count[start+mask_d], xResp_d)
     else:
         xDocTopicCount_d = np.sum(xResp_d, axis=0)
-    
+
     xLPslice['DocTopicCount'][d, :] = xDocTopicCount_d
     xLPslice['theta'][d, :] = xalphaPi + xDocTopicCount_d
     xLPslice['_nIters'][d] = riter
@@ -473,4 +473,3 @@ def restrictedLocalStepForSingleDoc_HDPTopicModel(
     assert thetaOK
     # That's all folks
     return xLPslice
-

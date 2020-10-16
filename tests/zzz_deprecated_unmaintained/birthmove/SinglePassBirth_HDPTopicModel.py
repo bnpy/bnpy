@@ -32,7 +32,7 @@ def main(**kwargs):
     DefaultKwargs.update(kwargs)
 
     parser = argparse.ArgumentParser()
-    for key, val in DefaultKwargs.items():
+    for key, val in list(DefaultKwargs.items()):
         try:
             assert np.allclose(int(val), float(val))
             _type = int
@@ -56,7 +56,7 @@ def main(**kwargs):
     doInteractiveViz = args.doInteractiveViz
     Kfresh = args.Kfresh
     outputdir = args.outputdir
-    print "OUTPUT: ", outputdir
+    print("OUTPUT: ", outputdir)
     nBatch = int(nDocTotal // nDocPerBatch)
 
     LPkwargs = DefaultLPkwargs
@@ -83,7 +83,7 @@ def main(**kwargs):
     SSmemory = dict()
     nDocsSeenBefore = 0
     for lap in range(nFixedInitLaps):
-        for batchID in xrange(nBatch):
+        for batchID in range(nBatch):
             Dbatch = DataIterator.getBatch(batchID)
 
             LPbatch = hmodel.calc_local_params(Dbatch, **LPkwargs)
@@ -103,8 +103,8 @@ def main(**kwargs):
     
     Lines = dict()
     Lines['xs'] = list()
-    for batchID in xrange(nBatch):
-        print 'batch %d/%d' % (batchID+1, nBatch)
+    for batchID in range(nBatch):
+        print('batch %d/%d' % (batchID+1, nBatch))
         Dbatch = DataIterator.getBatch(batchID)
 
         LPbatch = hmodel.calc_local_params(Dbatch, **LPkwargs)
@@ -165,18 +165,18 @@ def main(**kwargs):
                 arr = getattr(propSS, field)
                 arr_direct = getattr(propSS_whole, field)
                 if not np.allclose(arr, arr_direct):
-                    print '  Error detected in field: %s' % (field)
+                    print('  Error detected in field: %s' % (field))
                     from IPython import embed; embed()
-                print '  SS field %s verified' % (field)
+                print('  SS field %s verified' % (field))
 
             for field in ['gammalnTheta', 'slackTheta', 'slackThetaRem',
                           'gammalnSumTheta', 'gammalnThetaRem']:
                 arr = getattr(propSS._ELBOTerms, field)
                 arr_direct = getattr(propSS_whole._ELBOTerms, field)
                 if not np.allclose(arr, arr_direct):
-                    print '  Error detected in field: %s' % (field)
+                    print('  Error detected in field: %s' % (field))
                     from IPython import embed; embed()
-                print '  ELBO field %s verified' % (field)
+                print('  ELBO field %s verified' % (field))
 
             propModel = hmodel.copy()
             propModel.update_global_params(propSS)
@@ -187,19 +187,19 @@ def main(**kwargs):
             assert np.allclose(SS.getCountVec().sum(),
                                propSS.getCountVec().sum())
 
-            print ' curLscore %.3f' % (curLscore)
-            print 'propLscore %.3f' % (propLscore)
+            print(' curLscore %.3f' % (curLscore))
+            print('propLscore %.3f' % (propLscore))
             highlightComps = np.hstack([targetUID, np.arange(Kinit, propSS.K)])
             if propLscore > curLscore:
-                print 'ACCEPTED!'
+                print('ACCEPTED!')
             else:
-                print 'REJECTED <<<<<<<<<< :('
+                print('REJECTED <<<<<<<<<< :(')
 
             if doInteractiveViz:
                 bnpy.viz.PlotComps.plotCompsFromHModel(
                     propModel, compsToHighlight=highlightComps)
                 pylab.show(block=False)
-                keypress = raw_input("Press key to continue >>>")
+                keypress = input("Press key to continue >>>")
                 if keypress.count('embed'):
                     from IPython import embed; embed()
 
@@ -313,7 +313,7 @@ def main(**kwargs):
         propModel, compsToHighlight=highlightComps)
     filename = os.path.join(outputdir, 'AfterComps')
     pylab.savefig(filename + filesuffix + '.png', bbox_inches='tight', pad_inches=0)
-    print filename + filesuffix + '.png', '<<<<<<'
+    print(filename + filesuffix + '.png', '<<<<<<')
 
     # Show document subset!
     Dfirst = DataIterator.getBatch(0)
@@ -342,7 +342,7 @@ def main(**kwargs):
 
     if args.doShowAfter:
         pylab.show(block=False)
-        keypress = raw_input("Press key to continue >>>")
+        keypress = input("Press key to continue >>>")
         if keypress.count('embed'):
             from IPython import embed; embed()
 

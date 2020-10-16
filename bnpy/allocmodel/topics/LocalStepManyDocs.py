@@ -5,10 +5,10 @@ import time
 from scipy.special import digamma, gammaln
 import scipy.sparse
 
-import LocalStepLogger
+from bnpy.allocmodel.topics import LocalStepLogger
 from bnpy.util import NumericUtil
-from LocalStepSingleDoc import calcLocalParams_SingleDoc
-from LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
+from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
+from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
 
 from bnpy.util.SparseRespUtil \
     import fillInDocTopicCountFromSparseResp, sparsifyResp, sparsifyLogResp
@@ -22,12 +22,26 @@ def calcLocalParams(
         alphaEbeta=None,
         alphaEbetaRem=None,
         alpha=None,
-        initDocTopicCountLP='scratch',
+        initDocTopicCountLP='setDocProbsToEGlobalProbs',
         cslice=(0, None),
         nnzPerRowLP=0,
         doSparseOnlyAtFinalLP=0,
         **kwargs):
     ''' Calculate all local parameters for provided dataset under a topic model
+
+
+    Kwargs
+    ------
+    initDocTopicCountLP : str, must be one of the options below
+        'useDocTopicCountIfProvided'
+            If provided LP contains 'DocTopicCount' array, 
+            will use that to initialize the per-doc counts.
+            Otherwise, will default back to 'setDocProbsToEGlobalProbs'.
+        'setDocProbsToEGlobalProbs'
+            Initialize doc-topic probas directly using global probas.
+            Recommended for the first time a document is processed.
+        'setDocTopicCountToAllZeros' 
+            Initialize doc-topic counts to all zeros.
 
     Returns
     -------
@@ -58,6 +72,7 @@ def calcLocalParams(
     if 'DocTopicCount' in LP:
         if LP['DocTopicCount'].shape == (nDoc, K):
             initDocTopicCount = LP['DocTopicCount'].copy()
+
     sumRespTilde = np.zeros(N)
     DocTopicCount = np.zeros((nDoc, K))
     DocTopicProb = np.zeros((nDoc, K))
@@ -84,11 +99,8 @@ def calcLocalParams(
 
     if not DO_DENSE and obsModelName.count('Mult'):
         if initDocTopicCountLP.count('fastfirstiter'):
-            #tstart = time.time()
             init_spR = calcInitSparseResp(
                 LP, alphaEbeta, nnzPerRowLP=nnzPerRowLP, **kwargs)
-            #tstop = time.time()
-            #telapsed = tstop - tstart
 
     AggInfo = dict()
     AggInfo['maxDiff'] = np.zeros(Data.nDoc)
@@ -101,7 +113,7 @@ def calcLocalParams(
         AggInfo['nRestartsAccepted'] = None
         AggInfo['nRestartsTried'] = None
 
-    for d in xrange(nDoc):
+    for d in range(nDoc):
         start = Data.doc_range[cslice[0] + d]
         stop = Data.doc_range[cslice[0] + d + 1]
         if hasattr(Data, 'word_count') and obsModelName.count('Bern'):
@@ -109,13 +121,13 @@ def calcLocalParams(
             lstop = (d+1) * Data.vocab_size
         else:
             lstart = start - slice_start
-            lstop = stop - slice_start        
+            lstop = stop - slice_start
         if hasattr(Data, 'word_count') and not obsModelName.count('Bern'):
             wc_d = Data.word_count[start:stop].copy()
         else:
             wc_d = 1.0
         initDTC_d = None
-        if initDocTopicCountLP == 'memo':
+        if initDocTopicCountLP == 'useDocTopicCountIfProvided':
             if initDocTopicCount is not None:
                 if DO_DENSE:
                     initDTC_d = initDocTopicCount[d]
@@ -125,13 +137,11 @@ def calcLocalParams(
                 initDocTopicCountLP = 'setDocProbsToEGlobalProbs'
         if not DO_DENSE and initDocTopicCountLP.count('fastfirstiter'):
             if obsModelName.count('Mult'):
-                #tstart = time.time()
                 DocTopicCount[d, :] = wc_d * init_spR[Data.word_id[start:stop]]
-                #telapsed += time.time() - tstart
         if not DO_DENSE:
             m_start = nnzPerRowLP * start
             m_stop = nnzPerRowLP * stop
-            
+
             # SPARSE RESP
             calcSparseLocalParams_SingleDoc(
                 wc_d,
@@ -150,7 +160,7 @@ def calcLocalParams(
                 **kwargs)
         else:
             Lik_d = Lik[lstart:lstop].copy()  # Local copy
-            (DocTopicCount[d], DocTopicProb[d], 
+            (DocTopicCount[d], DocTopicProb[d],
                 sumRespTilde[lstart:lstop], Info_d) \
                 = calcLocalParams_SingleDoc(
                     wc_d, Lik_d, alphaEbeta, alphaEbetaRem,
@@ -158,6 +168,7 @@ def calcLocalParams(
                     initDocTopicCountLP=initDocTopicCountLP,
                     **kwargs)
             AggInfo = updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data)
+
     #if initDocTopicCountLP.startswith('fast'):
     #    AggInfo['time_extra'] = telapsed
     LP['DocTopicCount'] = DocTopicCount
@@ -187,7 +198,7 @@ def calcInitSparseResp(LP, alphaEbeta, nnzPerRowLP=0, **kwargs):
     ''' Compute initial sparse responsibilities
     '''
     assert 'ElogphiT' in LP
-    # Determine the top-L for each 
+    # Determine the top-L for each
     logS = LP['ElogphiT'].copy()
     logS += np.log(alphaEbeta)[np.newaxis,:]
     init_spR = sparsifyLogResp(logS, nnzPerRowLP)
@@ -228,7 +239,7 @@ def updateLPGivenDocTopicCount(LP, DocTopicCount,
     return LP
 
 
-def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde, 
+def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde,
         cslice=(0, None), doSparseOnlyAtFinalLP=0, nnzPerRowLP=0):
     ''' Compute assignment responsibilities given output of local step.
 
@@ -255,13 +266,13 @@ def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde,
     if N > Data.doc_range[-1]:
         assert N == nDoc * Data.vocab_size
         # Bernoulli naive case. Quite slow!
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             rstart = d * Data.vocab_size
             rstop = (d+1) * Data.vocab_size
             LP['resp'][rstart:rstop] *= Prior[d]
     else:
         # Usual case. Quite fast!
-        for d in xrange(nDoc):
+        for d in range(nDoc):
             start = Data.doc_range[cslice[0] + d] - slice_start
             stop = Data.doc_range[cslice[0] + d + 1] - slice_start
             LP['resp'][start:stop] *= Prior[d]
@@ -275,7 +286,7 @@ def updateLPWithResp(LP, Data, Lik, Prior, sumRespTilde,
     else:
         LP['resp'] /= sumRespTilde[:, np.newaxis]
         np.maximum(LP['resp'], 1e-300, out=LP['resp'])
-    # Time consuming: 
+    # Time consuming:
     # >>> assert np.allclose(LP['resp'].sum(axis=1), 1.0)
     return LP
 
@@ -357,7 +368,7 @@ def updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data):
         * maxDiff : 1D array, nDoc
         * iter : 1D array, nDoc
     """
-    if len(AggInfo.keys()) == 0:
+    if len(list(AggInfo.keys())) == 0:
         AggInfo['maxDiff'] = np.zeros(Data.nDoc)
         AggInfo['iter'] = np.zeros(Data.nDoc, dtype=np.int32)
 

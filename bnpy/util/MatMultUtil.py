@@ -24,7 +24,6 @@ Compare methods for computing X.T * X
 
 Conclusion: method "B" is the best by far!
 '''
-
 import numpy as np
 
 try:

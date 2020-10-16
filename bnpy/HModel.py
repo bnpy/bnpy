@@ -17,14 +17,13 @@ Key functions
 * get_global_suff_stats
 * update_global_params
 '''
-
 import numpy as np
 import os
 import copy
 
-import init
-from allocmodel import AllocModelConstructorsByName
-from obsmodel import ObsModelConstructorsByName
+from bnpy import init
+from bnpy.allocmodel import AllocModelConstructorsByName
+from bnpy.obsmodel import ObsModelConstructorsByName
 from bnpy.learnalg import ElapsedTimeLogger
 
 class HModel(object):
@@ -59,7 +58,7 @@ class HModel(object):
         copyObj.obsModel.ClearCache()
         return copyObj
 
-    def calc_local_params(self, Data, LP=None, 
+    def calc_local_params(self, Data, LP=None,
             doLogElapsedTime=False, **kwargs):
         ''' Calculate local parameters specific to each data item.
 
@@ -74,7 +73,7 @@ class HModel(object):
         LP = self.obsModel.calc_local_params(Data, LP, **kwargs)
         if doLogElapsedTime:
             ElapsedTimeLogger.stopEvent('local', 'obsupdate')
-            ElapsedTimeLogger.startEvent('local', 'allocupdate')            
+            ElapsedTimeLogger.startEvent('local', 'allocupdate')
         # Combine with allocModel probs of each cluster
         # Fills in LP['resp'], N x K array whose rows sum to one
         LP = self.allocModel.calc_local_params(Data, LP, **kwargs)
@@ -82,7 +81,7 @@ class HModel(object):
             ElapsedTimeLogger.stopEvent('local', 'allocupdate')
         return LP
 
-    def get_global_suff_stats(self, Data, LP, 
+    def get_global_suff_stats(self, Data, LP,
             doLogElapsedTime=False,
             **kwargs):
         ''' Calculate sufficient statistics for each component.
@@ -97,13 +96,13 @@ class HModel(object):
         SS = self.allocModel.get_global_suff_stats(Data, LP, **kwargs)
         if doLogElapsedTime:
             ElapsedTimeLogger.stopEvent('local', 'allocsummary')
-            ElapsedTimeLogger.startEvent('local', 'obssummary')            
+            ElapsedTimeLogger.startEvent('local', 'obssummary')
         SS = self.obsModel.get_global_suff_stats(Data, SS, LP, **kwargs)
         if doLogElapsedTime:
             ElapsedTimeLogger.stopEvent('local', 'obssummary')
         return SS
 
-    def update_global_params(self, SS, rho=None, 
+    def update_global_params(self, SS, rho=None,
             doLogElapsedTime=False,
             **kwargs):
         ''' Update (in-place) global parameters given provided suff stats.
@@ -114,7 +113,7 @@ class HModel(object):
         self.allocModel.update_global_params(SS, rho, **kwargs)
         if doLogElapsedTime:
             ElapsedTimeLogger.stopEvent('global', 'alloc')
-            ElapsedTimeLogger.startEvent('global', 'obs')            
+            ElapsedTimeLogger.startEvent('global', 'obs')
         self.obsModel.update_global_params(SS, rho, **kwargs)
         if doLogElapsedTime:
             ElapsedTimeLogger.stopEvent('global', 'obs')
@@ -162,7 +161,7 @@ class HModel(object):
             # Identify unique keys, ignoring subdivided terms
             # eg Lalloc_top_term1 and Lalloc_top_term2 are not counted,
             # since we expect they are already aggregated in term Lalloc
-            ukeys = list(set([key.split('_')[0] for key in evA.keys()]))
+            ukeys = list(set([key.split('_')[0] for key in list(evA.keys())]))
             evA['Ltotal'] = sum([evA[key] for key in ukeys])
             return evA
         else:

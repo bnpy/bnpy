@@ -32,7 +32,7 @@ def get_data(seed=DEFAULT_SEED, T=DEFAULT_LEN, **kwargs):
 
     nUsedStates = len(np.unique(Z))
     if nUsedStates < K:
-        print 'WARNING: NOT ALL TRUE STATES USED IN GENERATED DATA'
+        print('WARNING: NOT ALL TRUE STATES USED IN GENERATED DATA')
 
     Data = GroupXData(X=X, Xprev=Xprev, doc_range=doc_range, TrueZ=Z)
     Data.name = get_short_name()
@@ -57,7 +57,7 @@ def makeStickyTransMatrix(K, pSame=0.75, T=50):
     stickyP = np.exp(np.log(pSame) / T)
     transPi = (1 - stickyP) / (K - 1) * np.ones((K, K))
 
-    for k in xrange(K):
+    for k in range(K):
         transPi[k, k] = stickyP
 
     assert np.allclose(1.0, transPi.sum(axis=1))
@@ -132,8 +132,8 @@ def generateSequence_ZandX(T, activeStateIDs, A_all, Sigma_all, prng):
     # Generate sequence
     Z[0] = 0
     X[0] = 0
-    for t in xrange(1, T):
-        Z[t] = prng.choice(xrange(K), p=transPi[Z[t - 1]])
+    for t in range(1, T):
+        Z[t] = prng.choice(range(K), p=transPi[Z[t - 1]])
 
         X[t] = prng.normal(A[Z[t]] * X[t - 1],
                            np.sqrt(Sigma_all[Z[t]]))
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     B = np.max(np.abs(Data.X))
     Tmax = np.max(Data.doc_range[1:] - Data.doc_range[:-1])
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
 
@@ -184,21 +184,21 @@ if __name__ == '__main__':
                                                 **obsPriorParams)
     TrueZ = Data.TrueParams['Z'].copy()
     resp = np.zeros((TrueZ.size, np.max(TrueZ) + 1))
-    for t in xrange(TrueZ.size):
+    for t in range(TrueZ.size):
         resp[t, TrueZ[t]] = 1.0
     LP = dict(resp=resp)
     SS = bnpy.suffstats.SuffStatBag(K=K, D=D)
     SS = oModel.calcSummaryStats(Data, SS, LP)
     oModel.update_global_params(SS)
 
-    print 'A truth'
-    print A_master
-    print 'A estimated'
-    print oModel.EstParams.A.flatten()
-    print ''
-    print 'Sigma truth'
-    print Sigma_master
-    print 'Sigma estimated'
-    print oModel.EstParams.Sigma.flatten()
+    print('A truth')
+    print(A_master)
+    print('A estimated')
+    print(oModel.EstParams.A.flatten())
+    print('')
+    print('Sigma truth')
+    print(Sigma_master)
+    print('Sigma estimated')
+    print(oModel.EstParams.Sigma.flatten())
 
     pylab.show(block=True)

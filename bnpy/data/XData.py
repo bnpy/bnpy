@@ -5,7 +5,6 @@ XData : dataset_object
     Holds a 2D array X of exchangable observations
     Each observation is a dense row vector inside the array X
 '''
-
 import numpy as np
 import scipy.io
 import inspect
@@ -13,9 +12,8 @@ import os
 from collections import namedtuple
 import pandas as pd
 
-from DataObj import DataObj
-
 from bnpy import DATASET_PATH
+from bnpy.data.DataObj import DataObj
 from bnpy.util import as1D, as2D, toCArray
 from bnpy.util import numpyToSharedMemArray, sharedMemToNumpyArray
 
@@ -50,17 +48,17 @@ class XData(DataObj):
     -------
     >>> X = np.zeros((1000, 3)) # Create 1000x3 matrix
     >>> myData = XData(X) # Convert to an XData object
-    >>> print myData.nObs
+    >>> print (myData.nObs)
     1000
-    >>> print myData.dim
+    >>> print (myData.dim)
     3
-    >>> print myData.X.shape
+    >>> print (myData.X.shape)
     (1000, 3)
     >>> mySubset = myData.make_subset([0])
     >>> mySubset.X.shape
     (1, 3)
     >>> mySubset.X[0]
-    array([ 0.,  0.,  0.])
+    array([0., 0., 0.])
     """
 
     @classmethod
@@ -74,7 +72,7 @@ class XData(DataObj):
         except Exception as e:
             X = np.loadtxt(filepath)
         return cls(X, nObsTotal=nObsTotal, **kwargs)
- 
+
     @classmethod
     def read_file(cls, filepath, **kwargs):
         ''' Constructor for loading data from disk into XData instance.
@@ -126,7 +124,7 @@ class XData(DataObj):
         Returns
         -------
         dataset : XData object
-            
+
         Examples
         --------
         >>> dataset = XData.read_npz(
@@ -151,7 +149,7 @@ class XData(DataObj):
         Returns
         -------
         dataset : XData object
-            
+
         Examples
         --------
         >>> dataset = XData.read_csv(
@@ -259,17 +257,17 @@ class XData(DataObj):
 
         # Add optional row names
         if row_names is None:
-            self.row_names = map(str, range(self.nObs))
+            self.row_names = list(map(str, list(range(self.nObs))))
         else:
             assert len(row_names) == self.nObs
-            self.row_names = map(str, row_names)
+            self.row_names = list(map(str, row_names))
 
         # Add optional column names
         if column_names is None:
-            self.column_names = map(lambda n: "dim_%d" % n, range(self.dim))
+            self.column_names = ["dim_%d" % n for n in range(self.dim)]
         else:
             assert len(column_names) == self.dim
-            self.column_names = map(str, column_names)
+            self.column_names = list(map(str, column_names))
 
     def _set_dependent_params(self, nObsTotal=None):
         self.nObs = self.X.shape[0]
@@ -290,7 +288,7 @@ class XData(DataObj):
             assert self.Y.shape[0] == self.X.shape[0]
         if hasattr(self, 'Xprev'):
             assert self.Xprev.shape[0] == self.X.shape[0]
-            
+
     def get_size(self):
         """ Get number of observations in memory for this object.
 
@@ -318,7 +316,7 @@ class XData(DataObj):
         if hasattr(self, 'row_names'):
             return self.row_names
         else:
-            return map(str, np.arange(self.nObs))
+            return list(map(str, np.arange(self.nObs)))
 
     def get_text_summary(self):
         ''' Get human-readable description of this dataset.
@@ -475,7 +473,7 @@ class XData(DataObj):
         --------
         >>> dataset = XData(X=np.zeros((3,2)), column_names=['a', 'b'])
         >>> x_df = dataset.to_dataframe()
-        >>> print x_df
+        >>> print (x_df)
              a    b
         0  0.0  0.0
         1  0.0  0.0

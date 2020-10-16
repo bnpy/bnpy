@@ -1,10 +1,11 @@
-from DataObj import DataObj
 
-from XData import XData
-from GroupXData import GroupXData
-from BagOfWordsData import BagOfWordsData
-from GraphXData import GraphXData
-from DataIteratorFromDisk import DataIteratorFromDisk
+from bnpy.data.DataObj import DataObj
+
+from bnpy.data.XData import XData
+from bnpy.data.GroupXData import GroupXData
+from bnpy.data.BagOfWordsData import BagOfWordsData
+from bnpy.data.GraphXData import GraphXData
+from bnpy.data.DataIteratorFromDisk import DataIteratorFromDisk
 
 __all__ = ['DataObj', 'DataIterator', 'DataIteratorFromDisk',
            'XData', 'GroupXData', 'GraphXData',

@@ -41,17 +41,17 @@ def make_extensions():
         ext_list.append(make_cpp_extension_libfwdbwd())
         ext_list.append(make_cpp_extension_libsparsemix())
     else:
-        print "Warning: Environment variable EIGENPATH not found."
-        print "Will not compile the following C++ extensions"
-        print " - libsparsemix (for L-sparse mixtures)"
-        print " - libfwdbwd (for fast local steps for HMMs)"
+        print("Warning: Environment variable EIGENPATH not found.")
+        print("Will not compile the following C++ extensions")
+        print(" - libsparsemix (for L-sparse mixtures)")
+        print(" - libfwdbwd (for fast local steps for HMMs)")
     if get_path_to_eigen() and get_path_to_boost():
         ext_list.append(make_cpp_extension_libsparsetopics())
         ext_list.append(make_cpp_extension_libsparsetopicsmanydocs())
     else:
-        print "Warning: Environment variable BOOSTMATHPATH not found."
-        print "Will not compile the following C++ extensions"
-        print " - libsparsetopics (for L-sparse topic models)"
+        print("Warning: Environment variable BOOSTMATHPATH not found.")
+        print("Will not compile the following C++ extensions")
+        print(" - libsparsetopics (for L-sparse topic models)")
     return ext_list
 
 def make_cpp_extension_libfwdbwd():
@@ -184,7 +184,7 @@ def make_list_of_datasets_specs():
                 data_spec = (
                     full_dirpath,
                     [full_fpath])
-                print data_spec
+                print(data_spec)
                 data_spec_list.append(data_spec)
     return data_spec_list
 
@@ -225,9 +225,9 @@ setup(
         "ipython>=5.1",
         "scikit_learn>=0.18",
         "matplotlib>=1.5",
-        "joblib>=0.10",
+        "joblib==0.14.1",
         "memory_profiler>=0.41",
-        "munkres>=1.0",
+        "munkres==1.0.12",
         "numexpr>=2.6",
         "psutil>=5.0",
         "sphinx_gallery>=0.1",

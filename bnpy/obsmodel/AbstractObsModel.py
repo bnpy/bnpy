@@ -135,12 +135,12 @@ class AbstractObsModel(object):
         if hasattr(self, 'EstParams'):
             PDict['K'] = self.EstParams.K
             PDict['D'] = self.EstParams.D
-            for key in self.EstParams._FieldDims.keys():
+            for key in list(self.EstParams._FieldDims.keys()):
                 PDict[key] = getattr(self.EstParams, key)
         if hasattr(self, 'Post'):
             PDict['K'] = self.Post.K
             PDict['D'] = self.Post.D
-            for key in self.Post._FieldDims.keys():
+            for key in list(self.Post._FieldDims.keys()):
                 PDict[key] = getattr(self.Post, key)
         return PDict
 
@@ -161,8 +161,8 @@ class AbstractObsModel(object):
             PDict['CompDims'] = self.CompDims
 
         if hasattr(self, 'Prior'):
-            all_keys = self.Prior.__dict__.keys()
-            field_names = self.Prior._FieldDims.keys()
+            all_keys = list(self.Prior.__dict__.keys())
+            field_names = list(self.Prior._FieldDims.keys())
             other_names = [key for key in all_keys if key not in field_names]
             for key in field_names:
                 PDict[key] = getattr(self.Prior, key)

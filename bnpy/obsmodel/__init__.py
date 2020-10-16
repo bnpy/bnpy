@@ -1,12 +1,13 @@
-from DiagGaussObsModel import DiagGaussObsModel
-from GaussObsModel import GaussObsModel
-from ZeroMeanGaussObsModel import ZeroMeanGaussObsModel
-from AutoRegGaussObsModel import AutoRegGaussObsModel
-from MultObsModel import MultObsModel
-from BernObsModel import BernObsModel
-from GaussRegressYFromFixedXObsModel \
+
+from bnpy.obsmodel.DiagGaussObsModel import DiagGaussObsModel
+from bnpy.obsmodel.GaussObsModel import GaussObsModel
+from bnpy.obsmodel.ZeroMeanGaussObsModel import ZeroMeanGaussObsModel
+from bnpy.obsmodel.AutoRegGaussObsModel import AutoRegGaussObsModel
+from bnpy.obsmodel.MultObsModel import MultObsModel
+from bnpy.obsmodel.BernObsModel import BernObsModel
+from bnpy.obsmodel.GaussRegressYFromFixedXObsModel \
 	import GaussRegressYFromFixedXObsModel
-from GaussRegressYFromDiagGaussXObsModel \
+from bnpy.obsmodel.GaussRegressYFromDiagGaussXObsModel \
 	import GaussRegressYFromDiagGaussXObsModel
 
 ObsModelConstructorsByName = {
@@ -23,7 +24,7 @@ ObsModelConstructorsByName = {
 # Make constructor accessible by nickname and fullname
 # Nickname = 'Gauss'
 # Fullname = 'GaussObsModel'
-for val in ObsModelConstructorsByName.values():
+for val in list(ObsModelConstructorsByName.values()):
     fullname = str(val.__name__)
     ObsModelConstructorsByName[fullname] = val
 

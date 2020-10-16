@@ -30,7 +30,7 @@ def runKMeans_BregmanDiv_existing(
     -------
     Z : 1D array, size N
         Contains assignments to Korig + K possible clusters
-        if Niter == 0, unassigned data items have value Z[n] = -1 
+        if Niter == 0, unassigned data items have value Z[n] = -1
 
     Mu : 2D array, size (Korig + Kfresh) x D
         Includes original Korig clusters and Kfresh new clusters
@@ -66,10 +66,10 @@ def runKMeans_BregmanDiv_existing(
     # (partial) global step: update mean parameters for Kfresh new clusters
     Lscores = list()
     prevN_K = np.zeros(Korig + Kfresh)
-    for riter in xrange(Niter):
+    for riter in range(Niter):
         Div = obsModel.calcSmoothedBregDiv(
             X=X, Mu=Mu, W=W,
-            includeOnlyFastTerms=True, 
+            includeOnlyFastTerms=True,
             smoothFrac=smoothFrac, eps=eps)
         Z = np.argmin(Div, axis=1)
         Ldata = Div.min(axis=1).sum()
@@ -89,11 +89,11 @@ def runKMeans_BregmanDiv_existing(
                 if logFunc:
                     logFunc(msg)
                 else:
-                    print msg
+                    print(msg)
                 assert np.all(np.diff(Lscores) <= 1e-5)
 
         curN_K = np.zeros(Korig + Kfresh)
-        for k in xrange(Korig + Kfresh):
+        for k in range(Korig + Kfresh):
             if W is None:
                 W_k = None
                 curN_K[k] = np.sum(Z==k)
@@ -121,7 +121,7 @@ def runKMeans_BregmanDiv_existing(
 
             str_sum_w_exist = countvec2str(curN_K[:Korig])
             logFunc(str_sum_w_exist)
-            
+
             str_sum_w_fresh = countvec2str(curN_K[Korig:])
             logFunc(str_sum_w_fresh)
 
@@ -133,7 +133,7 @@ def runKMeans_BregmanDiv_existing(
         # In case a new cluster (index Korig, Korig+1, ... Korig+Kfresh)
         # has mass pushed to zero, we delete it.
         # All original clusters (index 0, 1, ... Korig) remain untouched.
-        for k in reversed(xrange(Korig, Korig + Kfresh)):
+        for k in reversed(range(Korig, Korig + Kfresh)):
             if curN_K[k] == 0:
                 del(Mu[k])
                 Z[Z > k] -= 1
@@ -176,8 +176,8 @@ def initKMeans_BregmanDiv_existing(
     # Initialize list Mu to hold all mean vectors
     # First obsModel.K entries go to existing clusters found in the obsModel.
     # Final K entries are placeholders for the new clusters we'll make below.
-    Mu = [obsModel.getSmoothedMuForComp(k) + noiseSD**2*np.eye(obsModel.D) for k in xrange(obsModel.K)]
-    Mu.extend([None for k in xrange(K)])
+    Mu = [obsModel.getSmoothedMuForComp(k) + noiseSD**2*np.eye(obsModel.D) for k in range(obsModel.K)]
+    Mu.extend([None for k in range(K)])
 
     # Compute minDiv between all data and existing clusters
     minDiv, DivDataVec = obsModel.calcSmoothedBregDiv(
@@ -188,13 +188,13 @@ def initKMeans_BregmanDiv_existing(
 
     # Sample each cluster id using distance heuristic
     for k in range(0, K):
-        sum_minDiv = np.sum(minDiv)        
+        sum_minDiv = np.sum(minDiv)
         if sum_minDiv == 0.0:
             # Duplicate rows corner case
-            # Some rows of X may be exact copies, 
+            # Some rows of X may be exact copies,
             # leading to all minDiv being zero if chosen covers all copies
             chosenZ = chosenZ[:k]
-            for emptyk in reversed(range(k, K)):
+            for emptyk in reversed(list(range(k, K))):
                 # Remove remaining entries in the Mu list,
                 # so its total size is now k, not K
                 Mu.pop(emptyk)
@@ -229,7 +229,7 @@ def initKMeans_BregmanDiv_existing(
         curDiv[chosenZ[k]] = 0
         # Update distance between each atom and its nearest cluster
         minDiv = np.minimum(minDiv, curDiv)
-    
+
     # Some final verification
     assert len(Mu) == chosenZ.size + obsModel.K
     return chosenZ, Mu, minDiv, np.sum(DivDataVec)

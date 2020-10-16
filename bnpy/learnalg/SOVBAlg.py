@@ -7,9 +7,9 @@ import os
 import numpy as np
 import scipy.sparse
 
-from LearnAlg import LearnAlg
-from LearnAlg import makeDictOfAllWorkspaceVars
-import ElapsedTimeLogger
+from bnpy.learnalg.LearnAlg import LearnAlg
+from bnpy.learnalg.LearnAlg import makeDictOfAllWorkspaceVars
+from bnpy.learnalg import ElapsedTimeLogger
 from bnpy.util.SparseRespUtil import sparsifyResp
 
 class SOVBAlg(LearnAlg):
@@ -208,11 +208,11 @@ class SOVBAlg(LearnAlg):
             Fields to save determined by the memoLPkeys attribute of this alg.
         '''
         batchLP = dict(**batchLP) # make a copy
-        allkeys = batchLP.keys()
+        allkeys = list(batchLP.keys())
         for key in allkeys:
             if key != 'DocTopicCount':
                 del batchLP[key]
-        if len(batchLP.keys()) > 0:
+        if len(list(batchLP.keys())) > 0:
             if self.algParams['doMemoizeLocalParams'] == 1:
                 self.LPmemory[batchID] = batchLP
             elif self.algParams['doMemoizeLocalParams'] == 2:
@@ -242,4 +242,3 @@ class SOVBAlg(LearnAlg):
                 del batchLP
                 del spDTC
                 ElapsedTimeLogger.stopEvent('io', 'savelocal')
-

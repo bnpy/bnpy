@@ -5,7 +5,7 @@ import time
 
 from scipy.special import digamma
 
-from CPPLoader import LoadFuncFromCPPLib
+from bnpy.util.lib.sparseResp.CPPLoader import LoadFuncFromCPPLib
 
 curdir = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
 sparseLocalStepManyDocs_cpp = LoadFuncFromCPPLib(
@@ -55,7 +55,7 @@ def sparseLocalStep_WordCountData(
     assert numIterVec.dtype == np.int32
 
     # Handle starting from memoized doc-topic counts
-    if initDocTopicCountLP == 'memo':
+    if initDocTopicCountLP == 'useDocTopicCountIfProvided':
         if 'DocTopicCount' in LP:
             DocTopicCount = LP['DocTopicCount']
         else:
@@ -132,7 +132,7 @@ def sparseLocalStep_WordCountData(
     if restartLP > 0:
         LP['Info']['nRestartsAccepted'] = nRAcceptVec[0]
         LP['Info']['nRestartsTried'] = nRTrialVec[0]
-    writeLogMessageForManyDocs(Data, LP['Info'], LP, 
+    writeLogMessageForManyDocs(Data, LP['Info'], LP,
         convThrLP=convThrLP, **kwargs)
     return LP
 
@@ -167,13 +167,13 @@ def compareLocalStep(Data, model, **LPkwargs):
         Data, model, **LPkwargs)
     cpptime = time.time() - stime
 
-    print "%8.3f sec | python" % (pytime)
-    print "%8.3f sec | cpp" % (cpptime)
-    print "Comparing Python vs C++ LocalStepManyDocs implementations..."
-    print '    nDoc: %s' % (Data.nDoc)
-    print '       K: %s' % (model.allocModel.K)
+    print("%8.3f sec | python" % (pytime))
+    print("%8.3f sec | cpp" % (cpptime))
+    print("Comparing Python vs C++ LocalStepManyDocs implementations...")
+    print('    nDoc: %s' % (Data.nDoc))
+    print('       K: %s' % (model.allocModel.K))
     for KwArgName in ['nCoordAscentItersLP', 'convThrLP', 'restartLP']:
-        print '    %s: %s' % (KwArgName, LPkwargs[KwArgName])
+        print('    %s: %s' % (KwArgName, LPkwargs[KwArgName]))
     for key in ['DocTopicCount', 'spR', 'iter']:
         compareLPValsAtKey(LPold, LPnew, key)
     return LPold, LPnew
@@ -191,9 +191,9 @@ def compareLPValsAtKey(LPold, LPnew, key):
                                LPnew[key].toarray(), rtol=0, atol=.0001)
         else:
             assert np.allclose(LPold[key], LPnew[key], rtol=0, atol=.0001)
-        print '  Good. Same value for LP[%s]' % (key)
+        print('  Good. Same value for LP[%s]' % (key))
     except AssertionError as e:
-        print '  BAD!! Mismatch for LP[%s]' % (key)
+        print('  BAD!! Mismatch for LP[%s]' % (key))
         raise(e)
 
 
@@ -204,20 +204,20 @@ if __name__ == '__main__':
 
     import nips
     Data = nips.get_data()
-    Data200 = Data.select_subset_by_mask(range(400))
+    Data200 = Data.select_subset_by_mask(list(range(400)))
     Data200.name = 'nips400'
     model, Info = bnpy.run(Data200, 'HDPTopicModel', 'Mult', 'VB',
-        nBatch=1, nLap=2, initname='randexamples', K=200, 
+        nBatch=1, nLap=2, initname='randexamples', K=200,
         nCoordAscentItersLP=100, convThrLP=.01)
 
     '''
     model, Info = bnpy.run('BarsK10V900', 'HDPTopicModel', 'Mult', 'VB',
-        nBatch=1, nDocTotal=50, nLap=2, initname='randexamples', K=200, 
+        nBatch=1, nDocTotal=50, nLap=2, initname='randexamples', K=200,
         nCoordAscentItersLP=100, convThrLP=.01)
     '''
     '''
     model, Info = bnpy.run('BarsK10V900', 'HDPTopicModel', 'Mult', 'VB',
-        nBatch=1, nDocTotal=50, nLap=2, initname='truelabels', 
+        nBatch=1, nDocTotal=50, nLap=2, initname='truelabels',
         nCoordAscentItersLP=100, convThrLP=.01)
     '''
     # Find doc with significant usage by at least 2 topics
@@ -312,7 +312,6 @@ if __name__ == '__main__':
             reviseActiveEveryLP=1,
             activeonlyLP=2,
             verboseLP=0)
-        print '>>> reviseActiveEveryLP=%d  nnzPerRow=%d' % (
-            reviseActiveEveryLP, nnzPerRow)
+        print('>>> reviseActiveEveryLP=%d  nnzPerRow=%d' % (
+            reviseActiveEveryLP, nnzPerRow))
         model.calc_local_params(Data, **LPkwargs)
-

@@ -69,7 +69,7 @@ def calcDocTopicCount_numpy(
     if DocTopicCount is None:
         DocTopicCount = np.zeros((D, K), order='C')
     if np.isfortran(DocTopicCount):
-        print 'here!!!!'
+        print('here!!!!')
         DocTopicCount = np.ascontiguousarray(DocTopicCount)
 
     for d in activeDocs:
@@ -101,7 +101,7 @@ def calcDocTopicCount_c(
     if sumR is None:
         sumR = np.zeros(N)
     if DocTopicCount is None:
-        print 'HERE!!'
+        print('HERE!!')
         DocTopicCount = np.zeros((D, K), order='F')
     if not np.isfortran(DocTopicCount):
         raise NotImplementedError('NEED FORTRAN ORDER')
@@ -127,13 +127,13 @@ def make_quick_args(D=5, N=85, K=4, A=4, order='F'):
     if A == D:
         activeDocs = np.arange(D, dtype=np.int32)
     else:
-        activeDocs = PRNG.choice(range(D), A, replace=False)
+        activeDocs = PRNG.choice(list(range(D)), A, replace=False)
         activeDocs = np.asarray(np.sort(activeDocs), dtype=np.int32)
 
     if D == 1:
         docIndices = np.asarray([0, N], dtype=np.int32)
     else:
-        docIndices = PRNG.choice(range(N), D - 1, replace=False)
+        docIndices = PRNG.choice(list(range(N)), D - 1, replace=False)
         docIndices = np.hstack([0, np.sort(docIndices), N])
         docIndices = np.asarray(docIndices, dtype=np.int32)
 
@@ -163,16 +163,16 @@ def test_speed(D=4000, N=400, K=100, A=None, nTrial=5):
     for _ in range(nTrial):
         R, DTM = calcDocTopicCount_numpy(*args)
     etime = time.time() - stime
-    print '%.5f sec  numpy' % (etime)
+    print('%.5f sec  numpy' % (etime))
 
     stime = time.time()
     for _ in range(nTrial):
         R2, DTM2 = calcDocTopicCount_c(*args2)
     etime = time.time() - stime
-    print '%.5f sec  c' % (etime)
+    print('%.5f sec  c' % (etime))
 
-    print np.allclose(R, R2)
-    print np.allclose(DTM, DTM2)
+    print(np.allclose(R, R2))
+    print(np.allclose(DTM, DTM2))
 
 
 def test_quick_c():
@@ -193,21 +193,21 @@ def test_quick_numpy():
 
 
 def pprint_arr(X, label, Kmax=10, fmt='%8.5f'):
-    print '------------------', label
+    print('------------------', label)
     if X.ndim == 1:
-        print ' '.join([fmt % x for x in X[:Kmax]])
+        print(' '.join([fmt % x for x in X[:Kmax]]))
     else:
         nRow = np.minimum(Kmax, X.shape[0])
         for row in range(nRow):
-            print ' '.join([fmt % x for x in X[row, :Kmax]])
+            print(' '.join([fmt % x for x in X[row, :Kmax]]))
 
 
 if __name__ == '__main__':
 
-    print '============================ Numpy'
+    print('============================ Numpy')
     test_quick_numpy()
 
-    print '============================ C'
+    print('============================ C')
     test_quick_c()
 
     test_speed()

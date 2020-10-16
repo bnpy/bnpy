@@ -16,7 +16,7 @@ def makeDataset(K=5, Nk=100, Nvec=None, **kwargs):
 
     Z = [None for k in range(K)]
     X = [None for k in range(K)]
-    for k in xrange(K):
+    for k in range(K):
         PRNG = np.random.RandomState(k)
         mu_k = 10 * PRNG.randn(2)
         Sigma_k = np.diag(PRNG.gamma(5, size=2)/5.0)

@@ -5,7 +5,7 @@ Visualization tools for toy bars data for topic models.
 '''
 import numpy as np
 
-from PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 
 imshowArgs = dict(interpolation='nearest',
                   cmap='bone_r', # zero is white, large values are black
@@ -29,7 +29,7 @@ def show_square_images(
     --------------
     Provided axes have plots updated.
     '''
-    global imshowArgs    
+    global imshowArgs
     local_imshowArgs = dict(**imshowArgs)
     for key in local_imshowArgs:
         if key in kwargs:
@@ -126,7 +126,7 @@ def plotExampleBarsDocs(Data, docIDsToPlot=None, figID=None,
             pylab.xlabel(xlabels[plotPos])
 
     # Disable empty plots!
-    for kdel in xrange(plotPos + 2, nrows * ncols + 1):
+    for kdel in range(plotPos + 2, nrows * ncols + 1):
         aH = pylab.subplot(nrows, ncols, kdel)
         aH.axis('off')
 
@@ -194,8 +194,8 @@ def plotBarsForTopicMATFile(matfilename, sortBy=None, keepWorst=0,
     else:
         topics, probs, alph = bnpy.ioutil.ModelReader.loadTopicModel(
             matfilename, returnTPA=1)
-    print 'total K=', topics.shape[0]
-    print 'beta>0.0001 K=', np.sum(probs > .0001)
+    print('total K=', topics.shape[0])
+    print('beta>0.0001 K=', np.sum(probs > .0001))
     if levels is not None:
         assert topics.max() > 1.0
         topics = np.floor(topics)
@@ -215,12 +215,12 @@ def plotBarsForTopicMATFile(matfilename, sortBy=None, keepWorst=0,
             L = len(sortIDs)
             sortIDs = sortIDs[:L + worstLoc]
             probs = probs[:L + worstLoc]
-            print probs[-1], '<<<< first above cutoff'
+            print(probs[-1], '<<<< first above cutoff')
             keepIDs = np.hstack(
                 [sortIDs[:(Kmax - keepWorst)], sortIDs[-keepWorst:]])
-            print probs[:(Kmax - keepWorst)]
-            print probs[-keepWorst:]
-            print len(sortIDs), '<<< count above cutoff'
+            print(probs[:(Kmax - keepWorst)])
+            print(probs[-keepWorst:])
+            print(len(sortIDs), '<<< count above cutoff')
             topics = topics[keepIDs]
         else:
             topics = topics[sortIDs[:Kmax]]
@@ -236,7 +236,7 @@ def showTopicsAsSquareImages(topics,
                              ncols=5,
                              W=1, H=1, figH=None,
                              **kwargs):
-    global imshowArgs    
+    global imshowArgs
     local_imshowArgs = dict(**imshowArgs)
     for key in local_imshowArgs:
         if key in kwargs:
@@ -273,8 +273,8 @@ def showTopicsAsSquareImages(topics,
 
     for plotID, compID in enumerate(compListToPlot):
         if plotID >= Kmax:
-            print 'DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
-                % (plotID, len(activeCompIDs))
+            print('DISPLAY LIMIT EXCEEDED. Showing %d/%d components' \
+                % (plotID, len(activeCompIDs)))
             break
 
         if compID not in activeCompIDs:
@@ -291,15 +291,15 @@ def showTopicsAsSquareImages(topics,
 
         # Draw colored border around highlighted topics
         if compID in compsToHighlight:
-            [i.set_color('green') for i in ax.spines.itervalues()]
-            [i.set_linewidth(3) for i in ax.spines.itervalues()]
+            [i.set_color('green') for i in ax.spines.values()]
+            [i.set_linewidth(3) for i in ax.spines.values()]
 
         if xlabels is not None:
             if len(xlabels) > 0:
                 pylab.xlabel(xlabels[plotID], fontsize=11)
 
     # Disable empty plots!
-    for kdel in xrange(plotID + 2, nrows * ncols + 1):
+    for kdel in range(plotID + 2, nrows * ncols + 1):
         aH = pylab.subplot(nrows, ncols, kdel)
         aH.axis('off')
 

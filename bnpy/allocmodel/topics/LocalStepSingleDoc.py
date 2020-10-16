@@ -26,6 +26,15 @@ def calcLocalParams_SingleDoc(
 
     Kwargs
     --------
+    initDocTopicCountLP : str
+        If equal to 'setDocProbsToEGlobalProbs',
+            Initialize doc-topic probas directly using global probas.
+            Recommended for the first time a document is processed.
+            However, if document has been processed before and counts have
+            been provided, this initialization will *disrupt* any guarantees
+            of cross-lap ELBO monotonicity.
+        Otherwise, will use provided counts to initialize local iterations.
+            By default, these counts will be an array of all zeros.
     nCoordAscentItersLP : int
         Number of local step iterations to do for this document.
     convThrLP : float
@@ -50,12 +59,12 @@ def calcLocalParams_SingleDoc(
     if sumResp_d is None:
         sumResp_d = np.zeros(Lik_d.shape[0])
 
-    # Initialize prior from global topic probs
     if DocTopicCount_d is None:
+        # Allocate space for storing doc-topic counts
         DocTopicCount_d = np.zeros_like(alphaEbeta)
-    
+
     if initDocTopicCountLP.count('setDocProbsToEGlobalProbs'):
-        # Here, we initialize pi_d to alphaEbeta
+        # Here, we initialize current doc probas to global probas
         DocTopicProb_d = alphaEbeta.copy()
         # Update sumResp for all tokens in document
         np.dot(Lik_d, DocTopicProb_d, out=sumResp_d)
@@ -63,13 +72,12 @@ def calcLocalParams_SingleDoc(
         np.dot(wc_d / sumResp_d, Lik_d, out=DocTopicCount_d)
         DocTopicCount_d *= DocTopicProb_d
     else:
-        # Set E[pi_d] to exp E log[ alphaEbeta ] 
+        # Allocate space for storing doc-topic proba array
         DocTopicProb_d = np.zeros_like(alphaEbeta)
 
     prevDocTopicCount_d = DocTopicCount_d.copy()
-    for iter in xrange(nCoordAscentItersLP):
-        # Update Prob of Active Topics
-        # First, in logspace, so Prob_d[k] = E[ log pi_dk ] + const
+    for iter in range(nCoordAscentItersLP):    
+        # Update proba of active topics (in log space)
         np.add(DocTopicCount_d, alphaEbeta, out=DocTopicProb_d)
         digamma(DocTopicProb_d, out=DocTopicProb_d)
         # TODO: subtract max for safe exp? doesnt seem necessary...
@@ -159,7 +167,7 @@ def removeJunkTopics_SingleDoc(
         pDocTopicCount_d[kID] = 0
 
         # Refine initial proposal via standard coord ascent updates
-        for iter in xrange(restartNumItersLP):
+        for iter in range(restartNumItersLP):
             np.add(pDocTopicCount_d, alphaEbeta, out=pDocTopicProb_d)
             digamma(pDocTopicProb_d, out=pDocTopicProb_d)
             np.exp(pDocTopicProb_d, out=pDocTopicProb_d)
@@ -312,7 +320,7 @@ def calcLocalParams_SingleDoc_WithELBOTrace(
 
     ELBOtrace = list()
     prevDocTopicCount_d = DocTopicCount_d.copy()
-    for iter in xrange(nCoordAscentItersLP):
+    for iter in range(nCoordAscentItersLP):
         # Update Prob of Active Topics
         # First, in logspace, so Prob_d[k] = E[ log pi_dk ] + const
         np.add(DocTopicCount_d, alphaEbeta, out=DocTopicProb_d)

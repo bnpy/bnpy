@@ -1,4 +1,4 @@
-from DataIterator import DataIterator
+from bnpy.data.DataIterator import DataIterator
 
 class DataObj(object):
 

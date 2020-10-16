@@ -17,7 +17,6 @@ Constraints:
 * rho satisfies: 0 < rho[k] < 1
 * omega satisfies: 0 < omega[k]
 '''
-
 import warnings
 import numpy as np
 import scipy.optimize
@@ -47,7 +46,7 @@ def negL_omega(omega=None, rho=None, initrho=None, **kwargs):
     return negL_rhoomega(rho=rho, omega=omega, **kwargs)
 
 def negL_rhoomega(rhoomega=None, rho=None, omega=None,
-            sumLogPiActiveVec=None, 
+            sumLogPiActiveVec=None,
             sumLogPiRemVec=None,
             sumLogPiRem=None,
             nDoc=0, gamma=1.0, alpha=1.0,
@@ -75,7 +74,7 @@ def negL_rhoomega(rhoomega=None, rho=None, omega=None,
         rho, omega, K = _unpack(rhoomega)
     else:
         assert np.all(np.isfinite(rho))
-        assert np.all(np.isfinite(omega))       
+        assert np.all(np.isfinite(omega))
         K = rho.size
         assert K == omega.size
     eta1 = rho * omega
@@ -245,11 +244,11 @@ def find_optimum(
     ...     sumLogPiActiveVec=np.zeros(3),
     ...     sumLogPiRemVec=np.zeros(3),
     ...     alpha=0.5, gamma=1.0)
-    >>> print r_opt
-    [ 0.5  0.5  0.5]
-    >>> print o_opt
-    [ 2.  2.  2.]
-    
+    >>> print (r_opt)
+    [0.5 0.5 0.5]
+    >>> print (o_opt)
+    [2. 2. 2.]
+
     We can optimize for just rho by turning do_grad_omega off.
     This fixes omega at its initial value, but optimizes rho.
     >>> r_opt, o_opt, f_opt, Info = find_optimum(
@@ -259,8 +258,8 @@ def find_optimum(
     ...     sumLogPiRemVec=np.asarray([0, 0, -20.]),
     ...     alpha=0.5,
     ...     gamma=5.0)
-    >>> print o_opt
-    [ 46.  36.  26.]
+    >>> print (o_opt)
+    [46. 36. 26.]
     >>> np.allclose(o_opt, Info['initomega'])
     True
 
@@ -334,7 +333,7 @@ def find_optimum(
         approx_grad=approx_grad,
         disp=None,
         )
-    fminPossibleKwargs = set(scipy.optimize.fmin_l_bfgs_b.func_code.co_varnames)
+    fminPossibleKwargs = set(scipy.optimize.fmin_l_bfgs_b.__code__.co_varnames)
     for key in kwargs:
         if key in fminPossibleKwargs:
             fminKwargs[key] = kwargs[key]
@@ -441,7 +440,7 @@ def c2rhoomega(c, returnSingleVector=False):
 
     OPTIONAL: may return as one concatenated vector (length 2K)
     '''
-    K = c.size / 2
+    K = c.size // 2
     rho = sigmoid(c[:K])
     omega = np.exp(c[K:])
     if returnSingleVector:
@@ -455,7 +454,7 @@ def c2omega(c):
     return np.exp(c)
 
 def rhoomega2c(rhoomega):
-    K = rhoomega.size / 2
+    K = rhoomega.size // 2
     return np.hstack([invsigmoid(rhoomega[:K]), np.log(rhoomega[K:])])
 
 def rho2c(rho):
@@ -465,7 +464,7 @@ def omega2c(omega):
     return np.log(omega)
 
 def _unpack(rhoomega):
-    K = rhoomega.size / 2
+    K = rhoomega.size // 2
     rho = rhoomega[:K]
     omega = rhoomega[-K:]
     return rho, omega, K
@@ -484,8 +483,8 @@ def make_initrho(K, nDoc, gamma):
     Example
     -------
     >>> rho = make_initrho(3, 0, 1.0)
-    >>> print rho
-    [ 0.5  0.5  0.5]
+    >>> print (rho)
+    [0.5 0.5 0.5]
     '''
     eta1 = (nDoc + 1) * np.ones(K)
     eta0 = nDoc * kvec(K) + gamma
@@ -598,7 +597,7 @@ def _get_flatLowTriIDs_KxK(K):
     return flatIDs
 
 
-def calc_fgrid(o_grid=None, o_pos=None, 
+def calc_fgrid(o_grid=None, o_pos=None,
                r_grid=None, r_pos=None,
                omega=None, rho=None, **kwargs):
     ''' Evaluate the objective across range of values for one entry
@@ -608,7 +607,7 @@ def calc_fgrid(o_grid=None, o_pos=None,
         assert o_pos >= 0 and o_pos < K
         f_grid = np.zeros_like(o_grid)
         omega_n = omega.copy()
-        for n in xrange(o_grid.size):
+        for n in range(o_grid.size):
             omega_n[o_pos] = o_grid[n]
             f_grid[n] = negL_omega(rho=rho, omega=omega_n,
                 approx_grad=1, **kwargs)
@@ -616,7 +615,7 @@ def calc_fgrid(o_grid=None, o_pos=None,
         assert r_pos >= 0 and r_pos < K
         f_grid = np.zeros_like(r_grid)
         rho_n = rho.copy()
-        for n in xrange(r_grid.size):
+        for n in range(r_grid.size):
             rho_n[o_pos] = r_grid[n]
             f_grid[n] = negL_rho(rho=rho_n, omega=omega,
                 approx_grad=1, **kwargs)
@@ -637,7 +636,7 @@ def negL_rhoomega_viaHDPTopicUtil(
     ''' Compute minimization objective another way, using utility funcs.
 
     This allows verifying that our negL_rhoomega function is correct.
-    
+
     Returns
     -------
     negL : -1 * L(rho, omega, ...)
@@ -645,12 +644,12 @@ def negL_rhoomega_viaHDPTopicUtil(
     '''
     K = rho.size
 
-    from HDPTopicUtil import L_alloc
-    Ldict = L_alloc(todict=1, 
+    from .HDPTopicUtil import L_alloc
+    Ldict = L_alloc(todict=1,
         rho=rho, omega=omega, nDoc=nDoc, alpha=alpha, gamma=gamma)
 
-    from HDPTopicUtil import calcELBO_NonlinearTerms
-    Ldict2 = calcELBO_NonlinearTerms(todict=1, 
+    from .HDPTopicUtil import calcELBO_NonlinearTerms
+    Ldict2 = calcELBO_NonlinearTerms(todict=1,
         rho=rho,
         alpha=alpha,
         gamma=gamma,
@@ -667,4 +666,3 @@ def negL_rhoomega_viaHDPTopicUtil(
     Lrhoomega = Ldict['Lalloc_rhoomega'] + \
         Ldict2['Lslack_alphaEbeta']
     return -1 * Lrhoomega
-

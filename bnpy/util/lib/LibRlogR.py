@@ -88,7 +88,7 @@ def calcRlogRdotv_specificpairs_c(R, v, mPairs):
     Z = np.zeros((K, K), order='F')
     if K == 1 or len(mPairs) == 0:
         return Z
-    aList, bList = zip(*mPairs)
+    aList, bList = list(zip(*mPairs))
     avec = np.asarray(aList, order='F', dtype=np.float64)
     bvec = np.asarray(bList, order='F', dtype=np.float64)
 

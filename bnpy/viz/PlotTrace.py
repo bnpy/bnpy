@@ -16,10 +16,10 @@ import glob
 import os
 import scipy.io
 
-from PlotUtil import pylab
+from bnpy.viz.PlotUtil import pylab
 from bnpy.ioutil import BNPYArgParser
 from bnpy.ioutil.CountReader import loadKeffForTask
-from JobFilter import filterJobs
+from bnpy.viz.JobFilter import filterJobs
 
 taskidsHelpMsg = "ids of trials/runs to plot from given job." + \
                  " Example: '4' or '1,2,3' or '2-6'."
@@ -66,7 +66,7 @@ def plotJobs(jpaths, legNames, styles=None, density=2,
 
     nLeg = len(legNames)
 
-    for lineID in xrange(nLines):
+    for lineID in range(nLines):
         if styles is None:
             curStyle = dict(colorID=lineID)
         else:
@@ -118,7 +118,7 @@ def plotJobs(jpaths, legNames, styles=None, density=2,
         if (not np.allclose(ymax, ymin)) and allRunsHaveXBeyond1:
             pylab.ylim([ymin, ymax + 0.1 * (ymax - ymin)])
         pylab.xlim([xmin, xmax + .05 * (xmax - xmin)])
-    
+
     if loc is not None and len(jpaths) > 1:
         pylab.legend(loc=loc, bbox_to_anchor=bbox_to_anchor)
     if tickfontsize is not None:
@@ -232,10 +232,10 @@ def plot_all_tasks_for_job(jobpath, label, taskids=None,
             diff = xs[1:] - xs[:-1]
             goodIDs = np.flatnonzero(diff >= 0)
             if len(goodIDs) < xs.size - 1:
-                print 'WARNING: looks like multiple runs writing to this file!'
-                print jobpath
-                print 'Task: ', taskid
-                print len(goodIDs), xs.size - 1
+                print('WARNING: looks like multiple runs writing to this file!')
+                print(jobpath)
+                print('Task: ', taskid)
+                print(len(goodIDs), xs.size - 1)
                 xs = np.hstack([xs[goodIDs], xs[-1]])
                 ys = np.hstack([ys[goodIDs], ys[-1]])
 
@@ -251,7 +251,7 @@ def plot_all_tasks_for_job(jobpath, label, taskids=None,
             mask = laps >= showOnlyAfterLap
             xs = xs[mask]
             ys = ys[mask]
-            
+
         # Force plot density (data points per lap) to desired specification
         # This avoids making plots that have huge file sizes,
         # due to too much content in the given display space
@@ -307,7 +307,7 @@ def loadXYFromTopicModelSummaryFiles(jobpath, taskid, xvar='laps', yvar='K'):
     elif xvar.count('time'):
         xpath = os.path.join(jobpath, taskid, 'predlik-timeTrain.txt')
     else:
-        xpath = os.path.join(jobpath, taskid, 'predlik-' + xvar + '.txt')       
+        xpath = os.path.join(jobpath, taskid, 'predlik-' + xvar + '.txt')
     xs = np.loadtxt(xpath)
     ys = np.loadtxt(ypath)
     # HACK!
@@ -346,7 +346,7 @@ def parse_args(xvar='laps', yvar='evidence'):
     parser.add_argument('jpath', type=str, default='demo*')
 
     parser.add_argument('--xvar', type=str, default=xvar,
-                        choices=LabelMap.keys(),
+                        choices=list(LabelMap.keys()),
                         help="name of x axis variable to plot.")
 
     parser.add_argument('--yvar', type=str, default=yvar,

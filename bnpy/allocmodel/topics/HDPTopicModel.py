@@ -1,14 +1,14 @@
 import numpy as np
 import logging
 
-import LocalStepManyDocs
-import OptimizerRhoOmegaBetter
+from bnpy.allocmodel.topics import LocalStepManyDocs
+from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 
-from HDPTopicUtil import calcELBO
-from HDPTopicUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
-from HDPTopicUtil import calcHrespForMergePairs, calcHrespForSpecificMergePairs
-from HDPTopicUtil import calcMergeTermsFromSeparateLP
-from HDPTopicUtil import L_alloc
+from bnpy.allocmodel.topics.HDPTopicUtil import calcELBO
+from bnpy.allocmodel.topics.HDPTopicUtil import calcELBO_LinearTerms, calcELBO_NonlinearTerms
+from bnpy.allocmodel.topics.HDPTopicUtil import calcHrespForMergePairs, calcHrespForSpecificMergePairs
+from bnpy.allocmodel.topics.HDPTopicUtil import calcMergeTermsFromSeparateLP
+from bnpy.allocmodel.topics.HDPTopicUtil import L_alloc
 
 from bnpy.allocmodel.AllocModel import AllocModel
 from bnpy.allocmodel.mix.DPMixtureModel import convertToN0
@@ -228,10 +228,10 @@ class HDPTopicModel(AllocModel):
         '''
         alphaEbeta = self.alpha_E_beta()
         alphaEbetaRem = self.alpha_E_beta_rem()
-        assert np.allclose(alphaEbeta[0], 
+        assert np.allclose(alphaEbeta[0],
             self.alpha * self.rho[0])
         if alphaEbeta.size > 1:
-            assert np.allclose(alphaEbeta[1], 
+            assert np.allclose(alphaEbeta[1],
                 self.alpha * self.rho[1] * (1-self.rho[0]))
         doSparse1 = 'activeonlyLP' in kwargs and kwargs['activeonlyLP'] == 2
         doSparse2 = 'nnzPerRowLP' in kwargs and \
@@ -272,7 +272,7 @@ class HDPTopicModel(AllocModel):
         N = resp.shape[0]
         K = resp.shape[1]
         DocTopicCount = np.zeros((Data.nDoc, K))
-        for d in xrange(Data.nDoc):
+        for d in range(Data.nDoc):
             start = Data.doc_range[d]
             stop = Data.doc_range[d + 1]
             if hasattr(Data, 'word_count'):
@@ -365,7 +365,7 @@ class HDPTopicModel(AllocModel):
         for docID in docIDs:
             start = Data.doc_range[docID]
             stop = Data.doc_range[docID + 1]
-            subsetTokenIDs.extend(range(start, stop))
+            subsetTokenIDs.extend(list(range(start, stop)))
         subsetLP['resp'] = LP['resp'][subsetTokenIDs].copy()
         return subsetLP
 
@@ -876,7 +876,7 @@ def calcSummaryStats(Dslice, LP=None,
         digammaSumTheta = digamma(LP['theta'].sum(axis=1) + LP['thetaRem'])
         LP['digammaSumTheta'] = digammaSumTheta # Used for merges
 
-    if 'ElogPi' not in LP:        
+    if 'ElogPi' not in LP:
         LP['ElogPiRem'] = digamma(LP['thetaRem']) - LP['digammaSumTheta']
         LP['ElogPi'] = digamma(LP['theta']) - \
             LP['digammaSumTheta'][:, np.newaxis]
@@ -966,4 +966,3 @@ def calcSummaryStats(Dslice, LP=None,
         SumPi = np.sum(Pi, axis=0)
         SS.setSelectionTerm('SumPi', SumPi, dims='K')
     return SS
-

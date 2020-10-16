@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def flatstr2np(xvecstr):
     return np.asarray([float(x) for x in xvecstr.split()])
 
@@ -40,8 +39,17 @@ def split_str_into_fixed_width_lines(mstr, linewidth=80, tostr=False):
     >>> s = '   abc   def   ghi   jkl   mno   pqr'  
     >>> split_str_into_fixed_width_lines(s, linewidth=10)
     ['    abc', '   def', '   ghi', '   jkl', '   mno', '   pqr']
+
     >>> s = '  abc1  def2  ghi3  jkl4'  
     >>> split_str_into_fixed_width_lines(s, linewidth=6)
+    ['   abc1', '  def2', '  ghi3', '  jkl4']
+
+    >>> s = '  abc1  def2  ghi3  jkl4'
+    >>> split_str_into_fixed_width_lines(s, linewidth=3)
+    [' a', 'bc1', 'd', 'ef2', 'g', 'hi3', 'j', 'kl4']
+    >>> split_str_into_fixed_width_lines(s, linewidth=6)
+    ['   abc1', '  def2', '  ghi3', '  jkl4']
+    >>> split_str_into_fixed_width_lines(s, linewidth=9)
     ['   abc1', '  def2', '  ghi3', '  jkl4']
     >>> split_str_into_fixed_width_lines(s, linewidth=80)
     ['   abc1  def2  ghi3  jkl4']

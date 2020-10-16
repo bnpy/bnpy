@@ -78,7 +78,7 @@ def runBirthMove(
 
     if doVizBirth:
         showBirthBeforeAfter(**locals())
-        keypress = raw_input('Press any key to continue >>>')
+        keypress = input('Press any key to continue >>>')
         if keypress.count('embed'):
             from IPython import embed;
             embed()

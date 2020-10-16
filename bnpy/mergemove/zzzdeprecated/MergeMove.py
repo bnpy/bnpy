@@ -19,7 +19,7 @@ def run_many_merge_moves(curModel, curSS, curELBO, mPairIDs, M=None,
     '''
     # eligibleIDs : list from 0, 1, ... len(mPairIDs)
     #  provides index of which original candidate we are now attempting
-    eligibleIDs = range(len(mPairIDs))
+    eligibleIDs = list(range(len(mPairIDs)))
 
     CompIDShift = np.zeros(curSS.K, dtype=np.int32)
 
@@ -37,7 +37,7 @@ def run_many_merge_moves(curModel, curSS, curELBO, mPairIDs, M=None,
     sF = curModel.obsModel.getDatasetScale(curSS)
     isHDPTopicModel = str(type(curModel.allocModel)).count('HDPTopic') > 0
     if len(mPairIDs) > 0 and isHDPTopicModel:
-        aList, bList = zip(*mPairIDs)
+        aList, bList = list(zip(*mPairIDs))
         OGapMat = np.zeros((curSS.K, curSS.K))
         OGapList = curModel.obsModel.calcHardMergeGap_SpecificPairs(
             curSS, mPairIDs)

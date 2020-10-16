@@ -113,7 +113,7 @@ def main():
     pylab.title('Cluster 0');
     pylab.show(block=0)
 
-    raw_input("Press any key to continue >>")
+    input("Press any key to continue >>")
 
     for doc in [1, 2, 3, 10, 32]:
         ktarget = bZ[doc]
@@ -128,7 +128,7 @@ def main():
                 b_cleanupMaxNumAcceptPerIter=2,
                 **b_kwargs)
         except BirthProposalError as e:
-            print e
+            print(e)
 
 
 def calcLscoreFromModel(Data, M, LP=None, label=''):
@@ -138,7 +138,7 @@ def calcLscoreFromModel(Data, M, LP=None, label=''):
     SS = M.get_global_suff_stats(Data, LP, doPrecompEntropy=1)
     M.update_global_params(SS)
     Lscore = M.calc_evidence(SS=SS)
-    print "%15s K=%d  L=%.5f Ntotal=%.2f" % (label, SS.K, Lscore, SS.N.sum())
+    print("%15s K=%d  L=%.5f Ntotal=%.2f" % (label, SS.K, Lscore, SS.N.sum()))
     return M, LP, SS, Lscore        
 
 def loadModelWithLPSSandLscore(Data, path, label=''):
@@ -147,7 +147,7 @@ def loadModelWithLPSSandLscore(Data, path, label=''):
     SS = M.get_global_suff_stats(Data, LP, doPrecompEntropy=1)
     M.update_global_params(SS)
     Lscore = M.calc_evidence(SS=SS)
-    print "%15s K=%d  L=%.5f Ntotal=%.2f" % (label, SS.K, Lscore, SS.N.sum())
+    print("%15s K=%d  L=%.5f Ntotal=%.2f" % (label, SS.K, Lscore, SS.N.sum()))
     return M, LP, SS, Lscore
 
 if __name__ == "__main__":

@@ -72,14 +72,14 @@ def learn_rhoomega_fromFixedCounts(DocTopicCount=None,
     didShuffle = 0
     if canShuffleInit:
         if canShuffleInit.lower().count('byusage'):
-            print 'INITIAL SORTING BY USAGE'
+            print('INITIAL SORTING BY USAGE')
             avgPi = calcAvgPiFromDocTopicCount(DocTopicCount)
             bigtosmall = argsort_bigtosmall_stable(avgPi)
         elif canShuffleInit.lower().count('bycount'):
-            print 'INITIAL SORTING BY COUNT'
+            print('INITIAL SORTING BY COUNT')
             bigtosmall = argsort_bigtosmall_stable(DocTopicCount.sum(axis=0))
         elif canShuffleInit.lower().count('random'):
-            print 'INITIAL SORTING RANDOMLY'
+            print('INITIAL SORTING RANDOMLY')
             PRNG = np.random.RandomState(0)
             bigtosmall = np.arange(K)
             PRNG.shuffle(bigtosmall)
@@ -232,9 +232,9 @@ def learn_rhoomega_fromFixedCounts(DocTopicCount=None,
         LtroList.append(Ltro)
         if not LtroList[-1] >= LtroList[-2]:
             if didShuffle:
-                print 'NOT MONOTONIC! just after theta update with SHUFFLE!'
+                print('NOT MONOTONIC! just after theta update with SHUFFLE!')
             else:
-                print 'NOT MONOTONIC! just after theta standard update'
+                print('NOT MONOTONIC! just after theta standard update')
 
         didELBODrop = 0
         if canShuffle:
@@ -272,8 +272,8 @@ def learn_rhoomega_fromFixedCounts(DocTopicCount=None,
                 )
                 LtroList.append(Ltro)
                 if not LtroList[-1] >= LtroList[-2]:
-                    print 'NOT MONOTONIC! just after %s shuffle update!' % (
-                        canShuffle)
+                    print('NOT MONOTONIC! just after %s shuffle update!' % (
+                        canShuffle))
                     didELBODrop = 1
 
         prevrho[:] = rho
@@ -310,14 +310,14 @@ def learn_rhoomega_fromFixedCounts(DocTopicCount=None,
         )
         LtroList.append(Ltro)
         if not LtroList[-1] >= LtroList[-2]:
-            print 'NOT MONOTONIC! just after rho update!'
+            print('NOT MONOTONIC! just after rho update!')
 
         if didELBODrop:
             if LtroList[-1] >= LtroList[-3]:
-                print 'Phew. Combined update of sorting then optimizing rho OK'
+                print('Phew. Combined update of sorting then optimizing rho OK')
             else:
-                print 'WHOA! Combined update of sorting then' + \
-                    ' optimizing rho beta NOT MONOTONIC'
+                print('WHOA! Combined update of sorting then' + \
+                    ' optimizing rho beta NOT MONOTONIC')
 
     Snapshots['Lscore'].append(Ltro)
     Snapshots['DTCSum'].append(DocTopicCount.sum(axis=0))
@@ -333,29 +333,29 @@ def learn_rhoomega_fromFixedCounts(DocTopicCount=None,
     Snapshots['count_trackEmpty'].append(
         DocTopicCount.sum(axis=0)[trackEmptyUIDs])
 
-    print '\nEmpty cluster ids (%d of %d)' % (
-        len(trackEmptyUIDs), len(emptyUIDs))
-    print '-----------------'
-    print ' '.join(['% 10d' % (x) for x in trackEmptyUIDs])
+    print('\nEmpty cluster ids (%d of %d)' % (
+        len(trackEmptyUIDs), len(emptyUIDs)))
+    print('-----------------')
+    print(' '.join(['% 10d' % (x) for x in trackEmptyUIDs]))
     
 
-    print '\nSelected active clusters to track'
-    print '---------------------------------'
-    print ' '.join(['% 10d' % (x) for x in trackActiveUIDs])
-    print ' '.join(['% .3e' % (x) for x in avgPi[trackActiveUIDs]])
+    print('\nSelected active clusters to track')
+    print('---------------------------------')
+    print(' '.join(['% 10d' % (x) for x in trackActiveUIDs]))
+    print(' '.join(['% .3e' % (x) for x in avgPi[trackActiveUIDs]]))
 
-    print '\nDocTopicCount for %d of %d docs' % (nDocToDisplay, nDoc)
-    print '---------------------------------'
+    print('\nDocTopicCount for %d of %d docs' % (nDocToDisplay, nDoc))
+    print('---------------------------------')
     for n in range(nDocToDisplay):
-        print ' '.join([
-            '% 9.2f' % (x) for x in DocTopicCount[n, trackActiveUIDs]])
+        print(' '.join([
+            '% 9.2f' % (x) for x in DocTopicCount[n, trackActiveUIDs]]))
 
-    print '\nFinal sumLogPiActiveVec'
-    print '---------------------------------'
-    print ' '.join(['% .3e' % (x) for x in sumLogPiActiveVec[trackActiveUIDs]])
+    print('\nFinal sumLogPiActiveVec')
+    print('---------------------------------')
+    print(' '.join(['% .3e' % (x) for x in sumLogPiActiveVec[trackActiveUIDs]]))
 
-    print 'is sumLogPiActiveVec sorted?', \
-        is_sorted_bigtosmall(sumLogPiActiveVec)
+    print('is sumLogPiActiveVec sorted?', \
+        is_sorted_bigtosmall(sumLogPiActiveVec))
     return rho, omega, Snapshots
 
 
@@ -396,8 +396,8 @@ def evalELBOandPrint(nDoc=None,
     if f is None:
         f = Lrhoomega
     assert np.allclose(f, Lrhoomega)
-    print "%10s Ltro= % .8e   Lro= % .5e  fro= % .5e" % (
-        msg, L, Lrhoomega, f)
+    print("%10s Ltro= % .8e   Lro= % .5e  fro= % .5e" % (
+        msg, L, Lrhoomega, f))
     return L
 
 def DocTopicCount_to_sumLogPi(
@@ -466,7 +466,7 @@ def makeDocTopicCount(
     '''
     PRNG = np.random.RandomState(seed)
     DocTopicCount = np.zeros((nDoc, K))
-    for d in xrange(nDoc):
+    for d in range(nDoc):
         # Pick one to five random columns to be left in each doc
         maxK_d = np.minimum(K - Kempty, maxK_d)
         K_d = PRNG.choice(maxK_d, size=1)
@@ -501,13 +501,13 @@ if __name__ == '__main__':
     savename = args.savename
 
     if savename:
-        print ''
-        print ''
-        print '>>>>>>>>>>', savename
+        print('')
+        print('')
+        print('>>>>>>>>>>', savename)
 
     # If provided, load DocTopicCount from saved file.
     if args.dumppath and os.path.exists(args.dumppath):
-        print "Loading DocTopicCount from file: ", args.dumppath
+        print("Loading DocTopicCount from file: ", args.dumppath)
         LVars = joblib.load(args.dumppath)
         assert 'DocTopicCount' in LVars
         if 'rho' in LVars:
@@ -589,7 +589,7 @@ if __name__ == '__main__':
         pylab.savefig('BetaTracePlot_' + savename + ".png", pad_inches=0)
         pylab.savefig('BetaTracePlot_' + savename + ".eps", pad_inches=0)
     if args.doInteractive:
-        keyinput = raw_input("Press any key to quit >>>")
+        keyinput = input("Press any key to quit >>>")
         if keyinput.count('embed'):
             from IPython import embed;
             embed()

@@ -45,7 +45,7 @@ if __name__ == "__main__":
 			N_K_list.append(Ntotal * np.asarray([frac, (1-frac)]))
 
 	for ff, N_K in enumerate(N_K_list):
-		print ' '.join(['%5.1f' % (x) for x in N_K])
+		print(' '.join(['%5.1f' % (x) for x in N_K]))
 		gamma0_vals = np.arange(0.05, 20, 0.05)
 		elbo_vals = np.zeros_like(gamma0_vals)
 		for ii, gamma0 in enumerate(gamma0_vals):
@@ -53,6 +53,6 @@ if __name__ == "__main__":
 				N_K=np.concatenate([N_K, np.zeros(K - N_K.size)]),
 				gamma0=gamma0)
 		pylab.plot(gamma0_vals, elbo_vals, '.-', label='frac=%.3f' % (frac_vals[ff]))
-		print 'best gamma0 = ', (gamma0_vals[np.argmax(elbo_vals)])
+		print('best gamma0 = ', (gamma0_vals[np.argmax(elbo_vals)]))
 	pylab.legend()
 	pylab.show()

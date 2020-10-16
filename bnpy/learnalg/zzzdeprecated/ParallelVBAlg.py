@@ -87,7 +87,7 @@ class ParallelVBAlg(LearnAlg):
             self.dataSharedMem = Data.getRawDataAsSharedMemDict()
             self.makeDataSliceFromSharedMem = Data.getDataSliceFunctionHandle()
 
-        for iterid in xrange(1, self.algParams['nLap'] + 1):
+        for iterid in range(1, self.algParams['nLap'] + 1):
             lap = self.algParams['startLap'] + iterid
             nLapsCompleted = lap - self.algParams['startLap']
             self.set_random_seed_at_lap(lap)

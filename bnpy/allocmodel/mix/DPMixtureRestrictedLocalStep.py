@@ -5,7 +5,7 @@ from bnpy.util import NumericUtil
 from bnpy.util.SparseRespStatsUtil import calcSparseRlogR
 
 def summarizeRestrictedLocalStep_DPMixtureModel(
-        Dslice=None, 
+        Dslice=None,
         curModel=None,
         curLPslice=None,
         curSSwhole=None,
@@ -44,7 +44,7 @@ def summarizeRestrictedLocalStep_DPMixtureModel(
     # If it doesn't exist already
     if xObsModel is None:
         xObsModel = curModel.obsModel.copy()
-    if xInitSS is not None:      
+    if xInitSS is not None:
         xObsModel.update_global_params(xInitSS)
     assert xObsModel.K == Kfresh
 
@@ -53,7 +53,7 @@ def summarizeRestrictedLocalStep_DPMixtureModel(
     xPiVec, emptyPi = make_xPiVec_and_emptyPi(
         curModel=curModel, xInitSS=xInitSS,
         ktarget=ktarget, Kfresh=Kfresh, **kwargs)
-    
+
     sumRespVec = curLPslice['resp'][:,ktarget]
     isExpansion = True
     if np.intersect1d(xUIDs, curSSwhole.uids).size > 0:
@@ -72,7 +72,7 @@ def summarizeRestrictedLocalStep_DPMixtureModel(
         doBuildOnInit=doBuildOnInit,
         xInitSS=xInitSS,
         **kwargs)
-    
+
     # Summarize this expanded local parameter pack
     xSSslice = curModel.get_global_suff_stats(
         Dslice, xLPslice,
@@ -97,12 +97,12 @@ def summarizeRestrictedLocalStep_DPMixtureModel(
             assert uidA != targetUID
             assert uidB != targetUID
         Mdict = curModel.allocModel.calcMergeTermsFromSeparateLP(
-            Data=Dslice, 
+            Data=Dslice,
             LPa=curLPslice, SSa=curSSwhole,
-            LPb=xLPslice, SSb=xSSslice, 
+            LPb=xLPslice, SSb=xSSslice,
             mUIDPairs=mUIDPairs)
         xSSslice.setMergeUIDPairs(mUIDPairs)
-        for key, arr in Mdict.items():
+        for key, arr in list(Mdict.items()):
             xSSslice.setMergeTerm(key, arr, dims='M')
     # Prepare dict of info for debugging/inspection
     Info = dict()
@@ -190,7 +190,7 @@ def restrictedLocalStep_DPMixtureModel(
         ktarget=0,
         Kfresh=None,
         xPi=None,
-        xLPslice=None, 
+        xLPslice=None,
         LPkwargs=dict(),
         xObsModel=None,
         xPiVec=None,
@@ -294,7 +294,7 @@ def makeExpansionLPFromZ_DPMixtureModel(
 
     # Compute prior probability of each proposed comp
     xPiVec, emptyPi = make_xPiVec_and_emptyPi(
-        curModel=curModel, ktarget=ktarget, Kfresh=Kfresh, 
+        curModel=curModel, ktarget=ktarget, Kfresh=Kfresh,
         xInitSS=xInitSS, **kwargs)
 
     # Compute likelihood under each proposed comp
@@ -316,7 +316,7 @@ def makeExpansionLPFromZ_DPMixtureModel(
             stop = Dslice.doc_range[d+1]
             xresp[start:stop, :] = 1e-100
             xresp[start:stop, targetZ[pos]] = 1.0
-    else:        
+    else:
         for pos, n in enumerate(chosenDataIDs):
             xresp[n, :] = 1e-100
             xresp[n, targetZ[pos]] = 1.0
@@ -358,18 +358,18 @@ def make_xPiVec_and_emptyPi(
 
     Post Condition
     --------------
-    The original value of Pi[ktarget]  equals the sum of 
+    The original value of Pi[ktarget]  equals the sum of
     xPiVec (a vector) and emptyPi (a scalar).
 
     Examples
     --------
     >>> origPiVec = np.asarray([0.5, 0.5])
-    >>> xPiVec, emptyPi = make_xPiVec_and_emptyPi(origPiVec=origPiVec, 
+    >>> xPiVec, emptyPi = make_xPiVec_and_emptyPi(origPiVec=origPiVec,
     ...     ktarget=0, Kfresh=3, emptyPiFrac=0.25)
-    >>> print emptyPi
+    >>> print (emptyPi)
     0.125
-    >>> print xPiVec
-    [ 0.125  0.125  0.125]
+    >>> print (xPiVec)
+    [0.125 0.125 0.125]
     '''
     if b_emptyPiFrac is not None:
         emptyPiFrac = b_emptyPiFrac
@@ -393,7 +393,7 @@ def make_xPiVec_and_emptyPi(
         else:
             pvec = np.ones(Kfresh) #xInitSS.getCountVec()
         pvec = pvec / pvec.sum()
-        xPiVec = (1-emptyPiFrac) * targetPi * pvec        
+        xPiVec = (1-emptyPiFrac) * targetPi * pvec
     else:
         raise ValueError("Unrecognized b_method_xPi: " + b_method_xPi)
     assert np.allclose(np.sum(xPiVec) + emptyPi, targetPi)

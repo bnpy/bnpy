@@ -2,11 +2,11 @@ import os
 import numpy as np
 import glob
 
-import JobFilter
+from bnpy.viz import JobFilter
 
 from bnpy.util import as1D
 from bnpy.ioutil.BNPYArgParser import parse_task_ids, arglist_to_kwargs
-from JobFilter import filterJobs
+from bnpy.viz.JobFilter import filterJobs
 
 
 def rankTasksForSingleJobOnDisk(joboutpath, **kwargs):
@@ -98,7 +98,7 @@ def scoreTasksForSingleJob(
             scores[tid] = np.nan
             continue
         kwargs = dict()
-        if extraTxtFileDict is not None:       
+        if extraTxtFileDict is not None:
             for key, xTxtFile in extraTxtFileDict:
                 kwargs[key] = np.loadtxt(
                     os.path.join(joboutpath, taskidstr, xTxtFile))

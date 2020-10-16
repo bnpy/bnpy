@@ -64,7 +64,7 @@ def addDataFromBatchToPlan(Plan, hmodel, Dchunk, LPchunk,
         return Plan
 
     # ----    Add all these docs to the Plan
-    batchIDs = [batchID for n in xrange(relSize)]
+    batchIDs = [batchID for n in range(relSize)]
     if hasValidKey(Plan, 'DTargetData'):
         Plan['DTargetData'].add_data(relData)
         Plan['batchIDs'].extend(batchIDs)
@@ -75,7 +75,7 @@ def addDataFromBatchToPlan(Plan, hmodel, Dchunk, LPchunk,
 
     curTargetSize = getSize(Plan['DTargetData'])
     if curTargetSize > dtargetMaxSize:
-        for key in Plan.keys():
+        for key in list(Plan.keys()):
             del Plan[key]
         msg = ' %6.3f | batch %3d | targetSize %d EXCEEDED BUDGET of %d' \
             % (lapFrac, batchID, curTargetSize, dtargetMaxSize)
@@ -149,7 +149,7 @@ def getDataSubsetRelevantToPlan(Dchunk, LPchunk, Plan,
             curkeepmask = DocTopicCount[:, delCompID] >= dtargetMinCount
         elif 'respPair' in LPchunk or 'TransCount' in LPchunk:
             curkeepmask = np.zeros(Dchunk.nDoc, dtype=np.int32)
-            for n in xrange(Dchunk.nDoc):
+            for n in range(Dchunk.nDoc):
                 start = Dchunk.doc_range[n]
                 stop = Dchunk.doc_range[n + 1]
                 Usage_n = np.sum(LPchunk['resp'][start:stop, delCompID])

@@ -329,7 +329,7 @@ class ParallelMOVBMovesAlg(MOVBBirthMergeAlg):
         # Map Step
         # Create several tasks (one per worker) and add to job queue
         nWorkers = self.algParams['nWorkers']
-        for workerID in xrange(nWorkers):
+        for workerID in range(nWorkers):
             sliceArgs = DataIterator.calcSliceArgs(
                 batchID, workerID, nWorkers, lapFrac)
             aArgs = hmodel.allocModel.getSerializableParamsForLocalStep()

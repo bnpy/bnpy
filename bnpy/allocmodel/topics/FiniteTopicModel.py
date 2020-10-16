@@ -1,6 +1,6 @@
 import numpy as np
 
-import LocalStepManyDocs
+from bnpy.allocmodel.topics import LocalStepManyDocs
 
 from bnpy.allocmodel.AllocModel import AllocModel
 from bnpy.suffstats import SuffStatBag
@@ -151,7 +151,7 @@ class FiniteTopicModel(AllocModel):
         resp = LP['resp']
         K = resp.shape[1]
         DocTopicCount = np.zeros((Data.nDoc, K))
-        for d in xrange(Data.nDoc):
+        for d in range(Data.nDoc):
             start = Data.doc_range[d]
             stop = Data.doc_range[d + 1]
             if hasattr(Data, 'word_count'):
@@ -325,7 +325,7 @@ def L_entropy(Data=None, LP=None, resp=None, returnVector=0):
             resp = LP['resp']
         elif 'spR' in LP:
             spR = LP['spR']
-            N, K = LP['spR'].shape  
+            N, K = LP['spR'].shape
         else:
             raise ValueError("LP dict missing resp or spR")
     if resp is not None:

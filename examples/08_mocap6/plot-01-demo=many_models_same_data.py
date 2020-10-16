@@ -35,7 +35,7 @@ dataset = bnpy.data.GroupXData.read_npz(
 def show_single_sequence(seq_id):
     start = dataset.doc_range[seq_id]
     stop = dataset.doc_range[seq_id + 1]
-    for dim in xrange(12):
+    for dim in range(12):
         X_seq = dataset.X[start:stop]
         pylab.plot(X_seq[:, dim], '.-')
     pylab.xlabel('time')

@@ -4,7 +4,7 @@ Implementation of parallel memoized variational algorithm for bnpy models.
 import numpy as np
 import multiprocessing
 import os
-import ElapsedTimeLogger 
+from bnpy.learnalg import ElapsedTimeLogger
 import scipy.sparse
 
 from collections import defaultdict
@@ -22,8 +22,8 @@ from bnpy.mergemove import selectCandidateMergePairs
 from bnpy.deletemove import DLogger, selectCandidateDeleteComps
 from bnpy.util import argsort_bigtosmall_stable
 from bnpy.util.SparseRespUtil import sparsifyResp
-from LearnAlg import makeDictOfAllWorkspaceVars
-from LearnAlg import LearnAlg
+from bnpy.learnalg.LearnAlg import makeDictOfAllWorkspaceVars
+from bnpy.learnalg.LearnAlg import LearnAlg
 from bnpy.viz.PrintTopics import count2str
 
 # If abs val of two ELBOs differs by less than this small constant
@@ -188,7 +188,7 @@ class MemoVBMovesAlg(LearnAlg):
 
             # Debug
             if self.doDebug() and lapFrac >= 1.0:
-                self.verifyELBOTracking(hmodel, SS, loss, 
+                self.verifyELBOTracking(hmodel, SS, loss,
                     MoveLog=MoveLog, lapFrac=lapFrac)
             self.saveDebugStateAtBatch(
                 'Mstep', batchID,
@@ -339,7 +339,7 @@ class MemoVBMovesAlg(LearnAlg):
                 **kwargs)
             ElapsedTimeLogger.stopEvent('birth', 'plan')
 
-        # Prepare some logging stats        
+        # Prepare some logging stats
         if 'b_nFailedProp' not in MovePlans:
             MovePlans['b_nFailedProp'] = 0
         if 'b_nTrial' not in MovePlans:
@@ -396,7 +396,7 @@ class MemoVBMovesAlg(LearnAlg):
             # Run restricted local step
             DKwargs = self.algParams['delete']
             SSbatch.propXSS[targetUID], rInfo = summarizeRestrictedLocalStep(
-                Dbatch, curModel, LPbatch, 
+                Dbatch, curModel, LPbatch,
                 curSSwhole=curSSwhole,
                 xInitSS=xInitSS,
                 doBuildOnInit=doBuildOnInit,
@@ -447,11 +447,11 @@ class MemoVBMovesAlg(LearnAlg):
             Fields to save determined by the memoLPkeys attribute of this alg.
         '''
         batchLP = dict(**batchLP) # make a copy
-        allkeys = batchLP.keys()
+        allkeys = list(batchLP.keys())
         for key in allkeys:
             if key not in self.memoLPkeys:
                 del batchLP[key]
-        if len(batchLP.keys()) > 0:
+        if len(list(batchLP.keys())) > 0:
             if self.algParams['doMemoizeLocalParams'] == 1:
                 self.LPmemory[batchID] = batchLP
             elif self.algParams['doMemoizeLocalParams'] == 2:
@@ -621,7 +621,7 @@ class MemoVBMovesAlg(LearnAlg):
 
     def makeMovePlans(self, hmodel, SS,
                       MovePlans=dict(),
-                      MoveRecordsByUID=dict(), 
+                      MoveRecordsByUID=dict(),
                       lapFrac=-1,
                       **kwargs):
         ''' Plan which comps to target for each possible move.
@@ -636,7 +636,7 @@ class MemoVBMovesAlg(LearnAlg):
         if isFirst and self.hasMove('birth'):
            ElapsedTimeLogger.startEvent('birth', 'plan')
            MovePlans = self.makeMovePlans_Birth_AtLapStart(
-               hmodel, SS, 
+               hmodel, SS,
                lapFrac=lapFrac,
                MovePlans=MovePlans,
                MoveRecordsByUID=MoveRecordsByUID,
@@ -645,7 +645,7 @@ class MemoVBMovesAlg(LearnAlg):
         if isFirst and self.hasMove('merge'):
             ElapsedTimeLogger.startEvent('merge', 'plan')
             MovePlans = self.makeMovePlans_Merge(
-                hmodel, SS, 
+                hmodel, SS,
                 lapFrac=lapFrac,
                 MovePlans=MovePlans,
                 MoveRecordsByUID=MoveRecordsByUID,
@@ -654,7 +654,7 @@ class MemoVBMovesAlg(LearnAlg):
         if isFirst and self.hasMove('delete'):
             ElapsedTimeLogger.startEvent('delete', 'plan')
             MovePlans = self.makeMovePlans_Delete(
-                hmodel, SS, 
+                hmodel, SS,
                 lapFrac=lapFrac,
                 MovePlans=MovePlans,
                 MoveRecordsByUID=MoveRecordsByUID,
@@ -844,7 +844,7 @@ class MemoVBMovesAlg(LearnAlg):
             return MovePlans
 
         if self.hasMove('birth'):
-            BArgs = self.algParams['birth']    
+            BArgs = self.algParams['birth']
             msg = "PLANNING birth at lap %.3f batch %d"
             BLogger.pprint(msg % (lapFrac, batchID))
             MovePlans = selectCompsForBirthAtCurrentBatch(
@@ -913,7 +913,7 @@ class MemoVBMovesAlg(LearnAlg):
             nTrial += 1
 
             BLogger.startUIDSpecificLog(targetUID)
-            # Prepare record-keeping            
+            # Prepare record-keeping
             if targetUID not in MoveRecordsByUID:
                 MoveRecordsByUID[targetUID] = defaultdict(int)
             ktarget = SS.uid2k(targetUID)
@@ -1019,7 +1019,7 @@ class MemoVBMovesAlg(LearnAlg):
 
                 if doTryRetain and couldUseMoreData:
                     # If Ldata for subset of data reassigned so far looks good
-                    # we hold onto this proposal for next time! 
+                    # we hold onto this proposal for next time!
                     propSSsubset = SS.propXSS[targetUID].copy(
                         includeELBOTerms=False, includeMergeTerms=False)
                     tmpModel = propModel
@@ -1079,7 +1079,7 @@ class MemoVBMovesAlg(LearnAlg):
                     # Update batch-specific records for this uid
                     uidRec = MoveRecordsByUID[targetUID]
                     uidRec_b = uidRec['byBatch'][uidRec['b_proposalBatchID']]
-                    uidRec_b['nFail'] += 1            
+                    uidRec_b['nFail'] += 1
                     uidRec_b['nEval'] += 1
                     uidRec_b['proposalTotalSize'] = \
                         SS.propXSS[targetUID].getCountVec().sum()
@@ -1107,7 +1107,7 @@ class MemoVBMovesAlg(LearnAlg):
                     " %d/%d succeeded. %d/%d failed eval phase. " + \
                     "%d/%d failed build phase."
                 msg = msg % (
-                    lapFrac, totalKnew, 
+                    lapFrac, totalKnew,
                     nAccept, nTrial,
                     MovePlans['b_nFailedEval'], nTrial,
                     MovePlans['b_nFailedProp'], nTrial)
@@ -1442,7 +1442,7 @@ class MemoVBMovesAlg(LearnAlg):
                 lapFrac, nAccept, nTrial, Ndiff)
             DLogger.pprint(msg, 'info')
         # Discard plans, because they have come to fruition.
-        for key in MovePlans.keys():
+        for key in list(MovePlans.keys()):
             if key.startswith('d_'):
                 del MovePlans[key]
         ElapsedTimeLogger.stopEvent('delete', 'eval')
@@ -1593,37 +1593,38 @@ class MemoVBMovesAlg(LearnAlg):
 
     def verifyELBOTracking(
             self, hmodel, SS,
-            evBound=None, lapFrac=-1, MoveLog=None, **kwargs):
+            loss_which_equals_negative_elbo=None,
+            lapFrac=-1, MoveLog=None, **kwargs):
         ''' Verify current global SS consistent with batch-specific SS.
         '''
         if self.doDebugVerbose():
             self.print_msg(
                 '>>>>>>>> BEGIN double-check @ lap %.2f' % (self.lapFrac))
 
-        if evBound is None:
-            evBound = hmodel.calc_evidence(SS=SS)
+        if loss_which_equals_negative_elbo is None:
+            loss_which_equals_negative_elbo = -1.0 * hmodel.calc_evidence(SS=SS)
 
-        for batchID in range(len(self.SSmemory.keys())):
+        for batchID in range(len(list(self.SSmemory.keys()))):
             SSchunk = self.loadBatchAndFastForward(
                 batchID, lapFrac=lapFrac, MoveLog=MoveLog, doCopy=1)
             if batchID == 0:
                 SS2 = SSchunk.copy()
             else:
                 SS2 += SSchunk
-        evCheck = hmodel.calc_evidence(SS=SS2)
+        loss_check = -1.0 * hmodel.calc_evidence(SS=SS2)
 
         if self.algParams['debug'].count('quiet') == 0:
-            print '% 14.8f evBound from agg SS' % (evBound)
-            print '% 14.8f evBound from sum over SSmemory' % (evCheck)
+            print('% 14.8f loss from agg SS' % (loss_which_equals_negative_elbo))
+            print('% 14.8f loss from sum over SSmemory' % (loss_check))
         if self.algParams['debug'].count('interactive'):
             isCorrect = np.allclose(SS.getCountVec(), SS2.getCountVec()) \
-                and np.allclose(evBound, evCheck)
+                and np.allclose(loss_which_equals_negative_elbo, loss_check)
             if not isCorrect:
                 from IPython import embed
                 embed()
         else:
             assert np.allclose(SS.getCountVec(), SS2.getCountVec())
-            assert np.allclose(evBound, evCheck)
+            assert np.allclose(loss_which_equals_negative_elbo, loss_check)
         if self.doDebugVerbose():
             self.print_msg(
                 '<<<<<<<< END   double-check @ lap %.2f' % (self.lapFrac))

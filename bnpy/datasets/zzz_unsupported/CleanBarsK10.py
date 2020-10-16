@@ -123,8 +123,8 @@ if __name__ == '__main__':
         Info = IHT.calcPredLikForDoc(
             docData, Defaults['topics'],
             trueBeta, gamma)
-        print " doc %d | Rprec %.3f AUC %.3f" % (
-            rep, Info['R_precision'], Info['auc'])
+        print(" doc %d | Rprec %.3f AUC %.3f" % (
+            rep, Info['R_precision'], Info['auc']))
         RprecLabels.append('%.3f' % (Info['R_precision']))
     import bnpy.viz.BarsViz as BarsViz
     BarsViz.plotExampleBarsDocs(Data,

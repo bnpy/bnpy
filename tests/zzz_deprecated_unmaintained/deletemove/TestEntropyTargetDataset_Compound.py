@@ -44,10 +44,10 @@ def pprintR(R):
     """ Pretty printing of 2D array R
     """
     if R.size < 5:
-        print R[:, :10]
+        print(R[:, :10])
     else:
-        print R[:3, :10]
-        print R[-3:, :10]
+        print(R[:3, :10])
+        print(R[-3:, :10])
 
 
 def pprintRandL(R, L, Rmsg=''):
@@ -63,15 +63,15 @@ def pprintRandL(R, L, Rmsg=''):
     strR = strR.replace(']', ' ')
 
     lines = strR.split('\n')
-    print '--------------------'
-    print '%10s | R %s' % ('Lentropy', Rmsg)
-    print '--------------------'
+    print('--------------------')
+    print('%10s | R %s' % ('Lentropy', Rmsg))
+    print('--------------------')
     for lID, line in enumerate(lines):
         if lID == 0:
             line = '% 10.3f' % (L) + '   ' + line
         else:
             line = '%13s' % (' ') + line
-        print line
+        print(line)
 
 
 class MyTestN1K4(unittest.TestCase):
@@ -205,11 +205,11 @@ class MyTestN1K4(unittest.TestCase):
 
         Each successive candidate should have lower entropy than before.
         """
-        print ''
-        print 'Lorig = % 7.3f' % (self.Lorig)
-        print 'L1    = % 7.3f' % (self.L1)
-        print 'L2    = % 7.3f' % (self.L2)
-        print 'L3    = % 7.3f' % (self.L3)
+        print('')
+        print('Lorig = % 7.3f' % (self.Lorig))
+        print('L1    = % 7.3f' % (self.L1))
+        print('L2    = % 7.3f' % (self.L2))
+        print('L3    = % 7.3f' % (self.L3))
 
         assert self.Lorig > self.L1
         assert self.L1 > self.L2
@@ -218,7 +218,7 @@ class MyTestN1K4(unittest.TestCase):
     def test_pprint_proposals(self):
         """ Display the original R and each proposal, prettily.
         """
-        print ''
+        print('')
         pprintRandL(self.R, self.Lorig, 'original')
         pprintRandL(self.Rnew1, self.L1, 'after 1 delete')
         pprintRandL(self.Rnew2, self.L2, 'after 2 deletes')
@@ -229,29 +229,29 @@ class MyTestN1K4(unittest.TestCase):
 
         This will certify that we can use bound without touching local params.
         """
-        print ''
-        print 'L1_lb        = % 7.5f' % (self.L1_lb)
-        print 'H1_lb.sum()  = % 7.5f' % (self.H1_lb.sum())
+        print('')
+        print('L1_lb        = % 7.5f' % (self.L1_lb))
+        print('H1_lb.sum()  = % 7.5f' % (self.H1_lb.sum()))
         assert np.allclose(self.L1_lb, self.H1_lb.sum())
 
-        print ''
-        print 'L2_lb        = % 7.5f' % (self.L2_lb)
-        print 'H2_lb.sum()  = % 7.5f' % (self.H2_lb.sum())
+        print('')
+        print('L2_lb        = % 7.5f' % (self.L2_lb))
+        print('H2_lb.sum()  = % 7.5f' % (self.H2_lb.sum()))
         assert np.allclose(self.L2_lb, self.H2_lb.sum())
 
-        print ''
-        print 'L1_lb2       = % 7.5f' % (self.L1_lb2)
-        print 'H1_lb2.sum() = % 7.5f' % (self.H1_lb2.sum())
+        print('')
+        print('L1_lb2       = % 7.5f' % (self.L1_lb2))
+        print('H1_lb2.sum() = % 7.5f' % (self.H1_lb2.sum()))
         H = self.SS1.getELBOTerm('ElogqZ').sum()
-        print 'SS1.getELBO  = % 7.5f' % (-1 * H)
+        print('SS1.getELBO  = % 7.5f' % (-1 * H))
         assert np.allclose(self.L1_lb2, self.H1_lb2.sum())
         assert np.allclose(self.L1_lb2, -1 * H)
 
-        print ''
-        print 'L2_lb2       = % 7.5f' % (self.L2_lb2)
-        print 'H2_lb2.sum() = % 7.5f' % (self.H2_lb2.sum())
+        print('')
+        print('L2_lb2       = % 7.5f' % (self.L2_lb2))
+        print('H2_lb2.sum() = % 7.5f' % (self.H2_lb2.sum()))
         H = self.SS2.getELBOTerm('ElogqZ').sum()
-        print 'SS2.getELBO  = % 7.5f' % (-1 * H)
+        print('SS2.getELBO  = % 7.5f' % (-1 * H))
 
     def test_entropy_bounds_hold(self):
         """ Verify "binary entropy" trick is correct in our calculations.
@@ -259,40 +259,40 @@ class MyTestN1K4(unittest.TestCase):
         Using the binary entropy trick:
             \sum_{k=1}^K H'_k >= \sum_{k=1}^K H_k + sum1mepslog1meps
         """
-        print ''
-        print 'L1     = % 7.5f' % (self.L1)
-        print 'L1_lb2 = % 7.5f' % (self.L1_lb2)
-        print 'L1_lb  = % 7.5f' % (self.L1_lb)
+        print('')
+        print('L1     = % 7.5f' % (self.L1))
+        print('L1_lb2 = % 7.5f' % (self.L1_lb2))
+        print('L1_lb  = % 7.5f' % (self.L1_lb))
 
         assert self.L1 > self.L1_lb
         assert self.L1 > self.L1_lb2
 
-        print ''
-        print 'L2     = % 7.5f' % (self.L2)
-        print 'L2_lb2 = % 7.5f' % (self.L2_lb2)
-        print 'L2_lb  = % 7.5f' % (self.L2_lb)
+        print('')
+        print('L2     = % 7.5f' % (self.L2))
+        print('L2_lb2 = % 7.5f' % (self.L2_lb2))
+        print('L2_lb  = % 7.5f' % (self.L2_lb))
         assert self.L2 > self.L2_lb
         assert self.L2 > self.L2_lb2
 
-        print ''
-        print 'L3     = % 7.5f' % (self.L3)
-        print 'L3_lb2 = % 7.5f' % (self.L3_lb2)
-        print 'L3_lb  = % 7.5f' % (self.L3_lb)
+        print('')
+        print('L3     = % 7.5f' % (self.L3))
+        print('L3_lb2 = % 7.5f' % (self.L3_lb2))
+        print('L3_lb  = % 7.5f' % (self.L3_lb))
         assert self.L3 > self.L3_lb
         assert self.L3 > self.L3_lb2
 
     def test_gap_bounds_hold(self):
         """ Verify gap calculation is correct.
         """
-        print ''
-        print "GAP L_move1 - L_orig"
-        print 'gap1      = % 7.5f' % (self.gap1)
-        print 'gap1_lb2  = % 7.5f' % (self.gap1_lb2)
+        print('')
+        print("GAP L_move1 - L_orig")
+        print('gap1      = % 7.5f' % (self.gap1))
+        print('gap1_lb2  = % 7.5f' % (self.gap1_lb2))
         assert self.gap1 > self.gap1_lb2
 
-        print "GAP L_move2 - L_orig"
-        print 'gap2      = % 7.5f' % (self.gap2)
-        print 'gap2_lb2  = % 7.5f' % (self.gap2_lb2)
+        print("GAP L_move2 - L_orig")
+        print('gap2      = % 7.5f' % (self.gap2))
+        print('gap2_lb2  = % 7.5f' % (self.gap2_lb2))
         assert self.gap2 > self.gap2_lb2
 
 

@@ -47,7 +47,7 @@ def makeTrueParams(Din):
 
     Sigma = np.zeros((K, D, D))
     cholSigma = np.zeros(Sigma.shape)
-    for k in xrange(K):
+    for k in range(K):
         Sigma[k] = makeImgPatchCovMatForComp(D, k)
         cholSigma[k] = scipy.linalg.cholesky(Sigma[k])
 

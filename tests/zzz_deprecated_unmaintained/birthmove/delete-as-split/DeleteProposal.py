@@ -15,29 +15,29 @@ def evaluateDeleteMoveCandidate_LP(
     propModel.update_global_params(propSS)
 
     mPairIDs=[]
-    for k in xrange(Korig-1):
+    for k in range(Korig-1):
         mPairIDs.append((k, Korig-1+k))
-    print mPairIDs
+    print(mPairIDs)
     
     curSS = curModel.get_global_suff_stats(
         Data, curLP, 
         doPrecompEntropy=1)
     curModel.update_global_params(curSS)
     curELBO = curModel.calc_evidence(SS=curSS)
-    print ' current ELBO: %.5f' % (curELBO)
+    print(' current ELBO: %.5f' % (curELBO))
 
     propSS = propModel.get_global_suff_stats(
         Data, propLP, 
         doPrecompEntropy=1, doPrecompMergeEntropy=1, mPairIDs=mPairIDs)
     propModel.update_global_params(propSS)
     propELBO = propModel.calc_evidence(SS=propSS)
-    print 'expanded ELBO: %.5f' % (propELBO)
+    print('expanded ELBO: %.5f' % (propELBO))
     
     finalModel, finalSS, finalELBO, Info = \
         bnpy.mergemove.MergeMove.run_many_merge_moves(
             propModel, propSS, propELBO, mPairIDs)
     finalELBO = finalModel.calc_evidence(SS=finalSS)
-    print '   final ELBO: %.5f' % (finalELBO)
+    print('   final ELBO: %.5f' % (finalELBO))
     
     return finalModel, dict(
         SS=finalSS,
@@ -157,7 +157,7 @@ def makeLPWithMinNonzeroValFromLP(Data, hmodel, LP, minResp=0.001):
     '''
     respS = LP['resp'].copy()
     Natom, Korig = respS.shape
-    for n in xrange(Natom):
+    for n in range(Natom):
         sizeOrder_n = np.argsort(respS[n,:])
         for posLoc, compID in enumerate(sizeOrder_n):
             if respS[n, compID] > minResp:

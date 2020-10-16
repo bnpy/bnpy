@@ -83,7 +83,7 @@ def makePlanForEligibleComps(SS, DRecordsByComp=None,
         eUIDs = Plan['eligible-by-size-UIDs']
         sizeVec = [Plan['SizeMap'][x] for x in eUIDs]
         failVec = np.zeros_like(sizeVec)
-        for ii in xrange(failVec.size):
+        for ii in range(failVec.size):
             if 'nFail' in DRecordsByComp[eUIDs[ii]]:
                 failVec[ii] = DRecordsByComp[eUIDs[ii]]['nFail']
             else:
@@ -183,7 +183,7 @@ def getEligibleCompInfo(SS, DRecordsByComp=None,
     for ii, uID in enumerate(eligibleUIDs):
         SizeMap[uID] = SizeVec[eligibleIDs[ii]]
         CountMap[uID] = CountVec[eligibleIDs[ii]]
-    for uID in DRecordsByComp.keys():
+    for uID in list(DRecordsByComp.keys()):
         if uID not in CountMap or 'count' not in DRecordsByComp[uID]:
             continue
         count = DRecordsByComp[uID]['count']

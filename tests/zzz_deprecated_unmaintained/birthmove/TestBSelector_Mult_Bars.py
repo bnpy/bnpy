@@ -25,15 +25,15 @@ def makeDataset(K=5, Nk=100, Nvec=None, Nd=100, vocab_size=25, **kwargs):
     sqrtV = int(np.sqrt(V))
     nOnTopic = V / (K / 2)  # total "on topic" words in each bar
     pOnTopic = 0.95
-    for k in xrange(K):
+    for k in range(K):
         PRNG = np.random.RandomState(k)
 
         if k < K/2:
             # Horz bar
-            wordIDs = range(nOnTopic * k, nOnTopic * (k + 1))
+            wordIDs = list(range(nOnTopic * k, nOnTopic * (k + 1)))
         else:
             # Vert bar
-            wordIDs = range(k - K/2, V, sqrtV)
+            wordIDs = list(range(k - K/2, V, sqrtV))
         mu_k = (1-pOnTopic) / (V - nOnTopic) * np.ones(V)
         mu_k[wordIDs] = pOnTopic / nOnTopic
         

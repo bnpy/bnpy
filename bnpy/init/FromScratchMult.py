@@ -10,7 +10,7 @@ import re
 import warnings
 
 from scipy.special import digamma
-from FromTruth import convertLPFromHardToSoft, convertLPFromDocsToTokens
+from bnpy.init.FromTruth import convertLPFromHardToSoft, convertLPFromDocsToTokens
 
 # Import Kmeans routine
 hasRexAvailable = True
@@ -105,7 +105,7 @@ def _initTopicWordEstParams(obsModel, Data, PRNG, K=0,
         value = m.group('value')
         if name.count("lam"):
             initObsModelScale = float(value)
-    
+
     smoothParam = obsModel.Prior.lam[np.newaxis,:].copy()
     if initObsModelScale > 0.0:
         smoothParam += initObsModelScale
@@ -176,7 +176,7 @@ def _initTopicWordEstParams(obsModel, Data, PRNG, K=0,
             raise ValueError("NaN")
         if initObsModelAddRandomNoise:
             lam += 0.1 * smoothParam * PRNG.rand(lam.shape[0], lam.shape[1])
-    
+
     if topics is None and obsModel.inferType.count('EM'):
         topics = lam / lam.sum(axis=1)[:, np.newaxis]
 
@@ -296,11 +296,11 @@ def hasValidKey(key, kwargs):
 """
 
 def initSSByBregDiv_Mult(
-        Dslice=None, 
-        curModel=None, 
+        Dslice=None,
+        curModel=None,
         curLPslice=None,
-        K=5, ktarget=None, 
-        b_minNumAtomsInDoc=None, 
+        K=5, ktarget=None,
+        b_minNumAtomsInDoc=None,
         b_includeRemainderTopic=0,
         b_initHardCluster=0,
         seed=0, doSample=True,
@@ -311,14 +311,14 @@ def initSSByBregDiv_Mult(
     -------
     xSS : SuffStatBag
     Info : dict
-        contains info about which docs were used to inspire this init. 
+        contains info about which docs were used to inspire this init.
     '''
     PRNG = np.random.RandomState(seed)
     if curLPslice is None:
         weights = None
     else:
         weights = curLPslice['resp'][:,ktarget]
-    # Make nDoc x vocab_size array 
+    # Make nDoc x vocab_size array
     DocWordMat = Dslice.getDocTypeCountMatrix(weights=weights)
     # Keep only rows with minimum count
     if b_minNumAtomsInDoc is None:
@@ -387,7 +387,7 @@ def initSSByBregDiv_Mult(
     else:
         xLP = xdocLP
     if curLPslice is not None:
-        xLP['resp'] *= curLPslice['resp'][:, ktarget][:,np.newaxis]    
+        xLP['resp'] *= curLPslice['resp'][:, ktarget][:,np.newaxis]
 
         # Verify that initial xLP resp is a subset of curLP's resp,
         # leaving out only the docs that didnt have enough tokens.
@@ -400,8 +400,8 @@ def initSSByBregDiv_Mult(
     xSS.reorderComps(bigtosmall)
     Info = dict(
         Z=Z,
-        Means=WCMeans, 
-        lamVals=lamVals, 
+        Means=WCMeans,
+        lamVals=lamVals,
         chosenDocIDs=chosenDocIDs)
     return xSS, Info
 
@@ -444,4 +444,3 @@ def calcBregDiv_Mult(WordCountData, WordCountMeans):
         Div[:, k] += Nx * np.log(Nmean[k]/Nx)
     return Div
 """
-

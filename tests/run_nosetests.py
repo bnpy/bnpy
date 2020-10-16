@@ -27,8 +27,8 @@ for folder in test_folder_list:
     if folder.count('zzz') or folder.count('endtoend'):
         continue
     CMD = "nosetests %s -v --nocapture" % (folder)
-    print CMD
-    print "------------------------------------------------------------"
+    print(CMD)
+    print("------------------------------------------------------------")
     proc = subprocess.Popen(
             CMD.split(),
             shell=False)

@@ -53,8 +53,8 @@ def FindAnchorsForSizeKBasis(Q, K, lowerDim=None, seed=0, candidateRows=None):
 
     dist[0] = dist[1]  # dist[0] is kind of nonsensical, so just duplicate
     distToOrigin = np.zeros(Q.shape[0])
-    for k in xrange(1, K - 1):
-        for rowID in xrange(Q.shape[0]):
+    for k in range(1, K - 1):
+        for rowID in range(Q.shape[0]):
             Q[rowID] -= np.inner(Q[rowID], B[k - 1]) * B[k - 1]
             distToOrigin[rowID] = np.inner(Q[rowID], Q[rowID])
         basisRows[k + 1], dist[k + 1], B[k, :] = FindFarthestFromOrigin(
@@ -77,7 +77,7 @@ def FindFarthestFromOrigin(Q, distToOrigin=None):
     """
     if distToOrigin is None:
         distToOrigin = np.zeros(Q.shape[0])
-        for rowID in xrange(Q.shape[0]):
+        for rowID in range(Q.shape[0]):
             distToOrigin[rowID] = np.inner(Q[rowID], Q[rowID])
         # above loop is faster than line below, due to no memory allocation
         # distToOrigin = np.sum(np.square(Q), axis=1)
@@ -124,7 +124,7 @@ def findAnchorsForExpandedBasis(Q, Topics, Kextra, lowerDim=None,
     B[0, :] = Topics[1]
     B[0, :] /= np.sqrt(np.inner(B[0], B[0]))
 
-    for k in xrange(1, K - 1):
+    for k in range(1, K - 1):
         Q -= np.dot(Q, B[k - 1])[:, np.newaxis] * B[k - 1][np.newaxis, :]
         TdotB = np.dot(Topics, B[k - 1])[:, np.newaxis]
         Topics -= TdotB * B[k - 1][np.newaxis, :]
@@ -133,9 +133,9 @@ def findAnchorsForExpandedBasis(Q, Topics, Kextra, lowerDim=None,
 
     # Now, expand by adding Kextra new basis vectors
     newRows = np.zeros(Kextra, dtype=np.int32)
-    for knew in xrange(Kextra):
+    for knew in range(Kextra):
         k = K + knew - 1
-        for i in xrange(Q.shape[0]):
+        for i in range(Q.shape[0]):
             Q[i] -= np.inner(Q[i], B[k - 1]) * B[k - 1]
         newRows[knew], _, B[k] = FindFarthestFromOrigin(Q)
         B[k, :] /= np.sqrt(np.inner(B[k], B[k]))

@@ -8,15 +8,17 @@ LearnAlg
         * printing progress updates to stdout
         * recording run-time
 '''
+import six
 import numpy as np
 import time
 import logging
 import os
 import sys
 import scipy.io
-import ElapsedTimeLogger
+import joblib
 
-from sklearn.externals import joblib
+from bnpy.learnalg import ElapsedTimeLogger
+
 from bnpy.ioutil import ModelWriter
 from bnpy.util import (
     isEvenlyDivisibleFloat,
@@ -71,7 +73,7 @@ class LearnAlg(object):
         self.status = 'active. not converged.'
 
         self.algParamsLP = dict()
-        for k, v in algParams.items():
+        for k, v in list(algParams.items()):
             if k.count('LP') > 0:
                 self.algParamsLP[k] = v
 
@@ -126,7 +128,7 @@ class LearnAlg(object):
         Info : dict
             contains information about completed run.
         '''
-        # Convert TraceLaps from set to 1D array, sorted in ascending order
+        # Convert recorded trace laps from set to 1D array, sorted in ascending order
         lap_history = np.asarray(self.lap_list)
         loss_history = np.asarray(self.loss_list)
         K_history = np.asarray(self.K_list)
@@ -208,15 +210,15 @@ class LearnAlg(object):
 
         # Record current state to plain-text files
         with open(self.mkfile('trace_lap.txt'), 'a') as f:
-            f.write('%.4f\n' % (lap))
+            f.write(six.text_type('%.4f\n' % (lap)))
         with open(self.mkfile('trace_loss.txt'), 'a') as f:
-            f.write('%.9e\n' % (loss))
+            f.write(six.text_type('%.9e\n' % (loss)))
         with open(self.mkfile('trace_elapsed_time_sec.txt'), 'a') as f:
-            f.write('%.3f\n' % (elapsed_time_sec))
+            f.write(six.text_type('%.3f\n' % (elapsed_time_sec)))
         with open(self.mkfile('trace_K.txt'), 'a') as f:
-            f.write('%d\n' % (SS.K))
+            f.write(six.text_type('%d\n' % (SS.K)))
         with open(self.mkfile('trace_n_examples_total.txt'), 'a') as f:
-            f.write('%d\n' % (self.totalDataUnitsProcessed))
+            f.write(six.text_type('%d\n' % (self.totalDataUnitsProcessed)))
 
         # Record active counts in plain-text files
         counts = SS.getCountVec()
@@ -225,7 +227,7 @@ class LearnAlg(object):
         np.maximum(counts, 0, out=counts)
         with open(self.mkfile('active_counts.txt'), 'a') as f:
             flatstr = ' '.join(['%.3f' % x for x in counts])
-            f.write(flatstr + '\n')
+            f.write(six.text_type(flatstr + '\n'))
 
         with open(self.mkfile('active_uids.txt'), 'a') as f:
             if ActiveIDVec is None:
@@ -234,7 +236,7 @@ class LearnAlg(object):
                 else:
                     ActiveIDVec = SS.uids
             flatstr = ' '.join(['%d' % x for x in ActiveIDVec])
-            f.write(flatstr + '\n')
+            f.write(six.text_type(flatstr + '\n'))
 
         if SS.hasSelectionTerm('DocUsageCount'):
             ucount = SS.getSelectionTerm('DocUsageCount')
@@ -298,9 +300,9 @@ class LearnAlg(object):
         self.SavedIters.add(lap)
         prefix = ModelWriter.makePrefixForLap(lap)
         with open(self.mkfile('snapshot_lap.txt'), 'a') as f:
-            f.write('%.4f\n' % (lap))
+            f.write(six.text_type('%.4f\n' % (lap)))
         with open(self.mkfile('snapshot_elapsed_time_sec.txt'), 'a') as f:
-            f.write('%.3f\n' % (self.get_elapsed_time()))
+            f.write(six.text_type('%.3f\n' % (self.get_elapsed_time())))
         if self.outputParams['doSaveFullModel']:
             ModelWriter.save_model(
                 hmodel, self.task_output_path, prefix,
@@ -318,6 +320,13 @@ class LearnAlg(object):
         Returns
         -------
         fpath : str
+
+        Examples
+        --------
+        # Platform-independent and user independent
+        >>> my_obj = LearnAlg(task_output_path=os.path.join('tmp', 'a', 'b', 'c'))
+        >>> my_obj.mkfile("K.txt").split(os.path.sep)
+        ['tmp', 'a', 'b', 'c', 'K.txt']
         """
         return os.path.join(self.task_output_path, fname)
 
@@ -519,7 +528,7 @@ def makeDictOfAllWorkspaceVars(**kwargs):
         kwargs['learnAlg'] = kwargs.pop('self')
     if 'lap' in kwargs:
         kwargs['lapFrac'] = kwargs['lap']
-    for key in kwargs.keys():
+    for key in list(kwargs.keys()):
         if key.startswith('_'):
             kwargs.pop(key)
     return kwargs

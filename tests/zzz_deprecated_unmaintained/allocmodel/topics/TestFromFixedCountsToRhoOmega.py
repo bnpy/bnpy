@@ -51,16 +51,16 @@ def pprintResult(Results):
         betaK = Info['betaK']
         betastr += np2flatstr(betaK, fmt=' %.4f') + '   '
 
-    print '                             @ nDoc %d' % (Info['nDoc'])
-    print '>>>>>> rho: '
-    print rhoinitstr
-    print rhoeststr
-    print '>>>>>> omega: '
-    print ominitstr
-    print omeststr
-    print '>>>>>> beta: '
-    print betastr
-    print ''
+    print('                             @ nDoc %d' % (Info['nDoc']))
+    print('>>>>>> rho: ')
+    print(rhoinitstr)
+    print(rhoeststr)
+    print('>>>>>> omega: ')
+    print(ominitstr)
+    print(omeststr)
+    print('>>>>>> beta: ')
+    print(betastr)
+    print('')
 
 
 class Test(unittest.TestCase):
@@ -94,17 +94,17 @@ class Test(unittest.TestCase):
         Verify that regardless of initialization,
         the recovered beta value is roughly the same.
         '''
-        print ''
+        print('')
         DocTopicCount_d = np.asarray(DocTopicCount_d, dtype=np.float64)
 
-        print '------------- alpha %6.3f gamma %6.3f' % (
-            alpha, gamma)
-        print '------------- DocTopicCount [%s]' % (
+        print('------------- alpha %6.3f gamma %6.3f' % (
+            alpha, gamma))
+        print('------------- DocTopicCount [%s]' % (
             np2flatstr(DocTopicCount_d, fmt='%d'),
-        )
-        print '------------- DocTopicProb  [%s]' % (
+        ))
+        print('------------- DocTopicProb  [%s]' % (
             np2flatstr(DocTopicCount_d / DocTopicCount_d.sum(), fmt='%.3f'),
-        )
+        ))
         Nd = np.sum(DocTopicCount_d)
         theta_d = DocTopicCount_d + alpha * 1.0 / (K + 1) * np.ones(K)
         thetaRem = alpha * 1 / (K + 1)
@@ -157,23 +157,23 @@ class Test(unittest.TestCase):
         Verify that regardless of initialization,
         the recovered beta value is roughly the same.
         '''
-        print ''
+        print('')
         DocTopicCount_d = np.asarray(DocTopicCount_d, dtype=np.float64)
-        print 'Fixed DocTopicCount [%s]' % (
+        print('Fixed DocTopicCount [%s]' % (
             np2flatstr(DocTopicCount_d, fmt='%5d'),
-        )
-        print 'Est DocTopicProb    [%s]' % (
+        ))
+        print('Est DocTopicProb    [%s]' % (
             np2flatstr(DocTopicCount_d / DocTopicCount_d.sum(), fmt='%.3f'),
-        )
+        ))
         for nDoc in nDocRange:
-            print 'nDoc = %d' % (nDoc)
+            print('nDoc = %d' % (nDoc))
 
             rho, omega = learn_rhoomega_fromFixedCounts(
                 DocTopicCount_d=DocTopicCount_d, nDoc=nDoc,
                 alpha=alpha, gamma=gamma)
 
             if doRestart:
-                print 'restart with 2x smaller omega'
+                print('restart with 2x smaller omega')
                 rho2, omega2 = learn_rhoomega_fromFixedCounts(
                     DocTopicCount_d=DocTopicCount_d, nDoc=nDoc,
                     alpha=alpha, gamma=gamma,
@@ -251,8 +251,8 @@ def evalELBOandPrint(DocTopicCount=None, alpha=None, gamma=None,
     betaK = rho2beta(rho, returnSize='K')
     betastr = np2flatstr(betaK, fmt="%.4f")
     omstr = np2flatstr(omega, fmt="%6.2f")
-    print '%10s % .6e beta %s | omega %s' % (
-        msg, L / float(nDoc), betastr, omstr)
+    print('%10s % .6e beta %s | omega %s' % (
+        msg, L / float(nDoc), betastr, omstr))
 
 
 if __name__ == '__main__':

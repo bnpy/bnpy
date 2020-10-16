@@ -1,7 +1,6 @@
 '''
 FiniteMMSB.py
 '''
-
 import numpy as np
 
 from scipy.sparse import csc_matrix
@@ -13,7 +12,7 @@ from bnpy.util import StickBreakUtil
 from bnpy.allocmodel.topics import OptimizerRhoOmegaBetter
 from bnpy.allocmodel.topics.HDPTopicUtil import c_Beta, c_Dir, L_top
 
-from FiniteMMSB import FiniteMMSB
+from bnpy.allocmodel.relational.FiniteMMSB import FiniteMMSB
 
 class HDPMMSB(FiniteMMSB):
 
@@ -54,7 +53,7 @@ class HDPMMSB(FiniteMMSB):
         self.gamma = float(gamma)
 
     def get_active_comp_probs(self):
-        print 'TODO'
+        print('TODO')
 
     def getCompDims(self):
         ''' Get dimensions of latent component interactions.
@@ -112,14 +111,14 @@ class HDPMMSB(FiniteMMSB):
         # Update theta with recently updated info from suff stats
         self.theta, self.thetaRem = updateThetaAndThetaRem(
             SS, rho=self.rho, alpha=self.alpha, gamma=self.gamma)
-        for giter in xrange(nGlobalIters):
+        for giter in range(nGlobalIters):
             self.rho, self.omega = updateRhoOmega(
                 theta=self.theta, thetaRem=self.thetaRem,
-                initrho=self.rho, omega=self.omega, 
+                initrho=self.rho, omega=self.omega,
                 alpha=self.alpha, gamma=self.gamma)
             self.theta, self.thetaRem = updateThetaAndThetaRem(
                 SS, rho=self.rho, alpha=self.alpha, gamma=self.gamma)
-        
+
     def set_global_params(self, hmodel=None,
                           rho=None, omega=None, theta=None, thetaRem=None,
                           **kwargs):
@@ -145,7 +144,7 @@ class HDPMMSB(FiniteMMSB):
             self.theta = theta
             self.thetaRem = thetaRem
         else:
-            self.rho, self.omega = initRhoOmegaFromScratch(**kwargs)            
+            self.rho, self.omega = initRhoOmegaFromScratch(**kwargs)
             self.theta, self.thetaRem = initThetaFromScratch(rho=rho, **kwargs)
         self.K = self.rho.size
         assert self.K == self.omega.size
@@ -163,7 +162,7 @@ class HDPMMSB(FiniteMMSB):
         initbeta = (1.0 - 0.01)/K * np.ones(K)
         assert np.sum(initbeta) < 1.0
         self.rho, self.omega = _beta2rhoomega(
-            beta=initbeta, K=K, 
+            beta=initbeta, K=K,
             nDoc=Data.nNodes, gamma=self.gamma)
 
         if initLP is not None:
@@ -202,7 +201,7 @@ class HDPMMSB(FiniteMMSB):
         -------
         L : scalar float
         '''
-        prior_cDir = L_top(nDoc=self.theta.shape[0], 
+        prior_cDir = L_top(nDoc=self.theta.shape[0],
             alpha=self.alpha, gamma=self.gamma,
             rho=self.rho, omega=self.omega)
         post_cDir = c_Dir(self.theta, self.thetaRem)
@@ -226,7 +225,7 @@ class HDPMMSB(FiniteMMSB):
 
     def to_dict(self):
         return dict(
-            theta=self.theta, thetaRem=self.thetaRem, 
+            theta=self.theta, thetaRem=self.thetaRem,
             rho=self.rho, omega=self.omega)
 
     def from_dict(self, myDict):
@@ -340,7 +339,7 @@ def updateRhoOmega(
 
 def initRhoOmegaFromScratch(
         alpha=None, gamma=None, K=None,
-        beta=None, betaRem=None, 
+        beta=None, betaRem=None,
         Data=None, nNodes=None, **kwargs):
     ''' Set rho, omega to values that reproduce provided appearance probs
 
@@ -374,7 +373,7 @@ def initRhoOmegaFromScratch(
 
 def initThetaFromScratch(
         alpha=None, gamma=None, K=None,
-        Data=None, nNodes=10, nEdgesPerNode=10, 
+        Data=None, nNodes=10, nEdgesPerNode=10,
         rho=None):
     ''' Create initial theta values from scratch.
 

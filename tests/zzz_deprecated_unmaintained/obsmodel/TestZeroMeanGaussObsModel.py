@@ -28,9 +28,9 @@ class Test(unittest.TestCase):
         var = self.nu / (0.5 * self.B * self.B)
         self.gridmaxval = mean + 8 * np.sqrt(var)
         self.gridsize = 8e6  # lots of grid points! need accurate integral.
-        print ''
-        print 'B=%9.4f  nu=%9.4f | %9.4f' % (self.B, self.nu, self.gridmaxval)
-        print '----------------- setup complete.'
+        print('')
+        print('B=%9.4f  nu=%9.4f | %9.4f' % (self.B, self.nu, self.gridmaxval))
+        print('----------------- setup complete.')
 
     def test_integral_of_pdf_equals_one(self):
         """ Verify expected relation -c_F == log(integral(pdf))
@@ -41,8 +41,8 @@ class Test(unittest.TestCase):
 
         negC_numeric = np.log(np.trapz(pdf, grid))
         negC_exact = -1 * c_Func(self.nu, as2D(self.B), 1)
-        print 'negC_numeric: % 9.7f' % (negC_numeric)
-        print 'negC_exact:   % 9.7f' % (negC_exact)
+        print('negC_numeric: % 9.7f' % (negC_numeric))
+        print('negC_exact:   % 9.7f' % (negC_exact))
         assert np.allclose(negC_numeric, negC_exact, atol=0.001)
 
     def pdf(self, grid):

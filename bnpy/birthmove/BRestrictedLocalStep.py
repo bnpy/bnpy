@@ -1,5 +1,6 @@
+
 import numpy as np
-import BLogger
+from bnpy.birthmove import BLogger
 
 from bnpy.allocmodel.mix.DPMixtureRestrictedLocalStep import \
     summarizeRestrictedLocalStep_DPMixtureModel, \
@@ -47,4 +48,4 @@ def makeExpansionSSFromZ(
     xSSslice = MakeSSFromZFuncMap[allocModelName](
         Dslice=Dslice, curModel=curModel, curLPslice=curLPslice,
         **kwargs)
-    return xSSslice    
+    return xSSslice

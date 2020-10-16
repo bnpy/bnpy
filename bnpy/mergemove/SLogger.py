@@ -28,7 +28,7 @@ def pprint(msg, level=None, prefix='', linewidth=80):
         return
 
     if level == 'print':
-        print msg
+        print(msg)
     if Log is None:
         return
     if level is None:
@@ -42,10 +42,10 @@ def pprint(msg, level=None, prefix='', linewidth=80):
     if isinstance(RecentMessages, list):
         RecentMessages.append(msg)
 
-def configure(taskoutpathIN, 
+def configure(taskoutpathIN,
         doSaveToDisk=0, doWriteStdOut=0,
         verboseLevel=0,
-        summaryLevel=logging.DEBUG+1,        
+        summaryLevel=logging.DEBUG+1,
         stdoutLevel=logging.DEBUG+1):
     ''' Configure this singleton Logger to write logs to disk or stdout.
 

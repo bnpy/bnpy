@@ -80,14 +80,14 @@ def CreateBNPYDataDict(origmatfile='/tmp/MoCapSensorData_R1_nCh12_W12.mat',
     # to allow autoregressive likelihoods
     T_all = 0
     doc_range = np.zeros(N + 1, dtype=np.int32)
-    for n in xrange(N):
+    for n in range(N):
         T_n = np.squeeze(Vars['T'][0, n]) - 1  # len of seq n
         doc_range[n + 1] = doc_range[n] + T_n
     T_all = doc_range[-1]
 
     X = np.zeros((T_all, 12))
     Xprev = np.zeros_like(X)
-    for n in xrange(N):
+    for n in range(N):
         X_n = np.asarray(Vars['obs'][0, n], dtype=np.float)
         start = doc_range[n]
         stop = doc_range[n + 1]
@@ -96,11 +96,11 @@ def CreateBNPYDataDict(origmatfile='/tmp/MoCapSensorData_R1_nCh12_W12.mat',
 
     # Track sequence names
     fileNames = list()
-    for n in xrange(N):
+    for n in range(N):
         fileNames.append(str(np.squeeze(Vars['fileName'][0, n])))
 
     # Double check that expected relation between X and Xprev holds
-    for seqID in xrange(doc_range.size - 1):
+    for seqID in range(doc_range.size - 1):
         start = doc_range[seqID]
         stop = doc_range[seqID + 1]
         assert np.allclose(X[start:stop - 1], Xprev[start + 1:stop])

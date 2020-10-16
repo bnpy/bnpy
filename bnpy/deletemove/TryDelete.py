@@ -2,24 +2,24 @@ import argparse
 import numpy as np
 import time
 
-import bnpy.deletemove.DLogger as DLogger
+import bnpy.deletemove as DLogger
 from bnpy.ioutil.DataReader import loadDataFromSavedTask, loadLPKwargsFromDisk
 from bnpy.ioutil.DataReader import loadKwargsFromDisk
 from bnpy.ioutil.ModelReader import load_model_at_lap
 
 def parse_list_of_absorbing_comps(kabsorbList, ktarget, K):
     if kabsorbList == 'all':
-        kabsorbList = range(K)
+        kabsorbList = list(range(K))
     elif kabsorbList.count(','):
         kabsorbList = [int(k) for k in kabsorbList.split(',')]
     elif kabsorbList.count('-'):
         kabsorbList = kabsorbList.split('-')
-        kabsorbList = range(int(kabsorbList[0]), int(kabsorbList[1])+1)
+        kabsorbList = list(range(int(kabsorbList[0]), int(kabsorbList[1])+1))
     else:
         kabsorbList = [int(kabsorbList)]
     if ktarget in kabsorbList:
         kabsorbList.remove(ktarget)
-    nIntersect = np.intersect1d(kabsorbList, range(K)).size
+    nIntersect = np.intersect1d(kabsorbList, list(range(K))).size
     assert nIntersect == len(kabsorbList)
     return kabsorbList
 
@@ -69,15 +69,15 @@ def tryDeleteProposalForSpecificTarget_DPMixtureModel(
         propLscore = propModel.calc_evidence(SS=propSS)
         propLscoreList.append(propLscore)
     if verbose:
-        print "Deleting cluster %d..." % (ktarget)
+        print("Deleting cluster %d..." % (ktarget))
         if propLscore - curLscore > 0:
-            print "  ACCEPTED"
+            print("  ACCEPTED")
         else:
-            print "  REJECTED"
-        print "%.4e  cur ELBO score" % (curLscore)
-        print "%.4e prop ELBO score" % (propLscore)
-        print "Change in ELBO score: %.4e" % (propLscore - curLscore)
-        print ""
+            print("  REJECTED")
+        print("%.4e  cur ELBO score" % (curLscore))
+        print("%.4e prop ELBO score" % (propLscore))
+        print("Change in ELBO score: %.4e" % (propLscore - curLscore))
+        print("")
     return (
         propModel,
         propSS,
@@ -126,8 +126,8 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
 
     # Update current model
     if verbose:
-        print ""
-        print "Loading model from disk and performing local step..."
+        print("")
+        print("Loading model from disk and performing local step...")
     starttime = time.time()
     curLP = curModel.calc_local_params(Data, **LPkwargs)
     curSS = curModel.get_global_suff_stats(Data, curLP, doPrecompEntropy=1)
@@ -135,23 +135,23 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
     curLdict = curModel.calc_evidence(SS=curSS, todict=1)
     curLscore = curLdict['Ltotal']
     if verbose:
-        print "%5.1f sec to obtain current model, LP, and SS" % (
-            time.time() - starttime)
+        print("%5.1f sec to obtain current model, LP, and SS" % (
+            time.time() - starttime))
 
     nontrivialdocIDs = np.flatnonzero(curLP['DocTopicCount'][:, ktarget] > .01)
-    sort_mask = np.argsort(-1*curLP['DocTopicCount'][nontrivialdocIDs, ktarget]) 
+    sort_mask = np.argsort(-1*curLP['DocTopicCount'][nontrivialdocIDs, ktarget])
     nontrivialdocIDs = nontrivialdocIDs[sort_mask]
     docIDs = nontrivialdocIDs[:5]
     if verbose:
-        print ""
-        print "Proposing deletion of cluster %d" % (ktarget)
-        print "    total mass N_k = %.1f" % (curSS.getCountVec()[ktarget])
-        print "    %d docs with non-trivial mass" % (nontrivialdocIDs.size)
-        print ""
-        print "Absorbing into %d/%d remaining clusters" % (
-            len(kabsorbList), curSS.K-1)
-        print " ".join(['%3d' % (kk) for kk in kabsorbList])
-        print ""
+        print("")
+        print("Proposing deletion of cluster %d" % (ktarget))
+        print("    total mass N_k = %.1f" % (curSS.getCountVec()[ktarget]))
+        print("    %d docs with non-trivial mass" % (nontrivialdocIDs.size))
+        print("")
+        print("Absorbing into %d/%d remaining clusters" % (
+            len(kabsorbList), curSS.K-1))
+        print(" ".join(['%3d' % (kk) for kk in kabsorbList]))
+        print("")
 
     # Create init observation model for absorbing states
     xObsModel = propModel.obsModel.copy()
@@ -164,8 +164,8 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
         corrVec = calcCorrelationFromTargetToAbsorbingSet(
             curLP['DocTopicCount'], ktarget, kabsorbList)
         bestAbsorbIDs = np.flatnonzero(corrVec >= .001)
-        print "absorbIDs with best correlation:"
-        print bestAbsorbIDs
+        print("absorbIDs with best correlation:")
+        print(bestAbsorbIDs)
         for k in bestAbsorbIDs:
             xinitSS.WordCounts[k,:] += curSS.WordCounts[ktarget,:]
     xObsModel.update_global_params(xinitSS)
@@ -179,7 +179,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
         curPiVec[ktarget] + np.sum(curPiVec[kabsorbList]))
 
     if verbose:
-        print "Reassigning target mass among absorbing set..."
+        print("Reassigning target mass among absorbing set...")
     starttime = time.time()
     propLscoreList = list()
     for ELBOstep in range(nELBOSteps):
@@ -201,8 +201,8 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
             xObsModel.update_global_params(xSS)
             # TODO: update xPiVec???
 
-        print " completed step %d/%d after %5.1f sec" % (
-            ELBOstep+1, nELBOSteps, time.time() - starttime)
+        print(" completed step %d/%d after %5.1f sec" % (
+            ELBOstep+1, nELBOSteps, time.time() - starttime))
 
         propSS = curSS.copy()
         propSS.replaceCompsWithContraction(
@@ -220,35 +220,35 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
         propLscoreList.append(propLscore)
 
     if verbose:
-        print ""
-        print "Proposal result:"
+        print("")
+        print("Proposal result:")
         if propLscore - curLscore > 0:
-            print "  ACCEPTED"
+            print("  ACCEPTED")
         else:
-            print "  REJECTED"
-        print "%.4e  cur ELBO score" % (curLscore)
-        print "%.4e prop ELBO score" % (propLscore)
-        print "% .4e change in ELBO score" % (propLscore - curLscore)
-        print ""
+            print("  REJECTED")
+        print("%.4e  cur ELBO score" % (curLscore))
+        print("%.4e prop ELBO score" % (propLscore))
+        print("% .4e change in ELBO score" % (propLscore - curLscore))
+        print("")
         for key in sorted(curLdict.keys()):
             if key.count('_') or key.count('total'):
                 continue
-            print "  gain %8s % .3e" % (
-                key, propLdict[key] - curLdict[key])
-        print ""
+            print("  gain %8s % .3e" % (
+                key, propLdict[key] - curLdict[key]))
+        print("")
         if docIDs.size > 0:
             np.set_printoptions(suppress=1, precision=2, linewidth=120)
             xLPslice = Info['xLPslice']
 
-            print "BEFORE"
-            print "-----"
-            print np.hstack([
+            print("BEFORE")
+            print("-----")
+            print(np.hstack([
                 curLP['DocTopicCount'][docIDs,:][:,kabsorbList],
                 curLP['DocTopicCount'][docIDs,:][:,ktarget][:,np.newaxis]
-                ])
-            print "AFTER"
-            print "-----"
-            print xLPslice['DocTopicCount'][docIDs,:]
+                ]))
+            print("AFTER")
+            print("-----")
+            print(xLPslice['DocTopicCount'][docIDs,:])
 
     if doPlotELBO:
         import bnpy.viz
@@ -267,7 +267,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
         kplotList = [x for x in kabsorbList]
         kplotList.append(ktarget)
         for d in docIDs:
-            curDTClabels = ['%.1f' % (x) for x in 
+            curDTClabels = ['%.1f' % (x) for x in
                 curLP['DocTopicCount'][d, kplotList]]
             bnpy.viz.PlotComps.plotCompsFromHModel(
                 curModel,
@@ -280,7 +280,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
             fig.canvas.set_window_title('doc %d BEFORE' % (d))
 
             propLP = Info['xLPslice']
-            propDTClabels = ['%.1f' % (x) for x in 
+            propDTClabels = ['%.1f' % (x) for x in
                 propLP['DocTopicCount'][d, :]]
             bnpy.viz.PlotComps.plotCompsFromHModel(
                 propModel,
@@ -291,7 +291,7 @@ def tryDeleteProposalForSpecificTarget_HDPTopicModel(
             fig.canvas.set_window_title('doc %d AFTER' % (d))
             pylab.show(block=False)
 
-        # Plot docs        
+        # Plot docs
         dIm = np.zeros((docIDs.size*2, 900))
         dImLabels = list()
         tImLabels = list()
@@ -395,7 +395,7 @@ if __name__ == '__main__':
 
     DLogger.configure(args.outputdir,
         doSaveToDisk=0,
-        doWriteStdOut=1) 
+        doWriteStdOut=1)
     tryDeleteProposalForSavedTask(**args.__dict__)
 
 '''

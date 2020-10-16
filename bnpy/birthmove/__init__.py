@@ -1,11 +1,12 @@
 ''' birthmove module
 '''
 
-import BLogger
 
-from BirthProposalError import BirthProposalError
-from BPlanner import selectShortListForBirthAtLapStart
-from BPlanner import selectCompsForBirthAtCurrentBatch
-from BRestrictedLocalStep import \
+from bnpy.birthmove import BLogger
+
+from bnpy.birthmove.BirthProposalError import BirthProposalError
+from bnpy.birthmove.BPlanner import selectShortListForBirthAtLapStart
+from bnpy.birthmove.BPlanner import selectCompsForBirthAtCurrentBatch
+from bnpy.birthmove.BRestrictedLocalStep import \
 	summarizeRestrictedLocalStep, \
 	makeExpansionSSFromZ

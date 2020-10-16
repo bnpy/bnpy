@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 try:
     import munkres
@@ -50,7 +51,7 @@ def calcHammingDistance(zTrue, zHat, excludeNegLabels=1, verbose=0,
         good_tstep_mask = zTrue >= 0
         nGood = np.sum(good_tstep_mask)
         if verbose and np.sum(good_tstep_mask) < zTrue.size:
-            print 'EXCLUDED %d/%d timesteps' % (np.sum(zTrue < 0), zTrue.size)
+            print('EXCLUDED %d/%d timesteps' % (np.sum(zTrue < 0), zTrue.size))
         dist = np.sum(zTrue[good_tstep_mask] != zHat[good_tstep_mask])
         dist = dist/float(nGood)
     else:
@@ -81,14 +82,14 @@ def buildCostMatrix(zHat, zTrue):
     Kest = int(np.max(zHat)) + 1
     K = np.maximum(Ktrue, Kest)
     CostMatrix = np.zeros((K, K))
-    for ktrue in xrange(K):
-        for kest in xrange(K):
+    for ktrue in range(K):
+        for kest in range(K):
             CostMatrix[ktrue, kest] = np.sum(np.logical_and(zTrue == ktrue,
                                                             zHat != kest))
     return CostMatrix
 
 
-def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
+def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False, standardize_order_of_extras=True):
     ''' Relabel the states in zHat to minimize the hamming-distance to zTrue
 
     Args
@@ -127,6 +128,34 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
                 AlignedRowColPairs.append((ktrue, kest))
                 OrigToAlignedMap[kest] = ktrue
                 AlignedToOrigMap[ktrue] = kest
+
+        if Ktrue < Kest and np.unique(zTrue).size < np.unique(zHat).size and standardize_order_of_extras:
+            # All extra states will have ids in Ktrue, Ktrue+1, Ktrue+2, ....
+            # Break ties by assigning these in ascending order by first appearance
+            extra_states = []
+            for (kt, ke) in AlignedRowColPairs:
+                if kt >= Ktrue and ke in zHat:
+                    extra_states.append(ke)
+            rank = dict()
+            for x in sorted(extra_states):
+                match_ids = np.flatnonzero(zHat == x)
+                if match_ids.size == 0:
+                    continue
+                rank[x] = match_ids[0]
+
+            ## Renumber by rank from smallest to largest
+            old_ids, rank_vals = zip(*list(rank.items()))
+            old_ids = np.asarray(old_ids)
+            new_ids = Ktrue + np.argsort(np.asarray(rank_vals))
+            old2new = dict(zip(old_ids, new_ids))
+            OrigToAlignedMap = dict()
+            AlignedToOrigMap = dict()
+            for a, b in AlignedRowColPairs:
+                newa = old2new.get(b, a)
+                OrigToAlignedMap[b] = newa
+                AlignedToOrigMap[newa] = b
+            AlignedRowColPairs = list(AlignedToOrigMap.items())
+
     else:
         # Unpack existing alignment info
         AlignedRowColPairs = useInfo['AlignedRowColPairs']
@@ -136,7 +165,8 @@ def alignEstimatedStateSeqToTruth(zHat, zTrue, useInfo=None, returnInfo=False):
         Ktrue = useInfo['Ktrue']
         Kest = useInfo['Kest']
 
-        assert np.allclose(Ktrue, zTrue.max() + 1)
+        assert Ktrue >= zTrue.max() + 1
+        
         Khat = zHat.max() + 1
 
         # Account for extra states present in zHat
@@ -175,7 +205,7 @@ def convertStateSeq_flat2list(zFlat, Data):
     ''' Convert flat, 1D array representation of multiple sequences to list
     '''
     zListBySeq = list()
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
         zListBySeq.append(zFlat[start:stop])
@@ -186,7 +216,7 @@ def convertStateSeq_list2flat(zListBySeq, Data):
     ''' Convert nested list representation of multiple sequences to 1D array
     '''
     zFlat = np.zeros(Data.doc_range[-1])
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
         zFlat[start:stop] = zListBySeq[n]
@@ -198,7 +228,7 @@ def convertStateSeq_list2MAT(zListBySeq):
     '''
     N = len(zListBySeq)
     zObjArr = np.zeros((N, 1), dtype=object)
-    for n in xrange(N):
+    for n in range(N):
         zObjArr[n, 0] = np.asarray(
             zListBySeq[n][:, np.newaxis], dtype=np.int32)
     return zObjArr
@@ -207,7 +237,7 @@ def convertStateSeq_list2MAT(zListBySeq):
 def convertStateSeq_MAT2list(zObjArr):
     N = zObjArr.shape[0]
     zListBySeq = list()
-    for n in xrange(N):
+    for n in range(N):
         zListBySeq.append(np.squeeze(zObjArr[n, 0]))
     return zListBySeq
 
@@ -218,15 +248,15 @@ def calcContigBlocksFromZ(Zvec, returnStates=False):
     Examples
     --------
     >>> calcContigBlocksFromZ([0,0,0,0])
-    (array([ 4.]), array([ 0.]))
+    (array([4.]), array([0.]))
     >>> calcContigBlocksFromZ([0,0,0,1,1])
-    (array([ 3.,  2.]), array([ 0.,  3.]))
+    (array([3., 2.]), array([0., 3.]))
     >>> calcContigBlocksFromZ([0,1,0])
-    (array([ 1.,  1.,  1.]), array([ 0.,  1.,  2.]))
+    (array([1., 1., 1.]), array([0., 1., 2.]))
     >>> calcContigBlocksFromZ([0,1,1])
-    (array([ 1.,  2.]), array([ 0.,  1.]))
+    (array([1., 2.]), array([0., 1.]))
     >>> calcContigBlocksFromZ([6,6,5])
-    (array([ 2.,  1.]), array([ 0.,  2.]))
+    (array([2., 1.]), array([0., 2.]))
 
     Returns
     -------
@@ -280,12 +310,12 @@ def makeStateColorMap(nTrue=1, nExtra=0, nHighlight=0):
             C.shape[0]))
     C = C[:nTrue] / 255.0
     shadeVals = np.linspace(0.2, 0.95, nExtra)
-    for shadeID in xrange(nExtra):
+    for shadeID in range(nExtra):
         shadeOfRed = np.asarray([shadeVals[shadeID], 0, 0])
         C = np.vstack([C, shadeOfRed[np.newaxis, :]])
 
     highVals = np.linspace(0.3, 1.0, nHighlight)
-    for highID in xrange(nHighlight):
+    for highID in range(nHighlight):
         yellowColor = np.asarray([highVals[highID], highVals[highID], 0])
         C = np.vstack([C, yellowColor[np.newaxis, :]])
 

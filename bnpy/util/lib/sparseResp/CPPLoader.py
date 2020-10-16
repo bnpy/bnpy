@@ -39,4 +39,3 @@ def LoadFuncFromCPPLib(libpath, srcpath, funcName):
         def errorFunc(*args, **kwargs):
             raise ImportError("Could not import C++ func: %s" % (funcName))
         return errorFunc
-

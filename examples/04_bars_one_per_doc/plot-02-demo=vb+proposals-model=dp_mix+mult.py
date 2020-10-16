@@ -137,4 +137,4 @@ for doc_id in range(n_docs_to_sample):
 bnpy.viz.BarsViz.show_square_images(
     test_x_DV, vmin=0, vmax=5)
 pylab.tight_layout()
-pylab.show()
+pylab.show(block=False)

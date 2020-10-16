@@ -41,7 +41,7 @@ def main(**kwargs):
     DefaultKwargs.update(kwargs)
 
     parser = argparse.ArgumentParser()
-    for key, val in DefaultKwargs.items():
+    for key, val in list(DefaultKwargs.items()):
         try:
             assert np.allclose(int(val), float(val))
             _type = int
@@ -66,7 +66,7 @@ def main(**kwargs):
     Kfresh = args.Kfresh
     dataName = args.dataName
     outputdir = args.outputdir
-    print "OUTPUT: ", outputdir
+    print("OUTPUT: ", outputdir)
     nBatch = int(nDocTotal // nDocPerBatch)
 
     LPkwargs = DefaultLPkwargs
@@ -75,9 +75,9 @@ def main(**kwargs):
     for key in args.__dict__:
         if key.startswith('b_'):
             bkwargs[key] = getattr(args, key)
-    print 'BIRTH kwargs:'
+    print('BIRTH kwargs:')
     for key in bkwargs:
-        print key, bkwargs[key]
+        print(key, bkwargs[key])
 
     if dataName.count('BarsK10V900'):
         import BarsK10V900
@@ -91,7 +91,7 @@ def main(**kwargs):
         dataMod = __import__(dataName, fromlist=[])
         Data = dataMod.get_data()
         vocabList = Data.vocabList
-        Data = Data.select_subset_by_mask(range(nDocTotal))
+        Data = Data.select_subset_by_mask(list(range(nDocTotal)))
         Data.name = dataName
         Data.vocabList = vocabList
     DataIterator = Data.to_iterator(nBatch=nBatch, nLap=10)
@@ -116,9 +116,9 @@ def main(**kwargs):
     SS = None
     while didAccept:
         nRep += 1
-        print ''
-        print ''
-        print 'rep %d' % (nRep)
+        print('')
+        print('')
+        print('rep %d' % (nRep))
         didAccept = False
 
         LPbatch = hmodel.calc_local_params(Dbatch, **LPkwargs)
@@ -154,8 +154,8 @@ def main(**kwargs):
                     b_debugOutputDir=b_debugOutputDir,
                     **bkwargs)
             except BirthProposalError as e:
-                print 'SKIPPED!'
-                print str(e)
+                print('SKIPPED!')
+                print(str(e))
                 rejectedComps[targetUID] = 1
                 continue
 
@@ -195,11 +195,11 @@ def main(**kwargs):
                         compsToHighlight=[pos],
                         xlabels=xlabels)
                 else:
-                    print 'TOPIC TO SPLIT'
+                    print('TOPIC TO SPLIT')
                     ktarget = SS.uid2k(targetUID)
                     printTopWordsFromWordCounts(
                         SS.WordCounts[ktarget][np.newaxis,:], Data.vocabList)
-                    print 'NEW TOPICS'
+                    print('NEW TOPICS')
                     printTopWordsFromWordCounts(
                         propSS.WordCounts, Data.vocabList)
                     plotCompsFromWordCounts(
@@ -209,22 +209,22 @@ def main(**kwargs):
 
             # Decision time: accept or reject
             if propLscore > curLscore:
-                print 'ACCEPT!'
+                print('ACCEPT!')
                 hmodel = propModel
                 SS = propSS
                 didAccept = True
             else:
-                print 'REJECT!'
+                print('REJECT!')
                 rejectedComps[targetUID] = 1
-            print ' curLscore %.5f' % (curLscore)
-            print 'propLscore %.5f' % (propLscore)
+            print(' curLscore %.5f' % (curLscore))
+            print('propLscore %.5f' % (propLscore))
 
             for key in ['Ldata', 'Lentropy', 'Lalloc', 'LcDtheta']:
-                print '  %s : %.5f' % (key, propLdict[key] - curLdict[key])
+                print('  %s : %.5f' % (key, propLdict[key] - curLdict[key]))
 
             if doInteractiveViz:
                 pylab.show(block=False)
-                keypress = raw_input("Press any key >>>")
+                keypress = input("Press any key >>>")
                 if keypress == 'embed':
                     from IPython import embed; embed()
                 pylab.close('all')
@@ -241,8 +241,8 @@ def main(**kwargs):
     # Final phase: merges
     from bnpy.mergemove import MergePlanner, MergeMove
 
-    print SS.uids
-    print ' '.join(['%.0f' % (x) for x in SS.getCountVec()])
+    print(SS.uids)
+    print(' '.join(['%.0f' % (x) for x in SS.getCountVec()]))
     mPairIDs = None
     for step in range(10):
         uids = SS.uids
@@ -267,7 +267,7 @@ def main(**kwargs):
             newModel, newSS, newLscore, Info = MergeMove.run_many_merge_moves(
                 hmodel, SS, curLscore, mPairIDs=mPairIDs)
             if Info['ELBOGain'] > 0:
-                print 'ACCEPTED MERGE!'
+                print('ACCEPTED MERGE!')
                 from IPython import embed; embed()
                 hmodel = newModel
                 SS = newSS

@@ -15,7 +15,7 @@ def sampleVd(u, nDoc=100, alpha=0.5, PRNG=np.random.RandomState(0)):
     cumprod1mu[1:] *= np.cumprod(1 - u[:-1])
 
     Vd = np.zeros((nDoc, K))
-    for k in xrange(K):
+    for k in range(K):
         Vd[:, k] = PRNG.beta(alpha * cumprod1mu[k] * u[k],
                              alpha * cumprod1mu[k] * (1. - u[k]),
                              size=nDoc)
@@ -96,7 +96,7 @@ def summarizeVdToDocTopicCount(Vd):
     assert not np.any(np.isnan(Vd))
     PRNG = np.random.RandomState(0)
     DocTopicCount = np.zeros(Vd.shape)
-    for d in xrange(Vd.shape[0]):
+    for d in range(Vd.shape[0]):
         N_d = 100 + 50 * PRNG.rand()
         Pi_d = Vd[d, :].copy()
         Pi_d[1:] *= np.cumprod(1.0 - Vd[d, :-1])

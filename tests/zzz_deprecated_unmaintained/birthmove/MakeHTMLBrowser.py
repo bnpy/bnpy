@@ -47,7 +47,7 @@ def makeImgTag(varname1, val1, varname2, val2, imgprefix="ELBOGain"):
             return htmltag
     #for f in flist:
     #    print f
-    print "Cannot find file: %s %s" % (str1, str2)
+    print("Cannot find file: %s %s" % (str1, str2))
     return ''
 
 

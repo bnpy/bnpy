@@ -24,7 +24,7 @@ class TestHDPHMM_ELBOPenalizesEmptyComps(unittest.TestCase):
         '''
         assert np.allclose(1.0, np.sum(self.trueResp, axis=1))
 
-        for kempty in xrange(0, 4):
+        for kempty in range(0, 4):
             resp = makeNewRespWithEmptyStates(self.trueResp, kempty)
             assert np.allclose(1.0, np.sum(resp, axis=1))
             assert resp.shape[0] == self.trueResp.shape[0]
@@ -39,14 +39,14 @@ class TestHDPHMM_ELBOPenalizesEmptyComps(unittest.TestCase):
         assert np.all(np.diff(ELBOVals) < 0)
 
     def test_ELBO_penalizes_empty__range_of_hypers(self):
-        print ''
+        print('')
         for initprobs in ['uniform', 'bypopularity']:
-            print '------------------- initial beta set to %s' % (initprobs)
-            print '%5s %5s %5s' % ('alpha', 'gamma', 'kappa')
+            print('------------------- initial beta set to %s' % (initprobs))
+            print('%5s %5s %5s' % ('alpha', 'gamma', 'kappa'))
             for alpha in [0.1, 0.9, 1.5]:
                 for gamma in [1.0, 3.0, 10.0]:
                     for kappa in [1.1, 17.76, 100]:
-                        print '%5.2f %5.2f %7.2f' % (alpha, gamma, kappa)
+                        print('%5.2f %5.2f %7.2f' % (alpha, gamma, kappa))
 
                         self.test_ELBO_penalizes_empty_comps(
                             alpha=alpha, gamma=gamma,
@@ -58,7 +58,7 @@ def printProbVector(xvec, fmt='%.4f'):
     xvec = np.asarray(xvec)
     if xvec.ndim == 0:
         xvec = np.asarray([xvec])
-    print ' '.join([fmt % (x) for x in xvec])
+    print(' '.join([fmt % (x) for x in xvec]))
 
 
 def resp2ELBO_HDPHMM(Data, resp, gamma=10, alpha=0.5, hmmKappa=0,
@@ -123,7 +123,7 @@ def makeDataAndTrueResp(seed=123, seqLens=(100, 90, 80, 70, 60, 50)):
     K = len(np.unique(Ztrue))  # Num states
     T_all = Ztrue.size
     trueResp = np.ones((T_all, K))
-    for t in xrange(T_all):
+    for t in range(T_all):
         trueResp[t, Ztrue[t]] = 100 - K + 1
     trueResp /= trueResp.sum(axis=1)[:, np.newaxis]
     assert np.allclose(1.0, trueResp.sum(axis=1))

@@ -35,13 +35,13 @@ def get_data(
     w[np.diag_indices(K)] = w_diag
 
     # Generate node assignments
-    Z = prng.choice(xrange(K), p=pi, size=nNodes)
+    Z = prng.choice(range(K), p=pi, size=nNodes)
     TrueParams = dict(Z=Z, w=w, pi=pi)
 
     # Generate edges
     AdjMat = np.zeros((nNodes, nNodes))
-    for i in xrange(nNodes):
-        for j in xrange(nNodes):
+    for i in range(nNodes):
+        for j in range(nNodes):
             if i != j:
                 AdjMat[i, j] = prng.binomial(n=1, p=w[Z[i], Z[j]])
 

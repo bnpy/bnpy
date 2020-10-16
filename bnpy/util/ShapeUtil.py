@@ -4,33 +4,33 @@ import numpy as np
 def argsort_bigtosmall_stable(x, limits=list()):
     ''' Sort indices of vector x so the values in x ranked big to small
 
-    Sort guaranteed to be stable, meaning any adjacent pairs of x 
+    Sort guaranteed to be stable, meaning any adjacent pairs of x
     that are already sorted will not be permuted.
 
     Returns
     -------
     sortids : 1D array
         x[sortids[i]] >= x[sortids[i+1]] for all i.
-    
+
     Examples
     --------
     >>> xs = np.asarray([3, 4, 5, 2, 2, 2, 1])
-    >>> print argsort_bigtosmall_stable(xs)
+    >>> print (argsort_bigtosmall_stable(xs))
     [2 1 0 3 4 5 6]
     >>> cntVec = np.asarray([5, 6, 7, 1])
     >>> remVec = np.asarray([0, 0, 0, 1])
     >>> limits = np.flatnonzero(remVec) + 1
     >>> sortids = argsort_bigtosmall_stable(cntVec, limits=limits)
-    >>> print cntVec[sortids]
+    >>> print (cntVec[sortids])
     [7 6 5 1]
     >>> # Try harder example
     >>> cntVec = np.asarray([5, 6, 7, 2, 8, 3, 9, 3, 1, 8, 1])
     >>> remVec = np.asarray([0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1])
     >>> limits = np.flatnonzero(remVec) + 1
-    >>> print limits
+    >>> print (limits)
     [ 3  6  8 11]
     >>> sortids = argsort_bigtosmall_stable(cntVec, limits=limits)
-    >>> print cntVec[sortids]
+    >>> print (cntVec[sortids])
     [7 6 5 8 3 2 9 3 8 1 1]
     '''
     x = as1D(x)
@@ -97,13 +97,13 @@ def argsortBigToSmallByTiers(tierAScores, tierBScores):
     -------
     >>> AScores = [1, 1, 1, 0, 0]
     >>> BScores = [6, 5, 4, 8, 7]
-    >>> print argsortBigToSmallByTiers(AScores, BScores)
+    >>> print (argsortBigToSmallByTiers(AScores, BScores))
     [0 1 2 3 4]
     >>> AScores = [1, 1, 1, 0, 0, -1, -1, -1]
     >>> BScores = [6, 5, 4, 8, 7, 11, 1.5, -1.5]
-    >>> print argsortBigToSmallByTiers(AScores, BScores)
+    >>> print (argsortBigToSmallByTiers(AScores, BScores))
     [0 1 2 3 4 5 6 7]
-    >>> print argsortBigToSmallByTiers(BScores, AScores)
+    >>> print (argsortBigToSmallByTiers(BScores, AScores))
     [5 3 4 0 1 2 6 7]
     '''
     tierAScores = np.asarray(tierAScores, dtype=np.float64)
@@ -214,4 +214,3 @@ def as3D(x):
     while x.ndim < 3:
         x = x[np.newaxis, :]
     return x
-

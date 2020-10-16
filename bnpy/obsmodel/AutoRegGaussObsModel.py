@@ -8,8 +8,8 @@ from bnpy.util import dotATA, dotATB, dotABT
 from bnpy.util import as1D, as2D, as3D
 from bnpy.util import numpyToSharedMemArray, fillSharedMemArray
 
-from AbstractObsModel import AbstractObsModel
-from GaussObsModel import createECovMatFromUserInput
+from bnpy.obsmodel.AbstractObsModel import AbstractObsModel
+from bnpy.obsmodel.GaussObsModel import createECovMatFromUserInput
 
 
 class AutoRegGaussObsModel(AbstractObsModel):
@@ -334,7 +334,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         '''
         K = self.EstParams.K
         L = np.empty((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             L[:, k] = - 0.5 * self.D * LOGTWOPI \
                 - 0.5 * self._logdetSigma(k)  \
                 - 0.5 * self._mahalDist_EstParam(Data.X, Data.Xprev, k)
@@ -396,7 +396,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
             minCovMat_EE = self.min_covar * np.eye(SS.E)
         A = np.zeros((SS.K, self.D, self.E))
         Sigma = np.zeros((SS.K, self.D, self.D))
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             # Add small pos multiple of identity to make invertible
             # TODO: This is source of potential stability issues.
             A[k] = np.linalg.solve(SS.ppT[k] + minCovMat_EE,
@@ -469,7 +469,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         B = SS.xxT + B_MVM[np.newaxis, :]
         V = SS.ppT + Prior.V[np.newaxis, :]
         M = np.zeros((SS.K, SS.D, SS.E))
-        for k in xrange(B.shape[0]):
+        for k in range(B.shape[0]):
             M[k] = np.linalg.solve(
                 V[k], SS.pxT[k] + np.dot(Prior.V, Prior.M.T)).T
             B[k] -= np.dot(M[k], np.dot(V[k], M[k].T))
@@ -565,12 +565,12 @@ class AutoRegGaussObsModel(AbstractObsModel):
         # Post.setField('nu', Post.nu, dims=None)
         # Post.setField('V', Post.nu, dims=None)
         VMT = np.zeros((self.K, self.D, self.D))
-        for k in xrange(self.K):
+        for k in range(self.K):
             VMT[k] = np.dot(Post.V[k], Post.M[k].T)
         Post.setField('n_VMT', VMT, dims=('K', 'D', 'D'))
 
         Bnat = np.empty((self.K, self.D, self.D))
-        for k in xrange(self.K):
+        for k in range(self.K):
             Bnat[k] = Post.B[k] + np.dot(Post.M[k], VMT[k])
         Post.setField('n_B', Bnat, dims=('K', 'D', 'D'))
 
@@ -587,12 +587,12 @@ class AutoRegGaussObsModel(AbstractObsModel):
         # Post.setField('V', Post.nu, dims=None)
 
         M = np.zeros((self.K, self.D, self.D))
-        for k in xrange(self.K):
+        for k in range(self.K):
             M[k] = np.linalg.solve(Post.V[k], Post.n_VMT[k]).T
         Post.setField('M', M, dims=('K', 'D', 'D'))
 
         B = np.empty((self.K, self.D, self.D))
-        for k in xrange(self.K):
+        for k in range(self.K):
             B[k] = Post.n_B[k] - np.dot(Post.M[k], Post.n_VMT[k])
         Post.setField('B', B, dims=('K', 'D', 'D'))
 
@@ -605,7 +605,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         '''
         K = self.Post.K
         L = np.zeros((Data.nObs, K))
-        for k in xrange(K):
+        for k in range(K):
             L[:, k] = - 0.5 * self.D * LOGTWOPI \
                 + 0.5 * self.GetCached('E_logdetL', k)  \
                 - 0.5 * self._mahalDist_Post(Data.X, Data.Xprev, k)
@@ -650,7 +650,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         elbo = np.zeros(SS.K)
         Post = self.Post
         Prior = self.Prior
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             elbo[k] = c_Diff(Prior.nu,
                              self.GetCached('logdetB'),
                              Prior.M,
@@ -715,12 +715,12 @@ class AutoRegGaussObsModel(AbstractObsModel):
         Prior = self.Prior
         cPrior = c_Func(Prior.nu, Prior.B, Prior.M, Prior.V)
         c = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             c[k] = c_Func(Post.nu[k], Post.B[k], Post.M[k], Post.V[k])
 
         Gap = np.zeros((SS.K, SS.K))
-        for j in xrange(SS.K):
-            for k in xrange(j + 1, SS.K):
+        for j in range(SS.K):
+            for k in range(j + 1, SS.K):
                 nu, B, M, V = self.calcPostParamsForComp(SS, j, k)
                 cjk = c_Func(nu, B, M, V)
                 Gap[j, k] = c[j] + c[k] - cPrior - cjk
@@ -794,7 +794,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
     def calcMargLik_CFuncForLoop(self, SS):
         Prior = self.Prior
         logp = np.zeros(SS.K)
-        for k in xrange(SS.K):
+        for k in range(SS.K):
             nu, B, m, kappa = self.calcPostParamsForComp(SS, k)
             logp[k] = c_Diff(Prior.nu, Prior.B, Prior.m, Prior.kappa,
                              nu, B, m, kappa)
@@ -831,7 +831,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
     def _cholB(self, k=None):
         if k == 'all':
             retMat = np.zeros((self.K, self.D, self.D))
-            for k in xrange(self.K):
+            for k in range(self.K):
                 retMat[k] = scipy.linalg.cholesky(self.Post.B[k], lower=True)
             return retMat
         elif k is None:
@@ -847,7 +847,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
     def _cholV(self, k=None):
         if k == 'all':
             retMat = np.zeros((self.K, self.D, self.D))
-            for k in xrange(self.K):
+            for k in range(self.K):
                 retMat[k] = scipy.linalg.cholesky(self.Post.V[k], lower=True)
             return retMat
         elif k is None:
@@ -865,7 +865,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         if k is 'all':
             dvec = dvec[:, np.newaxis]
             retVec = self.D * LOGTWO * np.ones(self.K)
-            for kk in xrange(self.K):
+            for kk in range(self.K):
                 retVec[kk] -= self.GetCached('logdetB', kk)
             nuT = self.Post.nu[np.newaxis, :]
             retVec += np.sum(digamma(0.5 * (nuT + 1 - dvec)), axis=0)
@@ -1038,7 +1038,7 @@ def calcSummaryStats(Data, SS, LP,
     xxT = np.empty((K, D, D))
     ppT = np.empty((K, E, E))
     pxT = np.empty((K, E, D))
-    for k in xrange(K):
+    for k in range(K):
         sqrtResp_k = sqrtResp[:, k][:, np.newaxis]
         xxT[k] = dotATA(sqrtResp_k * Data.X)
         ppT[k] = dotATA(sqrtResp_k * Data.Xprev)
@@ -1072,7 +1072,7 @@ def calcLogSoftEvMatrix_FromPost(Dslice,
     '''
     K = kwargs['K']
     L = np.zeros((Dslice.nObs, K))
-    for k in xrange(K):
+    for k in range(K):
         L[:, k] = - 0.5 * Dslice.dim * LOGTWOPI \
             + 0.5 * E_logdetL[k]  \
             - 0.5 * _mahalDist_Post(Dslice.X, Dslice.Xprev, k, **kwargs)

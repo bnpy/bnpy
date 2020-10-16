@@ -2,22 +2,22 @@ import numpy as np
 import os
 import sys
 import bnpy.init.FromTruth
-import BLogger
+from bnpy.birthmove import BLogger
 
 from scipy.special import digamma, gammaln
 
 from bnpy.allocmodel.topics.HDPTopicRestrictedLocalStep \
     import summarizeRestrictedLocalStep_HDPTopicModel
 
-from BCleanup import cleanupMergeClusters, cleanupDeleteSmallClusters
-from BirthProposalError import BirthProposalError
+from bnpy.birthmove.BCleanup import cleanupMergeClusters, cleanupDeleteSmallClusters
+from bnpy.birthmove.BirthProposalError import BirthProposalError
 from bnpy.viz.PlotComps import plotCompsFromSS
 from bnpy.viz.ProposalViz import plotELBOtermsForProposal
 from bnpy.viz.ProposalViz import plotDocUsageForProposal
 from bnpy.viz.ProposalViz import makeSingleProposalHTMLStr
 from bnpy.viz.PrintTopics import vec2str
 
-from BRestrictedLocalStep import \
+from bnpy.birthmove.BRestrictedLocalStep import \
     summarizeRestrictedLocalStep, \
     makeExpansionSSFromZ
 
@@ -30,7 +30,7 @@ DefaultLPkwargs = dict(
     )
 
 def makeSummaryForBirthProposal_HTMLWrapper(
-        Dslice, curModel, curLPslice,        
+        Dslice, curModel, curLPslice,
         **kwargs):
     ''' Thin wrapper around makeSummaryForBirthProposal that produces HTML.
 
@@ -135,7 +135,7 @@ def makeSummaryForBirthProposal(
             'HTML output:' + b_debugOutputDir)
         # Create snapshot of current model comps
         plotCompsFromSS(
-            curModel, curSSwhole, 
+            curModel, curSSwhole,
             os.path.join(b_debugOutputDir, 'OrigComps.png'),
             vocabList=vocabList,
             compsToHighlight=[ktarget])
@@ -154,8 +154,8 @@ def makeSummaryForBirthProposal(
             return None, dict(errorMsg=errorMsg)
     # Create suff stats for some new states
     xInitSStarget, Info = initSS_BregmanDiv(
-        Dslice, curModel, curLPslice, 
-        K=xK, 
+        Dslice, curModel, curLPslice,
+        K=xK,
         ktarget=ktarget,
         lapFrac=lapFrac,
         seed=seed + int(1000 * lapFrac),
@@ -189,7 +189,7 @@ def makeSummaryForBirthProposal(
 
     if b_debugOutputDir:
         plotCompsFromSS(
-            curModel, xSSslice, 
+            curModel, xSSslice,
             os.path.join(b_debugOutputDir, 'NewComps_Init.png'),
             vocabList=vocabList)
 
@@ -226,7 +226,7 @@ def makeSummaryForBirthProposal(
                         initDocUsage_uid = np.sum(Info['targetZ'] == k)
                     else:
                         initDocUsage_uid = 0.0
-                        for d in xrange(Dslice.nDoc):
+                        for d in range(Dslice.nDoc):
                             start = Dslice.doc_range[d]
                             stop = Dslice.doc_range[d+1]
                             initDocUsage_uid += np.any(
@@ -254,7 +254,7 @@ def makeSummaryForBirthProposal(
     prevCountVec = xSSslice.getCountVec()
     didConvEarly = False
     convstep = 100 + b_nRefineSteps
-    # Run several refinement steps. 
+    # Run several refinement steps.
     # Each step does a restricted local step to improve
     # the proposed cluster assignments.
     for rstep in range(b_nRefineSteps):
@@ -264,7 +264,7 @@ def makeSummaryForBirthProposal(
         # Restricted local step!
         # * xInitSS : specifies obs-model stats used for initialization
         xSSslice, refineInfo = summarizeRestrictedLocalStep(
-            Dslice=Dslice, 
+            Dslice=Dslice,
             curModel=curModel,
             curLPslice=curLPslice,
             curSSwhole=curSSwhole,
@@ -301,7 +301,7 @@ def makeSummaryForBirthProposal(
         # Write HTML debug info
         if b_debugOutputDir:
             plotCompsFromSS(
-                curModel, xSSslice, 
+                curModel, xSSslice,
                 os.path.join(b_debugOutputDir,
                              'NewComps_Step%d.png' % (rstep+1)),
                 vocabList=vocabList)
@@ -343,10 +343,10 @@ def makeSummaryForBirthProposal(
         # If converged early and did the final refinement step
         if didConvEarly and rstep > convstep:
             break
-        # Cleanup by deleting small clusters 
+        # Cleanup by deleting small clusters
         if rstep < b_nRefineSteps - 1:
             if rstep == b_nRefineSteps - 2 or didConvEarly:
-                # After all but last step, 
+                # After all but last step,
                 # delete small (but not empty) comps
                 minNumAtomsToStay = b_minNumAtomsForNewComp
             else:
@@ -354,7 +354,7 @@ def makeSummaryForBirthProposal(
                 minNumAtomsToStay = np.minimum(1, b_minNumAtomsForNewComp)
             xSSslice, xInitLPslice = cleanupDeleteSmallClusters(
                 xSSslice, minNumAtomsToStay,
-                xInitLPslice=xInitLPslice, 
+                xInitLPslice=xInitLPslice,
                 pprintCountVec=pprintCountVec)
         # Decide if we have converged early
         if rstep < b_nRefineSteps - 2 and prevCountVec.size == xSSslice.K:
@@ -369,7 +369,7 @@ def makeSummaryForBirthProposal(
             Info['mergestep'] = rstep + 1
             xSSslice, xInitLPslice = cleanupMergeClusters(
                 xSSslice, curModel,
-                obsSSkeys=xInitSStarget._Fields._FieldDims.keys(),
+                obsSSkeys=list(xInitSStarget._Fields._FieldDims.keys()),
                 vocabList=vocabList,
                 pprintCountVec=pprintCountVec,
                 xInitLPslice=xInitLPslice,
@@ -400,7 +400,7 @@ def makeSummaryForBirthProposal(
         BLogger.pprint('') # Blank line
         return None, Info
 
-    # If here, we have a valid proposal. 
+    # If here, we have a valid proposal.
     # Need to verify mass conservation
     if hasattr(Dslice, 'word_count') and \
             curModel.obsModel.DataAtomType.count('word') and \
@@ -464,7 +464,7 @@ def makeSummaryForExistingBirthProposal(
             'HTML output:' + b_debugOutputDir)
         # Create snapshot of current model comps
         plotCompsFromSS(
-            curModel, curSSwhole, 
+            curModel, curSSwhole,
             os.path.join(b_debugOutputDir, 'OrigComps.png'),
             vocabList=vocabList,
             compsToHighlight=[ktarget])
@@ -494,7 +494,7 @@ def makeSummaryForExistingBirthProposal(
     xSSinitPlusSlice = xinitSS.copy()
     if b_debugOutputDir:
         plotCompsFromSS(
-            curModel, xinitSS, 
+            curModel, xinitSS,
             os.path.join(b_debugOutputDir, 'NewComps_Init.png'),
             vocabList=vocabList)
 
@@ -514,7 +514,7 @@ def makeSummaryForExistingBirthProposal(
     xObsModel = curModel.obsModel.copy()
     xInitLPslice = None
     Info = dict()
-    # Run several refinement steps. 
+    # Run several refinement steps.
     # Each step does a restricted local step to improve
     # the proposed cluster assignments.
     nRefineSteps = np.maximum(1, b_nRefineSteps)
@@ -524,7 +524,7 @@ def makeSummaryForExistingBirthProposal(
         # Restricted local step!
         # * xInitSS : specifies obs-model stats used for initialization
         xSSslice, refineInfo = summarizeRestrictedLocalStep(
-            Dslice=Dslice, 
+            Dslice=Dslice,
             curModel=curModel,
             curLPslice=curLPslice,
             curSSwhole=curSSwhole,
@@ -551,7 +551,7 @@ def makeSummaryForExistingBirthProposal(
             xInitLPslice = Info['xLPslice']
         if b_debugOutputDir:
             plotCompsFromSS(
-                curModel, xSSslice, 
+                curModel, xSSslice,
                 os.path.join(b_debugOutputDir,
                              'NewComps_Step%d.png' % (rstep+1)),
                 vocabList=vocabList)
@@ -585,7 +585,7 @@ def makeSummaryForExistingBirthProposal(
             plotDocUsageForProposal(docUsageByUID,
                                     savefilename=savefilename)
 
-    # If here, we have a valid proposal. 
+    # If here, we have a valid proposal.
     # Need to verify mass conservation
     if hasattr(Dslice, 'word_count') and \
             curModel.obsModel.DataAtomType.count('word') and \
@@ -605,7 +605,7 @@ def makeSummaryForExistingBirthProposal(
 
 
 def createBirthProposalHTMLOutputDir(
-        taskoutpath='/tmp/', 
+        taskoutpath='/tmp/',
         lapFrac=0, batchPos=None, nBatch=None, targetUID=0,
         dataName=None, **kwargs):
     ''' Create string that is absolute path to dir for saving birth HTML logs.
@@ -631,10 +631,10 @@ def createBirthProposalHTMLOutputDir(
             targetUID)
     if dataName:
         b_debugOutputDir = os.path.join(
-            taskoutpath, 'html-birth-logs', dataName, subdirname)        
+            taskoutpath, 'html-birth-logs', dataName, subdirname)
     else:
         b_debugOutputDir = os.path.join(
-            taskoutpath, 'html-birth-logs', subdirname)        
+            taskoutpath, 'html-birth-logs', subdirname)
     # Create this directory if it doesn't exist already
     if not os.path.exists(b_debugOutputDir):
        os.makedirs(b_debugOutputDir)
@@ -678,7 +678,7 @@ def logLPConvergenceDiagnostics(refineInfo, rstep=0, b_nRefineSteps=0):
         (k,v) for (k,v) in globals().items() if str(k).count('createSplitStats')])
     funcName = 'createSplitStats' + '_' + b_creationProposalName
     if funcName not in createSplitStatsMap:
-        raise NotImplementedError('Unrecognized function: ' + funcName)    
+        raise NotImplementedError('Unrecognized function: ' + funcName)
     # Execute model-specific function to make expansion stats
     # This call may return early if expansion failed,
     # due to creating too few states that are big-enough.

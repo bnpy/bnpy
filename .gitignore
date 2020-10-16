@@ -79,3 +79,4 @@ TextFileReaderX.c
 *.tmp
 *.synctex.gz
 *.out
+*.bak

@@ -10,6 +10,7 @@ try:
 except ImportError:
     hasCython = False
 
+
 hasNumexpr = True
 try:
     import numexpr
@@ -22,7 +23,7 @@ if hasNumexpr and 'OMP_NUM_THREADS' in os.environ:
         nThreads = int(os.environ['OMP_NUM_THREADS'])
         numexpr.set_num_threads(nThreads)
     except TypeError as ValueError:
-        print 'Unrecognized OMP_NUM_THREADS', os.environ['OMP_NUM_THREADS']
+        print('Unrecognized OMP_NUM_THREADS', os.environ['OMP_NUM_THREADS'])
         pass
 
 def calcRlogR(R, algVersion='cython'):
@@ -85,7 +86,7 @@ def test_correctness_calcRlogRdotv(N=1000, K=10):
 
 def test_speed_calcRlogR(N=1000, K=10, nRep=1):
     R = np.random.rand(N, K)
-    
+
     for calcRlogR_func in [
             calcRlogR_numpy_forloop,
             calcRlogR_numpy_vectorized,
@@ -93,19 +94,19 @@ def test_speed_calcRlogR(N=1000, K=10, nRep=1):
             calcRlogR_numexpr]:
         if N * K > 5e5 and calcRlogR_func.__name__.count('forloop'):
             # For loops take too long on big problems
-            print " skipped %s" % (calcRlogR_func.__name__)
+            print(" skipped %s" % (calcRlogR_func.__name__))
             continue
         do_timing_test_for_func(calcRlogR_func, (R,), nRep=nRep)
 
 def do_timing_test_for_func(func, args, nRep=1):
     times = list()
-    for trial in xrange(nRep):
+    for trial in range(nRep):
         tstart = time.time()
         func(*args)
         tstop = time.time()
         times.append(tstop - tstart)
-    print " AVG %.4f sec  MEDIAN %.4f sec | %s" % (
-        np.mean(times), np.median(times), func.__name__)
+    print(" AVG %.4f sec  MEDIAN %.4f sec | %s" % (
+        np.mean(times), np.median(times), func.__name__))
 
 def test_speed_calcRlogRdotv(N=1000, K=10, nRep=1):
     R = np.random.rand(N, K)
@@ -183,7 +184,7 @@ def calcRlogRdotv_numexpr(R, v):
     return np.dot(v, RlogR)
 
 def sumWithLotsOfMem(N, nRep=10):
-    print nRep
+    print(nRep)
     R = np.random.rand(N)
     time.sleep(0.5)
     for i in range(nRep):
@@ -194,7 +195,7 @@ def sumWithLotsOfMem(N, nRep=10):
     return 0
 
 def sumWithLotsOfMemMultiLine(N, nRep=10):
-    print nRep
+    print(nRep)
     R = np.random.rand(N)
     time.sleep(0.5)
     for i in range(nRep):
@@ -226,9 +227,9 @@ if __name__ == '__main__':
 
     if 'OMP_NUM_THREADS' not in os.environ:
         os.environ['OMP_NUM_THREADS'] = '1'
-    print 'OMP_NUM_THREADS=', os.environ['OMP_NUM_THREADS']
-    print 'N=', args.N
-    print 'K=', args.K
+    print('OMP_NUM_THREADS=', os.environ['OMP_NUM_THREADS'])
+    print('N=', args.N)
+    print('K=', args.K)
 
     if args.funcToEval.count('memtest'):
         from memory_profiler import memory_usage
@@ -247,7 +248,7 @@ if __name__ == '__main__':
         pylab.xlabel('time (sec)')
         pylab.ylabel('memory (MiB)')
         pylab.show(block=True)
-        
+
     elif args.funcToEval.count('dotv'):
         if args.testType.count('correctness'):
             test_correctness_calcRlogRdotv(args.N, args.K)

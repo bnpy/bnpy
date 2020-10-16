@@ -79,12 +79,12 @@ def runBenchmarkAcrossProblemSizes(TestClass):
         rangeFromString(args.nWorkers))
     kwargs = dict(**args.__dict__)
 
-    print "Speed Test. %s dataset" % (args.dataset)
-    print "    OMP_NUM_THREADS=%s" % (os.environ['OMP_NUM_THREADS'])
-    print "    T=%d" % (args.T)
+    print("Speed Test. %s dataset" % (args.dataset))
+    print("    OMP_NUM_THREADS=%s" % (os.environ['OMP_NUM_THREADS']))
+    print("    T=%d" % (args.T))
     for (nDoc, K, nWorkers) in argIterator:
-        print '========================= nDoc %d  K=%d | nWorkers %d' \
-            % (nDoc, K, nWorkers)
+        print('========================= nDoc %d  K=%d | nWorkers %d' \
+            % (nDoc, K, nWorkers))
         kwargs['nDoc'] = nDoc
         kwargs['K'] = K
         kwargs['nWorkers'] = nWorkers
@@ -248,7 +248,7 @@ class Test(unittest.TestCase):
         Just verifying that we can split computation up into >1 slice,
         add up results from all slices and still get the same answer.
         '''
-        print ''
+        print('')
         SSbase = self.run_baseline()
         SSserial = self.run_serial()
         allcloseSS(SSbase, SSserial)
@@ -261,7 +261,7 @@ class Test(unittest.TestCase):
         * performs computations on this chunk
         * load the resulting suff statistics object into resultsQueue
         """
-        print ''
+        print('')
         SSparallel = self.run_parallel()
         SSbase = self.run_baseline()
         allcloseSS(SSparallel, SSbase)
@@ -269,7 +269,7 @@ class Test(unittest.TestCase):
     def test_speed(self, nRepeat=5):
         """ Compare speed of different algorithms.
         """
-        print ''
+        print('')
         Results = self.run_all_with_timer(nRepeat=nRepeat)
         assert True
 
@@ -295,18 +295,18 @@ class Test(unittest.TestCase):
                     speedupmsg = "| %8.3f speedup" % (speedupval)
                 except KeyError:
                     speedupmsg = ""
-                print "%18s | %8.3f sec %s" % (
+                print("%18s | %8.3f sec %s" % (
                     key,
                     Results[key],
                     speedupmsg
-                )
+                ))
         return Results
 
     def run_with_timer(self, funcToCall, nRepeat=3):
         """ Timing experiment specified by funcToCall.
         """
         starttime = time.time()
-        for r in xrange(nRepeat):
+        for r in range(nRepeat):
             getattr(self, funcToCall)()
         return (time.time() - starttime) / nRepeat
 
@@ -380,23 +380,23 @@ def loadToyDataset(dataset, nDoc=3, T=1000, **kwargs):
         cachefilename = '%s/%s_nDoc=%d_T=%d.mat' % (tmproot, dataset, nDoc, T)
 
     if os.path.exists(cachefilename):
-        print 'Loading dataset from disk...'
+        print('Loading dataset from disk...')
         stime = time.time()
         Data = bnpy.data.GroupXData.LoadFromFile(cachefilename)
-        print ' done after %.1f sec' % (time.time() - stime)
+        print(' done after %.1f sec' % (time.time() - stime))
 
     elif dataset == 'SeqOfBinBars9x9':
-        print 'Creating toy dataset with nDoc=%d, T=%d, D=81' % (nDoc, T)
-        print '...',
+        print('Creating toy dataset with nDoc=%d, T=%d, D=81' % (nDoc, T))
+        print('...', end=' ')
         stime = time.time()
         import SeqOfBinBars9x9
         Data = SeqOfBinBars9x9.get_data(nDocTotal=nDoc, T=T)
-        print ' done after %.1f sec' % (time.time() - stime)
+        print(' done after %.1f sec' % (time.time() - stime))
         Data.save_to_mat(cachefilename)
     elif dataset == 'BigChromatinCD4T':
         import glob
-        print 'Creating big dataset with nDoc=%d' % (nDoc)
-        print '...',
+        print('Creating big dataset with nDoc=%d' % (nDoc))
+        print('...', end=' ')
         stime = time.time()
         dataPath = '/data/liv/biodatasets/CD4TCellLine/wholegenomebatches/'
         batchpaths = glob.glob(dataPath + 'chr*batch*.mat')
@@ -404,8 +404,8 @@ def loadToyDataset(dataset, nDoc=3, T=1000, **kwargs):
         for ff, fpath in enumerate(batchpaths[1:128]):
             BatchData = bnpy.data.GroupXData.LoadFromFile(fpath)
             Data.add_data(BatchData)
-            print ff
-        print ' done after %.1f sec' % (time.time() - stime)
+            print(ff)
+        print(' done after %.1f sec' % (time.time() - stime))
         Data.save_to_mat(cachefilename)
     assert Data.nDoc >= nDoc
     if Data.nDoc > nDoc:
@@ -438,28 +438,28 @@ def rangeFromHyphen(hyphenString):
     myList : list of integers
     """
     x = [int(x) for x in hyphenString.split('-')]
-    return range(x[0], x[-1] + 1)
+    return list(range(x[0], x[-1] + 1))
 
 
 def allcloseSS(SS1, SS2):
     """ Verify that two suff stat bags have indistinguishable data.
     """
     # Both A and B better give the same answer
-    for key in SS1._FieldDims.keys():
+    for key in list(SS1._FieldDims.keys()):
         arr1 = getattr(SS1, key)
         arr2 = getattr(SS2, key)
-        print key
+        print(key)
         if isinstance(arr1, float):
-            print arr1
-            print arr1
+            print(arr1)
+            print(arr1)
         elif arr1.ndim == 1:
-            print arr1[:3]
-            print arr2[:3]
+            print(arr1[:3])
+            print(arr2[:3])
             # print arr1.sum()
             # print arr2.sum()
         else:
-            print arr1[:2, :3]
-            print arr2[:2, :3]
+            print(arr1[:2, :3])
+            print(arr2[:2, :3])
         assert np.allclose(arr1, arr2)
 
 

@@ -7,7 +7,7 @@ import numpy as np
 import sys
 import os
 import itertools
-import MLogger
+from bnpy.mergemove import MLogger
 from collections import defaultdict
 from bnpy.viz.PrintTopics import vec2str, count2str
 
@@ -25,7 +25,7 @@ def selectCandidateMergePairs(hmodel, SS,
         m_pair_ranking_exclusion_thr=-0.000001,
         **kwargs):
     ''' Select candidate pairs to consider for merge move.
-    
+
     Returns
     -------
     Info : dict, with fields
@@ -41,7 +41,7 @@ def selectCandidateMergePairs(hmodel, SS,
     if 'b_shortlistUIDs' in MovePlans:
         for uid in MovePlans['b_shortlistUIDs']:
             uidUsageCount[uid] = 10 * m_maxNumPairsContainingComp
-    nDisqualified = len(uidUsageCount.keys())
+    nDisqualified = len(list(uidUsageCount.keys()))
     MLogger.pprint(
         "   %d/%d UIDs ineligible because on shortlist for births. " % (
             nDisqualified, SS.K),
@@ -49,7 +49,7 @@ def selectCandidateMergePairs(hmodel, SS,
     if nDisqualified > 0:
         MLogger.pprint(
             "   Ineligible UIDs:" + \
-                vec2str(uidUsageCount.keys()),
+                vec2str(list(uidUsageCount.keys())),
             'debug')
 
     uid2k = dict()
@@ -172,7 +172,7 @@ def selectCandidateMergePairs(hmodel, SS,
             MLogger.pprint("Chosen uid pairs:", 'debug')
         MLogger.pprint(
             "%4d, %4d : pair_score %.3e, size %s %s" % (
-                uidA, uidB, 
+                uidA, uidB,
                 rank_scores_per_pair[loc],
                 count2str(uid2count[uidA]),
                 count2str(uid2count[uidB]),
@@ -181,7 +181,7 @@ def selectCandidateMergePairs(hmodel, SS,
         nKeep += 1
     Info = dict()
     Info['m_UIDPairs'] = mUIDPairs
-    Info['m_GainVals'] = mGainVals 
+    Info['m_GainVals'] = mGainVals
     Info['mPairIDs'] = mAIDPairs
     targetUIDs = set()
     for uidA, uidB in mUIDPairs:

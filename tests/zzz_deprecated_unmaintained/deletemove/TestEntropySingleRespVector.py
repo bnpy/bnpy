@@ -95,17 +95,17 @@ class TestK2(unittest.TestCase):
         rVals = self.rVals
 
         np.set_printoptions(precision=4, suppress=True)
-        print ''
-        print '--- rVals'
-        print rVals[:3], rVals[-3:]
+        print('')
+        print('--- rVals')
+        print(rVals[:3], rVals[-3:])
 
-        print '--- R original'
-        print self.R[:3]
-        print self.R[-3:, :]
+        print('--- R original')
+        print(self.R[:3])
+        print(self.R[-3:, :])
 
-        print '--- R proposal'
-        print self.Rnew_Exact[:3]
-        print self.Rnew_Exact[-3:, :]
+        print('--- R proposal')
+        print(self.Rnew_Exact[:3])
+        print(self.Rnew_Exact[-3:, :])
 
         pylab.plot(rVals, H, 'k-', label='H original')
         pylab.plot(rVals, Hnew_exact, 'b-', label='H proposal exact')

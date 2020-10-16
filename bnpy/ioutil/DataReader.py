@@ -19,19 +19,20 @@ def loadDataFromSavedTask(taskoutpath, dataSplitName='train', **kwargs):
     Example
     -------
     >>> import bnpy
-    >>> os.environ['BNPYOUTDIR'] = '/tmp/'
+    >>> import tempfile
+    >>> output_dir = tempfile.mkdtemp(prefix='bnpy_tmp_results')
     >>> hmodel, Info = bnpy.run(
-    ...     'AsteriskK8', 'FiniteMixtureModel', 'Gauss', 'VB',
-    ...     nLap=1, nObsTotal=144, K=10,
+    ...     'AsteriskK8/x_dataset.csv', 'FiniteMixtureModel', 'Gauss', 'VB',
+    ...     nLap=1, nObsTotal=5000, K=10, output_path=output_dir,
     ...     doWriteStdOut=False)
-    >>> outputdir = Info['outputdir']
+
+    >>> outputdir = Info['task_output_path']
     >>> Data2 = loadDataFromSavedTask(outputdir)
-    >>> print Data2.nObsTotal
-    144
+    >>> print (Data2.nObsTotal)
+    5000
     >>> np.allclose(Info['Data'].X, Data2.X)
     True
     '''
-    dataName = getDataNameFromTaskpath(taskoutpath)
     dataKwargs = loadDataKwargsFromDisk(taskoutpath)
     try:
         onlineKwargs = loadKwargsFromDisk(
@@ -43,6 +44,7 @@ def loadDataFromSavedTask(taskoutpath, dataSplitName='train', **kwargs):
         # Occurs if does not exist.
         pass
 
+    dataName = dataKwargs['dataName']
     try:
         datamod = __import__(dataName, fromlist=[])
         if dataSplitName.count('test'):
@@ -101,11 +103,11 @@ def loadDataKwargsFromDisk(taskoutpath):
 
     Returns
     -------
-    dataKwargs : dict with options for loading dataset 
+    dataKwargs : dict with options for loading dataset
     '''
     return loadKwargsFromDisk(taskoutpath, 'args-DatasetPrefs.txt')
 
-def loadKwargsFromDisk(taskoutpath, 
+def loadKwargsFromDisk(taskoutpath,
         txtfile='args-birth.txt',
         suffix=None):
     ''' Load keyword options from specified txtfile.
@@ -135,7 +137,7 @@ def loadLPKwargsFromDisk(taskoutpath):
 
     Returns
     -------
-    dataKwargs : dict with options for loading dataset 
+    dataKwargs : dict with options for loading dataset
     '''
     from bnpy.ioutil.BNPYArgParser import algChoices
     chosentxtfile = None
@@ -178,7 +180,7 @@ def getDataNameFromTaskpath(taskoutpath):
     >>> os.environ['BNPYOUTDIR'] = '/tmp/'
     >>> taskoutpath = '/tmp/MyDataName/myjobname/1/'
     >>> dataName = getDataNameFromTaskpath(taskoutpath)
-    >>> print dataName
+    >>> print (dataName)
     MyDataName
     '''
     # Make it a proper absolute path

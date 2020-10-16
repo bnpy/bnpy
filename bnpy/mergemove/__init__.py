@@ -1,1 +1,2 @@
-from MPlanner import selectCandidateMergePairs
+
+from bnpy.mergemove.MPlanner import selectCandidateMergePairs

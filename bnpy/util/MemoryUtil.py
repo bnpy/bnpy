@@ -21,9 +21,8 @@ def calcObjSize_MiB(arr):
         return nbyt * MiB_PER_BYTE
     elif isinstance(arr, dict):
         total = 0
-        for key in arr:            
+        for key in arr:
             total += calcObjSize_MiB(arr[key])
         return total
     else:
         return 0
-

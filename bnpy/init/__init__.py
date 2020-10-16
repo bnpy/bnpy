@@ -2,15 +2,15 @@
 The init module gathers routines for initialization
 '''
 
-import FromSaved
-import FromTruth
-import FromLP
-import FromScratchRelational
-import FromScratchGauss
-import FromScratchMult
-import FromScratchBern
-import FromScratchBregman
-import FromScratchBregmanMixture
+from bnpy.init import FromSaved
+from bnpy.init import FromTruth
+from bnpy.init import FromLP
+from bnpy.init import FromScratchRelational
+from bnpy.init import FromScratchGauss
+from bnpy.init import FromScratchMult
+from bnpy.init import FromScratchBern
+from bnpy.init import FromScratchBregman
+from bnpy.init import FromScratchBregmanMixture
 
 # from FromScratchMult import initSSByBregDiv_Mult
 # from FromScratchBern import initSSByBregDiv_Bern

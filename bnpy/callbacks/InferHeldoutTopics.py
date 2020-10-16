@@ -10,18 +10,19 @@ import warnings
 import logging
 
 from scipy.special import digamma
-from scipy.misc import logsumexp
+from scipy.special import logsumexp
+
 from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
-from bnpy.ioutil.ModelReader import \
-    getPrefixForLapQuery, loadTopicModel, load_model_at_lap
-from bnpy.ioutil.DataReader import \
-    loadDataFromSavedTask, loadLPKwargsFromDisk, loadDataKwargsFromDisk
-from bnpy.ioutil.DataReader import str2numorstr
+from bnpy.ioutil.ModelReader import (
+    getPrefixForLapQuery, loadTopicModel, load_model_at_lap)
+from bnpy.ioutil.DataReader import (
+    str2numorstr,
+    loadDataFromSavedTask, loadLPKwargsFromDisk, loadDataKwargsFromDisk)
 
 VERSION = 0.1
 
 def evalTopicModelOnTestDataFromTaskpath(
-        taskpath='', 
+        taskpath='',
         queryLap=0,
         nLap=0,
         elapsedTime=None,
@@ -82,8 +83,8 @@ def evalTopicModelOnTestDataFromTaskpath(
                 alpha = 0.5
         K = hmodel.allocModel.K
     # Prepare debugging statements
-    if printFunc: 
-        startmsg = "Heldout Metrics at lap %.3f" % (queryLap) 
+    if printFunc:
+        startmsg = "Heldout Metrics at lap %.3f" % (queryLap)
         filler = '=' * (80 - len(startmsg))
         printFunc(startmsg + ' ' + filler)
         if hasattr(Data, 'word_count'):
@@ -151,7 +152,7 @@ def evalTopicModelOnTestDataFromTaskpath(
         if d == 0 or (d+1) % 25 == 0 or d == Data.nDoc - 1:
             if printFunc:
                 etime = time.time() - stime
-                msg = "%5d/%d after %8.1f sec " % (d+1, Data.nDoc, etime) 
+                msg = "%5d/%d after %8.1f sec " % (d+1, Data.nDoc, etime)
                 printFunc(msg + scoreMsg)
     # Aggregate results
     meanlogpTokensPerDoc = np.sum(logpTokensPerDoc) / np.sum(nTokensPerDoc)
@@ -217,15 +218,15 @@ def evalTopicModelOnTestDataFromTaskpath(
     for p in [10, 50, 90]:
         SVars['KactivePercentile%02d' % (p)] = np.percentile(KactivePerDoc, p)
 
-    
+
     # Record total time spent doing current work
     timeSpent = time.time() - stime
     if elapsedTime is not None:
         SVars['timeTrainAndEval'] = elapsedTime + timeSpent
     # Load previous time spent non training from disk
     timeSpentFilepaths = glob.glob(os.path.join(taskpath, '*-timeEvalOnly.txt'))
-    totalTimeSpent = timeSpent    
-    splitTimeSpent = timeSpent    
+    totalTimeSpent = timeSpent
+    splitTimeSpent = timeSpent
     for timeSpentFilepath in timeSpentFilepaths:
         with open(timeSpentFilepath,'r') as f:
             for line in f.readlines():
@@ -250,7 +251,7 @@ def evalTopicModelOnTestDataFromTaskpath(
             f.write("%.6e\n" % (SVars[key]))
     if printFunc:
         printFunc("DONE with heldout inference at lap %.3f" % queryLap)
-        printFunc("Wrote per-doc results in MAT file:" + 
+        printFunc("Wrote per-doc results in MAT file:" +
             outmatfile.split(os.path.sep)[-1])
         printFunc("      Aggregate results in txt files: %s__.txt"
             % (outfileprefix))
@@ -261,7 +262,7 @@ def evalTopicModelOnTestDataFromTaskpath(
         curLapStr = '%7.3f' % (queryLap)
         nLapStr = '%d' % (nLap)
         logmsg = '  %s/%s %s metrics   | K %4d | %s'
-        logmsg = logmsg % (curLapStr, nLapStr, '%5s' % (dataSplitName[:5]), K, scoreMsg) 
+        logmsg = logmsg % (curLapStr, nLapStr, '%5s' % (dataSplitName[:5]), K, scoreMsg)
         printFunc(logmsg, 'info')
 
     return SaveVars
@@ -291,20 +292,23 @@ def createTrainTestSplitOfVocab(
     >>> seen_wids = np.arange(100)
     >>> swc = np.ones(100)
     >>> Info = createTrainTestSplitOfVocab(seen_wids, swc, 1000, 0.2, 1.0/10.0)
-    >>> print Info['ratio']
+    >>> print (Info['ratio'])
     0.1
-    >>> I213 = createTrainTestSplitOfVocab(seen_wids, 213, 0.2, 1.0/10.0)
-    >>> print I213['ratio']
+    >>> I213 = createTrainTestSplitOfVocab(seen_wids, swc, 213, 0.2, 1.0/10.0)
+    >>> print (I213['ratio'])
     0.1
-    >>> print len(I213['tr_seen_wids'])
+    >>> print (len(I213['tr_seen_wids']))
     80
-    >>> print len(I213['ho_seen_wids'])
+    >>> print (len(I213['ho_seen_wids']))
     11
-    >>> print len(I213['ho_unsn_wids'])
+    >>> print (len(I213['ho_unsn_wids']))
     110
+
     >>> # Here's an example that fails
-    >>> I111 = createTrainTestSplitOfVocab(seen_wids, 111, 0.2, 1.0/10.0)
-    raises ValueError
+    >>> I111 = createTrainTestSplitOfVocab(seen_wids, swc, 111, 0.2, 1.0/10.0)
+    Traceback (most recent call last):
+    ...
+    ValueError: Cannot create heldout set with desired ratio of unseen words
     '''
     seen_wids = np.asarray(seen_wids, dtype=np.int32)
     # Split seen words into train and heldout
@@ -313,7 +317,7 @@ def createTrainTestSplitOfVocab(
     n_ho_seen = int(np.ceil(fracHeldout * len(seen_wids)))
     if len(seen_wids) < 2 * MINSIZE:
         raise ValueError(
-            "Cannot create training and test set with " + 
+            "Cannot create training and test set with " +
             "at least MINSIZE=%d seen (present) words" % (MINSIZE))
     elif n_ho_seen < MINSIZE:
         n_ho_seen = MINSIZE
@@ -331,7 +335,7 @@ def createTrainTestSplitOfVocab(
 
     if n_ho_seen < MINSIZE:
         raise ValueError(
-            "Cannot create test set with " + 
+            "Cannot create test set with " +
             "at least MINSIZE=%d seen/present words" % (MINSIZE))
     if n_ho_unsn > n_ttl_unsn:
         raise ValueError(
@@ -343,7 +347,7 @@ def createTrainTestSplitOfVocab(
     PRNG = np.random.RandomState(seed)
     shuffled_inds = PRNG.permutation(len(seen_wids))
     tr_seen_wids = seen_wids[shuffled_inds[:n_tr_seen]].copy()
-    tr_seen_wcts = seen_wcts[shuffled_inds[:n_tr_seen]].copy() 
+    tr_seen_wcts = seen_wcts[shuffled_inds[:n_tr_seen]].copy()
     ho_seen_wids = seen_wids[
         shuffled_inds[n_tr_seen:n_tr_seen+n_ho_seen]].copy()
     ho_seen_wcts = seen_wcts[
@@ -514,13 +518,13 @@ def calcPredLikForDoc(docData, topics, probs, alpha,
     '''
     # unseen_mask_d : 1D array, size vocab_size
     #   entry is 0 if word is seen in training half
-    #   entry is 1 if word is unseen 
+    #   entry is 1 if word is unseen
     unseen_mask_d = np.ones(docData.vocab_size, dtype=np.bool8)
     unseen_mask_d[tr_word_id] = 0
     probOfUnseenTypes_d = np.dot(topics[:, unseen_mask_d].T, Epi_d)
     unseen_mask_d = np.asarray(unseen_mask_d, dtype=np.int32)
     unseen_mask_d[ho_word_id] = 2
-    trueLabelsOfUnseenTypes_d = unseen_mask_d[unseen_mask_d > 0]     
+    trueLabelsOfUnseenTypes_d = unseen_mask_d[unseen_mask_d > 0]
     trueLabelsOfUnseenTypes_d -= 1
     assert np.sum(trueLabelsOfUnseenTypes_d) == ho_word_id.size
     fpr, tpr, thr = sklearn.metrics.roc_curve(
@@ -616,7 +620,7 @@ def calcPredLikForDocFromHModel(
     '''
 
 def inferDocTopicCountForDoc(
-        word_id, word_ct, topics, probs, alpha, 
+        word_id, word_ct, topics, probs, alpha,
         **LPkwargs):
     K = probs.size
     K2, W = topics.shape
@@ -675,6 +679,6 @@ if __name__ == '__main__':
             elif level == 'info':
                 level = logging.INFO
             if level >= args.printLevel:
-                print x
+                print(x)
         args.__dict__['printFunc'] = printFunc
     evalTopicModelOnTestDataFromTaskpath(**args.__dict__)

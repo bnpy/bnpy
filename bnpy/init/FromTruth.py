@@ -6,6 +6,7 @@ such as human annotations
 
 These are provided within the Data object's TrueParams attribute.
 '''
+from __future__ import print_function
 import numpy as np
 
 
@@ -168,7 +169,7 @@ def convertLPFromHardToSoft(LP, Data,
             Zsrc = Z[:,0]
             Zrcv = Z[:,1]
         resp = np.zeros((Zsrc.size, Kmax, Kmax))
-        for eid in xrange(Data.nEdges):
+        for eid in range(Data.nEdges):
             resp[eid, Zsrc[eid], Zrcv[eid]] = 1.0
         LP['resp'] = resp
         return LP
@@ -217,9 +218,9 @@ def expandLPWithEmpty(LP, Kextra):
     LP['resp'] = np.hstack([resp, np.zeros((resp.shape[0], Kextra))])
     return LP
 
-def dropWordsFromLP(Data, LP, 
-                    PRNG=np.random, 
-                    initTargetCompID=0, 
+def dropWordsFromLP(Data, LP,
+                    PRNG=np.random,
+                    initTargetCompID=0,
                     initDropWordIDs=None,
                     initNumDropWords=10,
                     **kwargs):
@@ -244,13 +245,13 @@ def dropWordsFromLP(Data, LP,
         mask = Data.word_id == v
         resp[mask, initTargetCompID] = 1e-100
 
-    print 'initDropWordIDs:',
-    print '   ', initDropWordIDs
+    print('initDropWordIDs:', end=' ')
+    print('   ', initDropWordIDs)
 
     LP['resp'] = resp
     return LP
 
-def expandLPWithJunk(LP, Kextra, PRNG=np.random.RandomState, 
+def expandLPWithJunk(LP, Kextra, PRNG=np.random.RandomState,
         initFracJunk=0.01, **kwargs):
     ''' Create new LP by adding extra junk topics
 
@@ -271,7 +272,7 @@ def expandLPWithJunk(LP, Kextra, PRNG=np.random.RandomState,
     respNew = np.hstack([resp, np.zeros((N, Kextra))])
     Nextra = int(initFracJunk * N)
     selectIDs = PRNG.choice(N, Nextra * Kextra).tolist()
-    for k in xrange(Kextra):
+    for k in range(Kextra):
         IDs_k = selectIDs[:Nextra]
         respNew[IDs_k, :K] = 0.01 / K
         respNew[IDs_k, K + k] = 1 - 0.01
@@ -331,7 +332,7 @@ def expandLPWithContigBlocks(LP, Data, PRNG, nPerSeq=2,
     '''
     Z = LP['Z']
     knewID = Z.max() + 1
-    for n in xrange(Data.nDoc):
+    for n in range(Data.nDoc):
         start = Data.doc_range[n]
         stop = Data.doc_range[n + 1]
         Z_n = Z[start:stop]
@@ -351,7 +352,7 @@ def expandLPWithContigBlocks(LP, Data, PRNG, nPerSeq=2,
             gap = (stop - start) - Bs.sum()
             if gap > 0:
                 Bs[:gap] += 1
-            for nn in xrange(nNew):
+            for nn in range(nNew):
                 if nn == 0:
                     a = start
                 Z_n[a:a + Bs[nn]] = knewID
@@ -379,7 +380,7 @@ def convertLPFromTokensToTypes(LP, Data):
         return LP
     assert N == Data.nUniqueToken
     typeResp = np.zeros((Data.nDoc * Data.vocab_size, K))
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
         start_d = Data.doc_range[d]
         stop_d = Data.doc_range[d+1]
         words_d = Data.word_id[start_d:stop_d]
@@ -411,7 +412,7 @@ def convertLPFromTokensToDocs(LP, Data):
     if N == Data.nDoc:
         return LP
     docResp = np.zeros((Data.nDoc, K))
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
         respMatForDoc = resp[Data.doc_range[d]:Data.doc_range[d + 1]]
         docResp[d, :] = np.mean(respMatForDoc, axis=0)
     LP['resp'] = docResp
@@ -426,7 +427,7 @@ def convertLPFromDocsToTokens(LP, Data):
     if N == Data.nUniqueToken:
         return LP
     tokResp = np.zeros((Data.nUniqueToken, K))
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
         curDocResp = docResp[d]
         start = Data.doc_range[d]
         stop = Data.doc_range[d + 1]
@@ -443,7 +444,7 @@ def convertLPFromDocsToTypes(LP, Data):
     if N == Data.vocab_size * Data.nDoc:
         return LP
     typeResp = np.zeros((Data.vocab_size * Data.nDoc, K))
-    for d in xrange(Data.nDoc):
+    for d in range(Data.nDoc):
         bstart = d * Data.vocab_size
         bstop = (d+1) * Data.vocab_size
         typeResp[bstart:bstop, :] = docResp[d]

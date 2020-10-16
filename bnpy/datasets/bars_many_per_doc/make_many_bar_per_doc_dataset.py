@@ -24,22 +24,22 @@ def make_bars_topics(V, K, fracMassOnTopic=0.95, PRNG=np.random):
         positive reals, each row sums to one
     '''
     sqrtV = int(np.sqrt(V))
-    BarWidth = sqrtV / (K / 2)  # number of consecutive words in each bar
-    B = V / (K / 2)  # total number of "on topic" words in each bar
+    BarWidth = sqrtV // (K // 2)  # number of consecutive words in each bar
+    B = V // (K // 2)  # total number of "on topic" words in each bar
 
     topics = np.zeros((K, V))
     # Make horizontal bars
-    for k in range(K / 2):
-        wordIDs = range(B * k, B * (k + 1))
+    for k in range(K // 2):
+        wordIDs = list(range(B * k, B * (k + 1)))
         topics[k, wordIDs] = 1.0
 
     # Make vertical bars
-    for k in range(K / 2):
+    for k in range(K // 2):
         wordIDs = list()
         for b in range(sqrtV):
             start = b * sqrtV + k * BarWidth
-            wordIDs.extend(range(start, start + BarWidth))
-        topics[K / 2 + k, wordIDs] = 1.0
+            wordIDs.extend(list(range(start, start + BarWidth)))
+        topics[K // 2 + k, wordIDs] = 1.0
 
     # Add smoothing mass to all entries in "topics"
     #  instead of picking this value out of thin air, instead,
@@ -51,7 +51,7 @@ def make_bars_topics(V, K, fracMassOnTopic=0.95, PRNG=np.random):
     topics += (2 * smoothMass) * PRNG.rand(K, V)
 
     # Ensure each row of topics is a probability vector
-    for k in xrange(K):
+    for k in range(K):
         topics[k, :] /= np.sum(topics[k, :])
 
     assert np.sum(topics[0, :B]) > fracMassOnTopic - 0.05
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     dataset = bnpy.data.BagOfWordsData.CreateToyDataFromLDAModel(**Defaults)
     DocTopicCount_DK = np.zeros((nDocTotal, 6))
-    for d in xrange(dataset.nDoc):
+    for d in range(dataset.nDoc):
         start_d = dataset.doc_range[d]
         stop_d = dataset.doc_range[d+1]
         DocTopicCount_DK[d,:] = np.dot(
@@ -89,13 +89,13 @@ if __name__ == '__main__':
     dataset = dataset.make_subset(good_doc_ids)
 
     dataset.to_npz('dataset.npz')
-    print "Created dataset:"
-    print dataset.get_stats_summary()
+    print("Created dataset:")
+    print(dataset.get_stats_summary())
 
-    print "Token counts for each true topic:"
+    print("Token counts for each true topic:")
     DocTopicCount_DK = DocTopicCount_DK[good_doc_ids]
-    print DocTopicCount_DK.sum(axis=0)
+    print(DocTopicCount_DK.sum(axis=0))
 
-    print "Avg per-doc fraction of each true topic:"
+    print("Avg per-doc fraction of each true topic:")
     DocTopicCount_DK /= DocTopicCount_DK.sum(axis=1)[:,np.newaxis]
-    print DocTopicCount_DK.mean(axis=0)
+    print(DocTopicCount_DK.mean(axis=0))

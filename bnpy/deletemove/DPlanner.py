@@ -1,7 +1,6 @@
 import numpy as np
 from collections import defaultdict
-
-import DLogger
+from bnpy.deletemove import DLogger
 import bnpy.birthmove.BPlanner as BPlanner
 from bnpy.viz.PrintTopics import count2str, vec2str
 
@@ -23,7 +22,7 @@ def selectCandidateDeleteComps(
     '''
     DLogger.pprint("PLANNING delete at lap %.2f" % (lapFrac))
     K = SS.K
-    
+
     availableUIDs = set(SS.uids)
     if len(availableUIDs) < 2:
         DLogger.pprint(
@@ -54,7 +53,7 @@ def selectCandidateDeleteComps(
         failMsg = "Ineligible. Too many uids occupied by merge or shortlisted for birth."
         return dict(failMsg=failMsg)
     '''
-    
+
     # Compute score for each eligible state
     countVec = np.maximum(SS.getCountVec(), 1e-100)
     eligibleUIDs = list()

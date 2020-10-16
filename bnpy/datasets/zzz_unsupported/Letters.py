@@ -22,7 +22,7 @@ def get_data(nDocTotal=200, nObsPerDoc=300,
 	X = np.zeros((nDocTotal * nObsPerDoc, 64))
 	TrueZ = np.zeros(nDocTotal * nObsPerDoc)
 	doc_range = np.zeros(nDocTotal + 1, dtype=np.int32)
-	for d in xrange(nDocTotal):
+	for d in range(nDocTotal):
 		start_d = d * nObsPerDoc
 		doc_range[d] = start_d
 		doc_range[d + 1] = start_d + nObsPerDoc
@@ -47,7 +47,7 @@ def get_data(nDocTotal=200, nObsPerDoc=300,
 				np.zeros(64), Lcovmat, size=nObsPerChoice[i])
 			start += nObsPerChoice[i]
 	for i in range(nLetters):
-		print chr(CHRSTART + i), np.sum(TrueZ == i)
+		print(chr(CHRSTART + i), np.sum(TrueZ == i))
 	return GroupXData(X=X, TrueZ=TrueZ, doc_range=doc_range)
 
 

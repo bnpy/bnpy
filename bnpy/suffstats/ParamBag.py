@@ -28,9 +28,9 @@ class ParamBag(object):
     >>> PB.setField('Sigma', np.eye(D)[np.newaxis,:], dims=('K','D','D'))
 
     >>> PB.Sigma
-    array([[[ 1.,  0.,  0.],
-            [ 0.,  1.,  0.],
-            [ 0.,  0.,  1.]]])
+    array([[[1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.]]])
 
     Insert an empty component
     >>> PB.insertEmptyComps(1)
@@ -38,8 +38,8 @@ class ParamBag(object):
     >>> PB.K
     2
     >>> PB.Mu
-    array([[ 1.,  1.,  1.],
-           [ 0.,  0.,  0.]])
+    array([[1., 1., 1.],
+           [0., 0., 0.]])
     '''
 
     def __init__(self, K=0, doCollapseK1=False, **kwargs):
@@ -52,7 +52,7 @@ class ParamBag(object):
         '''
         self.K = K
         self.D = 0
-        for key, val in kwargs.iteritems():
+        for key, val in kwargs.items():
             setattr(self, key, val)
         self._FieldDims = dict()
         self.doCollapseK1 = doCollapseK1
@@ -82,7 +82,7 @@ class ParamBag(object):
     def setAllFieldsToZero(self):
         ''' Update every field to be an array of all zeros.
         '''
-        for key, dims in self._FieldDims.items():
+        for key, dims in list(self._FieldDims.items()):
             curShape = getattr(self, key).shape
             self.setField(key, np.zeros(curShape), dims=dims)
 
@@ -192,7 +192,7 @@ class ParamBag(object):
             raise IndexError(emsg)
         if compPB.K != 1:
             raise ValueError('Expected compPB to have K=1')
-        for key, dims in self._FieldDims.items():
+        for key, dims in list(self._FieldDims.items()):
             if dims is None:
                 self.setField(key, getattr(compPB, key), dims=None)
             elif self.K == 1:
@@ -245,7 +245,7 @@ class ParamBag(object):
         '''
         if self.K != PB.K or self.D != PB.D:
             raise ValueError('Dimension mismatch')
-        if len(self._FieldDims.keys()) < len(PB._FieldDims.keys()):
+        if len(list(self._FieldDims.keys())) < len(list(PB._FieldDims.keys())):
             for key in PB._FieldDims:
                 arrB = getattr(PB, key)
                 try:
@@ -358,10 +358,10 @@ class ParamBag(object):
         Examples
         --------
         >>> PB = ParamBag() # fixing K,D doesn't matter
-        >>> PB._getAllowedShapes(())
-        set([()])
-        >>> PB._getAllowedShapes((1,))
-        set([(), (1,)])
+        >>> list(PB._getAllowedShapes(()))
+        [()]
+        >>> list(PB._getAllowedShapes((1,)))
+        [(), (1,)]
         >>> aSet = PB._getAllowedShapes((23,))
         >>> sorted(aSet)
         [(23,)]
