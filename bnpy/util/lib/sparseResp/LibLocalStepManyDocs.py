@@ -55,7 +55,7 @@ def sparseLocalStep_WordCountData(
     assert numIterVec.dtype == np.int32
 
     # Handle starting from memoized doc-topic counts
-    if initDocTopicCountLP == 'memo':
+    if initDocTopicCountLP == 'useDocTopicCountIfProvided':
         if 'DocTopicCount' in LP:
             DocTopicCount = LP['DocTopicCount']
         else:

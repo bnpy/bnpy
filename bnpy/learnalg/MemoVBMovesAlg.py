@@ -1593,15 +1593,16 @@ class MemoVBMovesAlg(LearnAlg):
 
     def verifyELBOTracking(
             self, hmodel, SS,
-            evBound=None, lapFrac=-1, MoveLog=None, **kwargs):
+            loss_which_equals_negative_elbo=None,
+            lapFrac=-1, MoveLog=None, **kwargs):
         ''' Verify current global SS consistent with batch-specific SS.
         '''
         if self.doDebugVerbose():
             self.print_msg(
                 '>>>>>>>> BEGIN double-check @ lap %.2f' % (self.lapFrac))
 
-        if evBound is None:
-            evBound = hmodel.calc_evidence(SS=SS)
+        if loss_which_equals_negative_elbo is None:
+            loss_which_equals_negative_elbo = -1.0 * hmodel.calc_evidence(SS=SS)
 
         for batchID in range(len(list(self.SSmemory.keys()))):
             SSchunk = self.loadBatchAndFastForward(
@@ -1610,20 +1611,20 @@ class MemoVBMovesAlg(LearnAlg):
                 SS2 = SSchunk.copy()
             else:
                 SS2 += SSchunk
-        evCheck = hmodel.calc_evidence(SS=SS2)
+        loss_check = -1.0 * hmodel.calc_evidence(SS=SS2)
 
         if self.algParams['debug'].count('quiet') == 0:
-            print('% 14.8f evBound from agg SS' % (evBound))
-            print('% 14.8f evBound from sum over SSmemory' % (evCheck))
+            print('% 14.8f loss from agg SS' % (loss_which_equals_negative_elbo))
+            print('% 14.8f loss from sum over SSmemory' % (loss_check))
         if self.algParams['debug'].count('interactive'):
             isCorrect = np.allclose(SS.getCountVec(), SS2.getCountVec()) \
-                and np.allclose(evBound, evCheck)
+                and np.allclose(loss_which_equals_negative_elbo, loss_check)
             if not isCorrect:
                 from IPython import embed
                 embed()
         else:
             assert np.allclose(SS.getCountVec(), SS2.getCountVec())
-            assert np.allclose(evBound, evCheck)
+            assert np.allclose(loss_which_equals_negative_elbo, loss_check)
         if self.doDebugVerbose():
             self.print_msg(
                 '<<<<<<<< END   double-check @ lap %.2f' % (self.lapFrac))
