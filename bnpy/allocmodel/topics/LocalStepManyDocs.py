@@ -22,12 +22,26 @@ def calcLocalParams(
         alphaEbeta=None,
         alphaEbetaRem=None,
         alpha=None,
-        initDocTopicCountLP='scratch',
+        initDocTopicCountLP='setDocProbsToEGlobalProbs',
         cslice=(0, None),
         nnzPerRowLP=0,
         doSparseOnlyAtFinalLP=0,
         **kwargs):
     ''' Calculate all local parameters for provided dataset under a topic model
+
+
+    Kwargs
+    ------
+    initDocTopicCountLP : str, must be one of the options below
+        'useDocTopicCountIfProvided'
+            If provided LP contains 'DocTopicCount' array, 
+            will use that to initialize the per-doc counts.
+            Otherwise, will default back to 'setDocProbsToEGlobalProbs'.
+        'setDocProbsToEGlobalProbs'
+            Initialize doc-topic probas directly using global probas.
+            Recommended for the first time a document is processed.
+        'setDocTopicCountToAllZeros' 
+            Initialize doc-topic counts to all zeros.
 
     Returns
     -------
@@ -58,6 +72,7 @@ def calcLocalParams(
     if 'DocTopicCount' in LP:
         if LP['DocTopicCount'].shape == (nDoc, K):
             initDocTopicCount = LP['DocTopicCount'].copy()
+
     sumRespTilde = np.zeros(N)
     DocTopicCount = np.zeros((nDoc, K))
     DocTopicProb = np.zeros((nDoc, K))
@@ -84,11 +99,8 @@ def calcLocalParams(
 
     if not DO_DENSE and obsModelName.count('Mult'):
         if initDocTopicCountLP.count('fastfirstiter'):
-            #tstart = time.time()
             init_spR = calcInitSparseResp(
                 LP, alphaEbeta, nnzPerRowLP=nnzPerRowLP, **kwargs)
-            #tstop = time.time()
-            #telapsed = tstop - tstart
 
     AggInfo = dict()
     AggInfo['maxDiff'] = np.zeros(Data.nDoc)
@@ -115,7 +127,7 @@ def calcLocalParams(
         else:
             wc_d = 1.0
         initDTC_d = None
-        if initDocTopicCountLP == 'memo':
+        if initDocTopicCountLP == 'useDocTopicCountIfProvided':
             if initDocTopicCount is not None:
                 if DO_DENSE:
                     initDTC_d = initDocTopicCount[d]
@@ -125,9 +137,7 @@ def calcLocalParams(
                 initDocTopicCountLP = 'setDocProbsToEGlobalProbs'
         if not DO_DENSE and initDocTopicCountLP.count('fastfirstiter'):
             if obsModelName.count('Mult'):
-                #tstart = time.time()
                 DocTopicCount[d, :] = wc_d * init_spR[Data.word_id[start:stop]]
-                #telapsed += time.time() - tstart
         if not DO_DENSE:
             m_start = nnzPerRowLP * start
             m_stop = nnzPerRowLP * stop
@@ -158,6 +168,7 @@ def calcLocalParams(
                     initDocTopicCountLP=initDocTopicCountLP,
                     **kwargs)
             AggInfo = updateConvergenceInfoForDoc_d(d, Info_d, AggInfo, Data)
+
     #if initDocTopicCountLP.startswith('fast'):
     #    AggInfo['time_extra'] = telapsed
     LP['DocTopicCount'] = DocTopicCount
