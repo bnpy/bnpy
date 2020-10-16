@@ -265,4 +265,4 @@ pylab.draw()
 pylab.tight_layout()
 
 
-pylab.show()
+pylab.show(block=False)

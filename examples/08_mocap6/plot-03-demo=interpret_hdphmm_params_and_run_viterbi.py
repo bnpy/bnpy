@@ -223,4 +223,4 @@ zhat_seq1_T = bnpy.allocmodel.hmm.HMMUtil.runViterbiAlg(
 show_single_sequence(1, zhat_T=zhat_seq1_T, K=K)
 
 
-pylab.show()
+pylab.show(block=False)

@@ -224,4 +224,4 @@ pylab.legend(loc='upper right')
 pylab.xlabel('elapsed time (sec)')
 pylab.ylabel('num. clusters (K)')
 
-pylab.show()
+pylab.show(block=False)
