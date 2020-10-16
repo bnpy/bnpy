@@ -115,21 +115,17 @@ To use **bnpy** for the first time, follow the documentation's [Installation Ins
 
 # Team
 
-### Lead developer
+### Primary investigators
 
 Mike Hughes  
-Website: [www.michaelchughes.com](http://www.michaelchughes.com)
-
-Post-doctoral researcher (Aug. 2016 - present)  
-School of Engineering and Applied Sciences  
-Harvard University  
-
-### Faculty adviser
+Assistant Professor (Aug. 2018 - present)  
+Tufts University, Dept. of Computer Science
+Website: <www.michaelchughes.com>
 
 Erik Sudderth  
-Assistant Professor  
-Brown University, Dept. of Computer Science  
-Website: [http://cs.brown.edu/people/sudderth/](http://cs.brown.edu/people/sudderth/)
+Professor  
+University of California, Irvine
+Website: <https://www.ics.uci.edu/~sudderth/>
 
 ### Contributors 
 
