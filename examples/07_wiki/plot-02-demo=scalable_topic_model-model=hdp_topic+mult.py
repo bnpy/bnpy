@@ -123,7 +123,7 @@ lam = 0.1
 K = 25 
 
 # Algorithm kwargs
-nLap = 6
+nLap = 5
 traceEvery = 0.5
 printEvery = 0.5
 convThr = 0.01
@@ -132,7 +132,7 @@ convThr = 0.01
 H = 3; W = 4
 fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(2*W,3*H), sharex=True, sharey=False)    
  
-for row_id, convThrLP in enumerate([-1.00, 0.05, 0.25]):
+for row_id, convThrLP in enumerate([-1.00, 0.25]):
 
     local_step_kwargs = dict(
         # perform at most this many iterations at each document
@@ -141,7 +141,7 @@ for row_id, convThrLP in enumerate([-1.00, 0.05, 0.25]):
         convThrLP=convThrLP,
         )
 
-    for nBatch in [1, 4, 16, 64]:
+    for nBatch in [1, 16]:
         
         output_path='/tmp/wiki/scalability-model=hdp_topic+mult-alg=memoized-nBatch=%d-nCoordAscentItersLP=%s-convThrLP=%.3g/' % (
                 nBatch, local_step_kwargs['nCoordAscentItersLP'], convThrLP)
@@ -189,4 +189,5 @@ plt.show()
 #
 # We generally recommend considering:
 # * batch size around 250 - 2000 (which means set nBatch = nDocsTotal / batch_size)
-# * looking carefully at the local step convergence threshold (convThrLP)
+# * carefully setting the local step convergence threshold (convThrLP could be 0.05 or 0.25 when training, probably needs to be smaller when computing likelihoods for a document)
+# * setting the number of iterations per document sufficiently large (might get away with nCoordAscentItersLP = 10 or 25 when training, but might need many iters like 50 or 100 at least when evaluating likelihoods to be confident in the value)
