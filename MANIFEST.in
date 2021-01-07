@@ -2,4 +2,4 @@ include README.md
 include LICENSE.txt
 include requirements.txt
 
-recursive-include bnpy *.c *.h *.pyx *.conf *.md *.txt *.csv *.npz *.txt
+recursive-include bnpy *.c *.h *.pyx *.conf *.md *.txt *.ldac *.csv *.npz *.txt

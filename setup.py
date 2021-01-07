@@ -178,6 +178,7 @@ def make_list_of_datasets_specs():
         for fpath in fpath_list:
             if (fpath.endswith('.npz')
                     or fpath.endswith('.csv')
+                    or fpath.endswith('.ldac')
                     or fpath.endswith('.txt')):
                 full_fpath = os.path.join(root, fpath)
                 full_dirpath = os.path.split(full_fpath)[0] + os.path.sep
@@ -208,7 +209,7 @@ setup(
     packages=make_list_of_subpackages(),
     package_data = {
         # If any subpackage contains these files, include them:
-        '': ['*.conf', '*.txt', '*.md', '*.npz', '*.csv'],
+        '': ['*.conf', '*.txt', '*.md', '*.npz', '*.csv', '*.ldac'],
         '': ['*.cpp', '*.c', '*.h', '*.pyx'],
     },
     include_package_data=True,

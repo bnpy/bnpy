@@ -22,12 +22,12 @@ bnpy_root_path = os.path.abspath('../../')
 sys.path.append(bnpy_root_path)
 print('>>> sys.path[-1]')
 print(sys.path[-1])
-print ">>> os.path.exists(os.path.join(sys.path[-1], 'bnpy'))"
-print os.path.exists(os.path.join(sys.path[-1], 'bnpy'))
-print ">>> os.path.exists(os.path.join(sys.path[-1], 'docs'))"
-print os.path.exists(os.path.join(sys.path[-1], 'docs'))
-print ">>> os.path.exists(os.path.join(sys.path[-1], 'docs/source/'))"
-print os.path.exists(os.path.join(sys.path[-1], 'docs/source/'))
+print(">>> os.path.exists(os.path.join(sys.path[-1], 'bnpy'))")
+print(os.path.exists(os.path.join(sys.path[-1], 'bnpy')))
+print(">>> os.path.exists(os.path.join(sys.path[-1], 'docs'))")
+print(os.path.exists(os.path.join(sys.path[-1], 'docs')))
+print(">>> os.path.exists(os.path.join(sys.path[-1], 'docs/source/'))")
+print(os.path.exists(os.path.join(sys.path[-1], 'docs/source/')))
 
 # -- General configuration ------------------------------------------------
 
@@ -298,9 +298,9 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 'preamble': """
-    \usepackage{amsmath}
-    \usepackage{amssymb}
-    \usepackage{bnpy_macros}
+    \\usepackage{amsmath}
+    \\usepackage{amssymb}
+    \\usepackage{bnpy_macros}
     """
 
 # Latex figure (float) alignment
