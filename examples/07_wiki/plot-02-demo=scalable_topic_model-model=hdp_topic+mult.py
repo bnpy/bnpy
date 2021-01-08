@@ -5,22 +5,30 @@ Scalable training of HDP topic models
 
 In this demo, we'll review the scalable memoized training of HDP topic models.
 
-To review, the algorithm proceeds like this pseudocode:
+To review, our memoized VB algorithm (Hughes and Sudderth, NeurIPS 2013) proceeds like this pseudocode:
 
-```
-n_laps_completed = 0
-while n_laps_completed < nLap:
-    n_batches_completed_this_lap = 0
-    while n_batches_completed_this_lap < nBatch:
-        batch_data = next_minibatch()
+.. code-block:: python
 
-        LPbatch = model.calc_local_params(batch_data, **local_step_kwargs)
-        SSbatch = model.get_summary_stats(batch_data, LPbatch)
+    n_laps_completed = 0
+    while n_laps_completed < nLap:
+    
+        n_batches_completed_this_lap = 0
+        while n_batches_completed_this_lap < nBatch:
+        
+            batch_data = next_minibatch()
 
-        SS = update_global_stats(SS, SSbatch) # increment update of global stats
-        model.update_global_params(SS)        # update global parameters
+            # Batch-specific local step
+            LPbatch = model.calc_local_params(batch_data, **local_step_kwargs)
 
-```
+            # Batch-specific summary step
+            SSbatch = model.get_summary_stats(batch_data, LPbatch)
+
+            # Increment global summary statistics
+            SS = update_global_stats(SS, SSbatch)
+
+            # Update global parameters
+            model.update_global_params(SS)
+
 
 From a runtime perspective, the important settings a user can control are:
 
@@ -66,18 +74,25 @@ There are two settings in the code that control this:
 * nCoordAscentItersLP : number of local step iterations to perform per document
 * convThrLP : threshold to decide if local step updates have converged
 
-The local step pseudocode is basically:
+The local step pseudocode is:
 
-```
-for each document:
-    for iter in 1, 2, ... nCoordAscentItersLP:
-        update q(\pi_d), the variational posterior for document d's topic probability vector
-        update q(z_d), the variational posterior for document d's topic-word discrete assignments
+.. code-block:: python
 
-        Let N_d1, ... N_dK be the expected number of times topic k is assigned to any word in document d
+    for each document d:
+    
+        for iter in [1, 2, ..., nCoordAscentItersLP]:
+    
+            # Update q(\pi_d), the variational posterior for document d's
+            # topic probability vector
+            
+            # Update q(z_d), the variational posterior for document d's
+            # topic-word discrete assignments
 
-        if iter % 5 == 0: # every 5 iterations, check for early convergence
-            Quit early if no N_dk entry changes by more than convThrLP
+            # Compute N_d1, ... N_dK, expected count of topic k in document d
+
+            if iter % 5 == 0: # every 5 iterations, check for early convergence
+
+                # Quit early if no N_dk entry changes by more than convThrLP
 ```
 
 Thus, setting these local step optimization hyperparameters can be very practically important.
@@ -109,8 +124,8 @@ doc_ids = np.flatnonzero(dataset.getDocTypeCountMatrix().sum(axis=1) >= 50)
 dataset = dataset.make_subset(docMask=doc_ids[:6400], doTrackFullSize=False)
 
 ###############################################################################
-# Train HDP topic model
-# ---------------------
+# Train scalable HDP topic models
+# -------------------------------
 # 
 # Vary the number of batches and the local step convergence threshold
 
@@ -128,10 +143,6 @@ traceEvery = 0.5
 printEvery = 0.5
 convThr = 0.01
 
-
-H = 3; W = 4
-fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(2*W,3*H), sharex=True, sharey=False)    
- 
 for row_id, convThrLP in enumerate([-1.00, 0.25]):
 
     local_step_kwargs = dict(
@@ -143,20 +154,39 @@ for row_id, convThrLP in enumerate([-1.00, 0.25]):
 
     for nBatch in [1, 16]:
         
-        output_path='/tmp/wiki/scalability-model=hdp_topic+mult-alg=memoized-nBatch=%d-nCoordAscentItersLP=%s-convThrLP=%.3g/' % (
+        output_path = '/tmp/wiki/scalability-model=hdp_topic+mult-alg=memoized-nBatch=%d-nCoordAscentItersLP=%s-convThrLP=%.3g/' % (
                 nBatch, local_step_kwargs['nCoordAscentItersLP'], convThrLP)
 
-        if True:
-            trained_model, info_dict = bnpy.run(
-                dataset, 'HDPTopicModel', 'Mult', 'memoVB',
-                output_path=output_path,
-                nLap=nLap, nBatch=nBatch, convThr=convThr,
-                K=K, gamma=gamma, alpha=alpha, lam=lam,
-                initname='randomlikewang', 
-                moves='shuffle',
-                traceEvery=traceEvery, printEvery=printEvery,
-                **local_step_kwargs)
+        trained_model, info_dict = bnpy.run(
+            dataset, 'HDPTopicModel', 'Mult', 'memoVB',
+            output_path=output_path,
+            nLap=nLap, nBatch=nBatch, convThr=convThr,
+            K=K, gamma=gamma, alpha=alpha, lam=lam,
+            initname='randomlikewang', 
+            moves='shuffle',
+            traceEvery=traceEvery, printEvery=printEvery,
+            **local_step_kwargs)
+
+
+###############################################################################
+# Plot: Training Loss and Laps Completed vs. Wallclock time
+# ---------------------------------------------------------
+#
+# * Left column: Training Loss progress vs. wallclock time
+# * Right column: Laps completed vs. wallclock time
+#
+# Remember: one lap is a complete pass through entire training set (6400 docs)
+
+H = 3; W = 4
+fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(2*W,2*H), sharex=True, sharey=False)    
+ 
+for row_id, convThrLP in enumerate([-1.00, 0.25]):
         
+    for nBatch in [1, 16]:
+
+        output_path = '/tmp/wiki/scalability-model=hdp_topic+mult-alg=memoized-nBatch=%d-nCoordAscentItersLP=%s-convThrLP=%.3g/' % (
+            nBatch, local_step_kwargs['nCoordAscentItersLP'], convThrLP)
+
         elapsed_time_T = np.loadtxt(os.path.join(output_path, '1', 'trace_elapsed_time_sec.txt'))
         elapsed_laps_T = np.loadtxt(os.path.join(output_path, '1', 'trace_lap.txt'))
         loss_T = np.loadtxt(os.path.join(output_path, '1', 'trace_loss.txt'))
@@ -170,18 +200,16 @@ for row_id, convThrLP in enumerate([-1.00, 0.25]):
         ax[row_id, 0].set_xlabel('elapsed time (sec)')
         ax[row_id, 1].set_xlabel('elapsed time (sec)')
     ax[row_id, 0].legend(loc='upper right')
-
     ax[row_id, 0].set_title(('Loss vs Time, local conv. thr. %.2f' % (convThrLP)).replace(".00", ""))
     ax[row_id, 1].set_title(('Laps vs Time, local conv. thr. %.2f' % (convThrLP)).replace(".00", ""))
 
 plt.tight_layout()
 plt.show()
 
-######################################################
-#
+###############################################################################
 # Lessons Learned
 # ---------------
-
+#
 # The local step is the most expensive step in terms of runtime (far more costly than the summary or global step)
 # Generally, increasing the number of batches has the following effect:
 # * Increase the total computational work that must be done for a fixed number of laps
