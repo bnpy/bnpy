@@ -2,8 +2,8 @@
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
-# Required
-version: 2 # version of readthedocs
+# Required version of readthedocs to use
+version: 2
 
 # Set the version of Python and other tools you might need
 build:
@@ -13,7 +13,7 @@ build:
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-   configuration: docs/source/conf.py
+  configuration: docs/source/conf.py
 
 # If using Sphinx, optionally build your docs in additional formats such as PDF
 # formats:
@@ -21,7 +21,7 @@ sphinx:
 
 # Optionally declare the Python requirements required to build your docs
 python:
-   install:
+  install:
     - requirements: requirements.txt
     - requirements: docs/requirements.txt
     - method: pip
