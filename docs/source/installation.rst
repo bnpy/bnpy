@@ -4,7 +4,7 @@ Installation
 
 Requirements
 ============
-**bnpy** requires Python 2.7+ and the following packages:
+**bnpy** requires Python 3.6+ (or 2.7+) and the following packages:
 
 * numpy >= 1.11
 * scipy >= 0.18

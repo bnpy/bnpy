@@ -128,12 +128,6 @@ def add_directives_to_cython_ext(ext):
         'wraparound':False}
     return ext
 
-def read_txt_file_as_string(fname='README.md'):
-    s = ""
-    with open(os.path.join(os.path.dirname(__file__), fname), 'r') as f:
-        s = f.read()
-    return s
-
 class CustomizedBuildExt(build_ext):
     ''' Custom override of some default build options
 
@@ -192,9 +186,13 @@ def make_list_of_datasets_specs():
 
 ########################################################################
 # Main function
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description_str = fh.read()
+
 setup(
     name="bnpy",
-    version="0.1.6",
+    version="0.1.7",
     author="Michael C. Hughes",
     author_email="mike@michaelchughes.com",
     description=(
@@ -206,6 +204,11 @@ setup(
         "topic model",
         "hidden Markov model"],
     url="https://github.com/bnpy/bnpy",
+    project_urls={
+        'Documentation':'https://bnpy.readthedocs.io',
+        'Source':'https://github.com/bnpy/bnpy',
+        'Issue Tracker':'https://github.com/bnpy/bnpy/issues',
+        },
     packages=make_list_of_subpackages(),
     package_data = {
         # If any subpackage contains these files, include them:
@@ -213,7 +216,8 @@ setup(
         '': ['*.cpp', '*.c', '*.h', '*.pyx'],
     },
     include_package_data=True,
-    long_description='',
+    long_description=long_description_str,
+    long_description_content_type='text/markdown',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: BSD License"],
