@@ -74,5 +74,4 @@ def rotateCovMat(Sigma, theta=np.pi / 4):
     RotMat = np.asarray(RotMat)
     Lam, V = np.linalg.eig(Sigma)
     Lam = np.diag(Lam)
-    Vrot = np.dot(V, RotMat)
-    return np.dot(Vrot, np.dot(Lam, Vrot.T))
+    return np.linalg.multi_dot([V, RotMat, Lam, Vrot.T])
