@@ -465,7 +465,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         Prior = self.Prior
         nu = Prior.nu + SS.N
 
-        B_MVM = Prior.B + np.dot(Prior.M, np.dot(Prior.V, Prior.M.T))
+        B_MVM = Prior.B + np.linalg.multi_dot([Prior.M, Prior.V, Prior.M.T])
         B = SS.xxT + B_MVM[np.newaxis, :]
         V = SS.ppT + Prior.V[np.newaxis, :]
         M = np.zeros((SS.K, SS.D, SS.E))
