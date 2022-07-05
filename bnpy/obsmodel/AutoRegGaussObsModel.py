@@ -544,7 +544,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         Bnat : 3D array, size K x D x D
         '''
         Prior = self.Prior
-        MVMT = np.linalg.multi_dot(Prior.M, Prior.V, Prior.M.T)
+        MVMT = np.linalg.multi_dot([Prior.M, Prior.V, Prior.M.T])
 
         n_nu = Prior.nu + SS.N
         n_V = Prior.V + SS.ppT
