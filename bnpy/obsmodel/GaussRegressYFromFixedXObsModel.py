@@ -724,8 +724,7 @@ def createParamBagForPrior(
     Prior.setField('w_E', w_E, dims=('E'))
     Prior.setField('P_EE', P_EE, dims=('E', 'E'))
 
-    Pw_E = np.dot(P_EE, w_E)
-    wPw_1 = np.dot(w_E, Pw_E)
+    wPw_1 = np.linalg.multi_dot([w_E, P_EE, w_E])
     Prior.setField('Pw_E', Pw_E, dims=('E'))
     Prior.setField('wPw_1', wPw_1, dims=None)
     return Prior
