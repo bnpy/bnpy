@@ -404,7 +404,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
             
             Sigma[k] = SS.xxT[k] \
                 - 2 * np.dot(SS.pxT[k].T, A[k].T) \
-                + np.dot(A[k], np.dot(SS.ppT[k], A[k].T))
+                + np.linalg.multi_dot([A[k], SS.ppT[k], A[k].T])
             Sigma[k] /= SS.N[k]
             # Sigma[k] = 0.5 * (Sigma[k] + Sigma[k].T) # symmetry!
             Sigma[k] += minCovMat
