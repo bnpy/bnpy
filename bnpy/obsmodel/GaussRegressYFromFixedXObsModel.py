@@ -439,7 +439,7 @@ def calcPostParamsFromSS(
     ptau_K = np.zeros(K)
     ptau_K[:] = SS.yy_K + Prior.ptau + Prior.wPw_1
     for k in range(K):
-        ptau_K[k] -= np.dot(w_KE[k], np.dot(P_KEE[k], w_KE[k]))
+        ptau_K[k] -= np.linalg.multi_dot([w_KE[k], P_KEE[k], w_KE[k]])
 
     if not returnParamBag:
         return pnu_K, ptau_K, w_KE, P_KEE
