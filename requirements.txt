@@ -3,7 +3,7 @@ pandas>=0.18.1
 scipy>=0.18.1
 Cython>=0.25.1
 ipython>=5.1.0
-joblib==0.14.1
+joblib==1.2.0
 memory_profiler>=0.41
 numexpr>=2.6.1
 psutil>=5.0.0

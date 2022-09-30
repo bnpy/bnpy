@@ -230,7 +230,7 @@ setup(
         "ipython>=5.1",
         "scikit_learn>=0.18",
         "matplotlib>=1.5",
-        "joblib==0.14.1",
+        "joblib==1.2.0",
         "memory_profiler>=0.41",
         "munkres==1.0.12",
         "numexpr>=2.6",
