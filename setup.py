@@ -18,10 +18,10 @@ def get_path_to_eigen():
 
 def get_path_to_boost():
     try:
-        eigen_path = os.environ['BOOSTMATHPATH']
+        boost_path = os.environ['BOOSTMATHPATH']
     except KeyError as e:
-        eigen_path = ''
-    return eigen_path
+        boost_path = ''
+    return boost_path
 
 def make_extensions():
     ''' Assemble C++/Cython extension objects for compilation

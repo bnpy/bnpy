@@ -10,9 +10,9 @@ from bnpy.util import NumericUtil
 from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc
 from bnpy.allocmodel.topics.LocalStepSingleDoc import calcLocalParams_SingleDoc_WithELBOTrace
 
-from bnpy.util.SparseRespUtil \
-    import fillInDocTopicCountFromSparseResp, sparsifyResp, sparsifyLogResp
-from bnpy.util.lib.sparseResp.LibSparseResp \
+from bnpy.util.SparseRespUtil import sparsifyResp, sparsifyLogResp
+from bnpy.util.SparseRespTopicsUtil import fillInDocTopicCountFromSparseResp
+from bnpy.util.lib.sparseResp.LibSparseRespTopics \
     import calcSparseLocalParams_SingleDoc
 from bnpy.util.lib.sparseResp.LibLocalStepManyDocs \
     import sparseLocalStep_WordCountData

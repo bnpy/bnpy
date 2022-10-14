@@ -360,7 +360,7 @@ class ParamBag(object):
         >>> PB = ParamBag() # fixing K,D doesn't matter
         >>> list(PB._getAllowedShapes(()))
         [()]
-        >>> list(PB._getAllowedShapes((1,)))
+        >>> sorted(list(PB._getAllowedShapes((1,))))
         [(), (1,)]
         >>> aSet = PB._getAllowedShapes((23,))
         >>> sorted(aSet)

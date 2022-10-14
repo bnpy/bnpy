@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import ctypes
+import sysconfig
+
 from numpy.ctypeslib import ndpointer
 from bnpy.util import as2D
 
@@ -99,11 +101,25 @@ def SummaryAlg_cpp(initPi, transPi, SoftEv, margPrObs, fMsg, bMsg,
     that can take numpy array objects.
 '''
 libpath = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-1])
-libfilename = 'libfwdbwdcpp.so'
+libfilename = 'libfwdbwdcpp' + sysconfig.get_config_var('EXT_SUFFIX')
+
 hasEigenLibReady = True
+cppLoadErrorMessage = ""
 
 try:
-    lib = ctypes.cdll.LoadLibrary(os.path.join(libpath, libfilename))
+    libfilepath = os.path.join(libpath, libfilename)
+    assert os.path.exists(libfilepath)
+    lib = ctypes.cdll.LoadLibrary(libfilepath)
+except AssertionError:
+    hasEigenLibReady = False
+    cppLoadErrorMessage = "Path to library does not exist: %s" % libfilepath
+except OSError:
+    # CDLL LoadLibrary call failed
+    hasEigenLibReady = False
+    cppLoadErrorMessage = "LoadLibrary() call failed on input: %s" % libfilepath
+else:
+    # lib has been correctly loaded
+
     lib.FwdAlg.restype = None
     lib.FwdAlg.argtypes = \
         [ndpointer(ctypes.c_double),
@@ -135,8 +151,3 @@ try:
          ndpointer(ctypes.c_double),
          ndpointer(ctypes.c_double),
          ctypes.c_int, ctypes.c_int, ctypes.c_int]
-
-
-except OSError:
-    # No compiled C++ library exists
-    hasEigenLibReady = False

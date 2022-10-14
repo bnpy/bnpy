@@ -862,7 +862,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
 
     def _E_logdetL(self, k=None):
         dvec = np.arange(1, self.D + 1, dtype=np.float)
-        if k is 'all':
+        if k == 'all':
             dvec = dvec[:, np.newaxis]
             retVec = self.D * LOGTWO * np.ones(self.K)
             for kk in range(self.K):

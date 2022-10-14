@@ -9,7 +9,7 @@ try:
     import bnpy.util.lib.sparseResp.LibSparseResp
     from bnpy.util.lib.sparseResp.LibSparseResp import sparsifyResp_cpp
     from bnpy.lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
-    hasCPP = bnpy.util.lib.sparseResp.LibSparseResp.hasEigenLibReady
+    hasCPP = bnpy.util.lib.sparseResp.LibSparseResp.hasLibReady
 
 except ImportError:
     hasCPP = False
@@ -27,23 +27,6 @@ def sparsifyLogResp(logresp, nnzPerRow=1):
     else:
         spR_csr = sparsifyLogResp_numpy_vectorized(logresp, nnzPerRow)
     return spR_csr
-
-def fillInDocTopicCountFromSparseResp(Data, LP):
-    if hasattr(Data, 'word_count'):
-        for d in range(Data.nDoc):
-            start = Data.doc_range[d]
-            stop = Data.doc_range[d+1]
-            spR_d = LP['spR'][start:stop]
-            wc_d = Data.word_count[start:stop]
-            LP['DocTopicCount'][d] = wc_d * spR_d
-    else:
-        for d in range(Data.nDoc):
-            start = Data.doc_range[d]
-            stop = Data.doc_range[d+1]
-            spR_d = LP['spR'][start:stop]
-            LP['DocTopicCount'][d] = spR_d.sum(axis=0)
-    return LP
-
 
 def sparsifyResp_numpy_forloop(resp, nnzPerRow=1):
     '''
@@ -174,7 +157,7 @@ def make_funcList(prefix='sparsifyResp_'):
     for key, val in list(globals().items()):
         if key.startswith(prefix):
             funcList.append(val)
-    return [f for f in sorted(funcList)]
+    return [f for f in funcList]
 
 
 def test_correctness(R=None, N=3, K=10,
