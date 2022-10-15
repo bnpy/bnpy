@@ -8,9 +8,8 @@ import sys
 try:
     import bnpy.util.lib.sparseResp.LibSparseResp
     from bnpy.util.lib.sparseResp.LibSparseResp import sparsifyResp_cpp
-    from bnpy.lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
+    from bnpy.util.lib.sparseResp.LibSparseResp import sparsifyLogResp_cpp
     hasCPP = bnpy.util.lib.sparseResp.LibSparseResp.hasLibReady
-
 except ImportError:
     hasCPP = False
 
@@ -135,7 +134,8 @@ def sparsifyLogResp_numpy_vectorized(logresp, nnzPerRow=1):
         top_colids = np.argpartition(logresp, K - nnzPerRow, axis=1)
         top_colids = top_colids[:, -nnzPerRow:]
         for n in range(N):
-            resp_n = np.exp(logresp[n, top_colids[n]])
+            maxval_n = logresp[n, top_colids[n]].max()
+            resp_n = np.exp(logresp[n, top_colids[n]] - maxval_n)
             start = n * nnzPerRow
             stop = start + nnzPerRow
             top_rowsum = resp_n.sum()

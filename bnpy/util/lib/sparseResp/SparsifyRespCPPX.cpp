@@ -354,7 +354,7 @@ void sparsifyLogResp(
         curRowHandler.findLargestL(nnzPerRow, K);
 
         // Walk through iptr to read off top L cluster indices
-        // And also find the maximum value, to do save exp later
+        // And also find the maximum value, to do safe exp later
         double maxlogResp_n = curRowHandler.xptr[0];
         for (int ell = 0; ell < nnzPerRow; ell++) {
             int m = M + ell;
