@@ -404,7 +404,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
             
             Sigma[k] = SS.xxT[k] \
                 - 2 * np.dot(SS.pxT[k].T, A[k].T) \
-                + np.dot(A[k], np.dot(SS.ppT[k], A[k].T))
+                + np.linalg.multi_dot([A[k], SS.ppT[k], A[k].T])
             Sigma[k] /= SS.N[k]
             # Sigma[k] = 0.5 * (Sigma[k] + Sigma[k].T) # symmetry!
             Sigma[k] += minCovMat
@@ -465,7 +465,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         Prior = self.Prior
         nu = Prior.nu + SS.N
 
-        B_MVM = Prior.B + np.dot(Prior.M, np.dot(Prior.V, Prior.M.T))
+        B_MVM = Prior.B + np.linalg.multi_dot([Prior.M, Prior.V, Prior.M.T])
         B = SS.xxT + B_MVM[np.newaxis, :]
         V = SS.ppT + Prior.V[np.newaxis, :]
         M = np.zeros((SS.K, SS.D, SS.E))
@@ -544,8 +544,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         Bnat : 3D array, size K x D x D
         '''
         Prior = self.Prior
-        VMT = np.dot(Prior.V, Prior.M.T)
-        MVMT = np.dot(Prior.M, VMT)
+        MVMT = np.linalg.multi_dot([Prior.M, Prior.V, Prior.M.T])
 
         n_nu = Prior.nu + SS.N
         n_V = Prior.V + SS.ppT
