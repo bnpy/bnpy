@@ -204,6 +204,14 @@ def loadDictFromMatfile(matfilepath):
     >>> D['arr1DN3']
     array([1, 2, 3], dtype=int32)
     '''
+    # Because the files like 'Best*.mat'  are symbolic link,
+    # they need to be transformed to ture file path.
+    from pathlib import Path
+    if Path(matfilepath).is_symlink():
+        matfilepath = os.readlink(matfilepath)
+
+
+
     Dtmp = scipy.io.loadmat(matfilepath)
     D = dict([x for x in list(Dtmp.items()) if not x[0].startswith('__')])
     for key in D:
