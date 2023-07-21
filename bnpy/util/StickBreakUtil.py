@@ -18,7 +18,7 @@ def create_initrho(K):
     '''
     remMass = np.minimum(0.1, 1.0 / (K * K))
     # delta = 0, -1 + r, -2 + 2r, ...
-    delta = (-1 + remMass) * np.arange(0, K, 1, dtype=np.float)
+    delta = (-1 + remMass) * np.arange(0, K, 1, dtype=np.float64)
     rho = (1 - remMass) / (K + delta)
     return rho
 

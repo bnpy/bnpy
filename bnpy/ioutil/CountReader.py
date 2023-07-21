@@ -43,7 +43,7 @@ def loadCountHistoriesForTask(
         idstr = str(idline.strip())
         ctstr = str(fct.readline().strip())
         idvec = np.asarray(idstr.split(' '), dtype=np.int32)
-        ctvec = np.asarray(ctstr.split(' '), dtype=np.float)
+        ctvec = np.asarray(ctstr.split(' '), dtype=np.float64)
         data.extend(ctvec)
         colids.extend(idvec)
         rowids.extend( ii * np.ones(idvec.size))

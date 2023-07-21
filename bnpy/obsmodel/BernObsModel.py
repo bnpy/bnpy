@@ -67,8 +67,8 @@ class BernObsModel(AbstractObsModel):
         self.eps_phi = eps_phi
         self.Prior = ParamBag(K=0, D=D)
         if priorMean is None or priorMean.lower().count('none'):
-            lam1 = np.asarray(lam1, dtype=np.float)
-            lam0 = np.asarray(lam0, dtype=np.float)
+            lam1 = np.asarray(lam1, dtype=np.float64)
+            lam0 = np.asarray(lam0, dtype=np.float64)
         elif isinstance(priorMean, str) and priorMean.count("data"):
             assert priorScale is not None
             priorScale = float(priorScale)

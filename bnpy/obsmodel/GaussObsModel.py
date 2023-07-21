@@ -75,16 +75,16 @@ class GaussObsModel(AbstractObsModel):
                 ECovMat = createECovMatFromUserInput(D, Data, ECovMat, sF)
             B = ECovMat * (nu - D - 1)
         if B.ndim == 1:
-            B = np.asarray([B], dtype=np.float)
+            B = np.asarray([B], dtype=np.float64)
         elif B.ndim == 0:
-            B = np.asarray([[B]], dtype=np.float)
+            B = np.asarray([[B]], dtype=np.float64)
         if m is None:
             if MMat == 'data':
                 m = np.mean(Data.X, axis=0)
             else:
                 m = np.zeros(D)
         elif m.ndim < 1:
-            m = np.asarray([m], dtype=np.float)
+            m = np.asarray([m], dtype=np.float64)
         kappa = np.maximum(kappa, 1e-8) if kappa else 1e-8
         self.Prior = ParamBag(K=0, D=D)
         self.Prior.setField('nu', nu, dims=None)
@@ -205,7 +205,7 @@ class GaussObsModel(AbstractObsModel):
         D = EstParams.D
         if Data is not None:
             N = Data.nObsTotal
-        N = np.asarray(N, dtype=np.float)
+        N = np.asarray(N, dtype=np.float64)
         if N.ndim == 0:
             N = N / K * np.ones(K)
 
@@ -795,7 +795,7 @@ class GaussObsModel(AbstractObsModel):
         return 2 * np.sum(np.log(np.diag(cholB)))
 
     def _E_logdetL(self, k=None):
-        dvec = np.arange(1, self.D + 1, dtype=np.float)
+        dvec = np.arange(1, self.D + 1, dtype=np.float64)
         if k == 'all':
             dvec = dvec[:, np.newaxis]
             retVec = self.D * LOGTWO * np.ones(self.K)
@@ -1100,7 +1100,7 @@ def c_Func(nu, logdetB, m, kappa):
     if logdetB.ndim >= 2:
         logdetB = np.log(np.linalg.det(logdetB))
     D = m.size
-    dvec = np.arange(1, D + 1, dtype=np.float)
+    dvec = np.arange(1, D + 1, dtype=np.float64)
     return - 0.5 * D * LOGTWOPI \
            - 0.25 * D * (D - 1) * LOGPI \
            - 0.5 * D * LOGTWO * nu \
@@ -1125,7 +1125,7 @@ def c_Diff(nu1, logdetB1, m1, kappa1,
     if logdetB2.ndim >= 2:
         logdetB2 = np.log(np.linalg.det(logdetB2))
     D = m1.size
-    dvec = np.arange(1, D + 1, dtype=np.float)
+    dvec = np.arange(1, D + 1, dtype=np.float64)
     return - 0.5 * D * LOGTWO * (nu1 - nu2) \
            - np.sum(gammaln(0.5 * (nu1 + 1 - dvec))) \
         + np.sum(gammaln(0.5 * (nu2 + 1 - dvec))) \

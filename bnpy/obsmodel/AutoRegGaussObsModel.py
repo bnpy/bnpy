@@ -253,7 +253,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         E = EstParams.E
         if Data is not None:
             N = Data.nObsTotal
-        N = np.asarray(N, dtype=np.float)
+        N = np.asarray(N, dtype=np.float64)
         if N.ndim == 0:
             N = N / K * np.ones(K)
 
@@ -861,7 +861,7 @@ class AutoRegGaussObsModel(AbstractObsModel):
         return 2 * np.sum(np.log(np.diag(cholV)))
 
     def _E_logdetL(self, k=None):
-        dvec = np.arange(1, self.D + 1, dtype=np.float)
+        dvec = np.arange(1, self.D + 1, dtype=np.float64)
         if k == 'all':
             dvec = dvec[:, np.newaxis]
             retVec = self.D * LOGTWO * np.ones(self.K)
@@ -993,7 +993,7 @@ def c_Func(nu, logdetB, M, logdetV):
     if logdetV.ndim >= 2:
         logdetV = np.log(np.linalg.det(logdetV))
     D, E = M.shape
-    dvec = np.arange(1, D + 1, dtype=np.float)
+    dvec = np.arange(1, D + 1, dtype=np.float64)
     return - 0.25 * D * (D - 1) * LOGPI \
         - 0.5 * D * LOGTWO * nu \
         - np.sum(gammaln(0.5 * (nu + 1 - dvec))) \
