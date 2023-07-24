@@ -88,7 +88,7 @@ def CreateBNPYDataDict(origmatfile='/tmp/MoCapSensorData_R1_nCh12_W12.mat',
     X = np.zeros((T_all, 12))
     Xprev = np.zeros_like(X)
     for n in range(N):
-        X_n = np.asarray(Vars['obs'][0, n], dtype=np.float)
+        X_n = np.asarray(Vars['obs'][0, n], dtype=np.float64)
         start = doc_range[n]
         stop = doc_range[n + 1]
         X[start:stop] = X_n[1:].copy()

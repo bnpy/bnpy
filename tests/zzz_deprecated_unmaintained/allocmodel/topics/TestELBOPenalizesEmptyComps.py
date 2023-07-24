@@ -142,8 +142,8 @@ def makeFigure(**kwargs):
     Data, trueResp = makeDataAndTrueResp(**kwargs)
 
     kemptyVals = np.asarray([0, 1, 2, 3.])
-    ELBOVals = np.zeros_like(kemptyVals, dtype=np.float)
-    PointEstELBOVals = np.zeros_like(kemptyVals, dtype=np.float)
+    ELBOVals = np.zeros_like(kemptyVals, dtype=np.float64)
+    PointEstELBOVals = np.zeros_like(kemptyVals, dtype=np.float64)
 
     # Iterate over the number of empty states (0, 1, 2, ...)
     for ii, kempty in enumerate(kemptyVals):

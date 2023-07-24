@@ -55,7 +55,7 @@ class MultObsModel(AbstractObsModel):
         D = self.D
         self.min_phi = min_phi
         self.Prior = ParamBag(K=0, D=D)
-        lam = np.asarray(lam, dtype=np.float)
+        lam = np.asarray(lam, dtype=np.float64)
         if lam.ndim == 0:
             lam = lam * np.ones(D)
         assert lam.size == D

@@ -166,7 +166,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         D = EstParams.D
         if Data is not None:
             N = Data.nObsTotal
-        N = np.asarray(N, dtype=np.float)
+        N = np.asarray(N, dtype=np.float64)
         if N.ndim == 0:
             N = float(N) / K * np.ones(K)
 
@@ -637,7 +637,7 @@ class ZeroMeanGaussObsModel(AbstractObsModel):
         return 2 * np.sum(np.log(np.diag(cholB)))
 
     def _E_logdetL(self, k=None):
-        dvec = np.arange(1, self.D + 1, dtype=np.float)
+        dvec = np.arange(1, self.D + 1, dtype=np.float64)
         if k == 'all':
             dvec = dvec[:, np.newaxis]
             retVec = self.D * LOGTWO * np.ones(self.K)
@@ -929,7 +929,7 @@ def c_Func(nu, logdetB, D=None):
     if logdetB.ndim >= 2:
         D = logdetB.shape[-1]
         logdetB = np.log(np.linalg.det(logdetB))
-    dvec = np.arange(1, D + 1, dtype=np.float)
+    dvec = np.arange(1, D + 1, dtype=np.float64)
     return - 0.5 * D * LOGTWO * nu \
         - np.sum(gammaln(0.5 * (nu + 1 - dvec))) \
         + 0.5 * nu * logdetB
@@ -949,7 +949,7 @@ def c_Diff(nu1, logdetB1, D, nu2, logdetB2):
         assert D == logdetB1.shape[-1]
         logdetB1 = np.log(np.linalg.det(logdetB1))
         logdetB2 = np.log(np.linalg.det(logdetB2))
-    dvec = np.arange(1, D + 1, dtype=np.float)
+    dvec = np.arange(1, D + 1, dtype=np.float64)
     return - 0.5 * D * LOGTWO * (nu1 - nu2) \
         - np.sum(gammaln(0.5 * (nu1 + 1 - dvec))) \
         + np.sum(gammaln(0.5 * (nu2 + 1 - dvec))) \

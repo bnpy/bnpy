@@ -423,7 +423,7 @@ def count2str(val, width=4, minVal=0.01, **kwargs):
     '''
     val = np.asarray(val)
     assert width >= 4
-    if val.dtype == np.float:
+    if val.dtype == np.float64:
         nDecPlace = int(np.abs(np.log10(minVal)))
         if val < minVal:
             fmt = '%' + str(width) + 's'
